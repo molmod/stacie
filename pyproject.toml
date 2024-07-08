@@ -48,6 +48,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-regtest",
+    "pytest-xdist",
     "setuptools_scm",
     "sphinx",
     "sphinx-autodoc2",
