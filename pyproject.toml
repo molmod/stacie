@@ -30,7 +30,7 @@ dependencies = [
     # Ensure changes to these dependencies are reflected
     # in .github/workflows/pytest.yaml and docs/install.rst
     "attrs>=21.3.0",
-    "jax>=0.4.25",
+    "jax[cpu]>=0.4.26",
     "matplotlib>=3.7.0",
     "numpy>=1.22",
     "path>=16.14.0",
