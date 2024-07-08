@@ -1,0 +1,7 @@
+# Ensure changes to these dependencies are reflected in pyproject.toml
+attrs==21.3.0
+jax==0.4.25
+matplotlib==3.7.0
+numpy==1.22
+path==16.14.0
+sicpy==1.11.1

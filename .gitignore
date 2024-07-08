@@ -1,0 +1,56 @@
+# Testing and Linting
+.pytest_cache
+coverage*.xml
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+*.cover
+.hypothesis/
+.ruff_cache
+tests/outputs/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+env/
+venv/
+ENV/
+.envrc
+.env
+.venv
+
+# Build artifacts, distribution / packaging
+src/stacie/_version.py
+docs/build/
+docs/source/apidocs/
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDEs
+.spyderproject
+.spyproject
+.vscode
+.idea
+
+# macOS
+.DS_Store
