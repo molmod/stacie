@@ -107,6 +107,9 @@ def cost_low(
 ) -> jax.Array | dict[str, jax.Array]:
     """Low-level implementation of the cost function.
 
+    Only ``pars`` and ``do_props`` parameters are documented below.
+    For all other parameters, see attributes of the :class:`LowFreqCost` class.
+
     Parameters
     ----------
     pars
@@ -116,9 +119,15 @@ def cost_low(
 
     Returns
     -------
-    If ``do_props==False``, the return value is minus the log-likelihood.
-    If ``do_props==True``, this function returns a dictionary with various intermediate results
-    of the loss function calculations:
+    cost or props
+        If ``do_props==False``, the return value is minus the log-likelihood.
+        If ``do_props==True``, this function returns a dictionary with various intermediate results
+        of the loss function calculations.
+        See notes for details.
+
+    Notes
+    -----
+    The returned dictionary contains the following items:
 
     - ``pars``: the given parameters
     - ``ll``: the log likelihood
@@ -127,10 +136,6 @@ def cost_low(
     - ``obj``: the objective to be minimized to find the best frequency cutoff.
     - ``amplitudes_model``: The model of the spectrum (function of pars)
     - ``amplitudes_std_model``: The model of the standard error of the spectrum (function of pars)
-
-    Notes
-    -----
-    For all other parameters, see attributes of the ``LowFreqCost`` class.
     """
     # Convert frequencies to dimensionless omegas, as if time step was 1
     # With RFFT, the highest omega would then be +pi.

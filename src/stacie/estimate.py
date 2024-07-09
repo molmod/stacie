@@ -28,7 +28,7 @@ from .model import ExpTailModel, SpectrumModel
 from .rpi import rpi_opt
 from .spectrum import Spectrum
 
-__all__ = ("Result", "HessianError", "estimate_acfint", "fit_model_spectrum")
+__all__ = ("Result", "estimate_acfint", "fit_model_spectrum")
 
 
 @attrs.define
@@ -44,7 +44,7 @@ class Result:
     history: dict[int, dict[str]] = attrs.field()
     """History of ncut optimization.
 
-    Each value is a dictionary returned by ``fit_model_spectrum``.
+    Each value is a dictionary returned by :func:`fit_model_spectrum`.
     """
 
     @property
@@ -52,13 +52,9 @@ class Result:
         """Properties computed from the fit up to the selected spectrum cutoff.
 
         This is a shortcut for ``history[ncut]``.
-        See return value of ``fit_model_spectrum`` for more details.
+        See return value of :func:`fit_model_spectrum` for more details.
         """
         return self.history[self.ncut]
-
-
-class HessianError(ValueError):
-    """Raised when the Hessian is infinite or not strictly positive definite."""
 
 
 def estimate_acfint(
@@ -146,10 +142,15 @@ def fit_model_spectrum(
 
     Returns
     -------
-    A dictionary with various intermediate results of the cost function calculation,
-    computed for the optimized parameters.
-    In addition to the properties returned by ``cost_low``,
-    also the following are included:
+    props
+        A dictionary with various intermediate results of the cost function calculation,
+        computed for the optimized parameters.
+        See Notes for details.
+
+    Notes
+    -----
+    In addition to the properties returned by :func:`stacie.cost.cost_low`,
+    the returned dictionary also contains the following items:
 
     - ``hess``: the Hessian matrix at the solution.
     - ``hess_evals``: the Hessian eigenvalues.
