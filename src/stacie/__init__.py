@@ -18,10 +18,17 @@
 """The Stacie package."""
 
 from .estimate import estimate_acfint
-from .plot import plot
+from .plot import UnitConfig, plot
 from .spectrum import prepare_acfint
 
-__all__ = ("__version__", "__version_tuple__", "prepare_acfint", "estimate_acfint", "plot")
+__all__ = (
+    "__version__",
+    "__version_tuple__",
+    "prepare_acfint",
+    "estimate_acfint",
+    "plot",
+    "UnitConfig",
+)
 
 
 try:

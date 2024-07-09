@@ -25,7 +25,7 @@ from scipy import stats
 
 from .estimate import Result
 
-__all__ = ("plot",)
+__all__ = ("plot", "UnitConfig")
 
 
 @attrs.define

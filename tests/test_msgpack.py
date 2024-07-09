@@ -17,12 +17,13 @@
 # --
 """Tests for ``stacie.zarr``."""
 
+import os
+
 import attrs
 import numpy as np
-import zarr
 from numpy.testing import assert_equal
 from numpy.typing import NDArray
-from stacie.zarr import dump, load
+from stacie.msgpack import dump, load
 
 
 @attrs.define
@@ -32,11 +33,11 @@ class Foo:
     other: list[str] = attrs.field()
 
 
-def test_load_dump_foo():
+def test_load_dump_foo(tmpdir):
     foo1 = Foo(np.array([1.0, 2.5, 3.0]), "blabla", ["aaa", "rrr"])
-    store = zarr.MemoryStore()
-    dump(foo1, store)
-    foo2 = load(store, Foo)
+    path_nmpk_xyz = os.path.join(tmpdir, "tmp.nmpk.xz")
+    dump(path_nmpk_xyz, foo1)
+    foo2 = load(path_nmpk_xyz, Foo)
     assert isinstance(foo2, Foo)
     assert_equal(foo1.ar, foo2.ar)
     assert foo1.name == foo2.name
@@ -50,15 +51,15 @@ class Bar:
     ar: NDArray[int] = attrs.field()
 
 
-def test_load_dump_bar():
+def test_load_dump_bar(tmpdir):
     bar1 = Bar(
         Foo(np.array([1.0, 2.0, 3.0]), "blabla", ["aaa", "rrr"]),
         Foo(np.array([4.0, 11.57]), "wowow", ["bb", "ss"]),
         np.array([3, 7, 9]),
     )
-    store = zarr.MemoryStore()
-    dump(bar1, store)
-    bar2 = load(store, Bar)
+    path_nmpk_xyz = os.path.join(tmpdir, "tmp.nmpk.xz")
+    dump(path_nmpk_xyz, bar1)
+    bar2 = load(path_nmpk_xyz, Bar)
     assert isinstance(bar2, Bar)
     assert_equal(bar1.foo1.ar, bar2.foo1.ar)
     assert bar1.foo1.name == bar2.foo1.name

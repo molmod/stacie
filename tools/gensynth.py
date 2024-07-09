@@ -3,15 +3,15 @@
 
 import numpy as np
 from celerite2 import GaussianProcess, terms
+from stacie.msgpack import dump
 from stacie.spectrum import Spectrum, prepare_acfint
-from stacie.zarr import dump
 
 
 def main():
-    dump(generate_white(1, 2000, 400), "../tests/inputs/spectrum_white1.zip")
-    dump(generate_white(2, 2000, 400), "../tests/inputs/spectrum_white2.zip")
-    dump(generate_double(1, 2000, 400), "../tests/inputs/spectrum_double1.zip")
-    dump(generate_double(2, 2000, 400), "../tests/inputs/spectrum_double2.zip")
+    dump("../tests/inputs/spectrum_white1.nmpk.xz", generate_white(1, 2000, 400))
+    dump("../tests/inputs/spectrum_white2.nmpk.xz", generate_white(2, 2000, 400))
+    dump("../tests/inputs/spectrum_double1.nmpk.xz", generate_double(1, 2000, 400))
+    dump("../tests/inputs/spectrum_double2.nmpk.xz", generate_double(2, 2000, 400))
 
 
 def generate_white(seed, nstep, nindep) -> Spectrum:

@@ -21,9 +21,9 @@ import pytest
 from path import Path
 from stacie.estimate import estimate_acfint
 from stacie.model import ExpTailModel, SpectrumModel, WhiteNoiseModel
+from stacie.msgpack import dump, load
 from stacie.plot import plot
 from stacie.spectrum import Spectrum
-from stacie.zarr import load
 
 DOUBLE_NAMES = ["double1", "double2"]
 WHITE_NAMES = ["white1", "white2"]
@@ -31,11 +31,13 @@ NAME_LISTS = DOUBLE_NAMES, WHITE_NAMES
 ALL_NAMES = [j for i in NAME_LISTS for j in i]
 
 
-def plot_test_result(prefix, res):
+def output_test_result(prefix, res):
     dn_out = Path("tests/outputs")
     dn_out.makedirs_p()
     path_pdf = dn_out / f"{prefix}.pdf"
     plot(path_pdf, res)
+    path_zip = dn_out / f"{prefix}.nmpk.xz"
+    dump(path_zip, res)
 
 
 def register_result(regtest, res):
@@ -55,18 +57,18 @@ def check_noscan_single(
 ):
     res = estimate_acfint(spectrum, fcut=fcut, maxscan=1, model=model)
     register_result(regtest, res)
-    plot_test_result(prefix, res)
+    output_test_result(prefix, res)
 
 
 @pytest.mark.parametrize("name", ALL_NAMES)
 def test_epxtail_noscan(regtest, name):
-    spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+    spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     check_noscan_single(regtest, spectrum, f"epxtail_noscan_{name}")
 
 
 @pytest.mark.parametrize("name", WHITE_NAMES)
 def test_white_noscan(regtest, name):
-    spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+    spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     check_noscan_single(
         regtest, spectrum, f"white_noscan_{name}", fcut=0.1, model=WhiteNoiseModel()
     )
@@ -74,7 +76,7 @@ def test_white_noscan(regtest, name):
 
 @pytest.mark.parametrize(("name", "fcut"), [("white2", 0.008), ("double1", 0.05)])
 def test_exptail_noscan_fail(regtest, name, fcut):
-    spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+    spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}_fail", fcut=fcut)
 
 
@@ -82,19 +84,19 @@ def test_exptail_noscan_fail(regtest, name, fcut):
 def test_exptail_noscan_multi(regtest, names):
     res = []
     for name in names:
-        spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+        spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
         r = estimate_acfint(spectrum, fcut=0.005, maxscan=1)
         register_result(regtest, r)
         res.append(r)
-    plot_test_result("exptail_noscan_multi", res)
+    output_test_result("exptail_noscan_multi", res)
 
 
 @pytest.mark.parametrize("name", ALL_NAMES)
 def test_exptail_scan(regtest, name):
-    spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+    spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     res = estimate_acfint(spectrum, fcut=0.03, maxscan=10)
     register_result(regtest, res)
-    plot_test_result(f"exptail_scan_{name}", res)
+    output_test_result(f"exptail_scan_{name}", res)
 
 
 @pytest.mark.parametrize("names", NAME_LISTS)
@@ -102,8 +104,8 @@ def test_exptail_scan(regtest, name):
 def test_scan_multi(regtest, names, model):
     res = []
     for name in names:
-        spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+        spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
         r = estimate_acfint(spectrum, fcut=0.01, maxscan=10, model=model)
         register_result(regtest, r)
         res.append(r)
-    plot_test_result(f"{model.name}_scan_multi", res)
+    output_test_result(f"{model.name}_scan_multi", res)
