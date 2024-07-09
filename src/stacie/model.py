@@ -15,149 +15,103 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Model to fit the low-frequency part of the spectrum."""
+"""Models to fit the low-frequency part of the spectrum."""
 
-from functools import partial, wraps
-
-import attrs
 import jax
 import jax.numpy as jnp
-import jax.scipy.special as jsp
 import numpy as np
+from jax.typing import ArrayLike as JArrayLike
 from numpy.typing import NDArray
 
-__all__ = ("LowFreqCost",)
+__all__ = ("SpectrumModel", "ExpTailModel")
 
 
-@attrs.define
-class LowFreqCost:
-    timestep: float = attrs.field()
-    freqs: NDArray[float] = attrs.field()
-    amplitudes: NDArray[float] = attrs.field()
-    ndofs: NDArray[int] = attrs.field()
+class SpectrumModel:
+    """Abstract base class for spectrum models.
 
-    @property
-    def bounds(self) -> list[tuple[float, float]]:
-        return [
-            (0, np.inf),
-            (0, np.inf),
-            (0, np.inf),
-        ]
+    Subclasses must override the methods ``bounds``, ``guess`` and ``__call__``.
+    """
 
-    def valid(self, pars):
-        return all(pmin < par < pmax for (pmin, pmax), par in zip(self.bounds, pars, strict=True))
+    @staticmethod
+    def bounds() -> list[tuple[float, float]]:
+        """Parameter bounds for the optimizer."""
+        raise NotImplementedError
 
-    @property
-    def guess(self):
-        acfint_coarse = self.amplitudes[0]
-        tau = 2 / self.freqs[-1]
-        return np.array([acfint_coarse / 2, acfint_coarse / 2, tau])
+    @classmethod
+    def valid(cls, pars) -> bool:
+        """Returns True when the parameters are within the feasible region."""
+        return all(pmin < par < pmax for (pmin, pmax), par in zip(cls.bounds(), pars, strict=True))
 
-    def func(self, pars: NDArray) -> float:
-        """Compute the negative log-likelihood.
+    @staticmethod
+    def guess(freqs: NDArray[float], amplitudes: NDArray[float]) -> NDArray[float]:
+        """Guess initial values of the parameters."""
+        raise NotImplementedError
+
+    @staticmethod
+    def __call__(omegas: JArrayLike, pars: JArrayLike) -> jax.Array:
+        """The exponential tail spectrum model.
 
         Parameters
         ----------
+        omegas
+            This is ``2 * pi * freqs``, where ``freqs`` is the array with dimensionless frequencies,
+            as obtained with ``numpy.fft.rfftfreq`` (maximum value 0.5),
+            of which possibly a subset is taken.
         pars
-            The parameters.
+            The three positive model parameters: acfint_short, acfint_tail, corrtime_tail.
 
         Returns
         -------
-        negll
-            The negative log-likelihood of the parameters for the given ACF data.
+        amplitudes_model
+            The amplitudes of the model spectrum at the given omegas.
         """
-        if not self.valid(pars):
-            return np.inf
-        return _func(pars, self.timestep, self.freqs, self.amplitudes, self.ndofs)
-
-    def prop(self, pars: NDArray) -> dict[str, NDArray]:
-        if not self.valid(pars):
-            raise ValueError("Invalid parameters")
-        return _prop(pars, self.timestep, self.freqs, self.amplitudes, self.ndofs)
-
-    def grad(self, pars: NDArray) -> NDArray:
-        if not self.valid(pars):
-            return np.full(len(pars), np.nan)
-        return _grad(pars, self.timestep, self.freqs, self.amplitudes, self.ndofs)
-
-    def hess(self, pars: NDArray) -> NDArray:
-        if not self.valid(pars):
-            return np.full((len(pars), len(pars)), np.nan)
-        return _hess(pars, self.timestep, self.freqs, self.amplitudes, self.ndofs)
+        raise NotImplementedError
 
 
-def loss_base(
-    pars: NDArray[float],
-    timestep: float,
-    freqs: NDArray[float],
-    amplitudes: NDArray[float],
-    ndofs: NDArray[int],
-    *,
-    do_props: bool = False,
-):
-    # Convert frequencies to dimensionless omegas, as if time step was 1
-    # With RFFT, the highest omega would then be +pi.
-    omegas = 2 * jnp.pi * timestep * freqs
+class ExpTailModel(SpectrumModel):
+    """The exponential tail model for the spectrum.
 
-    acfint_short, acfint_tail, corrtime_tail = pars
-    cosines = 2 * jnp.cos(omegas)
-    ratio = jnp.exp(-2 / corrtime_tail)
-    tail_model = (2 - ratio * cosines) / (1 + ratio**2 - ratio * cosines)
-    # tail_model = 1 / ((2/corrtime_tail)**2 + omegas**2)
-    tail_model /= tail_model[0]
-    spectrum_model = acfint_tail * tail_model + acfint_short
+    This model is derived under the following assumptions:
 
-    # Log-likelihood computed with the scaled Chi-squared distribution
-    # - Variance of the real or imaginary component of a Fourier-transform,
-    #   taking into account that it is rescaled when computing the average spectrum.
-    var_ft = spectrum_model / ndofs
-    # - Transform to dimensionless, standard Chi-squared random variables
-    xsq = amplitudes / var_ft
-    # - Compute the log-likelihood
-    ll_norm1 = -0.5 * (ndofs * jnp.log(2)).sum()
-    ll_norm2 = -jsp.gammaln(0.5 * ndofs).sum()
-    ll_power = ((0.5 * ndofs - 1) * jnp.log(xsq)).sum()
-    ll_cor = -jnp.log(var_ft).sum()
-    ll_exp = -0.5 * (xsq).sum()
-    ll = ll_norm1 + ll_norm2 + ll_power + ll_cor + ll_exp
+    - RFFT is used to compute the spectrum.
+    - The autocorrelation consists of two contributions:
+        - A quickly decaying part with no specific functional form,
+          but confined within a small time lag domain centered at t=0.
+        - An slow exponentially decaying part with a yet unknown characteristic time scale.
+    """
 
-    if do_props:
-        # Transformation to normal errors
-        uni = jsp.gammainc(0.5 * ndofs, 0.5 * xsq)
-        nor = jsp.erfinv(2 * uni - 1) * jnp.sqrt(2)
-        # Objective = minimize excess average cumulative sum of the normal noise
-        # TODO: normalize on len(uni)?
-        obj = ((jnp.cumsum(nor) - jnp.sum(nor) / 2) ** 2).mean() - len(uni) / 4
-        return {
-            "pars": pars,
-            "ll": ll,
-            "uni": uni,
-            "nor": nor,
-            "obj": obj,
-            "omegas": omegas,
-            "spectrum_model": spectrum_model,
-        }
-    return -ll
+    @staticmethod
+    def bounds() -> list[tuple[float, float]]:
+        """Parameter bounds for the optimizer."""
+        return [(0, np.inf), (0, np.inf), (0, np.inf)]
 
+    @staticmethod
+    def guess(freqs: NDArray[float], amplitudes: NDArray[float]) -> NDArray[float]:
+        """Guess initial values of the parameters."""
+        acfint_coarse = amplitudes[0]
+        tau = 2 / freqs[-1]
+        return np.array([acfint_coarse / 2, acfint_coarse / 2, tau])
 
-jax.config.update("jax_enable_x64", True)
-jax.config.update("jax_platform_name", "cpu")
+    @staticmethod
+    def __call__(omegas: JArrayLike, pars: JArrayLike) -> jax.Array:
+        """See SpectrumModel.__call__"""
+        acfint_short, acfint_tail, corrtime_tail = pars
+        cosines = 2 * jnp.cos(omegas)
+        ratio = jnp.exp(-2 / corrtime_tail)
+        tail_model = (2 - ratio * cosines) / (1 + ratio**2 - ratio * cosines)
+        # tail_model = 1 / ((2/corrtime_tail)**2 + omegas**2)
+        tail_model /= tail_model[0]
+        return acfint_tail * tail_model + acfint_short
 
-
-def numpify(func):
-    """Convert return values from JAX tensors to NumPy arrays."""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if isinstance(result, dict):
-            return {key: np.array(value) for key, value in result.items()}
-        return np.array(result)
-
-    return wrapper
-
-
-_func = numpify(jax.jit(loss_base))
-_prop = numpify(jax.jit(partial(loss_base, do_props=True)))
-_grad = numpify(jax.jit(jax.grad(loss_base)))
-_hess = numpify(jax.jit(jax.hessian(loss_base)))
+    @staticmethod
+    def update_props(props: dict[str]):
+        props["acfint"] = props["pars"][:2].sum()
+        acfint_var = props["covar"][:2, :2].sum()
+        props["acfint_var"] = acfint_var
+        props["acfint_std"] = np.sqrt(acfint_var) if acfint_var >= 0 else np.inf
+        props["corrtime_tail"] = props["pars"][2]
+        corrtime_tail_var = props["covar"][2, 2]
+        props["corrtime_tail_var"] = corrtime_tail_var
+        props["corrtime_tail_std"] = (
+            np.sqrt(corrtime_tail_var) if corrtime_tail_var >= 0 else np.inf
+        )

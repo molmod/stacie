@@ -27,19 +27,21 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    # Ensure changes to these dependencies are reflected
-    # in .github/workflows/pytest.yaml and docs/install.rst
+    # Ensure changes to these dependencies are reflected in .github/requirements-old.txt
     "attrs>=21.3.0",
+    "cattrs>=22.2.0",
     "jax[cpu]>=0.4.26",
     "matplotlib>=3.7.0",
     "numpy>=1.22",
     "path>=16.14.0",
     "scipy>=1.11.1",
+    "zarr>=2.14.0",
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
+    "celerite2",
     "furo",
     "intersphinx-registry",
     "myst-parser",
@@ -48,6 +50,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-regtest",
+    "pytest-slowest-first",
     "pytest-xdist",
     "setuptools_scm",
     "sphinx",
@@ -64,7 +67,7 @@ Issues = "https://github.com/molmod/stacie/issues/"
 Source = "https://github.com/molmod/stacie/"
 
 [tool.pytest.ini_options]
-addopts = "-n auto -W error"
+addopts = "-n auto -W error --slowest-first"
 
 [tool.setuptools_scm]
 write_to = "src/stacie/_version.py"

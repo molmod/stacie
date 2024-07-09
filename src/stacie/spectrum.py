@@ -63,7 +63,11 @@ class Spectrum:
 
 
 def prepare_acfint(
-    sequences: NDArray[float], *, prefactor: float = 0.5, timestep: float = 1
+    sequences: NDArray[float],
+    *,
+    prefactor: float = 0.5,
+    timestep: float = 1,
+    include_zero_freq: bool = True,
 ) -> Spectrum:
     """Compute a spectrum and store all physical inputs in a ``Spectrum`` instance.
 
@@ -80,6 +84,8 @@ def prepare_acfint(
         to give it a physically meaningful unit.
     timestep
         The timestep of the input sequence.
+    include_zero_freq
+        When set to False, the DC component of the spectrum is discarded.
 
     Returns
     -------
@@ -101,5 +107,11 @@ def prepare_acfint(
     # Compute the spectrum and scale it.
     amplitudes = (abs(np.fft.rfft(sequences, axis=1)) ** 2).mean(axis=0)
     amplitudes *= prefactor * timestep / nstep
+
+    # Remove DC component, useful for inputs that oscillate about a non-zero average.
+    if not include_zero_freq:
+        ndofs = ndofs[1:]
+        freqs = freqs[1:]
+        amplitudes = amplitudes[1:]
 
     return Spectrum(ndofs, prefactor, times, freqs, amplitudes)

@@ -1,0 +1,20 @@
+{
+  "tests/test_rpi.py::test_rpi_opt_simple_max": 0.0013414589993772097,
+  "tests/test_regression.py::test_noscan[double1]": 1.1483442429998831,
+  "tests/test_zarr.py::test_load_dump_foo": 0.0030823339984635822,
+  "tests/test_regression.py::test_noscan_fail[white2-0.008]": 1.2486286359999212,
+  "tests/test_regression.py::test_noscan[double2]": 1.424366879000445,
+  "tests/test_zarr.py::test_load_dump_bar": 0.007892460002040025,
+  "tests/test_regression.py::test_noscan[white2]": 1.5048990289997164,
+  "tests/test_regression.py::test_noscan[white1]": 1.5279309359993931,
+  "tests/test_regression.py::test_noscan_fail[double1-0.05]": 1.7526377569993201,
+  "tests/test_regression.py::test_noscan_multi[names1]": 1.9335572949985362,
+  "tests/test_regression.py::test_scan[white2]": 8.113397331999295,
+  "tests/test_regression.py::test_noscan_multi[names0]": 2.0576420439992944,
+  "tests/test_rpi.py::test_rpi_opt_simple_min": 0.0006369729981088312,
+  "tests/test_regression.py::test_scan[double1]": 11.758853253999405,
+  "tests/test_regression.py::test_scan_multi[names0]": 18.90172369699758,
+  "tests/test_regression.py::test_scan[white1]": 9.559601248000035,
+  "tests/test_regression.py::test_scan_multi[names1]": 21.00940596699911,
+  "tests/test_regression.py::test_scan[double2]": 9.033160848000989
+}

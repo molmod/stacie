@@ -17,6 +17,7 @@
 # --
 """Plot the results of the estimate of the ACF integral."""
 
+import attrs
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
@@ -27,7 +28,42 @@ from .estimate import Result
 __all__ = ("plot",)
 
 
-def plot(path_pdf: str, res: Result | list[Result], acf_unit: str = "A", time_unit: str = "s"):
+@attrs.define
+class UnitConfig:
+    """Unit configuration for plotting function.
+
+    Note that values are *divided* by their units before plotting.
+    """
+
+    acfint_unit_str: str = attrs.field(default="A s")
+    """The text used to label an ACF integral."""
+
+    acfint_unit: float = attrs.field(default=1.0)
+    """The unit of an ACF integral."""
+
+    acfint_fmt: str = attrs.field(default=".1f")
+    """The format string for an ACF integral."""
+
+    freq_unit_str: str = attrs.field(default="Hz")
+    """The text used to label a frequency value."""
+
+    freq_unit: float = attrs.field(default=1.0)
+    """The unit of a frequency."""
+
+    time_unit_str: str = attrs.field(default="s")
+    """The text used to label a time value."""
+
+    time_unit: float = attrs.field(default=1.0)
+    """The unit of a frequency."""
+
+    time_fmt: str = attrs.field(default=".1f")
+    """The format string for a time value."""
+
+    sfac: float = attrs.field(default=2.0)
+    """The scale factor used for error bars (multiplier for sigma, standard error)."""
+
+
+def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None):
     """Plot the results of the ACF integral estimation.
 
     Parameters
@@ -49,39 +85,69 @@ def plot(path_pdf: str, res: Result | list[Result], acf_unit: str = "A", time_un
     # Prepare res
     if isinstance(res, Result):
         res = [res]
-    sfac = 2
+
+    # Prepare units
+    if uc is None:
+        uc = UnitConfig()
 
     model_props = {"ls": "--", "color": "k", "alpha": 0.5}
 
     def plot_spectrum(ax, r: Result):
         nplot = 2 * r.ncut
         s = r.spectrum
-        ax.plot(s.freqs[:nplot], s.amplitudes[:nplot], color="C0", lw=1)
-        mean = r.props["spectrum_model"]
+        ax.plot(
+            s.freqs[:nplot] / uc.freq_unit,
+            s.amplitudes[:nplot] / uc.acfint_unit,
+            color="C0",
+            lw=1,
+        )
+        mean = r.props["amplitudes_model"]
+        std = r.props["amplitudes_std_model"]
         freqs = s.freqs[: len(mean)]
-        ax.plot(freqs, mean, color="C2")
-        # ax.fill_between(freqs, mean - sfac * std, mean + sfac * std, color="C2", alpha=0.3, lw=0)
-        ax.axvline(s.freqs[r.ncut - 1], ymax=0.1, color="k")
+        ax.plot(freqs / uc.freq_unit, mean / uc.acfint_unit, color="C2")
+        ax.fill_between(
+            freqs / uc.freq_unit,
+            (mean - uc.sfac * std) / uc.acfint_unit,
+            (mean + uc.sfac * std) / uc.acfint_unit,
+            color="C2",
+            alpha=0.3,
+            lw=0,
+        )
+        ax.axvline(s.freqs[r.ncut - 1] / uc.freq_unit, ymax=0.1, color="k")
         if s.amplitudes_ref is not None:
-            ax.plot(s.freqs[:nplot], s.amplitudes_ref[:nplot], **model_props)
-        ax.set_xlabel(f"Frequency [1/{time_unit}]")
-        ax.set_ylabel(f"Spectrum [{acf_unit} {time_unit}]")
-        ax.set_title(f"ACF integral = {r.acfint:.5f} ± {r.acfint_std:.5f}")
+            ax.plot(
+                s.freqs[:nplot] / uc.freq_unit,
+                s.amplitudes_ref[:nplot] / uc.acfint_unit,
+                **model_props,
+            )
+        ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
+        ax.set_ylabel(f"Spectrum [{uc.acfint_unit_str}]")
+        ax.set_title(
+            f"ACF integral = {r.props['acfint'] / uc.acfint_unit:{uc.acfint_fmt}} "
+            f"± {r.props['acfint_std'] / uc.acfint_unit:{uc.acfint_fmt}} "
+            f"{uc.acfint_unit_str}\n "
+            f"Corrtime tail = {r.props['corrtime_tail'] / uc.time_unit:{uc.time_fmt}} "
+            f"± {r.props['corrtime_tail_std'] / uc.time_unit:{uc.time_fmt}} " + uc.time_unit_str
+        )
 
     def plot_all_models(ax, r):
         s = r.spectrum
         for ncut, props in r.history.items():
-            mean = props["spectrum_model"]
+            mean = props["amplitudes_model"]
             freqs = s.freqs[: len(mean)]
             if ncut == r.ncut:
-                ax.plot(freqs, mean, color="k", lw=2, zorder=2.5)
+                ax.plot(freqs / uc.freq_unit, mean / uc.acfint_unit, color="k", lw=2, zorder=2.5)
             else:
-                ax.plot(freqs, mean, color="C2", lw=1, alpha=0.5)
+                ax.plot(freqs / uc.freq_unit, mean / uc.acfint_unit, color="C2", lw=1, alpha=0.5)
         if s.amplitudes_ref is not None:
             nplot = min(2 * max(r.history), len(s.freqs))
-            ax.plot(s.freqs[:nplot], s.amplitudes_ref[:nplot], **model_props)
-        ax.set_xlabel(f"Frequency [1/{time_unit}]")
-        ax.set_ylabel(f"Model Spectrum [{acf_unit} {time_unit}]")
+            ax.plot(
+                s.freqs[:nplot] / uc.freq_unit,
+                s.amplitudes_ref[:nplot] / uc.acfint_unit,
+                **model_props,
+            )
+        ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
+        ax.set_ylabel(f"Model Spectrum [{uc.acfint_unit_str}]")
 
     def plot_objective(ax, r):
         freqs = []
@@ -90,11 +156,12 @@ def plot(path_pdf: str, res: Result | list[Result], acf_unit: str = "A", time_un
         for ncut, props in sorted(r.history.items()):
             freqs.append(s.freqs[ncut])
             objs.append(props["obj"])
+        freqs = np.array(freqs)
 
-        ax.plot(freqs, objs, color="C1", lw=1)
-        ax.plot([s.freqs[r.ncut]], [r.props["obj"]], marker="o", color="k", ms=2)
-        ax.set_xlabel(f"Cutoff frequency [1/{time_unit}]")
-        ax.set_ylabel("Objective function")
+        ax.plot(freqs / uc.freq_unit, objs, color="C1", lw=1)
+        ax.plot([s.freqs[r.ncut] / uc.freq_unit], [r.props["obj"]], marker="o", color="k", ms=2)
+        ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
+        ax.set_ylabel("Objective function [1]")
         ncutmax = max(r.history)
         ax.set_ylim(r.props["obj"] * 1.2, ncutmax / 4)
 
@@ -107,26 +174,33 @@ def plot(path_pdf: str, res: Result | list[Result], acf_unit: str = "A", time_un
             freqs.append(s.freqs[ncut])
             acfints.append(props["pars"][:2].sum())
             acfint_stds.append(np.sqrt(props["covar"][:2, :2].sum()))
+        freqs = np.array(freqs)
         acfints = np.array(acfints)
         acfint_stds = np.array(acfint_stds)
-        ax.plot(freqs, acfints, "C3")
+
+        ax.plot(freqs / uc.freq_unit, acfints / uc.acfint_unit, "C3")
         ax.fill_between(
-            freqs,
-            acfints - sfac * acfint_stds,
-            acfints + sfac * acfint_stds,
+            freqs / uc.freq_unit,
+            (acfints - uc.sfac * acfint_stds) / uc.acfint_unit,
+            (acfints + uc.sfac * acfint_stds) / uc.acfint_unit,
             color="C3",
             alpha=0.3,
             lw=0,
         )
         s = r.spectrum
         ax.errorbar(
-            [s.freqs[r.ncut]], [r.acfint], [r.acfint_std * sfac], marker="o", ms=2, color="k"
+            [s.freqs[r.ncut] / uc.freq_unit],
+            [r.props["acfint"] / uc.acfint_unit],
+            [r.props["acfint_std"] * uc.sfac / uc.acfint_unit],
+            marker="o",
+            ms=2,
+            color="k",
         )
         if s.amplitudes_ref is not None:
             limit = s.amplitudes_ref[0]
-            ax.axhline(limit, **model_props)
-        ax.set_xlabel(f"Cutoff frequency [1/{time_unit}]")
-        ax.set_ylabel(f"ACF integral [{acf_unit} {time_unit}]")
+            ax.axhline(limit / uc.acfint_unit, **model_props)
+        ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
+        ax.set_ylabel(f"ACF integral [{uc.acfint_unit_str}]")
 
     def plot_evals(ax, r):
         freqs = []
@@ -137,33 +211,27 @@ def plot(path_pdf: str, res: Result | list[Result], acf_unit: str = "A", time_un
             evals.append(np.linalg.eigvalsh(props["covar"]))
             if ncut == r.ncut:
                 ax.plot([freqs[-1]], [evals[-1]], color="k", marker="o", ms=2, zorder=2.5)
+        freqs = np.array(freqs)
         evals = np.array(evals)
-        ax.plot(freqs, evals, color="C4")
-        ax.set_xlabel(f"Cutoff frequency [1/{time_unit}]")
+
+        ax.plot(freqs / uc.freq_unit, evals, color="C4")
+        ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
         ax.set_ylabel("Covariance eigenvalues")
         ax.set_yscale("log")
 
-    def plot_uni(ax, r):
+    def plot_nor(ax, r):
         nor = r.props["nor"]
-        ax.plot((np.cumsum(nor) - nor.sum() / 2) ** 2)
-        # spec = 2 * abs(np.fft.rfft(nor)[1:])**2 / len(nor)
-        # ax.set_title(format(stats.chi2(2).logpdf(spec).mean(), ".3e"))
-        # ax.plot(spec)
-        # ax.plot(spec.real)
-        # ax.plot(spec.imag)
-        # print(nor.std())
-        # print(spec.real.std())
-        # print(spec.imag[1:].std())
-        # print()
-        # qgrid = (np.arange(len(uni)) + 0.5) / len(uni)
-        # ax.plot(qgrid, uni)
+        ax.plot(np.cumsum(nor) - np.sum(nor) / 2)
+        ax.set_title("symcu normalized residuals")
+        ax.set_xlabel("index")
+        ax.set_ylabel("symcu")
 
     def plot_qq(ax):
         r0 = res[0]
         cdfs = (np.arange(len(res)) + 0.5) / len(res)
         quantiles = stats.norm().ppf(cdfs)
         limit = r0.spectrum.amplitudes_ref[0]
-        normed_errors = np.array([(r.acfint - limit) / r.acfint_std for r in res])
+        normed_errors = np.array([(r.props["acfint"] - limit) / r.props["acfint_std"] for r in res])
         normed_errors.sort()
         ax.scatter(quantiles, normed_errors, c="C0", s=3)
         ax.plot([-2, 2], [-2, 2], **model_props)
@@ -172,18 +240,26 @@ def plot(path_pdf: str, res: Result | list[Result], acf_unit: str = "A", time_un
         ax.set_title("QQ Plot")
 
     def plot_acfint_estimates(ax):
-        values = np.array([r.acfint for r in res])
-        errors = np.array([sfac * r.acfint_std for r in res])
+        values = np.array([r.props["acfint"] for r in res])
+        errors = np.array([uc.sfac * r.props["acfint_std"] for r in res])
         order = values.argsort()
         values = values[order]
         errors = errors[order]
-        ax.errorbar(np.arange(len(res)), values, errors, fmt="o", lw=1, ms=2, ls="none")
+        ax.errorbar(
+            np.arange(len(res)),
+            values / uc.acfint_unit,
+            errors,
+            fmt="o",
+            lw=1,
+            ms=2,
+            ls="none",
+        )
         r0 = res[0]
         if r0.spectrum.amplitudes_ref is not None:
             limit = r0.spectrum.amplitudes_ref[0]
-            ax.axhline(limit, **model_props)
+            ax.axhline(limit / uc.acfint_unit, **model_props)
         ax.set_xlabel("Rank")
-        ax.set_ylabel(f"Mean and uncertainties [{acf_unit} {time_unit}]")
+        ax.set_ylabel(f"Mean and uncertainty [{uc.acfint_unit_str}]")
         ax.set_title("ACF Integral")
 
     with PdfPages(path_pdf) as pdf:
@@ -199,7 +275,7 @@ def plot(path_pdf: str, res: Result | list[Result], acf_unit: str = "A", time_un
                 plot_objective(axs[0, 1], r)
                 plot_uncertainty(axs[1, 0], r)
                 # plot_evals(axs[1, 1], r)
-                plot_uni(axs[1, 1], r)
+                plot_nor(axs[1, 1], r)
                 pdf.savefig(fig)
                 plt.close(fig)
 

@@ -17,36 +17,17 @@
 # --
 """Regression tests for typical Stacie workflows."""
 
-import numpy as np
 import pytest
 from path import Path
 from stacie.estimate import estimate_acfint
 from stacie.plot import plot
 from stacie.spectrum import Spectrum
+from stacie.zarr import load
 
-
-@pytest.fixture()
-def synth_30():
-    amplitudes = np.load("tests/spectrum_30.npy")
-    amplitudes_ref = np.load("tests/spectrum_ref.npy")
-    ndof = np.full(amplitudes.shape, 800)
-    ndof[0] = 400
-    ndof[-1] = 400
-    nstep = 2000
-    freqs = np.fft.rfftfreq(nstep)
-    return Spectrum(ndof, 0.5, np.arange(nstep), freqs, amplitudes, amplitudes_ref)
-
-
-@pytest.fixture()
-def synth_36():
-    amplitudes = np.load("tests/spectrum_36.npy")
-    amplitudes_ref = np.load("tests/spectrum_ref.npy")
-    ndof = np.full(amplitudes.shape, 800)
-    ndof[0] = 400
-    ndof[-1] = 400
-    nstep = 2000
-    freqs = np.fft.rfftfreq(nstep)
-    return Spectrum(ndof, 0.5, np.arange(nstep), freqs, amplitudes, amplitudes_ref)
+DOUBLE_NAMES = ["double1", "double2"]
+WHITE_NAMES = ["white1", "white2"]
+NAME_LISTS = DOUBLE_NAMES, WHITE_NAMES
+ALL_NAMES = [j for i in NAME_LISTS for j in i]
 
 
 def plot_test_result(prefix, res):
@@ -56,61 +37,61 @@ def plot_test_result(prefix, res):
     plot(path_pdf, res)
 
 
-def check_noscan_single(spectrum, regtest, prefix):
-    res = estimate_acfint(spectrum, fcut=0.005, maxscan=1)
+def register_result(regtest, res):
     with regtest:
-        print(f"ACF Int  = {res.acfint:.4f} ± {res.acfint_std:.4f}")
-        print(f"Tau tail = {res.corrtime_tail:.4f} ± {res.corrtime_tail_std:.4f}")
+        print(f"ACF Int  = {res.props['acfint']:.4f} ± {res.props['acfint_std']:.4f}")
+        print(f"Tau tail = {res.props['corrtime_tail']:.4f} ± {res.props['corrtime_tail_std']:.4f}")
         print(f"Log lh   = {res.props['ll']:.5e}")
+        print("---")
+
+
+def check_noscan_single(regtest, spectrum, prefix, fcut=0.005):
+    res = estimate_acfint(spectrum, fcut=fcut, maxscan=1)
+    register_result(regtest, res)
     plot_test_result(prefix, res)
 
 
-def test_noscan_30(synth_30, regtest):
-    check_noscan_single(synth_30, regtest, "noscan_30")
+@pytest.mark.parametrize("name", ALL_NAMES)
+def test_noscan(regtest, name):
+    spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+    check_noscan_single(regtest, spectrum, f"noscan_{name}")
 
 
-def test_noscan_36(synth_36, regtest):
-    check_noscan_single(synth_36, regtest, "noscan_36")
+@pytest.mark.parametrize(("name", "fcut"), [("white2", 0.008), ("double1", 0.05)])
+def test_noscan_fail(regtest, name, fcut):
+    spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+    check_noscan_single(regtest, spectrum, f"noscan_{name}_fail", fcut=fcut)
 
 
-def test_noscan_multi(synth_30, synth_36, regtest):
+@pytest.mark.parametrize("names", NAME_LISTS)
+def test_noscan_multi(regtest, names):
     res = []
-    for spectrum in synth_30, synth_36:
+    for name in names:
+        spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
         r = estimate_acfint(spectrum, fcut=0.005, maxscan=1)
-        with regtest:
-            print(f"ACF Int  = {r.acfint:.4f} ± {r.acfint_std:.4f}")
-            print(f"Tau tail = {r.corrtime_tail:.4f} ± {r.corrtime_tail_std:.4f}")
-            print(f"Log lh   = {r.props['ll']:.5e}")
-            print("--")
+        register_result(regtest, r)
         res.append(r)
     plot_test_result("noscan_multi", res)
 
 
-def check_scan_single(spectrum, regtest, prefix):
+def check_scan_single(regtest, spectrum, prefix):
     res = estimate_acfint(spectrum, fcut=0.01, maxscan=10)
-    with regtest:
-        print(f"ACF Int  = {res.acfint:.4f} ± {res.acfint_std:.4f}")
-        print(f"Tau tail = {res.corrtime_tail:.4f} ± {res.corrtime_tail_std:.4f}")
-        print(f"Log lh   = {res.props['ll']:.5e}")
+    register_result(regtest, res)
     plot_test_result(prefix, res)
 
 
-def test_scan_30(synth_30, regtest):
-    check_scan_single(synth_30, regtest, "scan_30")
+@pytest.mark.parametrize("name", ALL_NAMES)
+def test_scan(regtest, name):
+    spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+    check_scan_single(regtest, spectrum, f"scan_{name}")
 
 
-def test_scan_36(synth_36, regtest):
-    check_scan_single(synth_36, regtest, "scan_36")
-
-
-def test_scan_multi(synth_30, synth_36, regtest):
+@pytest.mark.parametrize("names", NAME_LISTS)
+def test_scan_multi(regtest, names):
     res = []
-    for spectrum in synth_30, synth_36:
+    for name in names:
+        spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
         r = estimate_acfint(spectrum, fcut=0.01, maxscan=10)
-        with regtest:
-            print(f"ACF Int  = {r.acfint:.4f} ± {r.acfint_std:.4f}")
-            print(f"Tau tail = {r.corrtime_tail:.4f} ± {r.corrtime_tail_std:.4f}")
-            print(f"Log lh   = {r.props['ll']:.5e}")
-            print("--")
+        register_result(regtest, r)
         res.append(r)
     plot_test_result("scan_multi", res)

@@ -1,7 +1,9 @@
 # Ensure changes to these dependencies are reflected in pyproject.toml
 attrs==21.3.0
+cattrs==22.2.0
 jax[cpu]==0.4.26
 matplotlib==3.7.0
 numpy==1.22
 path==16.14.0
 scipy==1.11.1
+zarr==2.14.0
