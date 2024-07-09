@@ -39,8 +39,8 @@ def plot_test_result(prefix, res):
 
 def register_result(regtest, res):
     with regtest:
-        print(f"ACF Int  = {res.props['acfint']:.4f} ± {res.props['acfint_std']:.4f}")
-        print(f"Tau tail = {res.props['corrtime_tail']:.4f} ± {res.props['corrtime_tail_std']:.4f}")
+        print(f"ACF Int  = {res.props['acfint']:.5e} ± {res.props['acfint_std']:.5e}")
+        print(f"Tau tail = {res.props['corrtime_tail']:.5e} ± {res.props['corrtime_tail_std']:.5e}")
         print(f"Log lh   = {res.props['ll']:.5e}")
         print("---")
 
