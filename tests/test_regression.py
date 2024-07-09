@@ -20,6 +20,7 @@
 import pytest
 from path import Path
 from stacie.estimate import estimate_acfint
+from stacie.model import ExpTailModel, SpectrumModel, WhiteNoiseModel
 from stacie.plot import plot
 from stacie.spectrum import Spectrum
 from stacie.zarr import load
@@ -45,8 +46,14 @@ def register_result(regtest, res):
         print("---")
 
 
-def check_noscan_single(regtest, spectrum, prefix, fcut=0.005):
-    res = estimate_acfint(spectrum, fcut=fcut, maxscan=1)
+def check_noscan_single(
+    regtest,
+    spectrum: Spectrum,
+    prefix: str,
+    fcut: float = 0.005,
+    model: SpectrumModel | None = None,
+):
+    res = estimate_acfint(spectrum, fcut=fcut, maxscan=1, model=model)
     register_result(regtest, res)
     plot_test_result(prefix, res)
 
@@ -55,6 +62,14 @@ def check_noscan_single(regtest, spectrum, prefix, fcut=0.005):
 def test_noscan(regtest, name):
     spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
     check_noscan_single(regtest, spectrum, f"noscan_{name}")
+
+
+@pytest.mark.parametrize("name", WHITE_NAMES)
+def test_noscan_white(regtest, name):
+    spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
+    check_noscan_single(
+        regtest, spectrum, f"white_noscan_{name}", fcut=0.1, model=WhiteNoiseModel()
+    )
 
 
 @pytest.mark.parametrize(("name", "fcut"), [("white2", 0.008), ("double1", 0.05)])
@@ -74,24 +89,21 @@ def test_noscan_multi(regtest, names):
     plot_test_result("noscan_multi", res)
 
 
-def check_scan_single(regtest, spectrum, prefix):
-    res = estimate_acfint(spectrum, fcut=0.01, maxscan=10)
-    register_result(regtest, res)
-    plot_test_result(prefix, res)
-
-
 @pytest.mark.parametrize("name", ALL_NAMES)
 def test_scan(regtest, name):
     spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
-    check_scan_single(regtest, spectrum, f"scan_{name}")
+    res = estimate_acfint(spectrum, fcut=0.03, maxscan=10)
+    register_result(regtest, res)
+    plot_test_result(f"scan_{name}", res)
 
 
 @pytest.mark.parametrize("names", NAME_LISTS)
-def test_scan_multi(regtest, names):
+@pytest.mark.parametrize("model", [ExpTailModel(), WhiteNoiseModel()])
+def test_scan_multi(regtest, names, model):
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.zip", Spectrum)
-        r = estimate_acfint(spectrum, fcut=0.01, maxscan=10)
+        r = estimate_acfint(spectrum, fcut=0.01, maxscan=10, model=model)
         register_result(regtest, r)
         res.append(r)
-    plot_test_result("scan_multi", res)
+    plot_test_result(f"{model.name}_scan_multi", res)

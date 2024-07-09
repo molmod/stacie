@@ -123,9 +123,10 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
         ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
         ax.set_ylabel(f"Spectrum [{uc.acfint_unit_str}]")
         ax.set_title(
+            f"{r.props['model']} // "
             f"ACF integral = {r.props['acfint'] / uc.acfint_unit:{uc.acfint_fmt}} "
             f"± {r.props['acfint_std'] / uc.acfint_unit:{uc.acfint_fmt}} "
-            f"{uc.acfint_unit_str}\n "
+            f"{uc.acfint_unit_str} // "
             f"Corrtime tail = {r.props['corrtime_tail'] / uc.time_unit:{uc.time_fmt}} "
             f"± {r.props['corrtime_tail_std'] / uc.time_unit:{uc.time_fmt}} " + uc.time_unit_str
         )
@@ -163,7 +164,8 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
         ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
         ax.set_ylabel("Objective function [1]")
         ncutmax = max(r.history)
-        ax.set_ylim(r.props["obj"] * 1.2, ncutmax / 4)
+        if np.isfinite(r.props["obj"]):
+            ax.set_ylim(r.props["obj"] * 1.2, ncutmax / 4)
 
     def plot_uncertainty(ax, r):
         freqs = []
@@ -221,7 +223,8 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
 
     def plot_nor(ax, r):
         nor = r.props["nor"]
-        ax.plot(np.cumsum(nor) - np.sum(nor) / 2)
+        with np.errstate(invalid="ignore"):
+            ax.plot(np.cumsum(nor) - np.sum(nor) / 2)
         ax.set_title("symcu normalized residuals")
         ax.set_xlabel("index")
         ax.set_ylabel("symcu")

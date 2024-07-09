@@ -23,14 +23,17 @@ import numpy as np
 from jax.typing import ArrayLike as JArrayLike
 from numpy.typing import NDArray
 
-__all__ = ("SpectrumModel", "ExpTailModel")
+__all__ = ("SpectrumModel", "ExpTailModel", "WhiteNoiseModel")
 
 
 class SpectrumModel:
     """Abstract base class for spectrum models.
 
-    Subclasses must override the methods ``bounds``, ``guess`` and ``__call__``.
+    Subclasses must override the attribute ``name``
+    and the methods ``bounds``, ``guess``, ``__call__`` and ``update_props``.
     """
+
+    name: str = NotImplemented
 
     @staticmethod
     def bounds() -> list[tuple[float, float]]:
@@ -67,6 +70,11 @@ class SpectrumModel:
         """
         raise NotImplementedError
 
+    @classmethod
+    def update_props(cls, props: dict[str]):
+        """Add results items to the props dictionary derived from the model parameters."""
+        raise NotImplementedError
+
 
 class ExpTailModel(SpectrumModel):
     """The exponential tail model for the spectrum.
@@ -79,6 +87,8 @@ class ExpTailModel(SpectrumModel):
           but confined within a small time lag domain centered at t=0.
         - An slow exponentially decaying part with a yet unknown characteristic time scale.
     """
+
+    name: str = "exptail"
 
     @staticmethod
     def bounds() -> list[tuple[float, float]]:
@@ -103,8 +113,10 @@ class ExpTailModel(SpectrumModel):
         tail_model /= tail_model[0]
         return acfint_tail * tail_model + acfint_short
 
-    @staticmethod
-    def update_props(props: dict[str]):
+    @classmethod
+    def update_props(cls, props: dict[str]):
+        """Add results items to the props dictionary derived from the model parameters."""
+        props["model"] = cls.name
         props["acfint"] = props["pars"][:2].sum()
         acfint_var = props["covar"][:2, :2].sum()
         props["acfint_var"] = acfint_var
@@ -115,3 +127,36 @@ class ExpTailModel(SpectrumModel):
         props["corrtime_tail_std"] = (
             np.sqrt(corrtime_tail_var) if corrtime_tail_var >= 0 else np.inf
         )
+
+
+class WhiteNoiseModel(SpectrumModel):
+    """One may fall back to this model if one suspects there are no time correlations."""
+
+    name: str = "white"
+
+    @staticmethod
+    def bounds() -> list[tuple[float, float]]:
+        """Parameter bounds for the optimizer."""
+        return [(0, np.inf)]
+
+    @staticmethod
+    def guess(freqs: NDArray[float], amplitudes: NDArray[float]) -> NDArray[float]:
+        """Guess initial values of the parameters."""
+        return np.array([amplitudes.mean()])
+
+    @staticmethod
+    def __call__(omegas: JArrayLike, pars: JArrayLike) -> jax.Array:
+        """See SpectrumModel.__call__"""
+        return jnp.full_like(omegas, pars[0])
+
+    @classmethod
+    def update_props(cls, props: dict[str]):
+        """Add results items to the props dictionary derived from the model parameters."""
+        props["model"] = cls.name
+        props["acfint"] = props["pars"][0].sum()
+        acfint_var = props["covar"][0, 0].sum()
+        props["acfint_var"] = acfint_var
+        props["acfint_std"] = np.sqrt(acfint_var) if acfint_var >= 0 else np.inf
+        props["corrtime_tail"] = np.inf
+        props["corrtime_tail_var"] = np.inf
+        props["corrtime_tail_std"] = np.inf

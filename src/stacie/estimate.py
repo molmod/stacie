@@ -60,7 +60,7 @@ def estimate_acfint(
     fcut: float | None = None,
     maxscan: int = 100,
     ncutmin: int = 10,
-    model: SpectrumModel = None,
+    model: SpectrumModel | None = None,
     cutobj: CutObj = cutobj_symcu,
 ) -> Result:
     """Estimate the integral of the autocorrelation function.
