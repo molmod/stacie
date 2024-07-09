@@ -174,6 +174,7 @@ def _build_xgrid_exp(xbracket, ngrid):
 
 
 def _eval_grid(xgrid, func, cache):
+    """Evaluate the function on the xgrid, reusing cached values if available."""
     fgrid = []
     for x in xgrid:
         f = cache.get(x)

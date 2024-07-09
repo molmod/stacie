@@ -42,11 +42,18 @@ class Result:
     """The low-pass cutoff index of the frequency axis, to suppress periodic boundary artifacts."""
 
     history: dict[int, dict[str]] = attrs.field()
-    """History of ncut optimization."""
+    """History of ncut optimization.
+
+    Each value is a dictionary returned by ``fit_model_spectrum``.
+    """
 
     @property
     def props(self) -> dict[str]:
-        """Properties computed from the fit up to the selected spectrum cutoff."""
+        """Properties computed from the fit up to the selected spectrum cutoff.
+
+        This is a shortcut for ``history[ncut]``.
+        See return value of ``fit_model_spectrum`` for more details.
+        """
         return self.history[self.ncut]
 
 
@@ -94,6 +101,7 @@ def estimate_acfint(
     history = {}
 
     def objective(n: int):
+        """Objective to be minimized to find the best frequency cutoff."""
         ncut = ncutmin + n * stride
         props = fit_model_spectrum(
             spectrum.timestep,
@@ -132,6 +140,28 @@ def fit_model_spectrum(
     model: SpectrumModel,
     cutobj: CutObj,
 ) -> dict[str, NDArray]:
+    """Optimize the parameter of a model for a given spectrum.
+
+    The parameters are the attributes of the ``LowFeqCost`` class.
+
+    Returns
+    -------
+    A dictionary with various intermediate results of the cost function calculation,
+    computed for the optimized parameters.
+    In addition to the properties returned by ``cost_low``,
+    also the following are included:
+
+    - ``hess``: the Hessian matrix at the solution.
+    - ``hess_evals``: the Hessian eigenvalues.
+    - ``hess_evecs``: the Hessian eigenvectors.
+    - ``covar``: the covariance matrix of the parameters.
+    - ``acfint``: the estimate of the ACF integral.
+    - ``acfint_var``: the variance of estimate of the ACF integral.
+    - ``acfint_std``: the standard error of estimate of the ACF integral.
+    - ``corrtime_tail``: the slowest time scale in the sequences.
+    - ``corrtime_tail_var``: the variance of estimate of the slowest time scale.
+    - ``corrtime_tail_std``: the standard error of estimate of the slowest time scale.
+    """
     # Maximize likelihood
     pars_init = model.guess(freqs, amplitudes)
     if not model.valid(pars_init):

@@ -38,15 +38,28 @@ jax.config.update("jax_platform_name", "cpu")
 
 @attrs.define
 class LowFreqCost:
+    """Cost function to fit a model to the low-frequency part of the spectrum."""
+
     timestep: float = attrs.field()
+    """The timestep of the sequences used to compute the spectrum."""
+
     freqs: NDArray[float] = attrs.field()
+    """The frequencies for which the spectrum amplitudes are computed."""
+
     amplitudes: NDArray[float] = attrs.field()
+    """The actual spectrum amplitudes at frequencies in ``self.freqs``."""
+
     ndofs: NDArray[int] = attrs.field()
+    """The number of independent contributions to each spectrum amplitude."""
+
     model: SpectrumModel = attrs.field()
+    """The model to be fitted to the spectrum."""
+
     cutobj: CutObj = attrs.field()
+    """The criterion used to determine the frequency cutoff to select the low-frequency part."""
 
     def func(self, pars: NDArray) -> float:
-        """Compute the negative log-likelihood.
+        """Compute the cost function (the negative log-likelihood).
 
         Parameters
         ----------
@@ -63,16 +76,19 @@ class LowFreqCost:
         return _func(pars, *attrs.astuple(self))
 
     def prop(self, pars: NDArray) -> dict[str, NDArray]:
+        """Compute properties of the fit for the given parameters."""
         if not self.model.valid(pars):
             raise ValueError("Invalid parameters")
         return _prop(pars, *attrs.astuple(self))
 
     def grad(self, pars: NDArray) -> NDArray:
+        """Compute the gradient of the cost function."""
         if not self.model.valid(pars):
             return np.full(len(pars), np.nan)
         return _grad(pars, *attrs.astuple(self))
 
     def hess(self, pars: NDArray) -> NDArray:
+        """Compute the Hessian of the cost function."""
         if not self.model.valid(pars):
             return np.full((len(pars), len(pars)), np.nan)
         return _hess(pars, *attrs.astuple(self))
@@ -89,6 +105,33 @@ def cost_low(
     *,
     do_props: bool = False,
 ) -> jax.Array | dict[str, jax.Array]:
+    """Low-level implementation of the cost function.
+
+    Parameters
+    ----------
+    pars
+        The parameter vector for which the loss function must be computed.
+    do_props
+        Set to ``True`` to let this function compute a dictionary of properties.
+
+    Returns
+    -------
+    If ``do_props==False``, the return value is minus the log-likelihood.
+    If ``do_props==True``, this function returns a dictionary with various intermediate results
+    of the loss function calculations:
+
+    - ``pars``: the given parameters
+    - ``ll``: the log likelihood
+    - ``uni``: the residuals transformed such that they should be uniformely distributed.
+    - ``uni``: the residuals transformed such that they should be normally distributed.
+    - ``obj``: the objective to be minimized to find the best frequency cutoff.
+    - ``amplitudes_model``: The model of the spectrum (function of pars)
+    - ``amplitudes_std_model``: The model of the standard error of the spectrum (function of pars)
+
+    Notes
+    -----
+    For all other parameters, see attributes of the ``LowFreqCost`` class.
+    """
     # Convert frequencies to dimensionless omegas, as if time step was 1
     # With RFFT, the highest omega would then be +pi.
     omegas = 2 * jnp.pi * timestep * freqs
@@ -121,7 +164,6 @@ def cost_low(
             "uni": uni,
             "nor": nor,
             "obj": obj,
-            "omegas": omegas,
             "amplitudes_model": amplitudes_model,
             "amplitudes_std_model": amplitudes_model / jnp.sqrt(0.5 * ndofs),
         }
@@ -129,7 +171,7 @@ def cost_low(
 
 
 def numpify(func):
-    """Convert return values from JAX tensors to NumPy arrays."""
+    """Convert return values from JAX arrays to NumPy arrays."""
 
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -141,6 +183,7 @@ def numpify(func):
     return wrapper
 
 
+# Jit-compile functions to be used in LowFreqCost
 STATIC_ARGNAMES = ("model", "cutobj", "do_props")
 _func = numpify(jax.jit(cost_low, static_argnames=STATIC_ARGNAMES))
 _prop = numpify(jax.jit(partial(cost_low, do_props=True), static_argnames=STATIC_ARGNAMES))
