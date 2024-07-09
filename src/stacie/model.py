@@ -121,8 +121,8 @@ class ExpTailModel(SpectrumModel):
         acfint_var = props["covar"][:2, :2].sum()
         props["acfint_var"] = acfint_var
         props["acfint_std"] = np.sqrt(acfint_var) if acfint_var >= 0 else np.inf
-        props["corrtime_tail"] = props["pars"][2]
-        corrtime_tail_var = props["covar"][2, 2]
+        props["corrtime_tail"] = props["pars"][2] * props["timestep"]
+        corrtime_tail_var = props["covar"][2, 2] * props["timestep"] ** 2
         props["corrtime_tail_var"] = corrtime_tail_var
         props["corrtime_tail_std"] = (
             np.sqrt(corrtime_tail_var) if corrtime_tail_var >= 0 else np.inf

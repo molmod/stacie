@@ -130,6 +130,7 @@ def cost_low(
     The returned dictionary contains the following items:
 
     - ``pars``: the given parameters
+    - ``timestep``: the time step
     - ``ll``: the log likelihood
     - ``uni``: the residuals transformed such that they should be uniformely distributed.
     - ``uni``: the residuals transformed such that they should be normally distributed.
@@ -165,6 +166,7 @@ def cost_low(
         obj = cutobj(nor)
         return {
             "pars": pars,
+            "timestep": timestep,
             "ll": ll,
             "uni": uni,
             "nor": nor,

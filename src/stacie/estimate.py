@@ -109,7 +109,9 @@ def estimate_acfint(
         )
         history[ncut] = props
         evals = props["hess_evals"]
-        return props["obj"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
+        result = props["obj"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
+        print(ncut, result)
+        return result
 
     ncutmax = len(spectrum.freqs) if fcut is None else spectrum.freqs.searchsorted(fcut)
     if ncutmax < ncutmin:
