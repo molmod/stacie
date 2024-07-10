@@ -54,10 +54,10 @@ def check_noscan_single(
     regtest,
     spectrum: Spectrum,
     prefix: str,
-    fcut: float = 0.005,
+    fcutmax: float = 0.005,
     model: SpectrumModel | None = None,
 ):
-    res = estimate_acfint(spectrum, fcut=fcut, maxscan=1, model=model)
+    res = estimate_acfint(spectrum, fcutmax=fcutmax, maxscan=1, model=model)
     register_result(regtest, res)
     output_test_result(prefix, res)
 
@@ -72,14 +72,14 @@ def test_epxtail_noscan(regtest, name):
 def test_white_noscan(regtest, name):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     check_noscan_single(
-        regtest, spectrum, f"white_noscan_{name}", fcut=0.1, model=WhiteNoiseModel()
+        regtest, spectrum, f"white_noscan_{name}", fcutmax=0.1, model=WhiteNoiseModel()
     )
 
 
-@pytest.mark.parametrize(("name", "fcut"), [("white2", 0.008), ("double1", 0.05)])
-def test_exptail_noscan_fail(regtest, name, fcut):
+@pytest.mark.parametrize(("name", "fcutmax"), [("white2", 0.008), ("double1", 0.05)])
+def test_exptail_noscan_fail(regtest, name, fcutmax):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}_fail", fcut=fcut)
+    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}_fail", fcutmax=fcutmax)
 
 
 @pytest.mark.parametrize("names", NAME_LISTS)
@@ -87,7 +87,7 @@ def test_exptail_noscan_multi(regtest, names):
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-        r = estimate_acfint(spectrum, fcut=0.005, maxscan=1)
+        r = estimate_acfint(spectrum, fcutmax=0.005, maxscan=1)
         register_result(regtest, r)
         res.append(r)
     output_test_result("exptail_noscan_multi", res)
@@ -96,7 +96,7 @@ def test_exptail_noscan_multi(regtest, names):
 @pytest.mark.parametrize("name", ALL_NAMES)
 def test_exptail_scan(regtest, name):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-    res = estimate_acfint(spectrum, fcut=0.03, maxscan=10)
+    res = estimate_acfint(spectrum, fcutmax=0.03, maxscan=10)
     register_result(regtest, res)
     output_test_result(f"exptail_scan_{name}", res)
 
@@ -111,7 +111,7 @@ def test_scan_multi(regtest, names, model):
         with ExitStack() as stack:
             if should_warn:
                 stack.enter_context(pytest.warns(FCutWarning))
-            r = estimate_acfint(spectrum, fcut=0.01, maxscan=10, model=model)
+            r = estimate_acfint(spectrum, fcutmax=0.01, maxscan=10, model=model)
         register_result(regtest, r)
         res.append(r)
     output_test_result(f"{model.name}_scan_multi", res)

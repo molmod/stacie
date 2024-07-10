@@ -69,7 +69,7 @@ class FCutWarning(Warning):
 def estimate_acfint(
     spectrum: Spectrum,
     *,
-    fcut: float | None = None,
+    fcutmax: float | None = None,
     maxscan: int = 100,
     ncutmin: int = 10,
     ncutmax_hard: int = 1000,
@@ -89,7 +89,7 @@ def estimate_acfint(
         The maximum cutoff on the frequency axis (unit of frequency).
     maxscan
         The maximum number of cutoffs to test.
-        If 1, then only the given fcut is used.
+        If 1, then only the given fcutmax is used.
     ncutmin
         The minimal amount of frequency data points to use in the fit.
     ncutmax_hard
@@ -135,7 +135,7 @@ def estimate_acfint(
         print(ncut, result)
         return result
 
-    ncutmax = len(spectrum.freqs) if fcut is None else int(spectrum.freqs.searchsorted(fcut))
+    ncutmax = len(spectrum.freqs) if fcutmax is None else int(spectrum.freqs.searchsorted(fcutmax))
     if ncutmax > ncutmax_hard:
         ncutmax = ncutmax_hard
         warnings.warn(
