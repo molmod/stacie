@@ -45,7 +45,6 @@ def rpi_opt(func, xbracket, *, nsplit: int = 5, nsweep=20, budget=20, cache=None
         These will be linearly distributed.
     nsweep
         The (approximate) number of grid points in the initial scan.
-        These will be uniformly distributed on a log scale.
     budget
         The number of times the algorithm will try converging an alternative
         solutions when these appear to be present.
@@ -135,16 +134,16 @@ def build_eval_grid(func, xbracket, nsplit=5, nsweep=100, cache=None):
 
     cache = {} if cache is None else cache
     if len(cache) == 0:
-        xgrid = _build_xgrid_exp(xbracket, nsweep)
+        xgrid = build_xgrid_lin(xbracket, nsweep)
     else:
-        xgrid = _build_xgrid_lin(xbracket, nsplit)
+        xgrid = build_xgrid_lin(xbracket, nsplit)
     assert xgrid[0] == xbracket[0]
     assert xgrid[-1] == xbracket[-1]
     fgrid = _eval_grid(xgrid, func, cache)
     return xgrid, fgrid, cache
 
 
-def _build_xgrid_lin(xbracket, nsplit):
+def build_xgrid_lin(xbracket, nsplit):
     """Approximate linear integer grid."""
     step = max(1, (xbracket[-1] - xbracket[0]) / nsplit)
     if step == 1:
@@ -154,7 +153,7 @@ def _build_xgrid_lin(xbracket, nsplit):
     return sorted(xgrid)
 
 
-def _build_xgrid_exp(xbracket, ngrid):
+def build_xgrid_exp(xbracket, ngrid):
     """Approximate exponential integer grid."""
     xgrid = [xbracket[0]]
     while len(xgrid) < ngrid:

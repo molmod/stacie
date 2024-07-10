@@ -17,6 +17,8 @@
 # --
 """Algorithm to estimate the autocorrelation integral."""
 
+import warnings
+
 import attrs
 import numpy as np
 from numpy.typing import NDArray
@@ -25,10 +27,10 @@ from scipy.optimize import minimize
 from .cost import LowFreqCost
 from .cutobj import CutObj, cutobj_symcu
 from .model import ExpTailModel, SpectrumModel
-from .rpi import rpi_opt
+from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
 
-__all__ = ("Result", "estimate_acfint", "fit_model_spectrum")
+__all__ = ("Result", "FCutWarning", "estimate_acfint", "fit_model_spectrum")
 
 
 @attrs.define
@@ -57,12 +59,20 @@ class Result:
         return self.history[self.ncut]
 
 
+class FCutWarning(Warning):
+    """Raised when there is an issue with the frequency cutoff.
+
+    The algorithm will try to continue, but the results are unlikely to be useful.
+    """
+
+
 def estimate_acfint(
     spectrum: Spectrum,
     *,
     fcut: float | None = None,
     maxscan: int = 100,
     ncutmin: int = 10,
+    ncutmax_hard: int = 1000,
     model: SpectrumModel | None = None,
     cutobj: CutObj = cutobj_symcu,
 ) -> Result:
@@ -75,13 +85,17 @@ def estimate_acfint(
     ----------
     spectrum
         A ``Spectrum`` instance holding all the inputs for the estimation of the ACF integral.
-    fcut
-        The highest value of the spectrum to consider
+    fcutmax
+        The maximum cutoff on the frequency axis (unit of frequency).
     maxscan
         The maximum number of cutoffs to test.
         If 1, then only the given fcut is used.
     ncutmin
         The minimal amount of frequency data points to use in the fit.
+    ncutmax_hard
+        The maximal amount of frequency data points to use in the fit.
+        This upper limit puts an upper bound on the computational cost of the fit.
+        If this upper limit is stricter than that of fcutmax, a warning is raised.
     model
         The model used to fit the low-frequency regime.
     cutobj
@@ -96,9 +110,17 @@ def estimate_acfint(
         model = ExpTailModel()
     history = {}
 
-    def objective(n: int):
-        """Objective to be minimized to find the best frequency cutoff."""
-        ncut = ncutmin + n * stride
+    def objective(icut: int):
+        """Objective to be minimized to find the best frequency cutoff.
+
+        Parameters
+        ----------
+        icut
+            The index in the ncuts list to get the right cutoff.
+        include_failed
+            When ``True``, add failed fits to the history.
+        """
+        ncut = ncuts[icut]
         props = fit_model_spectrum(
             spectrum.timestep,
             spectrum.freqs[:ncut],
@@ -107,25 +129,41 @@ def estimate_acfint(
             model,
             cutobj,
         )
-        history[ncut] = props
         evals = props["hess_evals"]
+        history[ncut] = props
         result = props["obj"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
         print(ncut, result)
         return result
 
-    ncutmax = len(spectrum.freqs) if fcut is None else spectrum.freqs.searchsorted(fcut)
+    ncutmax = len(spectrum.freqs) if fcut is None else int(spectrum.freqs.searchsorted(fcut))
+    if ncutmax > ncutmax_hard:
+        ncutmax = ncutmax_hard
+        warnings.warn(
+            "The maximum frequency cutoff is lowered to constrain "
+            f"the maximum number of data points in the fit to {ncutmax}",
+            FCutWarning,
+            stacklevel=2,
+        )
     if ncutmax < ncutmin:
         raise ValueError("Too few data points for fit.")
+
     if maxscan == 1:
         ncut = ncutmax
-        stride = 1
-        objective(ncutmax - ncutmin)
+        ncuts = [ncut]
+        objective(0)
     else:
-        stride = max((ncutmax - ncutmin) // maxscan, 1)
-        rpi_opt(objective, [0, maxscan], mode="min")
-        if len(history) == 0:
-            raise AssertionError("Could not find a suitable solution")
-        ncut = min((record["obj"], key) for key, record in history.items())[1]
+        ncuts = build_xgrid_exp([ncutmin, ncutmax], maxscan)
+        rpi_opt(objective, [0, len(ncuts) - 1], mode="min")
+        if any(np.isfinite(props["obj"]) for props in history.values()):
+            ncut = min((record["obj"], key) for key, record in history.items())[1]
+        else:
+            warnings.warn(
+                "Could not find a suitable frequency cutoff. "
+                "The resuts for the smallest cutoff are selected.",
+                FCutWarning,
+                stacklevel=2,
+            )
+            ncut = ncuts[0]
 
     return Result(spectrum, ncut, dict(sorted(history.items())))
 

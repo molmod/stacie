@@ -149,6 +149,7 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
             )
         ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
         ax.set_ylabel(f"Model Spectrum [{uc.acfint_unit_str}]")
+        ax.set_xscale("log")
 
     def plot_objective(ax, r):
         freqs = []
@@ -163,9 +164,10 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
         ax.plot([s.freqs[r.ncut] / uc.freq_unit], [r.props["obj"]], marker="o", color="k", ms=2)
         ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
         ax.set_ylabel("Objective function [1]")
-        ncutmax = max(r.history)
+        ax.set_xscale("log")
         if np.isfinite(r.props["obj"]):
-            ax.set_ylim(r.props["obj"] * 1.2, ncutmax / 4)
+            objscale = abs(r.props["obj"])
+            ax.set_ylim(r.props["obj"] - 0.2 * objscale, 2 * objscale)
 
     def plot_uncertainty(ax, r):
         freqs = []
@@ -203,6 +205,7 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
             ax.axhline(limit / uc.acfint_unit, **model_props)
         ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
         ax.set_ylabel(f"ACF integral [{uc.acfint_unit_str}]")
+        ax.set_xscale("log")
 
     def plot_evals(ax, r):
         freqs = []
@@ -220,6 +223,7 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
         ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
         ax.set_ylabel("Covariance eigenvalues")
         ax.set_yscale("log")
+        ax.set_xscale("log")
 
     def plot_nor(ax, r):
         nor = r.props["nor"]

@@ -17,9 +17,11 @@
 # --
 """Regression tests for typical Stacie workflows."""
 
+from contextlib import ExitStack
+
 import pytest
 from path import Path
-from stacie.estimate import estimate_acfint
+from stacie.estimate import FCutWarning, estimate_acfint
 from stacie.model import ExpTailModel, SpectrumModel, WhiteNoiseModel
 from stacie.msgpack import dump, load
 from stacie.plot import plot
@@ -102,10 +104,14 @@ def test_exptail_scan(regtest, name):
 @pytest.mark.parametrize("names", NAME_LISTS)
 @pytest.mark.parametrize("model", [ExpTailModel(), WhiteNoiseModel()])
 def test_scan_multi(regtest, names, model):
+    should_warn = names[0].startswith("double") and isinstance(model, WhiteNoiseModel)
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-        r = estimate_acfint(spectrum, fcut=0.01, maxscan=10, model=model)
+        with ExitStack() as stack:
+            if should_warn:
+                stack.enter_context(pytest.warns(FCutWarning))
+            r = estimate_acfint(spectrum, fcut=0.01, maxscan=10, model=model)
         register_result(regtest, r)
         res.append(r)
     output_test_result(f"{model.name}_scan_multi", res)
