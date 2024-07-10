@@ -1,4 +1,4 @@
-# License
+# Licenses
 
 ## Source code license
 

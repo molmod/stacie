@@ -10,6 +10,10 @@
 Stacie is a *STable AutoCorrelation Integral Estimator*.
 Documentation is here: <https://molmod.github.io/stacie>.
 
+## Citation
+
+TODO (publish paper first)
+
 ## Installation
 
 Assuming you have Python and Pip installed, run the following command:
@@ -17,3 +21,7 @@ Assuming you have Python and Pip installed, run the following command:
 ```bash
 python -m pip install stacie
 ```
+
+## Contributing
+
+TODO: references to online documentation.

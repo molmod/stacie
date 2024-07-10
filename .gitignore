@@ -28,6 +28,7 @@ ENV/
 # Build artifacts, distribution / packaging
 src/stacie/_version.py
 docs/build/
+docs/_build/
 docs/source/apidocs/
 .Python
 build/

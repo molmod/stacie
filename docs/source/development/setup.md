@@ -1,6 +1,6 @@
-# Developer Notes
+# Development Setup
 
-## Development Install
+## Repository, Tests and Documentation Build
 
 It is assumed that you have installed Python, Git, pre-commit and direnv before.
 A local installation for testing and development can be installed as follows:
@@ -20,7 +20,7 @@ make html
 make latexpdf
 ```
 
-## Documentation
+## Documentation Live Preview
 
 The documentation is created using [Sphinx](https://www.sphinx-doc.org/).
 
@@ -36,10 +36,3 @@ Now you can edit the documentation and see the result as soon as you save a file
 
 Please, use [Semantic Line Breaks](https://sembr.org/)
 because it facilitates reviewing documentation changes.
-
-
-## How to Make a Release
-
-- Mark the release in `docs/changelog.md`.
-- Make a new commit and tag it with `vX.Y.Z`.
-- Trigger the PyPI GitHub Action: `git push origin main --tags`.

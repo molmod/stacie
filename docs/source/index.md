@@ -1,37 +1,27 @@
-# Welcome to Stacie
+# Welcome to Stacie's Documentation!
 
-This is a test with $f(x)=\sin(x)$. {cite:p}`daivis_1994_comparison`.
+Stacie is a *STable AutoCorrelation Integral Estimator*.
 
-$$
-\sum_{k=1}^N \omega^{kn}
-$$
+In this online documentation, you can find all the practical instructions on how to use Stacie,
+and the theory needed to understand what Stacie computes and how it works.
 
+Please use the following citation in any publication that relies on Stacie:
 
-```{toctree}
-:hidden:
-:caption: Usage
+> TODO
 
-installation.md
-licenses.md
-usage.md
-```
+Copy-pasteable citation records in various formats are provided in [How to Cite?](#cite-target).
+
 
 ```{toctree}
 :hidden:
-:caption: Theory
+:maxdepth: 2
 
-theory/goal.md
-theory/notation.md
-theory/power_spectrum.md
-theory/useful_identities.md
-theory/bibliography.md
-```
-
-```{toctree}
-:hidden:
-:caption: Development
-
-development.md
-changelog.md
-apidocs/modules.rst
+getting_started/index.md
+theory/index.md
+applications/index.md
+advanced_topics/index.md
+example/index.md
+bibliography.md
+development/index.md
+code_of_conduct.md
 ```
