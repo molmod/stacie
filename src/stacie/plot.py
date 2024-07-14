@@ -225,13 +225,15 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
         ax.set_yscale("log")
         ax.set_xscale("log")
 
-    def plot_nor(ax, r):
-        nor = r.props["nor"]
+    def plot_resid(ax, r):
+        amplitudes = r.props["amplitudes"]
+        kappas = r.props["kappas"]
+        thetas = r.props["thetas"]
         with np.errstate(invalid="ignore"):
-            ax.plot(np.cumsum(nor) - np.sum(nor) / 2)
-        ax.set_title("symcu normalized residuals")
+            ax.plot(amplitudes / (kappas * thetas))
+        ax.set_title("Rescaled spectrum (Gamma distributed)")
         ax.set_xlabel("index")
-        ax.set_ylabel("symcu")
+        ax.set_ylabel("Amplitude / (kappa * theta)")
 
     def plot_qq(ax):
         r0 = res[0]
@@ -282,7 +284,7 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
                 plot_objective(axs[0, 1], r)
                 plot_uncertainty(axs[1, 0], r)
                 # plot_evals(axs[1, 1], r)
-                plot_nor(axs[1, 1], r)
+                plot_resid(axs[1, 1], r)
                 pdf.savefig(fig)
                 plt.close(fig)
 

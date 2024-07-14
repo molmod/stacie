@@ -27,20 +27,28 @@ from jax.typing import ArrayLike as JArrayLike
 __all__ = ("CutObj", "cutobj_symcu")
 
 
-CutObj = NewType("CutObj", Callable[[JArrayLike], jax.Array])
+CutObj = NewType("CutObj", Callable[[JArrayLike, JArrayLike, JArrayLike], jax.Array])
 
 
-def cutobj_symcu(nor: JArrayLike) -> jax.Array:
+def cutobj_symcu(amplitudes: JArrayLike, kappas: JArrayLike, thetas: JArrayLike) -> jax.Array:
     """Compute the excess variance of the cumulative sum of the normal errors, starting from middle.
 
     Parameters
     ----------
-    nor
-        Normally distributed noise.
+    amplitudes
+        Spectrum amplitudes.
+    kappas
+        The Gamma shape parameters.
+    thetas
+        The Gamma scale parameters.
 
     Returns
     -------
     obj
         The objective to minimize.
     """
+    # Transformation to normal errors
+    uni = jax.scipy.stats.gamma.cdf(amplitudes, kappas, scale=thetas)
+    nor = jax.scipy.special.erfinv(2 * uni - 1) * jnp.sqrt(2)
+    # Objective = minimize excess variance of the cumulative sum of the normal noise.
     return ((jnp.cumsum(nor) - jnp.sum(nor) / 2) ** 2).mean() - len(nor) / 4

@@ -22,7 +22,6 @@ from functools import partial, wraps
 import attrs
 import jax
 import jax.numpy as jnp
-import jax.scipy.special as jsp
 import numpy as np
 from numpy.typing import NDArray
 
@@ -144,32 +143,22 @@ def cost_low(
 
     amplitudes_model = model(omegas, pars)
 
-    # Log-likelihood computed with the scaled Chi-squared distribution
-    # - Variance of the real or imaginary component of a Fourier-transform,
-    #   taking into account that it is rescaled when computing the average spectrum.
-    var_ft = amplitudes_model / ndofs
-    # - Transform to dimensionless, standard Chi-squared random variables
-    xsq = amplitudes / var_ft
-    # - Compute the log-likelihood
-    ll_norm1 = -0.5 * (ndofs * jnp.log(2)).sum()
-    ll_norm2 = -jsp.gammaln(0.5 * ndofs).sum()
-    ll_power = ((0.5 * ndofs - 1) * jnp.log(xsq)).sum()
-    ll_cor = -jnp.log(var_ft).sum()
-    ll_exp = -0.5 * (xsq).sum()
-    ll = ll_norm1 + ll_norm2 + ll_power + ll_cor + ll_exp
+    # Log-likelihood computed with the scaled Chi-squared distribution.
+    # The Gamma distribution is used because the scale parameter is easily incorporated.
+    kappas = 0.5 * ndofs
+    thetas = amplitudes_model / kappas
+    ll = jax.scipy.stats.gamma.logpdf(amplitudes, kappas, scale=thetas).sum()
 
     if do_props:
-        # Transformation to normal errors
-        uni = jsp.gammainc(0.5 * ndofs, 0.5 * xsq)
-        nor = jsp.erfinv(2 * uni - 1) * jnp.sqrt(2)
-        # Objective = minimize excess variance of the cumulative sum of the normal noise.
-        obj = cutobj(nor)
+        obj = cutobj(amplitudes, kappas, thetas)
         return {
             "pars": pars,
             "timestep": timestep,
+            "freqs": freqs,
+            "amplitudes": amplitudes,
             "ll": ll,
-            "uni": uni,
-            "nor": nor,
+            "kappas": kappas,
+            "thetas": thetas,
             "obj": obj,
             "amplitudes_model": amplitudes_model,
             "amplitudes_std_model": amplitudes_model / jnp.sqrt(0.5 * ndofs),
