@@ -13,7 +13,7 @@ python -m venv venv
 echo 'source venv/bin/activate' > .envrc
 direnv allow
 pip install -U pip
-pip install -e .[dev]
+pip install -e .[docs,tests,tools]
 pytest -vv
 cd docs
 make html

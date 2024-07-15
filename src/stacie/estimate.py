@@ -215,6 +215,7 @@ def fit_model_spectrum(
         hess=cost.hess,
         bounds=model.bounds(),
         method="trust-constr",
+        options={"xtol": 1e-10, "gtol": 1e-10},
     )
 
     # Compute all properties

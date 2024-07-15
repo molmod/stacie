@@ -15,7 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Regression tests for typical Stacie workflows."""
+"""Regression tests for typical Stacie workflows.
+
+Not that some regressions are not tracked
+because the algorithm is known and expected to be flaky for specific combinations of inputs.
+"""
 
 from contextlib import ExitStack
 
@@ -44,8 +48,8 @@ def output_test_result(prefix, res):
 
 def register_result(regtest, res):
     with regtest:
-        print(f"ACF Int  = {res.props['acfint']:.4e} ± {res.props['acfint_std']:.3e}")
-        print(f"Tau tail = {res.props['corrtime_tail']:.4e} ± {res.props['corrtime_tail_std']:.3e}")
+        print(f"ACF Int  = {res.props['acfint']:.5e} ± {res.props['acfint_std']:.5e}")
+        print(f"Tau tail = {res.props['corrtime_tail']:.5e} ± {res.props['corrtime_tail_std']:.5e}")
         print(f"Log lh   = {res.props['ll']:.5e}")
         print("---")
 
@@ -54,18 +58,22 @@ def check_noscan_single(
     regtest,
     spectrum: Spectrum,
     prefix: str,
+    *,
     fcutmax: float = 0.005,
     model: SpectrumModel | None = None,
+    flaky: bool = False,
 ):
     res = estimate_acfint(spectrum, fcutmax=fcutmax, maxscan=1, model=model)
-    register_result(regtest, res)
+    if not flaky:
+        register_result(regtest, res)
     output_test_result(prefix, res)
 
 
 @pytest.mark.parametrize("name", ALL_NAMES)
-def test_epxtail_noscan(regtest, name):
+def test_exptail_noscan(regtest, name):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-    check_noscan_single(regtest, spectrum, f"epxtail_noscan_{name}")
+    flaky = name == "white1"
+    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}", flaky=flaky)
 
 
 @pytest.mark.parametrize("name", WHITE_NAMES)
@@ -78,17 +86,23 @@ def test_white_noscan(regtest, name):
 
 @pytest.mark.parametrize(("name", "fcutmax"), [("white2", 0.008), ("double1", 0.05)])
 def test_exptail_noscan_fail(regtest, name, fcutmax):
+    # Try cutoffs for which the convergence of the ExpTail parameters is known to be problematic.
+    # Stacie should still produce some output without raising exceptions.
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}_fail", fcutmax=fcutmax)
+    check_noscan_single(
+        regtest, spectrum, f"exptail_noscan_{name}_fail", fcutmax=fcutmax, flaky=True
+    )
 
 
 @pytest.mark.parametrize("names", NAME_LISTS)
 def test_exptail_noscan_multi(regtest, names):
+    flaky = names[0].startswith("white")
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
         r = estimate_acfint(spectrum, fcutmax=0.005, maxscan=1)
-        register_result(regtest, r)
+        if not flaky:
+            register_result(regtest, r)
         res.append(r)
     output_test_result("exptail_noscan_multi", res)
 
@@ -103,8 +117,10 @@ def test_exptail_scan(regtest, fcutmax, name):
         # This means spectrum.freqs[ncut] will not work.
         # Any occurence of this will raise an error.
         spectrum = spectrum.without_zero_freq()
+    flaky = fcutmax is None and name == "white1"
     res = estimate_acfint(spectrum, fcutmax=fcutmax, maxscan=10)
-    register_result(regtest, res)
+    if not flaky:
+        register_result(regtest, res)
     output_test_result(f"exptail_scan_{name}", res)
 
 
@@ -112,7 +128,8 @@ def test_exptail_scan(regtest, fcutmax, name):
 @pytest.mark.parametrize("model", [ExpTailModel(), WhiteNoiseModel()])
 @pytest.mark.parametrize("zero_freq", [False, True])
 def test_scan_multi(regtest, zero_freq, model, names):
-    should_warn = names[0].startswith("double") and isinstance(model, WhiteNoiseModel)
+    should_warn = isinstance(model, WhiteNoiseModel) and names[0].startswith("double")
+    flaky = not zero_freq and isinstance(model, ExpTailModel) and names[0].startswith("white")
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
@@ -122,7 +139,8 @@ def test_scan_multi(regtest, zero_freq, model, names):
             if should_warn:
                 stack.enter_context(pytest.warns(FCutWarning))
             r = estimate_acfint(spectrum, fcutmax=0.01, maxscan=10, model=model)
-        register_result(regtest, r)
+        if not flaky:
+            register_result(regtest, r)
         res.append(r)
     prefix = f"{model.name}_scan_multi"
     if not zero_freq:

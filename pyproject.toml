@@ -39,18 +39,12 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = [
-    "celerite2",
+docs = [
     "furo",
     "intersphinx-registry",
     "myst-parser",
     "numpydoc",
     "packaging",
-    "pytest",
-    "pytest-cov",
-    "pytest-regtest",
-    "pytest-slowest-first",
-    "pytest-xdist",
     "setuptools_scm",
     "sphinx",
     "sphinx-autodoc2",
@@ -58,6 +52,16 @@ dev = [
     "sphinxcontrib-bibtex",
     "sphinx-copybutton",
     "sphinx-reload",
+]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "pytest-regtest",
+    "pytest-slowest-first",
+    "pytest-xdist",
+]
+tools = [
+    "celerite2",
 ]
 
 [project.urls]
