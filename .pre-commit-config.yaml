@@ -28,11 +28,11 @@ repos:
     - id: remove-crlf
       exclude_types: [binary]
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.28.6
+  rev: 0.29.0
   hooks:
     - id: check-github-workflows
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.5.1
+  rev: v0.5.2
   hooks:
     - id: ruff-format
     - id: ruff
