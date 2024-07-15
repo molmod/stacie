@@ -32,7 +32,7 @@ dependencies = [
     "jax[cpu]>=0.4.26",
     "matplotlib>=3.7.0",
     "msgpack>=1.0.3",
-    "numpy>=1.22",
+    "numpy>=1.23.3",
     "path>=16.14.0",
     "scipy>=1.11.1",
 ]
