@@ -94,9 +94,16 @@ def test_exptail_noscan_multi(regtest, names):
 
 
 @pytest.mark.parametrize("name", ALL_NAMES)
-def test_exptail_scan(regtest, name):
+@pytest.mark.parametrize("fcutmax", [0.03, None])
+def test_exptail_scan(regtest, fcutmax, name):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-    res = estimate_acfint(spectrum, fcutmax=0.03, maxscan=10)
+    if fcutmax is None:
+        # By dropping the DC component,
+        # the number of frequencies becomes equal to ncutmax_hard.
+        # This means spectrum.freqs[ncut] will not work.
+        # Any occurence of this will raise an error.
+        spectrum = spectrum.without_zero_freq()
+    res = estimate_acfint(spectrum, fcutmax=fcutmax, maxscan=10)
     register_result(regtest, res)
     output_test_result(f"exptail_scan_{name}", res)
 

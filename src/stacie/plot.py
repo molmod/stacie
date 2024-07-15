@@ -113,7 +113,7 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
             alpha=0.3,
             lw=0,
         )
-        ax.axvline(s.freqs[r.ncut - 1] / uc.freq_unit, ymax=0.1, color="k")
+        ax.axvline(r.props["freqs"][-1] / uc.freq_unit, ymax=0.1, color="k")
         if s.amplitudes_ref is not None:
             ax.plot(
                 s.freqs[:nplot] / uc.freq_unit,
@@ -154,14 +154,15 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
     def plot_objective(ax, r):
         freqs = []
         objs = []
-        s = r.spectrum
-        for ncut, props in sorted(r.history.items()):
-            freqs.append(s.freqs[ncut])
+        for _ncut, props in sorted(r.history.items()):
+            freqs.append(props["freqs"][-1])
             objs.append(props["obj"])
         freqs = np.array(freqs)
 
         ax.plot(freqs / uc.freq_unit, objs, color="C1", lw=1)
-        ax.plot([s.freqs[r.ncut] / uc.freq_unit], [r.props["obj"]], marker="o", color="k", ms=2)
+        ax.plot(
+            [r.props["freqs"][-1] / uc.freq_unit], [r.props["obj"]], marker="o", color="k", ms=2
+        )
         ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
         ax.set_ylabel("Objective function [1]")
         ax.set_xscale("log")
@@ -174,8 +175,8 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
         acfints = []
         acfint_stds = []
         s = r.spectrum
-        for ncut, props in sorted(r.history.items()):
-            freqs.append(s.freqs[ncut])
+        for _ncut, props in sorted(r.history.items()):
+            freqs.append(props["freqs"][-1])
             acfints.append(props["pars"][:2].sum())
             acfint_stds.append(np.sqrt(props["covar"][:2, :2].sum()))
         freqs = np.array(freqs)
@@ -193,7 +194,7 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
         )
         s = r.spectrum
         ax.errorbar(
-            [s.freqs[r.ncut] / uc.freq_unit],
+            [r.props["freqs"][-1] / uc.freq_unit],
             [r.props["acfint"] / uc.acfint_unit],
             [r.props["acfint_std"] * uc.sfac / uc.acfint_unit],
             marker="o",
@@ -210,9 +211,8 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
     def plot_evals(ax, r):
         freqs = []
         evals = []
-        s = r.spectrum
         for ncut, props in sorted(r.history.items()):
-            freqs.append(s.freqs[ncut])
+            freqs.append(props["freqs"][-1])
             evals.append(np.linalg.eigvalsh(props["covar"]))
             if ncut == r.ncut:
                 ax.plot([freqs[-1]], [evals[-1]], color="k", marker="o", ms=2, zorder=2.5)
