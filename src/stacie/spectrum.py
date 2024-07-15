@@ -17,6 +17,8 @@
 # --
 """Utility to prepare spectrum and other inputs for given time series."""
 
+from typing import Self
+
 import attrs
 import numpy as np
 from numpy.typing import NDArray
@@ -60,6 +62,15 @@ class Spectrum:
     def nfreq(self) -> int:
         """The number of irfft frequency grid points."""
         return len(self.freq)
+
+    def without_zero_freq(self) -> Self:
+        """Return a copy without the DC component."""
+        return attrs.evolve(
+            self,
+            freqs=self.freqs[1:],
+            amplitudes=self.amplitudes[1:],
+            amplitudes_ref=None if self.amplitudes_ref is None else self.amplitudes_ref[1:],
+        )
 
 
 def prepare_acfint(

@@ -103,15 +103,21 @@ def test_exptail_scan(regtest, name):
 
 @pytest.mark.parametrize("names", NAME_LISTS)
 @pytest.mark.parametrize("model", [ExpTailModel(), WhiteNoiseModel()])
-def test_scan_multi(regtest, names, model):
-    should_warn = names[0].startswith("double") and isinstance(model, WhiteNoiseModel)
+@pytest.mark.parametrize("zero_freq", [False, True])
+def test_scan_multi(regtest, zero_freq, model, names):
+    should_warn = names[0].startswith("double") and isinstance(model, WhiteNoiseModel) and zero_freq
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
+        if not zero_freq:
+            spectrum = spectrum.without_zero_freq()
         with ExitStack() as stack:
             if should_warn:
                 stack.enter_context(pytest.warns(FCutWarning))
             r = estimate_acfint(spectrum, fcutmax=0.01, maxscan=10, model=model)
         register_result(regtest, r)
         res.append(r)
-    output_test_result(f"{model.name}_scan_multi", res)
+    prefix = f"{model.name}_scan_multi"
+    if not zero_freq:
+        prefix += "_nodc"
+    output_test_result(prefix, res)

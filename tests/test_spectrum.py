@@ -44,6 +44,7 @@ def test_basics():
     assert spectrum.freqs[0] == 0.0
     assert len(spectrum.freqs) == 4
     assert_allclose(spectrum.freqs[1], 1 / (6 * timestep))
+    assert spectrum.amplitudes_ref is None
     # Test the DC-component.
     scale = prefactor * timestep / sequences.shape[1]
     dccomp = (sequences.sum(axis=1) ** 2).mean()
@@ -51,3 +52,8 @@ def test_basics():
     # Test the Plancherel theorem (taking into account RFFT conventions).
     sumsq = (sequences**2).sum()
     assert_allclose((spectrum.amplitudes * spectrum.ndofs).sum(), sumsq * prefactor * timestep)
+    # Test removing the zero frequency
+    spectrum2 = spectrum.without_zero_freq()
+    assert_equal(spectrum2.freqs, spectrum.freqs[1:])
+    assert_equal(spectrum2.amplitudes, spectrum.amplitudes[1:])
+    assert spectrum2.amplitudes_ref is None
