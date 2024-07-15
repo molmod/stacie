@@ -1,8 +1,8 @@
-# Applications
+# Properties
 
 CONCEPT:
 
-- Explain use cases of the algorithm.
+- Explain properties that are derived from the ACF Integral.
 - In each case: show the input to the ACF Integral and how to best represent it with NumPy arrays.
 - Concrete examples are not needed, just basic theory and some advice.
 

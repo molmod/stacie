@@ -18,7 +18,7 @@ Copy-pasteable citation records in various formats are provided in [How to Cite?
 
 getting_started/index.md
 theory/index.md
-applications/index.md
+properties/index.md
 advanced_topics/index.md
 example/index.md
 bibliography.md
