@@ -10,7 +10,7 @@ authors = [
 description = "STable AutoCorrelation Integral Estimator"
 readme = "README.md"
 license = {file = "LICENSE.txt"}
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
@@ -22,7 +22,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
@@ -76,7 +75,7 @@ local_scheme = "no-local-version"
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [
