@@ -67,6 +67,7 @@ class Spectrum:
         """Return a copy without the DC component."""
         return attrs.evolve(
             self,
+            ndofs=self.ndofs[1:],
             freqs=self.freqs[1:],
             amplitudes=self.amplitudes[1:],
             amplitudes_ref=None if self.amplitudes_ref is None else self.amplitudes_ref[1:],

@@ -105,7 +105,7 @@ def test_exptail_scan(regtest, name):
 @pytest.mark.parametrize("model", [ExpTailModel(), WhiteNoiseModel()])
 @pytest.mark.parametrize("zero_freq", [False, True])
 def test_scan_multi(regtest, zero_freq, model, names):
-    should_warn = names[0].startswith("double") and isinstance(model, WhiteNoiseModel) and zero_freq
+    should_warn = names[0].startswith("double") and isinstance(model, WhiteNoiseModel)
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)

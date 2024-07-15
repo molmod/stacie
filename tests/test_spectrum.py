@@ -54,6 +54,7 @@ def test_basics():
     assert_allclose((spectrum.amplitudes * spectrum.ndofs).sum(), sumsq * prefactor * timestep)
     # Test removing the zero frequency
     spectrum2 = spectrum.without_zero_freq()
+    assert_equal(spectrum2.ndofs, spectrum.ndofs[1:])
     assert_equal(spectrum2.freqs, spectrum.freqs[1:])
     assert_equal(spectrum2.amplitudes, spectrum.amplitudes[1:])
     assert spectrum2.amplitudes_ref is None
