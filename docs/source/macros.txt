@@ -1,0 +1,4 @@
+\newcommand{\mean}{\operatorname{E}}
+\newcommand{\var}{\operatorname{VAR}}
+\newcommand{\cov}{\operatorname{COV}}
+\newcommand{\gdist}{\operatorname{Gamma}}

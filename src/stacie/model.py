@@ -106,12 +106,12 @@ class ExpTailModel(SpectrumModel):
     def __call__(omegas: JArrayLike, pars: JArrayLike) -> jax.Array:
         """See SpectrumModel.__call__"""
         acfint_short, acfint_tail, corrtime_tail = pars
-        cosines = 2 * jnp.cos(omegas)
+        cosines = jnp.cos(omegas)
         ratio = jnp.exp(-2 / corrtime_tail)
-        tail_model = (2 - ratio * cosines) / (1 + ratio**2 - ratio * cosines)
-        # tail_model = 1 / ((2/corrtime_tail)**2 + omegas**2)
-        tail_model /= tail_model[0]
-        return acfint_tail * tail_model + acfint_short
+        tail_model = ((1 - ratio) / (1 + ratio)) * (
+            2 * (1 - ratio * cosines) / (1 - 2 * ratio * cosines + ratio**2) - 1
+        )
+        return acfint_short + acfint_tail * tail_model
 
     @classmethod
     def update_props(cls, props: dict[str]):

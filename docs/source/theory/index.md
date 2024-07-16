@@ -1,16 +1,18 @@
 # Theory
 
-CONCEPT:
-
-- General theory of the method, without any applications-specific details.
+The theory section deals only with the integral of the autocorrelation function as such.
+It does not cover any specifics of the (physical) properties associated with this integral.
+Some of the derivations in the theory section can also be found in other references.
+They are included here to make the theory more accessible
+and to explain all the details needed to implement Stacie.
 
 ```{toctree}
 :hidden:
 
-overview.md
 notation.md
-power_spectrum.md
-model_spectrum.md
-bayesian_inference.md
-frequency_cutoff.md
+overview.md
+model.md
+statistics.md
+cutoff.md
+comparison.md
 ```

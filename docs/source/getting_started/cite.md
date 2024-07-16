@@ -1,4 +1,3 @@
-(cite-target)=
 # How to Cite?
 
 CONCEPT:

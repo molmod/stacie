@@ -83,6 +83,10 @@ html_theme_options = {
 # -- Options for LaTeX output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/latex.html#module-latex
 latex_engine = "xelatex"
+latex_elements = {
+    "preamble": r"\input{macros.txt}",
+}
+latex_additional_files = ["macros.txt"]
 
 # -- Configuration for autodoc extensions ---------------------------------
 
@@ -112,7 +116,14 @@ def setup(app):
 # -- Configuration of mathjax extension -----------------------------------
 
 mathjax3_config = {
-    "tex": {},
+    "tex": {
+        "macros": {
+            "mean": r"\operatorname{E}",
+            "var": r"\operatorname{VAR}",
+            "cov": r"\operatorname{COV}",
+            "gdist": r"\operatorname{Gamma}",
+        }
+    },
 }
 
 
