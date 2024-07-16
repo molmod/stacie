@@ -14,12 +14,12 @@ The integral of the autocorrelation function is defined as:
 
 $$
 \eta =
-    A \int_{-\infty}^{\infty}
+    B \int_{-\infty}^{\infty}
     \mean \bigl[ \hat{x}(t) \hat{x}(t + \Delta_t) \bigr]
     \, \mathrm{d}\Delta_t
 $$
 
-A prefactor $A$ is usually present,
+A prefactor $B$ is usually present,
 for example containing a temperature and/or a volume in Green-Kubo formalisms.
 The integrand is the autocorrelation function, $c(\Delta_t)$,
 of the time-dependent input $\hat{x}(t)$.
@@ -35,7 +35,7 @@ Then $\eta$ is simply the DC component,
 i.e., the zero-frequency limit of this Fourier transform:
 
 $$
-\eta = A C(0)
+\eta = B C(0)
 $$
 
 At first glance, this result seems trivial,
@@ -66,7 +66,7 @@ far away from the zero-frequency limit.
 The autocorrelation integral is approximated with a simple quadrature rule:
 
 $$
-\eta = A h \sum_{\Delta=0}^{N-1} \mean \bigl[ \hat{x}_n \hat{x}_{n+\Delta} \bigr]
+\eta = B h \sum_{\Delta=0}^{N-1} \mean \bigl[ \hat{x}_n \hat{x}_{n+\Delta} \bigr]
 $$
 
 The summand is the discrete autocorrelation function, $c_\Delta$.
@@ -79,14 +79,14 @@ over which one can compute averages.
 Let $C_k$ be the discrete Fourier transform of the autocorrelation function:
 
 $$
-C_k = A h \sum_{\Delta=0}^{N-1} c_\Delta \omega^{-kn}
+C_k = B h \sum_{\Delta=0}^{N-1} c_\Delta \omega^{-kn}
 $$
 
 with $\omega = \exp(i 2\pi/N)$ (a different omega than in the continuous case).
 This is also known as the power spectrum:
 
 $$
-C_k = \frac{Ah}{N}\mean \bigl[|\hat{X}_k|^2\bigr]
+C_k = \frac{B h}{N}\mean \bigl[|\hat{X}_k|^2\bigr]
 $$
 
 with
