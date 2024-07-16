@@ -6,7 +6,6 @@ The following notation is used throughout Stacie's documentation.
 
 - $\Gamma(z)$ is the Gamma function.
 - $\gamma(z, x)$ is the lower incomplete Gamma function.
-- $R(z, x) = \gamma(z, x) / \Gamma(z)$ is the regularized gamma function.
 
 ## Statistics
 

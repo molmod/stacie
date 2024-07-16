@@ -203,24 +203,35 @@ $$
     \quad \text{for } 0<k<N \text { and } k \neq N/2
 $$
 
+(lmax-target)=
 ## Likelihood Maximization
 
 To facilitate the treatment of the (log) likelihood,
 we write the empirical spectrum as $\hat{C}_k$
-where $\nu_k$ is the number of degrees of freedom contributing to each component.
+and introduce $\nu_k$ for the number of degrees of freedom contributing to each component.
 ($S$ if there is only a real component, $2S$ if there are both real and imaginary ones.)
+
+The model is not fitted to the entire spectrum, but only to a subset of the data,
+i.e., all indexes $k \in K$, where the set $K$ is fixed before maximizing the likelihood.
+There are two reasons to exclude parts of the spectrum from the fit:
+
+- Frequency 0 corresponds to the DC component and may contain an unknown contribution.
+  This is the case when the input sequences $\mathbf{\hat{x}}$ have a non-zero time-average
+  that is unknown *a priori*.
+- The Exponential Tail model of Stacie is only applicable to low-frequency data.
+  It is not designed to describe all features in a spectrum.
 
 The log likelihood of the model $C^\text{model}_k$ becomes:
 
 $$
     \ln\mathcal{L}
-    &=\sum_k \ln p_{\gdist(\kappa_k,\theta_k)}(\hat{C}_k)
+    &=\sum_{k\in K} \ln p_{\gdist(\kappa_k,\theta_k)}(\hat{C}_k)
     \\
-    &=\sum_k
-      - \ln \Gamma(\kappa_k)
-      - \ln(\theta_k)
-      + (\kappa_k - 1)\ln\left(\frac{\hat{C}_k}{\theta_k}\right)
-      - \frac{\hat{C}_k}{\theta_k}
+    &=-\sum_{k\in K}
+      \ln \Gamma(\kappa_k)
+      + \ln(\theta_k)
+      + (1 - \kappa_k)\ln\left(\frac{\hat{C}_k}{\theta_k}\right)
+      + \frac{\hat{C}_k}{\theta_k}
 $$
 
 with
@@ -230,9 +241,6 @@ $$
     \\
     \theta_k &= \frac{2 C^\text{model}_k}{\nu_k}
 $$
-
-The range of the summation over $k$ is intentionally omitted, since such details
-depend on the application and on the cutoff frequency up to which the model is fitted.
 
 A true optimum is characterized by a negative-definite Hessian
 of $\ln \mathcal{L}$ with respect to the model parameters.

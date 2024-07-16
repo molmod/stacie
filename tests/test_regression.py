@@ -21,11 +21,9 @@ Not that some regressions are not tracked
 because the algorithm is known and expected to be flaky for specific combinations of inputs.
 """
 
-from contextlib import ExitStack
-
 import pytest
 from path import Path
-from stacie.estimate import FCutWarning, estimate_acfint
+from stacie.estimate import estimate_acfint
 from stacie.model import ExpTailModel, SpectrumModel, WhiteNoiseModel
 from stacie.msgpack import dump, load
 from stacie.plot import plot
@@ -128,17 +126,13 @@ def test_exptail_scan(regtest, fcutmax, name):
 @pytest.mark.parametrize("model", [ExpTailModel(), WhiteNoiseModel()])
 @pytest.mark.parametrize("zero_freq", [False, True])
 def test_scan_multi(regtest, zero_freq, model, names):
-    should_warn = isinstance(model, WhiteNoiseModel) and names[0].startswith("double")
     flaky = not zero_freq and isinstance(model, ExpTailModel) and names[0].startswith("white")
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
         if not zero_freq:
             spectrum = spectrum.without_zero_freq()
-        with ExitStack() as stack:
-            if should_warn:
-                stack.enter_context(pytest.warns(FCutWarning))
-            r = estimate_acfint(spectrum, fcutmax=0.01, maxscan=10, model=model)
+        r = estimate_acfint(spectrum, fcutmax=0.01, maxscan=10, model=model)
         if not flaky:
             register_result(regtest, r)
         res.append(r)

@@ -20,35 +20,35 @@
 from collections.abc import Callable
 from typing import NewType
 
-import jax
-import jax.numpy as jnp
-from jax.typing import ArrayLike as JArrayLike
+import numpy as np
+from numpy.typing import NDArray
 
-__all__ = ("CutObj", "cutobj_symcu")
-
-
-CutObj = NewType("CutObj", Callable[[JArrayLike, JArrayLike, JArrayLike], jax.Array])
+__all__ = ("RiskMetric", "risk_metric_cumsum")
 
 
-def cutobj_symcu(amplitudes: JArrayLike, kappas: JArrayLike, thetas: JArrayLike) -> jax.Array:
-    """Compute the excess variance of the cumulative sum of the normal errors, starting from middle.
+RiskMetric = NewType("RiskMetric", Callable[[NDArray], float])
+
+
+def risk_metric_cumsum(residuals: NDArray) -> float:
+    """Quantify the over- and underfitting risk of a smooth model to noisy data.
 
     Parameters
     ----------
-    amplitudes
-        Spectrum amplitudes.
-    kappas
-        The Gamma shape parameters.
-    thetas
-        The Gamma scale parameters.
+    residuals
+        Normalized residuals (zero mean and unit variance in the ideal scenario).
 
     Returns
     -------
-    obj
-        The objective to minimize.
+    risk_metric
+        A metric quantifying the risk of over- or underfitting.
+        This can be used to compare different selections of (contiguous) fitting data
+        to which the same model is fitted.
     """
-    # Transformation to normal errors
-    uni = jax.scipy.stats.gamma.cdf(amplitudes, kappas, scale=thetas)
-    nor = jax.scipy.special.erfinv(2 * uni - 1) * jnp.sqrt(2)
-    # Objective = minimize excess variance of the cumulative sum of the normal noise.
-    return ((jnp.cumsum(nor) - jnp.sum(nor) / 2) ** 2).mean() - len(nor) / 4
+    if residuals.ndim != 1:
+        raise TypeError("The residuals must be given in a 1D array.")
+    nres = len(residuals)
+    if nres < 2:
+        raise TypeError("The risk metric is meaningless for zero or one residual.")
+    cs = 2 * np.cumsum(residuals)
+    total = residuals.sum()
+    return (total**2 + ((cs - total) ** 2).sum()) / (nres + 1) - nres

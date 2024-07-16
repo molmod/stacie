@@ -25,7 +25,6 @@ import jax.numpy as jnp
 import numpy as np
 from numpy.typing import NDArray
 
-from .cutobj import CutObj
 from .model import SpectrumModel
 
 __all__ = ("LowFreqCost",)
@@ -53,9 +52,6 @@ class LowFreqCost:
 
     model: SpectrumModel = attrs.field()
     """The model to be fitted to the spectrum."""
-
-    cutobj: CutObj = attrs.field()
-    """The criterion used to determine the frequency cutoff to select the low-frequency part."""
 
     def func(self, pars: NDArray) -> float:
         """Compute the cost function (the negative log-likelihood).
@@ -100,7 +96,6 @@ def cost_low(
     amplitudes: NDArray[float],
     ndofs: NDArray[int],
     model: SpectrumModel,
-    cutobj: CutObj,
     *,
     do_props: bool = False,
 ) -> jax.Array | dict[str, jax.Array]:
@@ -150,7 +145,6 @@ def cost_low(
     ll = jax.scipy.stats.gamma.logpdf(amplitudes, kappas, scale=thetas).sum()
 
     if do_props:
-        obj = cutobj(amplitudes, kappas, thetas)
         return {
             "pars": pars,
             "timestep": timestep,
@@ -159,7 +153,6 @@ def cost_low(
             "ll": ll,
             "kappas": kappas,
             "thetas": thetas,
-            "obj": obj,
             "amplitudes_model": amplitudes_model,
             "amplitudes_std_model": amplitudes_model / jnp.sqrt(0.5 * ndofs),
         }
@@ -180,7 +173,7 @@ def numpify(func):
 
 
 # Jit-compile functions to be used in LowFreqCost
-STATIC_ARGNAMES = ("model", "cutobj", "do_props")
+STATIC_ARGNAMES = ("model", "do_props")
 _func = numpify(jax.jit(cost_low, static_argnames=STATIC_ARGNAMES))
 _prop = numpify(jax.jit(partial(cost_low, do_props=True), static_argnames=STATIC_ARGNAMES))
 _grad = numpify(jax.jit(jax.grad(cost_low), static_argnames=STATIC_ARGNAMES))

@@ -151,24 +151,24 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
         ax.set_ylabel(f"Model Spectrum [{uc.acfint_unit_str}]")
         ax.set_xscale("log")
 
-    def plot_objective(ax, r):
+    def plot_risk(ax, r):
         freqs = []
-        objs = []
+        risks = []
         for _ncut, props in sorted(r.history.items()):
             freqs.append(props["freqs"][-1])
-            objs.append(props["obj"])
+            risks.append(props["risk"])
         freqs = np.array(freqs)
 
-        ax.plot(freqs / uc.freq_unit, objs, color="C1", lw=1)
+        ax.plot(freqs / uc.freq_unit, risks, color="C1", lw=1)
         ax.plot(
-            [r.props["freqs"][-1] / uc.freq_unit], [r.props["obj"]], marker="o", color="k", ms=2
+            [r.props["freqs"][-1] / uc.freq_unit], [r.props["risk"]], marker="o", color="k", ms=2
         )
         ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
-        ax.set_ylabel("Objective function [1]")
+        ax.set_ylabel("Risk metric [1]")
         ax.set_xscale("log")
-        if np.isfinite(r.props["obj"]):
-            objscale = abs(r.props["obj"])
-            ax.set_ylim(r.props["obj"] - 0.2 * objscale, 2 * objscale)
+        if np.isfinite(r.props["risk"]):
+            risk_scale = abs(r.props["risk"])
+            ax.set_ylim(r.props["risk"] - 0.2 * risk_scale, 2 * risk_scale)
 
     def plot_uncertainty(ax, r):
         freqs = []
@@ -231,7 +231,7 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
         thetas = r.props["thetas"]
         with np.errstate(invalid="ignore"):
             ax.plot(amplitudes / (kappas * thetas))
-        ax.set_title("Rescaled spectrum (Gamma distributed)")
+        ax.set_title("Rescaled spectrum")
         ax.set_xlabel("index")
         ax.set_ylabel("Amplitude / (kappa * theta)")
 
@@ -281,7 +281,7 @@ def plot(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None
             if len(r.history) > 1:
                 fig, axs = plt.subplots(2, 2, figsize=(6, 6))
                 plot_all_models(axs[0, 0], r)
-                plot_objective(axs[0, 1], r)
+                plot_risk(axs[0, 1], r)
                 plot_uncertainty(axs[1, 0], r)
                 # plot_evals(axs[1, 1], r)
                 plot_resid(axs[1, 1], r)
