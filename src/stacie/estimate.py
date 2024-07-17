@@ -130,7 +130,7 @@ def estimate_acfint(
             model,
             risk_metric,
         )
-        evals = props["hess_evals"]
+        evals = props["cost_hess_evals"]
         history[ncut] = props
         result = props["risk"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
         print(ncut, result)
@@ -200,9 +200,8 @@ def fit_model_spectrum(
     In addition to the properties returned by :func:`stacie.cost.cost_low`,
     the returned dictionary also contains the following items:
 
-    - ``hess``: the Hessian matrix at the solution.
-    - ``hess_evals``: the Hessian eigenvalues.
-    - ``hess_evecs``: the Hessian eigenvectors.
+    - ``cost_hess_evals``: the Hessian eigenvalues.
+    - ``cost_hess_evecs``: the Hessian eigenvectors.
     - ``covar``: the covariance matrix of the parameters.
     - ``acfint``: the estimate of the ACF integral.
     - ``acfint_var``: the variance of estimate of the ACF integral.
@@ -217,9 +216,9 @@ def fit_model_spectrum(
         raise AssertionError("Infeasible guess")
     cost = LowFreqCost(timestep, freqs, amplitudes, ndofs, model)
     opt = minimize(
-        cost.func,
+        cost.funcgrad,
         pars_init,
-        jac=cost.grad,
+        jac=True,
         hess=cost.hess,
         bounds=model.bounds(),
         method="trust-constr",
@@ -227,18 +226,16 @@ def fit_model_spectrum(
     )
 
     # Compute all properties and derive the risk metric
-    props = cost.prop(opt.x)
+    props = cost.props(opt.x, 2)
     props["risk"] = risk_metric(
         (props["amplitudes"] / props["thetas"] - props["kappas"]) / np.sqrt(props["kappas"])
     )
 
     # Compute the Hessian and its properties.
-    hess = cost.hess(opt.x)
-    evals, evecs = np.linalg.eigh(hess)
-    props["hess"] = hess
-    props["hess_evals"] = evals
-    props["hess_evecs"] = evecs
-    props["covar"] = np.linalg.inv(hess)
+    evals, evecs = np.linalg.eigh(props["cost_hess"])
+    props["cost_hess_evals"] = evals
+    props["cost_hess_evecs"] = evecs
+    props["covar"] = np.linalg.inv(props["cost_hess"])
 
     # Derive estimates from model parameters.
     model.update_props(props)

@@ -29,7 +29,6 @@ dependencies = [
     # Ensure changes to these dependencies are reflected in .github/requirements-old.txt
     "attrs>=21.3.0",
     "cattrs>=22.2.0",
-    "jax[cpu]>=0.4.26",
     "matplotlib>=3.7.0",
     "msgpack>=1.0.3",
     "numpy>=1.23.3",
@@ -64,6 +63,7 @@ tests = [
     "pytest-regtest",
     "pytest-slowest-first",
     "pytest-xdist",
+    "numdifftools",
 ]
 tools = [
     "celerite2",

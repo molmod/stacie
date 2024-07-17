@@ -17,10 +17,7 @@
 # --
 """Models to fit the low-frequency part of the spectrum."""
 
-import jax
-import jax.numpy as jnp
 import numpy as np
-from jax.typing import ArrayLike as JArrayLike
 from numpy.typing import NDArray
 
 __all__ = ("SpectrumModel", "ExpTailModel", "WhiteNoiseModel")
@@ -51,7 +48,9 @@ class SpectrumModel:
         raise NotImplementedError
 
     @staticmethod
-    def __call__(omegas: JArrayLike, pars: JArrayLike) -> jax.Array:
+    def __call__(
+        omegas: NDArray[float], pars: NDArray[float], deriv: int = 0
+    ) -> list[NDArray[float]]:
         """The exponential tail spectrum model.
 
         Parameters
@@ -61,12 +60,14 @@ class SpectrumModel:
             as obtained with ``numpy.fft.rfftfreq`` (maximum value 0.5),
             of which possibly a subset is taken.
         pars
-            The three positive model parameters: acfint_short, acfint_tail, corrtime_tail.
+            The parameters.
+        deriv
+            The order of derivatives to compute.
 
         Returns
         -------
-        amplitudes_model
-            The amplitudes of the model spectrum at the given omegas.
+        results
+            A results list, index corresponds to order of derivative.
         """
         raise NotImplementedError
 
@@ -103,15 +104,51 @@ class ExpTailModel(SpectrumModel):
         return np.array([acfint_coarse / 2, acfint_coarse / 2, tau])
 
     @staticmethod
-    def __call__(omegas: JArrayLike, pars: JArrayLike) -> jax.Array:
+    def __call__(
+        omegas: NDArray[float], pars: NDArray[float], deriv: int = 0
+    ) -> list[NDArray[float]]:
         """See SpectrumModel.__call__"""
-        acfint_short, acfint_tail, corrtime_tail = pars
-        cosines = jnp.cos(omegas)
-        ratio = jnp.exp(-2 / corrtime_tail)
-        tail_model = ((1 - ratio) / (1 + ratio)) * (
-            2 * (1 - ratio * cosines) / (1 - 2 * ratio * cosines + ratio**2) - 1
-        )
-        return acfint_short + acfint_tail * tail_model
+        if not isinstance(deriv, int):
+            raise TypeError("Argument deriv must be integer.")
+        if deriv < 0:
+            raise ValueError("Argument deriv must be zero or positive.")
+        if omegas.ndim != 1:
+            raise TypeError("Argument omegas must be a 1D array.")
+        acfint_short, acfint_tail, ctt = pars
+        r = np.exp(-2 / ctt)
+        cs = np.cos(omegas)
+        denom = r**2 - 2 * r * cs + 1
+        tail_model = ((1 - r) / (1 + r)) * (2 * (1 - r * cs) / denom - 1)
+        results = [acfint_short + acfint_tail * tail_model]
+        if deriv >= 1:
+            tail_model_diff_r = -2 * (cs - 1) * (r**2 - 1) / denom**2
+            r_diff_ctt = 2 * r / ctt**2
+            tail_model_diff_ctt = tail_model_diff_r * r_diff_ctt
+            results.append(
+                np.array([np.ones(len(omegas)), tail_model, acfint_tail * tail_model_diff_ctt])
+            )
+        if deriv >= 2:
+            tail_model_diff_r_r = 4 * (cs - 1) * (r**3 - 3 * r + 2 * cs) / denom**3
+            r_diff_ctt_ctt = 4 * (1 - ctt) * r / ctt**4
+            tail_model_diff_ctt_ctt = (
+                tail_model_diff_r_r * r_diff_ctt**2 + tail_model_diff_r * r_diff_ctt_ctt
+            )
+            results.append(
+                np.array(
+                    [
+                        [np.zeros(len(omegas)), np.zeros(len(omegas)), np.zeros(len(omegas))],
+                        [np.zeros(len(omegas)), np.zeros(len(omegas)), tail_model_diff_ctt],
+                        [
+                            np.zeros(len(omegas)),
+                            tail_model_diff_ctt,
+                            acfint_tail * tail_model_diff_ctt_ctt,
+                        ],
+                    ]
+                )
+            )
+        if deriv >= 3:
+            raise ValueError("Third or higher derivatives are not supported.")
+        return results
 
     @classmethod
     def update_props(cls, props: dict[str]):
@@ -145,9 +182,25 @@ class WhiteNoiseModel(SpectrumModel):
         return np.array([amplitudes.mean()])
 
     @staticmethod
-    def __call__(omegas: JArrayLike, pars: JArrayLike) -> jax.Array:
+    def __call__(
+        omegas: NDArray[float], pars: NDArray[float], deriv: int = 0
+    ) -> list[NDArray[float]]:
         """See SpectrumModel.__call__"""
-        return jnp.full_like(omegas, pars[0])
+        if not isinstance(deriv, int):
+            raise TypeError("Argument deriv must be integer.")
+        if deriv < 0:
+            raise ValueError("Argument deriv must be zero or positive.")
+        if omegas.ndim != 1:
+            raise TypeError("Argument omegas must be a 1D array.")
+        npt = len(omegas)
+        results = [np.full(npt, pars[0])]
+        if deriv >= 1:
+            results.append(np.ones((1, npt)))
+        if deriv >= 2:
+            results.append(np.zeros((1, 1, npt)))
+        if deriv >= 3:
+            raise ValueError("Third or higher derivatives are not supported.")
+        return results
 
     @classmethod
     def update_props(cls, props: dict[str]):

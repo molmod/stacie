@@ -113,13 +113,16 @@ def test_exptail_scan(regtest, fcutmax, name):
         # By dropping the DC component,
         # the number of frequencies becomes equal to ncutmax_hard.
         # This means spectrum.freqs[ncut] will not work.
-        # Any occurence of this will raise an error.
+        # Any occurrence of this will raise an error.
         spectrum = spectrum.without_zero_freq()
     flaky = fcutmax is None and name == "white1"
     res = estimate_acfint(spectrum, fcutmax=fcutmax, maxscan=10)
     if not flaky:
         register_result(regtest, res)
-    output_test_result(f"exptail_scan_{name}", res)
+    prefix = f"exptail_scan_{name}"
+    if fcutmax is None:
+        prefix += "_nofcut"
+    output_test_result(prefix, res)
 
 
 @pytest.mark.parametrize("names", NAME_LISTS)

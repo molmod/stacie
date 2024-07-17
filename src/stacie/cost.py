@@ -17,21 +17,14 @@
 # --
 """Cost function to optimize models for the low-frequency part of the spectrum."""
 
-from functools import partial, wraps
-
 import attrs
-import jax
-import jax.numpy as jnp
 import numpy as np
 from numpy.typing import NDArray
+from scipy.special import gammaln
 
 from .model import SpectrumModel
 
 __all__ = ("LowFreqCost",)
-
-
-jax.config.update("jax_enable_x64", True)
-jax.config.update("jax_platform_name", "cpu")
 
 
 @attrs.define
@@ -53,8 +46,8 @@ class LowFreqCost:
     model: SpectrumModel = attrs.field()
     """The model to be fitted to the spectrum."""
 
-    def func(self, pars: NDArray) -> float:
-        """Compute the cost function (the negative log-likelihood).
+    def funcgrad(self, pars: NDArray[float]) -> tuple[float, NDArray[float]]:
+        """Compute the cost function (the negative log-likelihood) and the gradient.
 
         Parameters
         ----------
@@ -67,30 +60,26 @@ class LowFreqCost:
             The negative log-likelihood of the parameters for the given ACF data.
         """
         if not self.model.valid(pars):
-            return np.inf
-        return _func(pars, *attrs.astuple(self))
+            return np.inf, np.full(len(pars), np.inf)
+        props = cost_low(pars, 1, *attrs.astuple(self))
+        return props["cost_value"], props["cost_grad"]
 
-    def prop(self, pars: NDArray) -> dict[str, NDArray]:
+    def hess(self, pars: NDArray[float]):
+        if not self.model.valid(pars):
+            return np.full((len(pars), len(pars)), np.inf)
+        props = cost_low(pars, 2, *attrs.astuple(self))
+        return props["cost_hess"]
+
+    def props(self, pars: NDArray[float], deriv: int = 0) -> dict[str, NDArray[float]]:
         """Compute properties of the fit for the given parameters."""
         if not self.model.valid(pars):
             raise ValueError("Invalid parameters")
-        return _prop(pars, *attrs.astuple(self))
-
-    def grad(self, pars: NDArray) -> NDArray:
-        """Compute the gradient of the cost function."""
-        if not self.model.valid(pars):
-            return np.full(len(pars), np.nan)
-        return _grad(pars, *attrs.astuple(self))
-
-    def hess(self, pars: NDArray) -> NDArray:
-        """Compute the Hessian of the cost function."""
-        if not self.model.valid(pars):
-            return np.full((len(pars), len(pars)), np.nan)
-        return _hess(pars, *attrs.astuple(self))
+        return cost_low(pars, deriv, *attrs.astuple(self))
 
 
 def cost_low(
     pars: NDArray[float],
+    deriv: int,
     timestep: float,
     freqs: NDArray[float],
     amplitudes: NDArray[float],
@@ -98,7 +87,7 @@ def cost_low(
     model: SpectrumModel,
     *,
     do_props: bool = False,
-) -> jax.Array | dict[str, jax.Array]:
+) -> dict[str, NDArray]:
     """Low-level implementation of the cost function.
 
     Only ``pars`` and ``do_props`` parameters are documented below.
@@ -108,8 +97,8 @@ def cost_low(
     ----------
     pars
         The parameter vector for which the loss function must be computed.
-    do_props
-        Set to ``True`` to let this function compute a dictionary of properties.
+    deriv
+        The order of derivatives of the cost function to include.
 
     Returns
     -------
@@ -124,57 +113,88 @@ def cost_low(
     The returned dictionary contains the following items:
 
     - ``pars``: the given parameters
-    - ``timestep``: the time step
+    - ``timestep``: the given time step
+    - ``freqs``: the given frequencies
+    - ``amplitudes``: the given frequencies
+    - ``kappas``: shape parameters for the gamma distribution
+    - ``thetas``: scale parameters for the gamma distribution
+    - ``amplitudes``: the given frequencies
     - ``ll``: the log likelihood
-    - ``uni``: the residuals transformed such that they should be uniformely distributed.
-    - ``uni``: the residuals transformed such that they should be normally distributed.
-    - ``obj``: the objective to be minimized to find the best frequency cutoff.
+    - ``cost_value``: the cost function value
+    - ``cost_hess``: the cost Gradient vector (if ``deriv>=1``)
+    - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``)
     - ``amplitudes_model``: The model of the spectrum (function of pars)
     - ``amplitudes_std_model``: The model of the standard error of the spectrum (function of pars)
     """
     # Convert frequencies to dimensionless omegas, as if time step was 1
     # With RFFT, the highest omega would then be +pi.
-    omegas = 2 * jnp.pi * timestep * freqs
+    omegas = 2 * np.pi * timestep * freqs
 
-    amplitudes_model = model(omegas, pars)
+    amplitudes_model = model(omegas, pars, deriv)
 
     # Log-likelihood computed with the scaled Chi-squared distribution.
     # The Gamma distribution is used because the scale parameter is easily incorporated.
     kappas = 0.5 * ndofs
-    thetas = amplitudes_model / kappas
-    ll = jax.scipy.stats.gamma.logpdf(amplitudes, kappas, scale=thetas).sum()
+    thetas = amplitudes_model[0] / kappas
+    ll_terms = logpdf_gamma(amplitudes, kappas, thetas, deriv)
+    ll = ll_terms[0].sum()
 
-    if do_props:
-        return {
-            "pars": pars,
-            "timestep": timestep,
-            "freqs": freqs,
-            "amplitudes": amplitudes,
-            "ll": ll,
-            "kappas": kappas,
-            "thetas": thetas,
-            "amplitudes_model": amplitudes_model,
-            "amplitudes_std_model": amplitudes_model / jnp.sqrt(0.5 * ndofs),
-        }
-    return -ll
+    props = {
+        "pars": pars,
+        "timestep": timestep,
+        "freqs": freqs,
+        "amplitudes": amplitudes,
+        "kappas": kappas,
+        "thetas": thetas,
+        "ll": ll,
+        "cost_value": -ll,
+        "amplitudes_model": amplitudes_model[0],
+        "amplitudes_std_model": amplitudes_model[0] / np.sqrt(0.5 * ndofs),
+    }
+
+    if deriv >= 1:
+        props["cost_grad"] = -np.dot(amplitudes_model[1], ll_terms[1] / kappas)
+    if deriv >= 2:
+        props["cost_hess"] = -(
+            np.einsum(
+                "ia,ja,a->ij", amplitudes_model[1], amplitudes_model[1], ll_terms[2] / kappas**2
+            )
+            + np.einsum("ija,a->ij", amplitudes_model[2], ll_terms[1] / kappas)
+        )
+    if deriv >= 3:
+        raise ValueError("Third or higher derivatives are not supported.")
+
+    return props
 
 
-def numpify(func):
-    """Convert return values from JAX arrays to NumPy arrays."""
+def logpdf_gamma(x: NDArray[float], kappa: NDArray[float], theta: NDArray[float], deriv: int = 1):
+    """Compute the logarithm of the probability density function of the Gamma distribution.
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if isinstance(result, dict):
-            return {key: np.array(value) for key, value in result.items()}
-        return np.array(result)
+    Parameters
+    ----------
+    x
+        The argument of the PDF (random variable).
+    kappa
+        The shape parameter.
+    theta
+        The scale parameter.
+    deriv
+        The order of the derivatives toward theta to compute: 0, 1 or 2.
 
-    return wrapper
-
-
-# Jit-compile functions to be used in LowFreqCost
-STATIC_ARGNAMES = ("model", "do_props")
-_func = numpify(jax.jit(cost_low, static_argnames=STATIC_ARGNAMES))
-_prop = numpify(jax.jit(partial(cost_low, do_props=True), static_argnames=STATIC_ARGNAMES))
-_grad = numpify(jax.jit(jax.grad(cost_low), static_argnames=STATIC_ARGNAMES))
-_hess = numpify(jax.jit(jax.hessian(cost_low), static_argnames=STATIC_ARGNAMES))
+    Returns
+    -------
+    results
+        A list of results (function value and requested derivatives.)
+        All elements have the same shape as the kappa and theta arrays.
+    """
+    kappa = np.asarray(kappa)
+    theta = np.asarray(theta)
+    ratio = np.asarray(x) / theta
+    results = [-gammaln(kappa) - np.log(theta) + (kappa - 1) * np.log(ratio) - ratio]
+    if deriv >= 1:
+        results.append((ratio - kappa) / theta)
+    if deriv >= 2:
+        results.append((kappa - 2 * ratio) / theta**2)
+    if deriv >= 3:
+        raise ValueError("Third or higher derivatives are not supported.")
+    return results
