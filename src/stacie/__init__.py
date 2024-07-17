@@ -18,7 +18,7 @@
 """The Stacie package."""
 
 from .estimate import estimate_acfint
-from .plot import UnitConfig, plot
+from .plot import UnitConfig, plot_results
 from .spectrum import prepare_acfint
 
 __all__ = (
@@ -26,7 +26,7 @@ __all__ = (
     "__version_tuple__",
     "prepare_acfint",
     "estimate_acfint",
-    "plot",
+    "plot_results",
     "UnitConfig",
 )
 

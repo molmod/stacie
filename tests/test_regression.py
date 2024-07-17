@@ -26,7 +26,7 @@ from path import Path
 from stacie.estimate import estimate_acfint
 from stacie.model import ExpTailModel, SpectrumModel, WhiteNoiseModel
 from stacie.msgpack import dump, load
-from stacie.plot import plot
+from stacie.plot import plot_results
 from stacie.spectrum import Spectrum
 
 DOUBLE_NAMES = ["double1", "double2"]
@@ -39,7 +39,7 @@ def output_test_result(prefix, res):
     dn_out = Path("tests/outputs")
     dn_out.makedirs_p()
     path_pdf = dn_out / f"{prefix}.pdf"
-    plot(path_pdf, res)
+    plot_results(path_pdf, res)
     path_zip = dn_out / f"{prefix}.nmpk.xz"
     dump(path_zip, res)
 
