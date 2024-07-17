@@ -26,10 +26,10 @@ from numpy.typing import NDArray
 __all__ = ("RiskMetric", "risk_metric_cumsum")
 
 
-RiskMetric = NewType("RiskMetric", Callable[[NDArray], float])
+RiskMetric = NewType("RiskMetric", Callable[[NDArray[float]], float])
 
 
-def risk_metric_cumsum(residuals: NDArray) -> float:
+def risk_metric_cumsum(residuals: NDArray[float]) -> float:
     """Quantify the over- and underfitting risk of a smooth model to noisy data.
 
     Parameters
@@ -49,6 +49,8 @@ def risk_metric_cumsum(residuals: NDArray) -> float:
     nres = len(residuals)
     if nres < 2:
         raise TypeError("The risk metric is meaningless for zero or one residual.")
-    cs = 2 * np.cumsum(residuals)
-    total = residuals.sum()
-    return (total**2 + ((cs - total) ** 2).sum()) / (nres + 1) - nres
+    scs = np.zeros(nres + 1)
+    np.cumsum(residuals, out=scs[1:])
+    scs -= scs[-1] / 2
+    scs *= 2
+    return (scs**2).mean() - nres

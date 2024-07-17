@@ -20,7 +20,7 @@ getting_started/index.md
 theory/index.md
 properties/index.md
 advanced_topics/index.md
-example/index.md
+examples/index.md
 bibliography.md
 development/index.md
 code_of_conduct.md

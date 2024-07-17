@@ -12,6 +12,12 @@ attempt to identify the best model for a given data set.
 They solve a different problem and are not (trivially) applicable.
 Here, the model is the same for all cutoffs, but the amount of fitting data varies.
 
+A risk metric for selecting the best frequency cutoff is presented below.
+This metric is generally applicable to data selection when fitting a smooth function to noisy data.
+This is illustrated for a simple polynomial fit to noisy cosine data
+in the [Risk Metric Demo](../examples/riskmetric.py).
+
+
 ## Normalized Residuals
 
 The risk metric proposed here, uses normalized residuals, which are defined as follows,
@@ -109,14 +115,17 @@ This can be understood as follows:
 As long as the frequency cutoff is low enough to avoid underfitting,
 the variance of the normalized residuals is slightly less than $1$
 (because there are three degrees of freedom in the fit).
-This small discrepancy causes $\mathcal{M}$ to decrease slowly as more data points are added,
+Furthermore, the variance of the cumulative sums is significantly lower than $N_\text{res}$
+because any fitted model tries to interpolate the data.
+Residuals are therefore anticorrelated by construction,
+such that they cancel each other out when summing them.
+This causes $\mathcal{M}$ to decrease slowly as more data points are added,
 as long as the model does not exhibit underfitting.
 At the onset of underfitting, which is barely visible to the naked eye,
 $\mathcal{M}$ increases rapidly.
 At this point, one has included (nearly) the maximum amount of data in the fit
 (and thus minimal uncertainty in the parameters)
 without biasing the estimated parameters due to underfitting.
-
 
 Finally, we must emphasize that the proposed risk metric $\mathcal{M}$ is an ad hoc construction.
 It is nothing more than a robust mathematical implementation

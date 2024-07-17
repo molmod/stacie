@@ -2,3 +2,5 @@
 \newcommand{\var}{\operatorname{VAR}}
 \newcommand{\cov}{\operatorname{COV}}
 \newcommand{\gdist}{\operatorname{Gamma}}
+\newcommand{\lt}{\ensuremath <}
+\newcommand{\gt}{\ensuremath >}

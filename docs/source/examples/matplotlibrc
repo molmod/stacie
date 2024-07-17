@@ -1,0 +1,4 @@
+backend: SVG
+figure.constrained_layout.use: True
+axes.spines.top: False
+axes.spines.right: False

@@ -28,9 +28,10 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     # Third-party extensions
+    "myst_nb",
     "sphinx_autodoc_typehints",
+    "sphinx_codeautolink",
     "sphinx_copybutton",
-    "myst_parser",
     "sphinxcontrib.bibtex",
 ]
 
@@ -56,12 +57,17 @@ myst_enable_extensions = [
     "attrs_block",
 ]
 
+nb_custom_formats = {
+    ".py": ["jupytext.reads", {"fmt": "py:percent"}],
+}
+nb_execution_mode = "cache"
+exclude_patterns = ["conf.py"]
+codeautolink_concat_default = True
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "furo"
-html_static_path = ["_static"]
-html_css_files = ["css/table.css"]
 # Embedded SVG as recommended in Furo template.
 # See https://pradyunsg.me/furo/customisation/footer/#using-embedded-svgs
 with open("github.svg") as fh:
