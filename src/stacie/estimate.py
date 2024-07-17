@@ -238,5 +238,5 @@ def fit_model_spectrum(
     props["covar"] = np.linalg.inv(props["cost_hess"])
 
     # Derive estimates from model parameters.
-    model.update_props(props)
+    props.update(model.derive_props(props["pars"], props["covar"], props["timestep"]))
     return props

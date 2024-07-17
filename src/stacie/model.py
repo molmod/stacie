@@ -72,8 +72,10 @@ class SpectrumModel:
         raise NotImplementedError
 
     @classmethod
-    def update_props(cls, props: dict[str]):
-        """Add results items to the props dictionary derived from the model parameters."""
+    def derive_props(
+        cls, pars: NDArray[float], covar: NDArray[float], timestep: float
+    ) -> dict[str, NDArray[float]]:
+        """Return additional properties derived from model-specific parameters."""
         raise NotImplementedError
 
 
@@ -151,19 +153,21 @@ class ExpTailModel(SpectrumModel):
         return results
 
     @classmethod
-    def update_props(cls, props: dict[str]):
-        """Add results items to the props dictionary derived from the model parameters."""
-        props["model"] = cls.name
-        props["acfint"] = props["pars"][:2].sum()
-        acfint_var = props["covar"][:2, :2].sum()
-        props["acfint_var"] = acfint_var
-        props["acfint_std"] = np.sqrt(acfint_var) if acfint_var >= 0 else np.inf
-        props["corrtime_tail"] = props["pars"][2] * props["timestep"]
-        corrtime_tail_var = props["covar"][2, 2] * props["timestep"] ** 2
-        props["corrtime_tail_var"] = corrtime_tail_var
-        props["corrtime_tail_std"] = (
-            np.sqrt(corrtime_tail_var) if corrtime_tail_var >= 0 else np.inf
-        )
+    def derive_props(
+        cls, pars: NDArray[float], covar: NDArray[float], timestep: float
+    ) -> dict[str, NDArray[float]]:
+        """Return additional properties derived from model-specific parameters."""
+        acfint_var = covar[:2, :2].sum()
+        corrtime_tail_var = covar[2, 2] * timestep**2
+        return {
+            "model": cls.name,
+            "acfint": pars[:2].sum(),
+            "acfint_var": acfint_var,
+            "acfint_std": np.sqrt(acfint_var) if acfint_var >= 0 else np.inf,
+            "corrtime_tail": pars[2] * timestep,
+            "corrtime_tail_var": corrtime_tail_var,
+            "corrtime_tail_std": (np.sqrt(corrtime_tail_var) if corrtime_tail_var >= 0 else np.inf),
+        }
 
 
 class WhiteNoiseModel(SpectrumModel):
@@ -203,13 +207,16 @@ class WhiteNoiseModel(SpectrumModel):
         return results
 
     @classmethod
-    def update_props(cls, props: dict[str]):
-        """Add results items to the props dictionary derived from the model parameters."""
-        props["model"] = cls.name
-        props["acfint"] = props["pars"][0].sum()
-        acfint_var = props["covar"][0, 0].sum()
-        props["acfint_var"] = acfint_var
-        props["acfint_std"] = np.sqrt(acfint_var) if acfint_var >= 0 else np.inf
-        props["corrtime_tail"] = np.inf
-        props["corrtime_tail_var"] = np.inf
-        props["corrtime_tail_std"] = np.inf
+    def derive_props(
+        cls, pars: NDArray[float], covar: NDArray[float], timestep: float
+    ) -> dict[str, NDArray[float]]:
+        """Return additional properties derived from model-specific parameters."""
+        return {
+            "model": cls.name,
+            "acfint": pars[0],
+            "acfint_var": covar[0, 0],
+            "acfint_std": np.sqrt(covar[0, 0]) if covar[0, 0] >= 0 else np.inf,
+            "corrtime_tail": np.inf,
+            "corrtime_tail_var": np.inf,
+            "corrtime_tail_std": np.inf,
+        }
