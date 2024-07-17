@@ -61,7 +61,6 @@ tests = [
     "pytest",
     "pytest-cov",
     "pytest-regtest",
-    "pytest-slowest-first",
     "pytest-xdist",
     "numdifftools",
 ]
@@ -75,7 +74,7 @@ Issues = "https://github.com/molmod/stacie/issues/"
 Source = "https://github.com/molmod/stacie/"
 
 [tool.pytest.ini_options]
-addopts = "-n auto -W error --slowest-first"
+addopts = "-n auto -W error"
 
 [tool.setuptools_scm]
 write_to = "src/stacie/_version.py"
