@@ -9,7 +9,7 @@ CONCEPT:
 ```{toctree}
 :hidden:
 
-error_estimation.md
+error_estimates.md
 correlation_times.md
 diffusivity.md
 electrical_conductivity.md

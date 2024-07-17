@@ -1,4 +1,4 @@
-# Error Estimation
+# Error Estimates
 
 CONCEPT:
 

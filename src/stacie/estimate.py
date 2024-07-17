@@ -75,6 +75,7 @@ def estimate_acfint(
     ncutmax_hard: int = 1000,
     model: SpectrumModel | None = None,
     risk_metric: RiskMetric = risk_metric_cumsum,
+    verbose: bool = False,
 ) -> Result:
     """Estimate the integral of the autocorrelation function.
 
@@ -101,6 +102,9 @@ def estimate_acfint(
     risk_metric
         Thu metric used to detect over- and underfitting.
         The selected frequency cutoff minimizes this metric.
+    verbose
+        Set this to ``True`` to print progress information of the frequency cutoff search
+        to the standard output.
 
     Returns
     -------
@@ -110,6 +114,10 @@ def estimate_acfint(
     if model is None:
         model = ExpTailModel()
     history = {}
+
+    if verbose and maxscan > 1:
+        print("   ncut        risk  incumbent")
+        scratch = {}
 
     def objective(icut: int):
         """Objective to be minimized to find the best frequency cutoff.
@@ -132,16 +140,21 @@ def estimate_acfint(
         )
         evals = props["cost_hess_evals"]
         history[ncut] = props
-        result = props["risk"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
-        print(ncut, result)
-        return result
+        risk = props["risk"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
+        if verbose and maxscan > 1:
+            lowest_risk = scratch.get("lowest_risk")
+            best = lowest_risk is None or risk < lowest_risk
+            if best:
+                scratch["lowest_risk"] = risk
+            print(f"{ncut:7d}  {risk:10.1f}  {'<---' if best else ''}")
+        return risk
 
     ncutmax = len(spectrum.freqs) if fcutmax is None else int(spectrum.freqs.searchsorted(fcutmax))
     if ncutmax > ncutmax_hard:
         ncutmax = ncutmax_hard
         warnings.warn(
             "The maximum frequency cutoff is lowered to constrain "
-            f"the maximum number of data points in the fit to {ncutmax}",
+            f"the maximum number of data points in the fit to {ncutmax}.",
             FCutWarning,
             stacklevel=2,
         )

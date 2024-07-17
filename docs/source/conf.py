@@ -61,6 +61,7 @@ nb_custom_formats = {
     ".py": ["jupytext.reads", {"fmt": "py:percent"}],
 }
 nb_execution_mode = "cache"
+nb_merge_streams = True
 exclude_patterns = ["conf.py"]
 codeautolink_concat_default = True
 

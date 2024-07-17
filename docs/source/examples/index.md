@@ -3,5 +3,6 @@
 ```{toctree}
 :hidden:
 
+error_mean
 riskmetric
 ```
