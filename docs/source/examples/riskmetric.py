@@ -3,13 +3,13 @@
 # %% [markdown]
 # # Risk Metric Demo
 #
-# This notebook illustrates the risk metric to detect underfitting,
+# This notebook illustrates the risk metric for detecting underfitting,
 # using a simple polynomial fit to a cosine function as test case.
-# To get some intuition for how the method works,
-# we recommend trying the following changes:
+# To get an intuition of how the method works,
+# we suggest you try making the following changes:
 #
-# - Increase the degree of the polynomial.
-# - Increase the noise level (sigma).
+# - Increase the polynomial degree.
+# - Increase the noise (sigma).
 # - Override `icut_best` to visualize over- and underfitted results.
 # - Change the random seed.
 
@@ -41,8 +41,9 @@ yvalues = ytruth + rng.normal(0, sigma, len(xgrid))
 # %% [markdown]
 # ## Polynomial Fits
 #
-# A polynomial is fitted to a series of subsets of the data with increasing size.
-# For each data cutoff, the risk metric is computed and the lowest risk used in the following cells.
+# A polynomial is fitted to a series of subsets of the data of increasing size.
+# For each data cutoff, the risk metric is computed and
+# the lowest risk is used in the following cells.
 
 
 # %%
@@ -129,10 +130,10 @@ ax.set_title("Shifted Cumulative Sums")
 
 # %% [markdown]
 # Note that the cumulative sums fall well below the expectation value for standard normal residuals.
-# This has several causes:
+# There are several reasons for this:
 # - The variance of the regression residuals is $\frac{N_\text{res} - \nu}{N_\text{res}}\sigma$,
-#   where $\nu$ is the number of fitting parameters.
+#   where $\nu$ is the number of fitted parameters.
 #   The risk metric ignores $\nu$.
-#   (Doing so would simply shift the metric by a constant, which does not change the minimizer.)
-# - Regression residuals are anticorrelated, meaning that the sum of residuals has a lower variance
-#   than that of independent random variables with the same variance.
+#   (Including it would only make a small difference.)
+# - Regression residuals are anticorrelated, meaning that the sum of the residuals
+#   has a lower variance than that of independent random variables with the same variance.
