@@ -218,8 +218,8 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     s = r.spectrum
     for _ncut, props in sorted(r.history.items()):
         freqs.append(props["freqs"][-1])
-        acfints.append(props["pars"][:2].sum())
-        acfint_stds.append(np.sqrt(props["covar"][:2, :2].sum()))
+        acfints.append(props["acfint"])
+        acfint_stds.append(props["acfint_std"])
     freqs = np.array(freqs)
     acfints = np.array(acfints)
     acfint_stds = np.array(acfint_stds)
@@ -256,7 +256,7 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     evals = []
     for ncut, props in sorted(r.history.items()):
         freqs.append(props["freqs"][-1])
-        evals.append(np.linalg.eigvalsh(props["covar"]))
+        evals.append(props["hess_evals"])
         if ncut == r.ncut:
             ax.plot([freqs[-1]], [evals[-1]], color="k", marker="o", ms=2, zorder=2.5)
     freqs = np.array(freqs)

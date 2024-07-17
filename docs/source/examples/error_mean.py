@@ -92,14 +92,14 @@ mean_mc = sequences.mean()
 print(f"Monte Carlo E[r] ≈ {mean_mc:.5f}")
 
 # %%
-# Plot a few short examples of the chain
-
+# Plot the beginning of a few sequences.
+# The arbitrary unit of length is represented by $\ell$.
 fig, ax = plt.subplots()
 ax.plot(sequences[0][:500])
 ax.plot(sequences[1][:500])
 ax.plot(sequences[2][:500])
 ax.set_xlabel("Step")
-ax.set_ylabel("Bond length")
+ax.set_ylabel(r"Bond length [$\ell$]")
 ax.set_title("Markov Chain samples")
 
 # %% [markdown]
@@ -122,17 +122,17 @@ ax.set_title("Markov Chain samples")
 spectrum = prepare_acfint(sequences, prefactor=1 / sequences.size, include_zero_freq=False)
 
 # The UnitConfig object contains settings that are reused by most plotting functions.
-# The integral has units of length squared. (It is the variance of the mean.)
+# The integral has units of length squared, $\ell^2$. (It is the variance of the mean.)
 # In MC sampling, time and frequency are fictitious and therefore made dimensionless here.
-uc = UnitConfig(acfint_unit_str="l^2", freq_unit_str="1", time_unit_str="1", acfint_fmt=".1e")
+uc = UnitConfig(acfint_unit_str=r"$\ell^2$", freq_unit_str="1", time_unit_str="1", acfint_fmt=".1e")
 fig, ax = plt.subplots()
 plot_spectrum(ax, uc, spectrum, 180)
 
 # %% [markdown]
 # From the spectrum, one can already visually estimate the variance of the mean,
-# roughly about $2.0 \times 10^{-5}$.
+# roughly about $2.0 \times 10^{-5}\,\ell^2$.
 # By normalizing the spectrum with the total simulation time,
-# the unit of the spectrum is length squared, which is correct for the variance in this case.
+# the spectrum has a unit of length squared, which is correct for the variance in this case.
 # In the following, a model is fitted to the spectrum to get a more precise estimate.
 
 # %%
@@ -158,7 +158,7 @@ fig, ax = plt.subplots()
 plot_risk(ax, uc, result)
 
 # %%
-# Plot of the mean and uncertainty as a function of the frequency cutoff.
+# Plot of the error of the mean and its uncertainty as a function of the frequency cutoff.
 fig, ax = plt.subplots()
 plot_uncertainty(ax, uc, result)
 

@@ -37,7 +37,7 @@ extensions = [
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-intersphinx_mapping = get_intersphinx_mapping(packages={"python", "numpy", "scipy", "jax"})
+intersphinx_mapping = get_intersphinx_mapping(packages={"python", "numpy", "scipy"})
 nitpicky = True
 
 myst_enable_extensions = [
