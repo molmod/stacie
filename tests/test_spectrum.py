@@ -33,6 +33,7 @@ def test_basics():
     timestep = 10.0
     spectrum = prepare_acfint(sequences, prefactor=prefactor, timestep=timestep)
     # Test simple properties.
+    assert spectrum.nfreq == 4
     assert_equal(spectrum.ndofs, [2, 4, 4, 2])
     assert spectrum.nstep == 6
     assert spectrum.prefactor == prefactor

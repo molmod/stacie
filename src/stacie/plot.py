@@ -25,6 +25,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from scipy import stats
 
 from .estimate import Result
+from .spectrum import Spectrum
 
 __all__ = ("plot_results", "UnitConfig")
 
@@ -64,37 +65,35 @@ class UnitConfig:
     """The scale factor used for error bars (multiplier for sigma, standard error)."""
 
 
-def plot_results(path_pdf: str, res: Result | list[Result], uc: UnitConfig | None = None):
+def plot_results(path_pdf: str, rs: Result | list[Result], uc: UnitConfig | None = None):
     """Generate a multi-page PDF with plots of the autocorrelation integral estimation.
 
     Parameters
     ----------
     path_pdf
         The PDF file where all the figures are stored.
-    res
+    rs
         A single Results instance or a list of them.
         If the (first) result instance has model_spectrum set,
         theoretical expectations are included.
         When multiple results instances are given,
         only the first one is plotted in blue.
         All remaining ones are plotted in light grey.
-    acf_unit
-        A string with the unit of the autocorrelation function times the prefactor
-    time_unit
-        A string with the unit of the time axis, used for labels.
+    uc
+        The configuration of the units used for plotting.
     """
-    # Prepare res
-    if isinstance(res, Result):
-        res = [res]
+    # Prepare results list
+    if isinstance(rs, Result):
+        rs = [rs]
 
     # Prepare units
     if uc is None:
         uc = UnitConfig()
 
     with PdfPages(path_pdf) as pdf:
-        for r in res:
+        for r in rs:
             fig, ax = plt.subplots(figsize=(6, 6))
-            plot_spectrum(ax, uc, r)
+            plot_fitted_spectrum(ax, uc, r)
             pdf.savefig(fig)
             plt.close(fig)
 
@@ -107,15 +106,15 @@ def plot_results(path_pdf: str, res: Result | list[Result], uc: UnitConfig | Non
                 pdf.savefig(fig)
                 plt.close(fig)
 
-        if len(res) > 1:
-            if res[0].spectrum.amplitudes_ref is not None:
+        if len(rs) > 1:
+            if rs[0].spectrum.amplitudes_ref is not None:
                 fig, ax = plt.subplots(figsize=(6, 6))
-                plot_qq(ax, uc, res)
+                plot_qq(ax, uc, rs)
                 pdf.savefig(fig)
                 plt.close(fig)
 
             fig, ax = plt.subplots(figsize=(6, 6))
-            plot_acfint_estimates(ax, uc, res)
+            plot_acfint_estimates(ax, uc, rs)
             pdf.savefig(fig)
             plt.close(fig)
 
@@ -123,18 +122,39 @@ def plot_results(path_pdf: str, res: Result | list[Result], uc: UnitConfig | Non
 REF_PROPS = {"ls": "--", "color": "k", "alpha": 0.5}
 
 
-def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
-    nplot = 2 * r.ncut
-    s = r.spectrum
+def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int | None = None):
+    """Plot the empirical spectrum."""
+    if nplot is None:
+        nplot = s.nfreq
     ax.plot(
         s.freqs[:nplot] / uc.freq_unit,
         s.amplitudes[:nplot] / uc.acfint_unit,
         color="C0",
         lw=1,
     )
+    _plot_ref_spectrum(ax, uc, s, nplot)
+    ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
+    ax.set_ylabel(f"Spectrum [{uc.acfint_unit_str}]")
+    ax.set_title("Spectrum")
+
+
+def _plot_ref_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int):
+    """Plot the reference spectrum."""
+    if s.amplitudes_ref is not None:
+        ax.plot(
+            s.freqs[:nplot] / uc.freq_unit,
+            s.amplitudes_ref[:nplot] / uc.acfint_unit,
+            **REF_PROPS,
+        )
+
+
+def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    """Plot the fitted model spectrum."""
+    nplot = 2 * r.ncut
+    plot_spectrum(ax, uc, r.spectrum, nplot)
     mean = r.props["amplitudes_model"]
     std = r.props["amplitudes_std_model"]
-    freqs = s.freqs[: len(mean)]
+    freqs = r.props["freqs"]
     ax.plot(freqs / uc.freq_unit, mean / uc.acfint_unit, color="C2")
     ax.fill_between(
         freqs / uc.freq_unit,
@@ -145,14 +165,6 @@ def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         lw=0,
     )
     ax.axvline(r.props["freqs"][-1] / uc.freq_unit, ymax=0.1, color="k")
-    if s.amplitudes_ref is not None:
-        ax.plot(
-            s.freqs[:nplot] / uc.freq_unit,
-            s.amplitudes_ref[:nplot] / uc.acfint_unit,
-            **REF_PROPS,
-        )
-    ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(f"Spectrum [{uc.acfint_unit_str}]")
     ax.set_title(
         f"{r.props['model']} // "
         f"ACF integral = {r.props['acfint'] / uc.acfint_unit:{uc.acfint_fmt}} "
@@ -164,27 +176,23 @@ def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
 
 
 def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
-    s = r.spectrum
+    """Plot all fitted model spectra (for all tested cutoffs)."""
     for ncut, props in r.history.items():
         mean = props["amplitudes_model"]
-        freqs = s.freqs[: len(mean)]
+        freqs = props["freqs"]
         if ncut == r.ncut:
             ax.plot(freqs / uc.freq_unit, mean / uc.acfint_unit, color="k", lw=2, zorder=2.5)
         else:
             ax.plot(freqs / uc.freq_unit, mean / uc.acfint_unit, color="C2", lw=1, alpha=0.5)
-    if s.amplitudes_ref is not None:
-        nplot = min(2 * max(r.history), len(s.freqs))
-        ax.plot(
-            s.freqs[:nplot] / uc.freq_unit,
-            s.amplitudes_ref[:nplot] / uc.acfint_unit,
-            **REF_PROPS,
-        )
+    nplot = min(2 * max(r.history), r.spectrum.nfreq)
+    _plot_ref_spectrum(ax, uc, r.spectrum, nplot)
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
     ax.set_ylabel(f"Model Spectrum [{uc.acfint_unit_str}]")
     ax.set_xscale("log")
 
 
 def plot_risk(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    """Plot the risk metric as a function of cutoff frequency."""
     freqs = []
     risks = []
     for _ncut, props in sorted(r.history.items()):
@@ -203,6 +211,7 @@ def plot_risk(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
 
 
 def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    """Plot the AC integral estimate (uncertainty) as a function fo cutoff frequency."""
     freqs = []
     acfints = []
     acfint_stds = []
@@ -242,6 +251,7 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
 
 
 def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    """Plot the eigenvalues of the Hessian as a function of the cutoff frequency."""
     freqs = []
     evals = []
     for ncut, props in sorted(r.history.items()):
@@ -260,22 +270,27 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
 
 
 def plot_residuals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    """Plot the normalized residuals between the model and empirical spectra."""
     amplitudes = r.props["amplitudes"]
     kappas = r.props["kappas"]
     thetas = r.props["thetas"]
+    residuals = (amplitudes / thetas - kappas) / np.sqrt(kappas)
     with np.errstate(invalid="ignore"):
-        ax.plot(amplitudes / (kappas * thetas))
-    ax.set_title("Rescaled spectrum")
+        ax.plot(residuals)
+    ax.set_title("Normalized residuals")
     ax.set_xlabel("index")
-    ax.set_ylabel("Amplitude / (kappa * theta)")
+    ax.set_ylabel("Residual [1]")
 
 
-def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, res: list[Result]):
-    r0 = res[0]
-    cdfs = (np.arange(len(res)) + 0.5) / len(res)
+def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
+    """Make a qq-plot between the predicted and expected distribution of AC integral estimates.
+
+    This plot function assumes the true integral is known.
+    """
+    cdfs = (np.arange(len(rs)) + 0.5) / len(rs)
     quantiles = stats.norm().ppf(cdfs)
-    limit = r0.spectrum.amplitudes_ref[0]
-    normed_errors = np.array([(r.props["acfint"] - limit) / r.props["acfint_std"] for r in res])
+    limit = rs[0].spectrum.amplitudes_ref[0]
+    normed_errors = np.array([(r.props["acfint"] - limit) / r.props["acfint_std"] for r in rs])
     normed_errors.sort()
     ax.scatter(quantiles, normed_errors, c="C0", s=3)
     ax.plot([-2, 2], [-2, 2], **REF_PROPS)
@@ -284,14 +299,15 @@ def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, res: list[Result]):
     ax.set_title("QQ Plot")
 
 
-def plot_acfint_estimates(ax: mpl.axes.Axes, uc: UnitConfig, res: list[Result]):
-    values = np.array([r.props["acfint"] for r in res])
-    errors = np.array([uc.sfac * r.props["acfint_std"] for r in res])
+def plot_acfint_estimates(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
+    """Plot the sorted autocorrelation integral estimates and their uncertainties."""
+    values = np.array([r.props["acfint"] for r in rs])
+    errors = np.array([uc.sfac * r.props["acfint_std"] for r in rs])
     order = values.argsort()
     values = values[order]
     errors = errors[order]
     ax.errorbar(
-        np.arange(len(res)),
+        np.arange(len(rs)),
         values / uc.acfint_unit,
         errors,
         fmt="o",
@@ -299,9 +315,8 @@ def plot_acfint_estimates(ax: mpl.axes.Axes, uc: UnitConfig, res: list[Result]):
         ms=2,
         ls="none",
     )
-    r0 = res[0]
-    if r0.spectrum.amplitudes_ref is not None:
-        limit = r0.spectrum.amplitudes_ref[0]
+    if rs[0].spectrum.amplitudes_ref is not None:
+        limit = rs[0].spectrum.amplitudes_ref[0]
         ax.axhline(limit / uc.acfint_unit, **REF_PROPS)
     ax.set_xlabel("Rank")
     ax.set_ylabel(f"Mean and uncertainty [{uc.acfint_unit_str}]")

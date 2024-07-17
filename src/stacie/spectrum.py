@@ -61,7 +61,7 @@ class Spectrum:
     @property
     def nfreq(self) -> int:
         """The number of irfft frequency grid points."""
-        return len(self.freq)
+        return len(self.freqs)
 
     def without_zero_freq(self) -> Self:
         """Return a copy without the DC component."""
