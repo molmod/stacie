@@ -187,6 +187,12 @@ def plot_cumulative_sums():
 plot_cumulative_sums()
 
 # %% [markdown]
-# The cumulative sums fall below the (naive) expectation value for uncorrelated residuals.
-# Regression residuals are anticorrelated, meaning that the sum of the residuals
-# has a lower variance than that of independent random variables with the same variance.
+# The squared cumulative sums are well below the upper limit of the expectation value.
+# Regression residuals are anticorrelated, meaning that summed residuals
+# have a lower variance than a sum of independent random variables with the same variance.
+
+# %%
+# Basic regression tests to verify that the results in the notebook do not change unexpectedly.
+
+if ncut_best != 32:
+    raise ValueError(f"Wrong ncut_best: {ncut_best}")

@@ -197,3 +197,11 @@ print(f"Quadrature  E[r]   ≈ {mean_quad:8.5f}")
 print(f"Monte Carlo E[r]   ≈ {mean_mc:8.5f}")
 print(f"|Difference|       = {abs(mean_quad - mean_mc):8.5f}")
 print(f"Estimated MC error = {error_mc:8.5f}")
+
+# %%
+# Basic regression tests to verify that the results in the notebook do not change unexpectedly.
+
+if abs(mean_mc - 1.6284) > 1e-3:
+    raise ValueError(f"Wrong mean_mc: {mean_mc:.5f}")
+if abs(error_mc - 0.0047) > 1e-3:
+    raise ValueError(f"Wrong error_mc: {error_mc:.5f}")
