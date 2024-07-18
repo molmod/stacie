@@ -4,5 +4,5 @@
 :hidden:
 
 error_mean
-riskmetric
+underfitting_criterion
 ```

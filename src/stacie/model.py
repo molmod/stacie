@@ -38,6 +38,11 @@ class SpectrumModel:
         raise NotImplementedError
 
     @classmethod
+    def npar(cls):
+        """The number of parameters."""
+        return len(cls.bounds())
+
+    @classmethod
     def valid(cls, pars) -> bool:
         """Returns True when the parameters are within the feasible region."""
         return all(pmin < par < pmax for (pmin, pmax), par in zip(cls.bounds(), pars, strict=True))

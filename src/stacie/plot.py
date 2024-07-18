@@ -100,7 +100,7 @@ def plot_results(path_pdf: str, rs: Result | list[Result], uc: UnitConfig | None
             if len(r.history) > 1:
                 fig, axs = plt.subplots(2, 2, figsize=(6, 6))
                 plot_all_models(axs[0, 0], uc, r)
-                plot_risk(axs[0, 1], uc, r)
+                plot_criterion(axs[0, 1], uc, r)
                 plot_uncertainty(axs[1, 0], uc, r)
                 plot_residuals(axs[1, 1], uc, r)
                 pdf.savefig(fig)
@@ -191,23 +191,27 @@ def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax.set_xscale("log")
 
 
-def plot_risk(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
-    """Plot the risk metric as a function of cutoff frequency."""
+def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    """Plot the cutoff criterion as a function of cutoff frequency."""
     freqs = []
-    risks = []
+    criteria = []
     for _ncut, props in sorted(r.history.items()):
         freqs.append(props["freqs"][-1])
-        risks.append(props["risk"])
+        criteria.append(props["criterion"])
     freqs = np.array(freqs)
+    criteria = np.array(criteria)
+    criteria -= criteria[0]
 
-    ax.plot(freqs / uc.freq_unit, risks, color="C1", lw=1)
-    ax.plot([r.props["freqs"][-1] / uc.freq_unit], [r.props["risk"]], marker="o", color="k", ms=2)
+    ax.plot(freqs / uc.freq_unit, criteria, color="C1", lw=1)
+    ax.axvline(r.props["freqs"][-1] / uc.freq_unit, ymax=0.1, color="k")
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel("Risk metric [1]")
+    ax.set_ylabel("Criterion - Criterion[0]")
+    ax.set_title("Cutoff criterion")
     ax.set_xscale("log")
-    if np.isfinite(r.props["risk"]):
-        risk_scale = abs(r.props["risk"])
-        ax.set_ylim(r.props["risk"] - 0.2 * risk_scale, 2 * risk_scale)
+    if np.isfinite(criteria).any():
+        criterion_scale = abs(criteria.min())
+        if criterion_scale > 0:
+            ax.set_ylim(criteria.min() - 0.2 * criterion_scale, 2 * criterion_scale)
 
 
 def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):

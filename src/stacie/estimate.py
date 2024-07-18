@@ -25,8 +25,8 @@ from numpy.typing import NDArray
 from scipy.optimize import minimize
 
 from .cost import LowFreqCost
+from .cutoff import CutoffCriterion, underfitting_criterion
 from .model import ExpTailModel, SpectrumModel
-from .riskmetric import RiskMetric, risk_metric_cumsum
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
 
@@ -74,7 +74,7 @@ def estimate_acfint(
     ncutmin: int = 10,
     ncutmax_hard: int = 1000,
     model: SpectrumModel | None = None,
-    risk_metric: RiskMetric = risk_metric_cumsum,
+    cutoff_criterion: CutoffCriterion = underfitting_criterion,
     verbose: bool = False,
 ) -> Result:
     """Estimate the integral of the autocorrelation function.
@@ -99,9 +99,8 @@ def estimate_acfint(
         If this upper limit is stricter than that of fcutmax, a warning is raised.
     model
         The model used to fit the low-frequency regime.
-    risk_metric
-        Thu metric used to detect over- and underfitting.
-        The selected frequency cutoff minimizes this metric.
+    cutoff_criterion
+        The selected frequency cutoff minimizes this criterion.
     verbose
         Set this to ``True`` to print progress information of the frequency cutoff search
         to the standard output.
@@ -116,11 +115,11 @@ def estimate_acfint(
     history = {}
 
     if verbose and maxscan > 1:
-        print("   ncut        risk  incumbent")
+        print("   ncut   criterion  incumbent")
         scratch = {}
 
-    def objective(icut: int):
-        """Objective to be minimized to find the best frequency cutoff.
+    def compute_criterion(icut: int):
+        """Criterion to be minimized to find the best frequency cutoff.
 
         Parameters
         ----------
@@ -132,22 +131,25 @@ def estimate_acfint(
         ncut = ncuts[icut]
         props = fit_model_spectrum(
             spectrum.timestep,
-            spectrum.freqs[:ncut],
-            spectrum.amplitudes[:ncut],
-            spectrum.ndofs[:ncut],
+            spectrum.freqs,
+            spectrum.amplitudes,
+            spectrum.ndofs,
+            ncut,
             model,
-            risk_metric,
+            cutoff_criterion,
         )
         evals = props["cost_hess_evals"]
         history[ncut] = props
-        risk = props["risk"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
+        criterion = (
+            props["criterion"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
+        )
         if verbose and maxscan > 1:
-            lowest_risk = scratch.get("lowest_risk")
-            best = lowest_risk is None or risk < lowest_risk
+            lowest_criterion = scratch.get("lowest_criterion")
+            best = lowest_criterion is None or criterion < lowest_criterion
             if best:
-                scratch["lowest_risk"] = risk
-            print(f"{ncut:7d}  {risk:10.1f}  {'<---' if best else ''}")
-        return risk
+                scratch["lowest_criterion"] = criterion
+            print(f"{ncut:7d}  {criterion:10.1f}  {'<---' if best else ''}")
+        return criterion
 
     ncutmax = len(spectrum.freqs) if fcutmax is None else int(spectrum.freqs.searchsorted(fcutmax))
     if ncutmax > ncutmax_hard:
@@ -164,12 +166,12 @@ def estimate_acfint(
     if maxscan == 1:
         ncut = ncutmax
         ncuts = [ncut]
-        objective(0)
+        compute_criterion(0)
     else:
         ncuts = build_xgrid_exp([ncutmin, ncutmax], maxscan)
-        rpi_opt(objective, [0, len(ncuts) - 1], mode="min")
-        if any(np.isfinite(props["risk"]) for props in history.values()):
-            ncut = min((record["risk"], key) for key, record in history.items())[1]
+        rpi_opt(compute_criterion, [0, len(ncuts) - 1], mode="min")
+        if any(np.isfinite(props["criterion"]) for props in history.values()):
+            ncut = min((record["criterion"], key) for key, record in history.items())[1]
         else:
             warnings.warn(
                 "Could not find a suitable frequency cutoff. "
@@ -187,8 +189,9 @@ def fit_model_spectrum(
     freqs: NDArray[float],
     amplitudes: NDArray[float],
     ndofs: NDArray[int],
+    ncut: int,
     model: SpectrumModel,
-    risk_metric: RiskMetric,
+    cutoff_criterion: CutoffCriterion,
 ) -> dict[str, NDArray]:
     """Optimize the parameter of a model for a given spectrum.
 
@@ -197,9 +200,10 @@ def fit_model_spectrum(
 
     Parameters
     ----------
-    risk_metric
-        Thu metric used to detect over- and underfitting.
-        The selected frequency cutoff minimizes this metric.
+    ncut
+        The number of low-frequency data points to use in the fit.
+    cutoff_criterion
+        The selected frequency cutoff minimizes this criterion.
 
     Returns
     -------
@@ -213,6 +217,7 @@ def fit_model_spectrum(
     In addition to the properties returned by :func:`stacie.cost.cost_low`,
     the returned dictionary also contains the following items:
 
+    - ``criterion``: the criterion whose minimizer determines the frequency cutoff.
     - ``cost_hess_evals``: the Hessian eigenvalues.
     - ``cost_hess_evecs``: the Hessian eigenvectors.
     - ``covar``: the covariance matrix of the parameters.
@@ -224,10 +229,10 @@ def fit_model_spectrum(
     - ``corrtime_tail_std``: the standard error of estimate of the slowest time scale.
     """
     # Maximize likelihood
-    pars_init = model.guess(freqs, amplitudes)
+    pars_init = model.guess(freqs[:ncut], amplitudes[:ncut])
     if not model.valid(pars_init):
         raise AssertionError("Infeasible guess")
-    cost = LowFreqCost(timestep, freqs, amplitudes, ndofs, model)
+    cost = LowFreqCost(timestep, freqs[:ncut], amplitudes[:ncut], ndofs[:ncut], model)
     opt = minimize(
         cost.funcgrad,
         pars_init,
@@ -238,11 +243,12 @@ def fit_model_spectrum(
         options={"xtol": 1e-10, "gtol": 1e-10},
     )
 
-    # Compute all properties and derive the risk metric
+    # Compute all properties and derive the cutoff criterion
     props = cost.props(opt.x, 2)
-    props["risk"] = risk_metric(
-        (props["amplitudes"] / props["thetas"] - props["kappas"]) / np.sqrt(props["kappas"])
-    )
+    props["freqs_rest"] = freqs[ncut:]
+    props["amplitudes_rest"] = amplitudes[ncut:]
+    props["ndofs_rest"] = ndofs[ncut:]
+    props["criterion"] = cutoff_criterion(props)
 
     # Compute the Hessian and its properties.
     evals, evecs = np.linalg.eigh(props["cost_hess"])

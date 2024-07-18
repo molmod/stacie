@@ -227,11 +227,11 @@ $$
     \ln\mathcal{L}
     &=\sum_{k\in K} \ln p_{\gdist(\kappa_k,\theta_k)}(\hat{C}_k)
     \\
-    &=-\sum_{k\in K}
-      \ln \Gamma(\kappa_k)
-      + \ln(\theta_k)
-      + (1 - \kappa_k)\ln\left(\frac{\hat{C}_k}{\theta_k}\right)
-      + \frac{\hat{C}_k}{\theta_k}
+    &=\sum_{k\in K}
+      -\ln \Gamma(\kappa_k)
+      - \ln(\theta_k)
+      + (\kappa_k - 1)\ln\left(\frac{\hat{C}_k}{\theta_k}\right)
+      - \frac{\hat{C}_k}{\theta_k}
 $$
 
 with

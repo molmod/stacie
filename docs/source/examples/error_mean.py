@@ -18,7 +18,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import quad
 from stacie import UnitConfig, estimate_acfint, prepare_acfint
-from stacie.plot import plot_fitted_spectrum, plot_risk, plot_spectrum, plot_uncertainty
+from stacie.plot import (
+    plot_criterion,
+    plot_fitted_spectrum,
+    plot_residuals,
+    plot_spectrum,
+    plot_uncertainty,
+)
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -91,16 +97,21 @@ print(f"(nseq, nstep) = {sequences.shape}")
 mean_mc = sequences.mean()
 print(f"Monte Carlo E[r] ≈ {mean_mc:.5f}")
 
+
 # %%
 # Plot the beginning of a few sequences.
 # The arbitrary unit of length is represented by $\ell$.
-fig, ax = plt.subplots()
-ax.plot(sequences[0][:500])
-ax.plot(sequences[1][:500])
-ax.plot(sequences[2][:500])
-ax.set_xlabel("Step")
-ax.set_ylabel(r"Bond length [$\ell$]")
-ax.set_title("Markov Chain samples")
+def plot_chains():
+    fig, ax = plt.subplots()
+    ax.plot(sequences[0][:500])
+    ax.plot(sequences[1][:500])
+    ax.plot(sequences[2][:500])
+    ax.set_xlabel("Step")
+    ax.set_ylabel(r"Bond length [$\ell$]")
+    ax.set_title("Markov Chain samples")
+
+
+plot_chains()
 
 # %% [markdown]
 #
@@ -153,9 +164,14 @@ fig, ax = plt.subplots()
 plot_fitted_spectrum(ax, uc, result)
 
 # %%
-# Plot of the risk minimization as a function of the frequency cutoff.
+# Plot of the criterion minimization as a function of the frequency cutoff.
 fig, ax = plt.subplots()
-plot_risk(ax, uc, result)
+plot_criterion(ax, uc, result)
+
+# %%
+# Plot of the normalized residuals.
+fig, ax = plt.subplots()
+plot_residuals(ax, uc, result)
 
 # %%
 # Plot of the error of the mean and its uncertainty as a function of the frequency cutoff.
