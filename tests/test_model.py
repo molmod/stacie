@@ -19,61 +19,70 @@
 
 import numdifftools as nd
 import numpy as np
+import pytest
 from numpy.testing import assert_allclose
 from stacie.model import ExpTailModel, WhiteNoiseModel
 
+OMEGAS = np.linspace(0, np.pi, 10)
 
-def test_gradient_exptail():
-    omegas = np.linspace(0, np.pi, 10)
-    pars0 = np.array([1.2, 0.9, 2.2])
+PARS_REF_EXP_TAIL = [
+    [1.2, 0.9, 2.2],
+    [-0.3, 0.5, 0.7],
+    [0.1, -7.7, 0.7],
+    [-3.1, 0.0, 1.6],
+    [0.0, 0.0, 2.6],
+    [0.0, 15.0, 1.2],
+    [-108.0, -77.7, 5.0],
+    [108.0, 77.7, 3.6],
+]
+
+
+@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
+def test_gradient_exptail(pars_ref):
+    pars_ref = np.array(pars_ref)
     model = ExpTailModel()
-
-    def value(pars):
-        return model(omegas, pars)[0]
-
-    def grad(pars):
-        return model(omegas, pars, 1)[1].T
-
-    assert_allclose(grad(pars0), nd.Gradient(value)(pars0), atol=1e-12, rtol=1e-12)
+    assert_allclose(
+        model(OMEGAS, pars_ref, 1)[1].T,
+        nd.Gradient(lambda pars: model(OMEGAS, pars)[0])(pars_ref),
+        atol=1e-12,
+        rtol=1e-12,
+    )
 
 
-def test_hessian_exptail():
-    omegas = np.linspace(0, np.pi, 10)
-    pars0 = np.array([1.2, 0.9, 2.2])
+@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
+def test_hessian_exptail(pars_ref):
+    pars_ref = np.array(pars_ref)
     model = ExpTailModel()
-
-    def value(pars):
-        return model(omegas, pars, 1)[1].T
-
-    def grad(pars):
-        return model(omegas, pars, 2)[2].transpose(2, 0, 1)
-
-    assert_allclose(grad(pars0), nd.Gradient(value)(pars0), atol=1e-12, rtol=1e-12)
+    assert_allclose(
+        model(OMEGAS, pars_ref, 2)[2].transpose(2, 0, 1),
+        nd.Gradient(lambda pars: model(OMEGAS, pars, 1)[1].T)(pars_ref),
+        atol=1e-12,
+        rtol=1e-12,
+    )
 
 
-def test_gradient_white():
-    omegas = np.linspace(0, np.pi, 10)
-    pars0 = np.array([1.2])
+PARS_REF_WHITE = [[-102.0], [20.0], [-0.1], [0.0], [5.5]]
+
+
+@pytest.mark.parametrize("pars_ref", PARS_REF_WHITE)
+def test_gradient_white(pars_ref):
+    pars_ref = np.array(pars_ref)
     model = WhiteNoiseModel()
-
-    def value(pars):
-        return model(omegas, pars)[0]
-
-    def grad(pars):
-        return model(omegas, pars, 1)[1][0]
-
-    assert_allclose(grad(pars0), nd.Gradient(value)(pars0), atol=1e-12, rtol=1e-12)
+    assert_allclose(
+        model(OMEGAS, pars_ref, 1)[1][0],
+        nd.Gradient(lambda pars: model(OMEGAS, pars)[0])(pars_ref),
+        atol=1e-12,
+        rtol=1e-12,
+    )
 
 
-def test_hessian_white():
-    omegas = np.linspace(0, np.pi, 10)
-    pars0 = np.array([1.2])
+@pytest.mark.parametrize("pars_ref", PARS_REF_WHITE)
+def test_hessian_white(pars_ref):
+    pars_ref = np.array(pars_ref)
     model = WhiteNoiseModel()
-
-    def value(pars):
-        return model(omegas, pars, 1)[1].T
-
-    def grad(pars):
-        return model(omegas, pars, 2)[2][0, 0]
-
-    assert_allclose(grad(pars0), nd.Gradient(value)(pars0), atol=1e-12, rtol=1e-12)
+    assert_allclose(
+        model(OMEGAS, pars_ref, 2)[2][0, 0],
+        nd.Gradient(lambda pars: model(OMEGAS, pars, 1)[1].T)(pars_ref),
+        atol=1e-12,
+        rtol=1e-12,
+    )

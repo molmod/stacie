@@ -24,29 +24,32 @@ from numpy.testing import assert_allclose
 from stacie.cost import LowFreqCost, logpdf_gamma
 from stacie.model import ExpTailModel
 
-LOGPDF_GAMMA_CASES = [(1.0, 1.0, 2.0), ([0.4, 1.1, 1.5], [1.0, 2.0, 3.0], [1.2, 4.3, 8.1])]
+LOGPDF_GAMMA_CASES = [
+    (1.0, 1.0, 2.0),
+    [1.2, 0.9, 2.2],
+    [0.3, 0.001, 0.7],
+    ([0.4, 1.1, 1.5], [1.0, 2.0, 3.0], [1.2, 4.3, 8.1]),
+]
 
 
-@pytest.mark.parametrize(("x", "kappa", "theta0"), LOGPDF_GAMMA_CASES)
-def test_logpdf_gamma_deriv1(x, kappa, theta0):
-    def value(theta):
-        return logpdf_gamma(x, kappa, theta)[0]
+@pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
+def test_logpdf_gamma_deriv1(x, kappa, theta_ref):
+    assert_allclose(
+        logpdf_gamma(x, kappa, theta_ref, 1)[1],
+        nd.Derivative(lambda theta: logpdf_gamma(x, kappa, theta)[0])(theta_ref),
+        atol=1e-12,
+        rtol=1e-12,
+    )
 
-    def grad(theta):
-        return logpdf_gamma(x, kappa, theta, 1)[1]
 
-    assert_allclose(grad(theta0), nd.Derivative(value)(theta0), atol=1e-12, rtol=1e-12)
-
-
-@pytest.mark.parametrize(("x", "kappa", "theta0"), LOGPDF_GAMMA_CASES)
-def test_logpdf_gamma_deriv2(x, kappa, theta0):
-    def value(theta):
-        return logpdf_gamma(x, kappa, theta, 1)[1]
-
-    def grad(theta):
-        return logpdf_gamma(x, kappa, theta, 2)[2]
-
-    assert_allclose(grad(theta0), nd.Derivative(value)(theta0), atol=1e-12, rtol=1e-12)
+@pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
+def test_logpdf_gamma_deriv2(x, kappa, theta_ref):
+    assert_allclose(
+        logpdf_gamma(x, kappa, theta_ref, 2)[2],
+        nd.Derivative(lambda theta: logpdf_gamma(x, kappa, theta, 1)[1])(theta_ref),
+        atol=1e-12,
+        rtol=1e-12,
+    )
 
 
 @pytest.fixture()
@@ -59,25 +62,31 @@ def mycost():
     return LowFreqCost(timestep, freqs, amplitudes, ndofs, model)
 
 
-def test_gradient_exptail(mycost):
-    pars0 = np.array([1.2, 0.9, 2.2])
-
-    def value(pars):
-        return mycost.funcgrad(pars)[0]
-
-    def grad(pars):
-        return mycost.funcgrad(pars)[1]
-
-    assert_allclose(grad(pars0), nd.Gradient(value)(pars0), atol=1e-12, rtol=1e-12)
+PARS_REF_EXP_TAIL = [
+    [1.2, 0.9, 2.2],
+    [3.0, 0.1, 2.5],
+    [0.1, 4.0, 2.7],
+    [108.0, 77.7, 3.6],
+]
 
 
-def test_hessian_exptail(mycost):
-    pars0 = np.array([1.2, 0.9, 2.2])
+@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
+def test_gradient_exptail(mycost, pars_ref):
+    pars_ref = np.array(pars_ref)
+    assert_allclose(
+        mycost.funcgrad(pars_ref)[1],
+        nd.Gradient(lambda pars: mycost.funcgrad(pars)[0])(pars_ref),
+        atol=1e-12,
+        rtol=1e-12,
+    )
 
-    def value(pars):
-        return mycost.funcgrad(pars)[1]
 
-    def grad(pars):
-        return mycost.hess(pars)
-
-    assert_allclose(grad(pars0), nd.Gradient(value)(pars0), atol=1e-12, rtol=1e-12)
+@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
+def test_hessian_exptail(mycost, pars_ref):
+    pars_ref = np.array(pars_ref)
+    assert_allclose(
+        mycost.hess(pars_ref),
+        nd.Gradient(lambda pars: mycost.funcgrad(pars)[1])(pars_ref),
+        atol=1e-12,
+        rtol=1e-12,
+    )
