@@ -217,6 +217,10 @@ def fit_model_spectrum(
     In addition to the properties returned by :func:`stacie.cost.cost_low`,
     the returned dictionary also contains the following items:
 
+    - ``pars_init``: the initial guess of the parameters.
+    - ``freqs_rest``: the frequencies not used for the fit.
+    - ``amplitudes_rest``: the amplitudes of the spectrum not used for the fit.
+    - ``ndofs_rest``: the degrees of freedom not used for the fit.
     - ``criterion``: the criterion whose minimizer determines the frequency cutoff.
     - ``cost_hess_evals``: the Hessian eigenvalues.
     - ``cost_hess_evecs``: the Hessian eigenvectors.
@@ -229,7 +233,7 @@ def fit_model_spectrum(
     - ``corrtime_tail_std``: the standard error of estimate of the slowest time scale.
     """
     # Maximize likelihood
-    pars_init = model.guess(freqs[:ncut], amplitudes[:ncut])
+    pars_init = model.guess(timestep, freqs[:ncut], amplitudes[:ncut], ndofs[:ncut])
     if not model.valid(pars_init):
         raise AssertionError("Infeasible guess")
     cost = LowFreqCost(timestep, freqs[:ncut], amplitudes[:ncut], ndofs[:ncut], model)
@@ -245,6 +249,7 @@ def fit_model_spectrum(
 
     # Compute all properties and derive the cutoff criterion
     props = cost.props(opt.x, 2)
+    props["pars_init"] = pars_init
     props["freqs_rest"] = freqs[ncut:]
     props["amplitudes_rest"] = amplitudes[ncut:]
     props["ndofs_rest"] = ndofs[ncut:]

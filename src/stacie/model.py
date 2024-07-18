@@ -19,6 +19,7 @@
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.optimize import minimize_scalar
 
 __all__ = ("SpectrumModel", "ExpTailModel", "WhiteNoiseModel")
 
@@ -47,8 +48,13 @@ class SpectrumModel:
         """Returns True when the parameters are within the feasible region."""
         return all(pmin < par < pmax for (pmin, pmax), par in zip(cls.bounds(), pars, strict=True))
 
-    @staticmethod
-    def guess(freqs: NDArray[float], amplitudes: NDArray[float]) -> NDArray[float]:
+    def guess(
+        self,
+        timestep: float,
+        freqs: NDArray[float],
+        amplitudes: NDArray[float],
+        ndofs: NDArray[float],
+    ) -> NDArray[float]:
         """Guess initial values of the parameters."""
         raise NotImplementedError
 
@@ -94,6 +100,13 @@ class ExpTailModel(SpectrumModel):
         - A quickly decaying part with no specific functional form,
           but confined within a small time lag domain centered at t=0.
         - An slow exponentially decaying part with a yet unknown characteristic time scale.
+
+    The three parameters of the model in this implementation are:
+
+    - The prefactor for the short-term (white noise) component.
+    - The prefactor for the exponential tail component.
+    - The correlation time of the exponential tail.
+      (This is in dimensionless time unit, i.e. assuming the time step is 1.)
     """
 
     name: str = "exptail"
@@ -103,12 +116,53 @@ class ExpTailModel(SpectrumModel):
         """Parameter bounds for the optimizer."""
         return [(0, np.inf), (0, np.inf), (0, np.inf)]
 
-    @staticmethod
-    def guess(freqs: NDArray[float], amplitudes: NDArray[float]) -> NDArray[float]:
+    def guess(
+        self,
+        timestep: float,
+        freqs: NDArray[float],
+        amplitudes: NDArray[float],
+        ndofs: NDArray[float],
+    ) -> NDArray[float]:
         """Guess initial values of the parameters."""
-        acfint_coarse = amplitudes[0]
-        tau = 2 / freqs[-1]
-        return np.array([acfint_coarse / 2, acfint_coarse / 2, tau])
+        # This is implemented as a 1D non-linear optimization of corrtime_tail.
+        # For each tau, the two remaining parameters are found with weighted linear regression.
+        omegas = 2 * np.pi * timestep * freqs
+        amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
+
+        def linear_fit_rmsd(
+            corrtime_tau: float, return_pars: bool = False
+        ) -> float | tuple[float, float]:
+            pars = np.array([1.0, 1.0, corrtime_tau])
+            basis = self(omegas, [1.0, 1.0, corrtime_tau], 1)[1][:2]
+            pars[:2] = np.linalg.lstsq((basis / amplitudes_std).T, amplitudes / amplitudes_std)[0]
+            if not self.valid(pars):
+                pars[:2] = amplitudes[0] / 2
+            if return_pars:
+                return pars
+            model = np.dot(pars[:2], basis)
+            return (((model - amplitudes) / amplitudes_std) ** 2).mean()
+
+        # Perform a quick scan of correlation times
+        cttmin = 0.2 / omegas[-1]
+        cttmax = 2 / omegas[1]
+        nscan = 10
+        ctts = np.exp(np.linspace(np.log(cttmin), np.log(cttmax), nscan))
+        rmsds = np.array([linear_fit_rmsd(ctt) for ctt in ctts])
+
+        # Try to identify and refine a bracket
+        ibest = rmsds.argmin()
+        if ibest not in (0, nscan - 1):
+            bracket = ctts[ibest - 1 : ibest + 2]
+
+            # Refine the bracket
+            minres = minimize_scalar(
+                linear_fit_rmsd, bracket, method="golden", options={"xtol": 0.1 * cttmin}
+            )
+            if minres.success:
+                return linear_fit_rmsd(minres.x, True)
+
+        # Minimize_scalar did not work: take the best from the scan.
+        return linear_fit_rmsd(ctts[ibest], True)
 
     @staticmethod
     def __call__(
@@ -185,8 +239,13 @@ class WhiteNoiseModel(SpectrumModel):
         """Parameter bounds for the optimizer."""
         return [(0, np.inf)]
 
-    @staticmethod
-    def guess(freqs: NDArray[float], amplitudes: NDArray[float]) -> NDArray[float]:
+    def guess(
+        self,
+        timestep: float,
+        freqs: NDArray[float],
+        amplitudes: NDArray[float],
+        ndofs: NDArray[float],
+    ) -> NDArray[float]:
         """Guess initial values of the parameters."""
         return np.array([amplitudes.mean()])
 

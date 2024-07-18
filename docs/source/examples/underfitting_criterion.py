@@ -58,15 +58,15 @@ def fit_poly(ncut, degree):
 degree = 3
 npar = degree + 1
 ncuts = np.arange(degree + 2, len(xgrid))
-ucfs = np.zeros(ncuts.shape)
+ufcs = np.zeros(ncuts.shape)
 nrvars = np.zeros(ncuts.shape)
 aics = np.zeros(ncuts.shape)
 for icut, ncut in enumerate(ncuts):
     normalized_residuals = (fit_poly(ncut, degree)[0] - yvalues[:ncut]) / sigma
-    ucfs[icut] = general_ufc(normalized_residuals)
+    ufcs[icut] = general_ufc(normalized_residuals)
     nrvars[icut] = (normalized_residuals**2).mean()
     aics[icut] = (normalized_residuals**2).sum() + 2 * (len(xgrid) - ncut)
-icut_best = ucfs.argmin()  # <--- change to override the cutoff
+icut_best = ufcs.argmin()  # <--- change to override the cutoff
 ncut_best = ncuts[icut_best]
 print("icut_best =", icut_best)
 print("ncut_best =", ncut_best)
@@ -80,7 +80,7 @@ print("ncut_best =", ncut_best)
 def plot_underfitting():
     nplot = 42
     fig, ax1 = plt.subplots()
-    ax1.plot(ncuts[:nplot], ucfs[:nplot] - ucfs.min(), color="C2", label="UCF")
+    ax1.plot(ncuts[:nplot], ufcs[:nplot] - ufcs.min(), color="C2", label="UFC")
     ax1.plot(ncuts[:nplot], aics[:nplot] - aics.min(), color="C0", label="AIC")
     ax1.axvline(ncut_best, color="k", alpha=0.3)
     ax1.set_ylim(0)
