@@ -27,11 +27,11 @@ The documentation is created using [Sphinx](https://www.sphinx-doc.org/).
 Edit the documentation Markdown files with a live preview by running the following command *in the root* of the repository:
 
 ```bash
-sphinx-reload docs/ --watch docs/source/ src/stacie/
+sphinx-autobuild docs/source docs/_build/html  --watch docs/source/ --watch src/stacie/
 ```
 
 Keep this running.
-Your browser will open a new tab with the preview.
+This will print a URL in the terminal that you open in your browser to preview the documentation.
 Now you can edit the documentation and see the result as soon as you save a file.
 
 Please, use [Semantic Line Breaks](https://sembr.org/)
