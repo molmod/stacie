@@ -36,7 +36,7 @@ def underfitting_criterion(props: dict[str, NDArray]) -> float:
     Parameters
     ----------
     props
-        The property dictionary returned by the ``LowFreqCost.props`` method.
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
 
     Returns
     -------
@@ -81,12 +81,12 @@ def general_ufc(residuals: NDArray[float]) -> float:
 
 
 def akaike_criterion(props: dict[str, NDArray]) -> float:
-    """Compute the Akaike Information Criterion for the whole spectrum: fitted + discarded.
+    """Compute the Akaike Information Criterion (AIC) for the whole spectrum: fitted + discarded.
 
     Parameters
     ----------
     props
-        The property dictionary returned by the ``LowFreqCost.props`` method.
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
 
     Returns
     -------

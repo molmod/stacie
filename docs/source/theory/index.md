@@ -1,18 +1,18 @@
 # Theory
 
-The theory section deals only with the integral of the autocorrelation function as such.
-It does not cover any specifics of the (physical) properties associated with this integral.
-Some of the derivations in the theory section can also be found in other references.
-They are included here to make the theory more accessible
-and to explain all the details needed to implement Stacie.
+The theory section consists of three parts:
+
+1. A section on the estimation of
+   [autocorrelation integrals](autocorrelation_integral/index.md) in general
+2. A section on [properties](properties/index.md) that can be deduced
+   from the autocorrelation function and integral.
+3. A few [advanced topics](advanced_topics/index.md),
+   mainly relevant for high-quality production simulations.
 
 ```{toctree}
 :hidden:
 
-notation.md
-overview.md
-model.md
-statistics.md
-cutoff.md
-comparison.md
+autocorrelation_integral/index.md
+properties/index.md
+advanced_topics/index.md
 ```

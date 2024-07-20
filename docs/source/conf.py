@@ -5,9 +5,24 @@
 
 import os
 
+import sphinx
+import sphinx.builders.latex.transforms
 from intersphinx_registry import get_intersphinx_mapping
 from packaging.version import Version
 from sphinx.ext.apidoc import main as main_api_doc
+
+# -- Utility functions -------------------------------------------------------
+
+
+def _get_version_info():
+    """Get the version as defined in pyproject.toml"""
+    from setuptools_scm import Configuration
+    from setuptools_scm._get_version_impl import _get_version
+
+    config = Configuration.from_file("../../pyproject.toml", "./")
+    verinfo = Version(_get_version(config, force_write_version_files=False))
+    return f"{verinfo.major}.{verinfo.minor}", str(verinfo)
+
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -15,6 +30,8 @@ from sphinx.ext.apidoc import main as main_api_doc
 project = "Stacie"
 copyright = "2024, Toon Verstraelen"  # noqa: A001
 author = "Toon Verstraelen"
+version, release = _get_version_info()
+
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -34,11 +51,66 @@ extensions = [
     "sphinx_copybutton",
     "sphinxcontrib.bibtex",
 ]
-
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 intersphinx_mapping = get_intersphinx_mapping(packages={"python", "numpy", "scipy"})
 nitpicky = True
+
+
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+html_theme = "furo"
+html_title = f"{project} {version}"
+
+
+def load_footer_icons():
+    """Include SVG footer icons as recommended in Furo template.
+
+    See https://pradyunsg.me/furo/customisation/footer/#using-embedded-svgs
+    """
+    icon_links = [
+        ("Center for Molecular Modeling", "cmm.svg", "https://molmod.ugent.be"),
+        ("Soete Laboratory", "soete.svg", "https://www.ugent.be/ea/emsme/en/research/soete"),
+        ("Ghent University", "ugent.svg", "https://ugent.be"),
+        ("GitHub", "github.svg", "https://github.com/molmod/stacie"),
+    ]
+    footer_icons = []
+    for name, path_svg, url in icon_links:
+        with open(path_svg) as fh:
+            svg = fh.read().strip()
+        footer_icons.append({"name": name, "url": url, "html": svg, "class": ""})
+    return footer_icons
+
+
+html_theme_options = {
+    "source_repository": "https://github.com/molmod/stacie",
+    "source_branch": "main",
+    "source_directory": "docs/",
+    "footer_icons": load_footer_icons(),
+}
+
+
+# -- Options for LaTeX output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/latex.html#module-latex
+latex_engine = "xelatex"
+latex_elements = {
+    "preamble": r"\input{macros.txt}",
+}
+latex_additional_files = ["macros.txt"]
+
+
+class DummyTransform(sphinx.builders.latex.transforms.BibliographyTransform):
+    def run(self, **kwargs):
+        pass
+
+
+sphinx.builders.latex.transforms.BibliographyTransform = DummyTransform
+
+
+# -- Configuration for myst-nb extensions -------------------------------------
+# https://myst-parser.readthedocs.io/en/latest/configuration.html
+# https://myst-nb.readthedocs.io/en/v0.13.2/use/config-reference.html
 
 myst_enable_extensions = [
     "dollarmath",
@@ -56,7 +128,6 @@ myst_enable_extensions = [
     "attrs_inline",
     "attrs_block",
 ]
-
 nb_custom_formats = {
     ".py": ["jupytext.reads", {"fmt": "py:percent"}],
 }
@@ -65,62 +136,22 @@ nb_merge_streams = True
 exclude_patterns = ["conf.py"]
 codeautolink_concat_default = True
 
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "furo"
-# Embedded SVG as recommended in Furo template.
-# See https://pradyunsg.me/furo/customisation/footer/#using-embedded-svgs
-with open("github.svg") as fh:
-    GITHUB_ICON_SVG = fh.read().strip()
-html_theme_options = {
-    "source_repository": "https://github.com/molmod/stacie",
-    "source_branch": "main",
-    "source_directory": "docs/",
-    "footer_icons": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/molmod/stacie",
-            "html": GITHUB_ICON_SVG,
-            "class": "",
-        },
-    ],
-}
-
-# -- Options for LaTeX output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/latex.html#module-latex
-latex_engine = "xelatex"
-latex_elements = {
-    "preamble": r"\input{macros.txt}",
-}
-latex_additional_files = ["macros.txt"]
-
-# -- Configuration for autodoc extensions ---------------------------------
+# -- Configuration for autodoc extensions -------------------------------------
+# https://sphinx-autodoc2.readthedocs.io/en/latest/config.html
+# https://github.com/tox-dev/sphinx-autodoc-typehints
 
 autodoc_default_options = {
     "undoc-members": True,
-    "show-inheritance": True,
     "members": None,
-    "inherited-members": True,
     "ignore-module-all": True,
 }
 napoleon_use_rtype = False
 add_module_names = False
 
 
-def autodoc_skip_member(_app, _what, name, _obj, skip, _options):
-    """Decide which parts to skip when building the API doc."""
-    if name == "__init__":
-        return False
-    return skip
-
-
-def setup(app):
-    """Set up sphinx."""
-    app.connect("autodoc-skip-member", autodoc_skip_member)
-
-
-# -- Configuration of mathjax extension -----------------------------------
+# -- Configuration of mathjax extension ---------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/math.html#module-sphinx.ext.mathjax
 
 mathjax3_config = {
     "tex": {
@@ -134,21 +165,16 @@ mathjax3_config = {
 }
 
 
-# -- Configuration of bibtex extension -----------------------------------
+# -- Configuration of bibtex extension ----------------------------------------
+# https://sphinxcontrib-bibtex.readthedocs.io/en/latest/usage.html#configuration
 
 bibtex_bibfiles = ["references.bib"]
 
-# -- Utility functions -------------------------------------------------------
 
+# -- Pre-build step to regenerate API documentation ---------------------------
 
-def _get_version_info():
-    """Get the version as defined in pyproject.toml"""
-    from setuptools_scm import Configuration
-    from setuptools_scm._get_version_impl import _get_version
-
-    config = Configuration.from_file("../../pyproject.toml", "./")
-    verinfo = Version(_get_version(config, force_write_version_files=False))
-    return f"{verinfo.major}.{verinfo.minor}", str(verinfo)
+# Note that autodoc2 is not used because it does not support NumPy style docstrings.
+# See https://github.com/sphinx-extensions2/sphinx-autodoc2/issues/33
 
 
 def _pre_build():
@@ -158,15 +184,18 @@ def _pre_build():
     )
     main_api_doc(
         [
-            "--append-syspath",
             "--output-dir=apidocs/",
             "../../src/stacie/",
             "--separate",
-            "--doc-project=API Reference",
+            "--force",
+            "--remove-old",
+            "--ext-autodoc",
+            "--ext-intersphinx",
+            "--ext-mathjax",
+            "--ext-githubpages",
+            "--doc-project=Application Programming Interface",
         ]
     )
 
 
-version, release = _get_version_info()
 _pre_build()
-html_title = f"{project} {version}"

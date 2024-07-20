@@ -162,10 +162,15 @@ $$
 In summary, the Fourier transform of a stationary stochastic process
 consists of uncorrelated real and imaginary components at each frequency.
 Furthermore, the variance of the Fourier transform is proportional to the power spectrum.
+This simple statistical structure makes the spectrum an easy starting point for further analysis.
+In comparison, the autocorrelation function itself has non-trivial correlated uncertainties,
+{cite:p}`bartlett_1955_introduction,boshnakov_1996_bartlett,francq_2009_bartlett`
+making it difficult to fit models directly to it (or its running integral).
 
 If we further assume that the sequence $\mathbf{\hat{x}}$ is the result of a periodic Gaussian process,
 the Fourier transform is normally distributed.
-In this case, the empirical power spectrum follows a scaled Chi-squared distribution.
+In this case, the empirical power spectrum follows a scaled Chi-squared distribution
+{cite:p}`ercole_2017_accurate`.
 For notational consistency, we will use the Gamma distribution:
 
 $$

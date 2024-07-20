@@ -1,12 +1,15 @@
 # Getting Started
 
-CONCEPT:
+Stacie is a Python software library that can be used interactively in a Jupyter Notebook,
+or can be embedded non-interactively in larger computational workflows.
 
-- Discuss our philosophy: no GUI, should work as a black box without manualy tweaking of parameters. Minor refinements are possible by tweaking cutoff.
+The algorithms in Stacie are robust enough to make reliable estimates of autocorrelation integrals
+without any user invention.
+Hence, there is no need to tweak its settings interactively through a graphical user interface.
+At best, some settings may be refined to improve the computational efficiency of the calculations.
+
 
 ```{toctree}
-:hidden:
-
 installation.md
 licenses.md
 usage.md

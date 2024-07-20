@@ -27,7 +27,7 @@ subject to the constraint that there is no risk of biasing the parameters.
 Both AIC and UFC can be used for the selection of a domain
 when fitting a smooth univariate model to noisy data.
 They is illustrated for a simple polynomial fit to noisy cosine data
-in the [Underfitting Criterion Demo](../examples/underfitting_criterion.py).
+in the [Underfitting Criterion Demo](../../examples/underfitting_criterion.py).
 This example may be helpful to gain some intuition for the theory derived below.
 
 

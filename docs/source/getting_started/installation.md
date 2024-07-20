@@ -2,7 +2,7 @@
 
 You should have the following installed on your computer before starting:
 
-- [Python](https://www.python.org/) ≥ 3.10
+- [Python](https://www.python.org/) ≥ 3.11
 - [Pip](https://pip.pypa.io/)
 
 Other dependencies will be installed with the `pip` command below.

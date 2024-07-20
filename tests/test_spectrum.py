@@ -19,7 +19,7 @@
 
 import numpy as np
 from numpy.testing import assert_allclose, assert_equal
-from stacie.spectrum import prepare_acfint
+from stacie.spectrum import compute_spectrum
 
 
 def test_basics():
@@ -31,7 +31,7 @@ def test_basics():
     )
     prefactor = 0.34
     timestep = 10.0
-    spectrum = prepare_acfint(sequences, prefactor=prefactor, timestep=timestep)
+    spectrum = compute_spectrum(sequences, prefactor=prefactor, timestep=timestep)
     # Test simple properties.
     assert spectrum.nfreq == 4
     assert_equal(spectrum.ndofs, [2, 4, 4, 2])

@@ -50,7 +50,6 @@ docs = [
     "packaging",
     "setuptools_scm",
     "sphinx",
-    "sphinx-autodoc2",
     "sphinx_autodoc_typehints",
     "sphinx-codeautolink",
     "sphinxcontrib-bibtex",

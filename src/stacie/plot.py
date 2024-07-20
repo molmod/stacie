@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Plot the results of the estimate of the ACF integral."""
+"""Plot various aspects of the results of the autocorrelation integral estimate."""
 
 import attrs
 import matplotlib as mpl
@@ -38,22 +38,22 @@ class UnitConfig:
     """
 
     acfint_unit_str: str = attrs.field(default="A s")
-    """The text used to label an ACF integral."""
+    """The text used for the autocorrelation integral unit."""
 
     acfint_unit: float = attrs.field(default=1.0)
-    """The unit of an ACF integral."""
+    """The unit of an autocorrelation integral."""
 
     acfint_fmt: str = attrs.field(default=".1f")
-    """The format string for an ACF integral."""
+    """The format string for an autocorrelation integral."""
 
     freq_unit_str: str = attrs.field(default="Hz")
-    """The text used to label a frequency value."""
+    """The text used for the frequency unit."""
 
     freq_unit: float = attrs.field(default=1.0)
     """The unit of a frequency."""
 
     time_unit_str: str = attrs.field(default="s")
-    """The text used to label a time value."""
+    """The text used for a time unit."""
 
     time_unit: float = attrs.field(default=1.0)
     """The unit of a frequency."""
@@ -73,8 +73,8 @@ def plot_results(path_pdf: str, rs: Result | list[Result], uc: UnitConfig | None
     path_pdf
         The PDF file where all the figures are stored.
     rs
-        A single Results instance or a list of them.
-        If the (first) result instance has model_spectrum set,
+        A single ``Result`` instance or a list of them.
+        If the (first) result instance has ``spectrum.amplitudes_ref`` set,
         theoretical expectations are included.
         When multiple results instances are given,
         only the first one is plotted in blue.
@@ -215,7 +215,7 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
 
 
 def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
-    """Plot the AC integral estimate (uncertainty) as a function fo cutoff frequency."""
+    """Plot the autocorrelation integral and uncertainty as a function fo cutoff frequency."""
     freqs = []
     acfints = []
     acfint_stds = []

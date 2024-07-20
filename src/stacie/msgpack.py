@@ -15,9 +15,23 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Simple extension of msgpack to support NumPy arrays.
+"""Simple extension of ``msgpack`` to support NumPy arrays.
 
-This is a much simpler implementation than msgpack-numpy.
+
+This is a much simpler `NumPy <https://numpy.org>`_ extensions
+of `msgpack <https://pypi.org/project/msgpack/>`_
+than `msgpack-numpy <https://pypi.org/project/msgpack-numpy/>`_.
+
+We recommend storing spectra and other results with the serialization functions below
+instead of using Python pickle files.
+Pickle files are unfit for long-term data preservation because they can only be read again
+if your future Python version is compatible with the Python packages used to create the files.
+`MessagePack <https://msgpack.org/>`_ files can be used in almost all programming languages.
+This NumPy extension is fairly straightforward:
+arrays are stored as binary blobs (extension type 93) in NPY format, with ``allow_pickle=False``.
+
+Arbitrary objects can be stored. They are unstructered with `cattrs <https://catt.rs/>`_.
+Files are compressed with ``xz`` by default (not optional).
 """
 
 import io
@@ -28,6 +42,9 @@ import cattrs
 import msgpack
 import numpy as np
 from numpy.typing import NDArray
+
+__all__ = ("load", "dump")
+
 
 T = TypeVar("T")
 
@@ -42,19 +59,19 @@ NUMPY_CODE = 93
 
 
 def load(path_nmpk_xz: str, cls: type[T]) -> T:
-    """Load data from a NumPy Message Pack and structure it with the given cls.
+    """Load data from a NumPy Message Pack and structure it with the given ``cls``.
 
     Parameters
     ----------
     path_nmpk_xz
         Path of an XZ-compressed NumPy Message Pack file.
     cls
-        The type to structure into
+        The type to structure into.
 
     Returns
     -------
     result
-        An instance cls, loaded from the file.
+        An instance of ``cls``, loaded from the file.
     """
     with lzma.open(path_nmpk_xz, mode="r") as fh:
         data = msgpack.unpack(fh, ext_hook=_numpy_ext_hook, strict_map_key=False)
@@ -68,19 +85,14 @@ def _numpy_ext_hook(code, data) -> NDArray:
 
 
 def dump(path_nmpk_xz: str, obj: Any):
-    """Load data from a NumPy Message Pack and structure it with the given cls.
+    """Unstructure an object and dump the data to a NumPy Message Pack file.
 
     Parameters
     ----------
     path_nmpk_xz
         Path of an XZ-compressed NumPy Message Pack file.
-    cls
-        The type to structure into
-
-    Returns
-    -------
-    result
-        An instance cls, loaded from the file.
+    obj
+        The type to structure into.
     """
     data = CONVERTER.unstructure(obj)
     with lzma.open(path_nmpk_xz, mode="w") as fh:

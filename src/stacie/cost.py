@@ -64,14 +64,29 @@ class LowFreqCost:
         props = cost_low(pars, 1, *attrs.astuple(self))
         return props["cost_value"], props["cost_grad"]
 
-    def hess(self, pars: NDArray[float]):
+    def hess(self, pars: NDArray[float]) -> NDArray[float]:
+        """Compute the Hessian matrix of the cost function."""
         if not self.model.valid(pars):
             return np.full((len(pars), len(pars)), np.inf)
         props = cost_low(pars, 2, *attrs.astuple(self))
         return props["cost_hess"]
 
     def props(self, pars: NDArray[float], deriv: int = 0) -> dict[str, NDArray[float]]:
-        """Compute properties of the fit for the given parameters."""
+        """Compute properties of the fit for the given parameters.
+
+        Parameters
+        ----------
+        pars
+            Parameter vector passed on to ``self.model``.
+        deriv
+            The maximum order of derivatives to compute: 0, 1 or 2.
+
+        Returns
+        -------
+        props
+            Dictionary with properties.
+            See :py:func:`cost_low` for details.
+        """
         if not self.model.valid(pars):
             raise ValueError("Invalid parameters")
         return cost_low(pars, deriv, *attrs.astuple(self))
@@ -90,7 +105,7 @@ def cost_low(
 ) -> dict[str, NDArray]:
     """Low-level implementation of the cost function.
 
-    Only ``pars`` and ``do_props`` parameters are documented below.
+    Only ``pars`` and ``deriv`` parameters are documented below.
     For all other parameters, see attributes of the :class:`LowFreqCost` class.
 
     Parameters
@@ -102,35 +117,33 @@ def cost_low(
 
     Returns
     -------
-    cost or props
-        If ``do_props==False``, the return value is minus the log-likelihood.
-        If ``do_props==True``, this function returns a dictionary with various intermediate results
-        of the loss function calculations.
+    props
+        A dictionary with various intermediate results of the loss function calculations.
         See notes for details.
 
     Notes
     -----
     The returned dictionary contains the following items:
 
-    - ``pars``: the given parameters
-    - ``timestep``: the given time step
-    - ``freqs``: the given frequencies
-    - ``amplitudes``: the given frequencies
-    - ``kappas``: shape parameters for the gamma distribution
-    - ``thetas``: scale parameters for the gamma distribution
-    - ``amplitudes``: the given frequencies
-    - ``ll``: the log likelihood
-    - ``cost_value``: the cost function value
-    - ``cost_hess``: the cost Gradient vector (if ``deriv>=1``)
-    - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``)
-    - ``amplitudes_model``: The model of the spectrum (function of pars)
-    - ``amplitudes_std_model``: The model of the standard error of the spectrum (function of pars)
+    - ``pars``: the given parameters.
+    - ``timestep``: the given time step.
+    - ``freqs``: the given frequencies.
+    - ``amplitudes``: the given frequencies.
+    - ``kappas``: shape parameters for the gamma distribution.
+    - ``thetas``: scale parameters for the gamma distribution.
+    - ``amplitudes``: the given frequencies.
+    - ``ll``: the log likelihood.
+    - ``cost_value``: the cost function value.
+    - ``cost_hess``: the cost Gradient vector (if ``deriv>=1``).
+    - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``).
+    - ``amplitudes_model``: The model of the spectrum (function of pars).
+    - ``amplitudes_std_model``: The model of the standard error of the spectrum (function of pars).
     """
     # Convert frequencies to dimensionless omegas, as if time step was 1
     # With RFFT, the highest omega would then be +pi.
     omegas = 2 * np.pi * timestep * freqs
 
-    amplitudes_model = model(omegas, pars, deriv)
+    amplitudes_model = model.compute(omegas, pars, deriv)
 
     # Log-likelihood computed with the scaled Chi-squared distribution.
     # The Gamma distribution is used because the scale parameter is easily incorporated.
@@ -185,7 +198,7 @@ def logpdf_gamma(x: NDArray[float], kappa: NDArray[float], theta: NDArray[float]
     -------
     results
         A list of results (function value and requested derivatives.)
-        All elements have the same shape as the kappa and theta arrays.
+        All elements have the same shape as the ``kappa`` and ``theta`` arrays.
     """
     kappa = np.asarray(kappa)
     theta = np.asarray(theta)

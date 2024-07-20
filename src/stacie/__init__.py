@@ -19,12 +19,12 @@
 
 from .estimate import estimate_acfint
 from .plot import UnitConfig, plot_results
-from .spectrum import prepare_acfint
+from .spectrum import compute_spectrum
 
 __all__ = (
     "__version__",
     "__version_tuple__",
-    "prepare_acfint",
+    "compute_spectrum",
     "estimate_acfint",
     "plot_results",
     "UnitConfig",

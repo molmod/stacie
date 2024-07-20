@@ -2,8 +2,8 @@
 
 The goal of Stacie is to estimate the integral of the autocorrelation function
 of a physical continuous time-dependent function with an infinite domain.
-In computational studies, however, one resorts to discrete and finite time series.
-We first formulate the Stacie's goal in the continuous case
+In computational studies, however, one resorts to discrete and finite time-dependent sequences.
+We first formulate Stacie's goal in the continuous case
 and then reformulate it in the discrete case.
 
 ## Continuous time, infinite domain

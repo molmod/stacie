@@ -28,7 +28,7 @@ __all__ = ("rpi_opt",)
 
 
 def rpi_opt(func, xbracket, *, nsplit: int = 5, nsweep=20, budget=20, cache=None, mode="max"):
-    """Robust positive integer generalization of bisection optimization.
+    """Robust positive integer generalization of the bisection algorithm.
 
     Parameters
     ----------
@@ -106,15 +106,13 @@ def rpi_opt(func, xbracket, *, nsplit: int = 5, nsweep=20, budget=20, cache=None
 def build_eval_grid(func, xbracket, nsplit=5, nsweep=100, cache=None):
     """Build and evaluate the grid.
 
-    See rpi_opt docstring for details.
+    Parameters are documented in :py:func:`rpi_opt`.
 
     Returns
     -------
-    func
-        The function to be evaluated on the grid.
     xgrid
         The grid of integer arguments.
-        It is guaranteed that the first and last one correspond to the bracket.
+        It is guaranteed that the first and last one correspond to the edges of the bracket.
     fgrid
         The corresponding function values.
     cache

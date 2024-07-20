@@ -27,7 +27,7 @@ The documentation is created using [Sphinx](https://www.sphinx-doc.org/).
 Edit the documentation Markdown files with a live preview by running the following command *in the root* of the repository:
 
 ```bash
-sphinx-autobuild docs/source docs/_build/html  --watch docs/source/ --watch src/stacie/
+sphinx-autobuild docs/source docs/build/html --watch docs/source/ --watch src/stacie/
 ```
 
 Keep this running.

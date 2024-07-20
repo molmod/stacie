@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Utility to prepare spectrum and other inputs for given time series."""
+"""Utility to prepare the spectrum and other inputs for given sequences."""
 
 from typing import Self
 
@@ -23,18 +23,18 @@ import attrs
 import numpy as np
 from numpy.typing import NDArray
 
-__all__ = ("Spectrum", "prepare_acfint")
+__all__ = ("Spectrum", "compute_spectrum")
 
 
 @attrs.define
 class Spectrum:
-    """Container class holding all the inputs for the ACF integral esstimate."""
+    """Container class holding all the inputs for the autocorrelation integral estimate."""
 
     ndofs: NDArray[int] = attrs.field()
     """The number of independnt contributions to each amplitude."""
 
     prefactor: float = attrs.field()
-    """The given prefactor for the spectrum to get the right units for the ACF integral."""
+    """The given prefactor for the spectrum to fix the units for the autocorrelation integral."""
 
     times: NDArray[float] = attrs.field()
     """The equidistant time axis of the sequences, always starts at zero."""
@@ -55,12 +55,12 @@ class Spectrum:
 
     @property
     def timestep(self) -> float:
-        """The time span between two subsequent items in the given time series."""
+        """The time between two subsequent elements in the given sequence."""
         return self.times[1] - self.times[0]
 
     @property
     def nfreq(self) -> int:
-        """The number of irfft frequency grid points."""
+        """The number of RFFT frequency grid points."""
         return len(self.freqs)
 
     def without_zero_freq(self) -> Self:
@@ -74,35 +74,34 @@ class Spectrum:
         )
 
 
-def prepare_acfint(
+def compute_spectrum(
     sequences: NDArray[float],
     *,
     prefactor: float = 0.5,
     timestep: float = 1,
     include_zero_freq: bool = True,
 ) -> Spectrum:
-    """Compute a spectrum and store all physical inputs in a ``Spectrum`` instance.
+    """Compute a spectrum and store all inputs for ``estimate_acfint`` in a ``Spectrum`` instance.
 
     Parameters
     ----------
     sequences
-        The input sequences, array with shape `(nindep, nstep)`,
+        The input sequences, array with shape ``(nindep, nstep)``,
         of which each row is a time-dependent sequence.
-        All sequences are assumed to be statistically independent.
-        The time step is assumed to be 1.
-        If needed, multiply the resulting acfint and acfint_err with the appropriate time step.
+        All sequences are assumed to be statistically independent and have length ``nstep``.
+        (Time correlations within one sequence are fine, obviously.)
     prefactor
         A factor to be multiplied with the autocorrelation function
         to give it a physically meaningful unit.
     timestep
-        The timestep of the input sequence.
+        The time step of the input sequence.
     include_zero_freq
         When set to False, the DC component of the spectrum is discarded.
 
     Returns
     -------
     spectrum
-        An instance of the ``Spectrum`` object holding all the inputs needed to estimate
+        A ``Spectrum`` object holding all the inputs needed to estimate
         the integral of the autocorrelation function.
     """
     # Get basic parameters of the input sequences.

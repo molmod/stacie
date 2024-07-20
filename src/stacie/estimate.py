@@ -41,11 +41,16 @@ class Result:
     """The input spectrum from which the ACF integral is estimated."""
 
     ncut: int = attrs.field()
-    """The low-pass cutoff index of the frequency axis, to suppress periodic boundary artifacts."""
+    """
+    The number of low-frequency spectrum data points used to fit the model.
+    This value is the best among a series of tested cutoffs,
+    i.e. by minimizing the cutoff criterion.
+    """
 
     history: dict[int, dict[str]] = attrs.field()
     """History of ncut optimization.
 
+    The key is ``ncut``, the number of frequencies fitted to.
     Each value is a dictionary returned by :func:`fit_model_spectrum`.
     """
 
@@ -60,10 +65,7 @@ class Result:
 
 
 class FCutWarning(Warning):
-    """Raised when there is an issue with the frequency cutoff.
-
-    The algorithm will try to continue, but the results are unlikely to be useful.
-    """
+    """Raised when there is an issue with the frequency cutoff."""
 
 
 def estimate_acfint(
@@ -82,25 +84,34 @@ def estimate_acfint(
     It is recommended to leave the keyword arguments to their default values,
     except for methodological testing.
 
+    This function fits a model to the low-frequency portion of the spectrum
+    and derives an estimate of the autocorrelation (and its uncertainty) from the fit.
+    The model is fitted to a part of the spectrum op to a cutoff frequency.
+    Multiple cutoffs are tested and the one that minimizes the ``cutoff_criterion``,
+    is selected as the best solution.
+
     Parameters
     ----------
     spectrum
-        A ``Spectrum`` instance holding all the inputs for the estimation of the ACF integral.
+        The power spectrum and related metadata,
+        used as inputs for the estimation of the ACF integral.
+        This object can be prepared with the function: :py:func:`stacie.spectrum.compute_spectrum`.
     fcutmax
-        The maximum cutoff on the frequency axis (unit of frequency).
+        The maximum cutoff on the frequency axis (units of frequency).
     maxscan
         The maximum number of cutoffs to test.
-        If 1, then only the given fcutmax is used.
+        If 1, then only the given ``fcutmax`` is used.
     ncutmin
         The minimal amount of frequency data points to use in the fit.
     ncutmax_hard
         The maximal amount of frequency data points to use in the fit.
-        This upper limit puts an upper bound on the computational cost of the fit.
-        If this upper limit is stricter than that of fcutmax, a warning is raised.
+        This puts an upper bound on the computational cost of the fit.
+        If this upper limit is stricter than that of ``fcutmax``, a warning is raised.
     model
-        The model used to fit the low-frequency regime.
+        The model used to fit the low-frequency part of the spectrum.
+        The default is an instance of :py:class:`stacie.model.ExpTailModel`.
     cutoff_criterion
-        The selected frequency cutoff minimizes this criterion.
+        The criterion function that is minimized to find the best cutoff.
     verbose
         Set this to ``True`` to print progress information of the frequency cutoff search
         to the standard output.
@@ -108,7 +119,7 @@ def estimate_acfint(
     Returns
     -------
     result
-        A ``Result`` instance with inputs, intermediate results and outputs.
+        The inputs, intermediate results and outputs or the algorithm.
     """
     if model is None:
         model = ExpTailModel()
@@ -195,7 +206,7 @@ def fit_model_spectrum(
 ) -> dict[str, NDArray]:
     """Optimize the parameter of a model for a given spectrum.
 
-    The parameters are the attributes of the ``LowFeqCost`` class,
+    The parameters are the attributes of the :py:class:`stacie.cost.LowFreqCost` class,
     except for the ones documented below.
 
     Parameters
@@ -218,19 +229,20 @@ def fit_model_spectrum(
     the returned dictionary also contains the following items:
 
     - ``pars_init``: the initial guess of the parameters.
+    - ``pars``: the optimized parameters.
     - ``freqs_rest``: the frequencies not used for the fit.
     - ``amplitudes_rest``: the amplitudes of the spectrum not used for the fit.
     - ``ndofs_rest``: the degrees of freedom not used for the fit.
-    - ``criterion``: the criterion whose minimizer determines the frequency cutoff.
+    - ``criterion``: the value of the criterion whose minimizer determines the frequency cutoff.
     - ``cost_hess_evals``: the Hessian eigenvalues.
     - ``cost_hess_evecs``: the Hessian eigenvectors.
     - ``covar``: the covariance matrix of the parameters.
     - ``acfint``: the estimate of the ACF integral.
-    - ``acfint_var``: the variance of estimate of the ACF integral.
-    - ``acfint_std``: the standard error of estimate of the ACF integral.
-    - ``corrtime_tail``: the slowest time scale in the sequences.
-    - ``corrtime_tail_var``: the variance of estimate of the slowest time scale.
-    - ``corrtime_tail_std``: the standard error of estimate of the slowest time scale.
+    - ``acfint_var``: the variance of the estimate of the ACF integral.
+    - ``acfint_std``: the standard error of the estimate of the ACF integral.
+    - ``corrtime_tail``: the estimate of the slowest time scale in the sequences.
+    - ``corrtime_tail_var``: the variance of the estimate of the slowest time scale.
+    - ``corrtime_tail_std``: the standard error of the estimate of the slowest time scale.
     """
     # Maximize likelihood
     pars_init = model.guess(timestep, freqs[:ncut], amplitudes[:ncut], ndofs[:ncut])
