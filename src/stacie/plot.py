@@ -150,7 +150,7 @@ def _plot_ref_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: in
 
 def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the fitted model spectrum."""
-    nplot = 2 * r.ncut
+    nplot = 2 * r.nfit
     plot_spectrum(ax, uc, r.spectrum, nplot)
     mean = r.props["amplitudes_model"]
     std = r.props["amplitudes_std_model"]
@@ -177,10 +177,10 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
 
 def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot all fitted model spectra (for all tested cutoffs)."""
-    for ncut, props in r.history.items():
+    for nfit, props in r.history.items():
         mean = props["amplitudes_model"]
         freqs = props["freqs"]
-        if ncut == r.ncut:
+        if nfit == r.nfit:
             ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="k", lw=2, zorder=2.5)
         else:
             ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2", lw=1, alpha=0.5)
@@ -195,7 +195,7 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the cutoff criterion as a function of cutoff frequency."""
     freqs = []
     criteria = []
-    for _ncut, props in sorted(r.history.items()):
+    for _nfit, props in sorted(r.history.items()):
         freqs.append(props["freqs"][-1])
         criteria.append(props["criterion"])
     freqs = np.array(freqs)
@@ -220,7 +220,7 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     acints = []
     acint_stds = []
     s = r.spectrum
-    for _ncut, props in sorted(r.history.items()):
+    for _nfit, props in sorted(r.history.items()):
         freqs.append(props["freqs"][-1])
         acints.append(props["acint"])
         acint_stds.append(props["acint_std"])
@@ -258,10 +258,10 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the eigenvalues of the Hessian as a function of the cutoff frequency."""
     freqs = []
     evals = []
-    for ncut, props in sorted(r.history.items()):
+    for nfit, props in sorted(r.history.items()):
         freqs.append(props["freqs"][-1])
         evals.append(props["hess_evals"])
-        if ncut == r.ncut:
+        if nfit == r.nfit:
             ax.plot([freqs[-1]], [evals[-1]], color="k", marker="o", ms=2, zorder=2.5)
     freqs = np.array(freqs)
     evals = np.array(evals)

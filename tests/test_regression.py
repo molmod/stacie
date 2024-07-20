@@ -111,8 +111,8 @@ def test_exptail_scan(regtest, fcutmax, name):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     if fcutmax is None:
         # By dropping the DC component,
-        # the number of frequencies becomes equal to ncutmax_hard.
-        # This means spectrum.freqs[ncut] will not work.
+        # the number of frequencies becomes equal to nfitmax_hard.
+        # This means spectrum.freqs[nfit] will not work.
         # Any occurrence of this will raise an error.
         spectrum = spectrum.without_zero_freq()
     flaky = fcutmax is None and name == "white1"

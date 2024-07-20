@@ -40,7 +40,7 @@ class Result:
     spectrum: Spectrum = attrs.field()
     """The input spectrum from which the autocorrelation integral is estimated."""
 
-    ncut: int = attrs.field()
+    nfit: int = attrs.field()
     """
     The number of low-frequency spectrum data points used to fit the model.
     This value is the best among a series of tested cutoffs,
@@ -48,9 +48,9 @@ class Result:
     """
 
     history: dict[int, dict[str]] = attrs.field()
-    """History of ncut optimization.
+    """History of nfit optimization.
 
-    The key is ``ncut``, the number of frequencies fitted to.
+    The key is ``nfit``, the number of frequencies fitted to.
     Each value is a dictionary returned by :func:`fit_model_spectrum`.
     """
 
@@ -58,10 +58,10 @@ class Result:
     def props(self) -> dict[str]:
         """Properties computed from the fit up to the selected spectrum cutoff.
 
-        This is a shortcut for ``history[ncut]``.
+        This is a shortcut for ``history[nfit]``.
         See return value of :func:`fit_model_spectrum` for more details.
         """
-        return self.history[self.ncut]
+        return self.history[self.nfit]
 
 
 class FCutWarning(Warning):
@@ -73,8 +73,8 @@ def estimate_acint(
     *,
     fcutmax: float | None = None,
     maxscan: int = 100,
-    ncutmin: int = 10,
-    ncutmax_hard: int = 1000,
+    nfitmin: int = 10,
+    nfitmax_hard: int = 1000,
     model: SpectrumModel | None = None,
     cutoff_criterion: CutoffCriterion = underfitting_criterion,
     verbose: bool = False,
@@ -87,8 +87,8 @@ def estimate_acint(
     This function fits a model to the low-frequency portion of the spectrum
     and derives an estimate of the autocorrelation (and its uncertainty) from the fit.
     The model is fitted to a part of the spectrum op to a cutoff frequency.
-    Multiple cutoffs are tested and the one that minimizes the ``cutoff_criterion``,
-    is selected as the best solution.
+    Multiple cutoffs are tested, each resulting in another number of spectrum amplitudes in the fit,
+    and the one that minimizes the ``cutoff_criterion`` is selected as the best solution.
 
     Parameters
     ----------
@@ -97,13 +97,14 @@ def estimate_acint(
         used as inputs for the estimation of the autocorrelation integral.
         This object can be prepared with the function: :py:func:`stacie.spectrum.compute_spectrum`.
     fcutmax
-        The maximum cutoff on the frequency axis (units of frequency).
+        The maximum cutoff on the frequency axis (units of frequency),
+        which corresponds to the largest value for ``nfit``.
     maxscan
         The maximum number of cutoffs to test.
         If 1, then only the given ``fcutmax`` is used.
-    ncutmin
+    nfitmin
         The minimal amount of frequency data points to use in the fit.
-    ncutmax_hard
+    nfitmax_hard
         The maximal amount of frequency data points to use in the fit.
         This puts an upper bound on the computational cost of the fit.
         If this upper limit is stricter than that of ``fcutmax``, a warning is raised.
@@ -111,7 +112,8 @@ def estimate_acint(
         The model used to fit the low-frequency part of the spectrum.
         The default is an instance of :py:class:`stacie.model.ExpTailModel`.
     cutoff_criterion
-        The criterion function that is minimized to find the best cutoff.
+        The criterion function that is minimized to find the best cutoff
+        (and thus number of points included in the fit).
     verbose
         Set this to ``True`` to print progress information of the frequency cutoff search
         to the standard output.
@@ -126,31 +128,31 @@ def estimate_acint(
     history = {}
 
     if verbose and maxscan > 1:
-        print("   ncut   criterion  incumbent")
+        print("   nfit   criterion  incumbent")
         scratch = {}
 
-    def compute_criterion(icut: int):
+    def compute_criterion(ifit: int):
         """Criterion to be minimized to find the best frequency cutoff.
 
         Parameters
         ----------
-        icut
-            The index in the ncuts list to get the right cutoff.
+        ifit
+            The index in the nfits list to get the right cutoff.
         include_failed
             When ``True``, add failed fits to the history.
         """
-        ncut = ncuts[icut]
+        nfit = nfits[ifit]
         props = fit_model_spectrum(
             spectrum.timestep,
             spectrum.freqs,
             spectrum.amplitudes,
             spectrum.ndofs,
-            ncut,
+            nfit,
             model,
             cutoff_criterion,
         )
         evals = props["cost_hess_evals"]
-        history[ncut] = props
+        history[nfit] = props
         criterion = (
             props["criterion"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
         )
@@ -159,30 +161,30 @@ def estimate_acint(
             best = lowest_criterion is None or criterion < lowest_criterion
             if best:
                 scratch["lowest_criterion"] = criterion
-            print(f"{ncut:7d}  {criterion:10.1f}  {'<---' if best else ''}")
+            print(f"{nfit:7d}  {criterion:10.1f}  {'<---' if best else ''}")
         return criterion
 
-    ncutmax = len(spectrum.freqs) if fcutmax is None else int(spectrum.freqs.searchsorted(fcutmax))
-    if ncutmax > ncutmax_hard:
-        ncutmax = ncutmax_hard
+    nfitmax = len(spectrum.freqs) if fcutmax is None else int(spectrum.freqs.searchsorted(fcutmax))
+    if nfitmax > nfitmax_hard:
+        nfitmax = nfitmax_hard
         warnings.warn(
             "The maximum frequency cutoff is lowered to constrain "
-            f"the maximum number of data points in the fit to {ncutmax}.",
+            f"the maximum number of data points in the fit to {nfitmax}.",
             FCutWarning,
             stacklevel=2,
         )
-    if ncutmax < ncutmin:
+    if nfitmax < nfitmin:
         raise ValueError("Too few data points for fit.")
 
     if maxscan == 1:
-        ncut = ncutmax
-        ncuts = [ncut]
+        nfit = nfitmax
+        nfits = [nfit]
         compute_criterion(0)
     else:
-        ncuts = build_xgrid_exp([ncutmin, ncutmax], maxscan)
-        rpi_opt(compute_criterion, [0, len(ncuts) - 1], mode="min")
+        nfits = build_xgrid_exp([nfitmin, nfitmax], maxscan)
+        rpi_opt(compute_criterion, [0, len(nfits) - 1], mode="min")
         if any(np.isfinite(props["criterion"]) for props in history.values()):
-            ncut = min((record["criterion"], key) for key, record in history.items())[1]
+            nfit = min((record["criterion"], key) for key, record in history.items())[1]
         else:
             warnings.warn(
                 "Could not find a suitable frequency cutoff. "
@@ -190,9 +192,9 @@ def estimate_acint(
                 FCutWarning,
                 stacklevel=2,
             )
-            ncut = ncuts[0]
+            nfit = nfits[0]
 
-    return Result(spectrum, ncut, dict(sorted(history.items())))
+    return Result(spectrum, nfit, dict(sorted(history.items())))
 
 
 def fit_model_spectrum(
@@ -200,7 +202,7 @@ def fit_model_spectrum(
     freqs: NDArray[float],
     amplitudes: NDArray[float],
     ndofs: NDArray[int],
-    ncut: int,
+    nfit: int,
     model: SpectrumModel,
     cutoff_criterion: CutoffCriterion,
 ) -> dict[str, NDArray]:
@@ -211,10 +213,11 @@ def fit_model_spectrum(
 
     Parameters
     ----------
-    ncut
+    nfit
         The number of low-frequency data points to use in the fit.
     cutoff_criterion
-        The selected frequency cutoff minimizes this criterion.
+        The criterion function that is minimized to find the best cutoff
+        (and thus number of points included in the fit).
 
     Returns
     -------
@@ -245,10 +248,10 @@ def fit_model_spectrum(
     - ``corrtime_tail_std``: the standard error of the estimate of the slowest time scale.
     """
     # Maximize likelihood
-    pars_init = model.guess(timestep, freqs[:ncut], amplitudes[:ncut], ndofs[:ncut])
+    pars_init = model.guess(timestep, freqs[:nfit], amplitudes[:nfit], ndofs[:nfit])
     if not model.valid(pars_init):
         raise AssertionError("Infeasible guess")
-    cost = LowFreqCost(timestep, freqs[:ncut], amplitudes[:ncut], ndofs[:ncut], model)
+    cost = LowFreqCost(timestep, freqs[:nfit], amplitudes[:nfit], ndofs[:nfit], model)
     opt = minimize(
         cost.funcgrad,
         pars_init,
@@ -262,9 +265,9 @@ def fit_model_spectrum(
     # Compute all properties and derive the cutoff criterion
     props = cost.props(opt.x, 2)
     props["pars_init"] = pars_init
-    props["freqs_rest"] = freqs[ncut:]
-    props["amplitudes_rest"] = amplitudes[ncut:]
-    props["ndofs_rest"] = ndofs[ncut:]
+    props["freqs_rest"] = freqs[nfit:]
+    props["amplitudes_rest"] = amplitudes[nfit:]
+    props["ndofs_rest"] = ndofs[nfit:]
     props["criterion"] = cutoff_criterion(props)
 
     # Compute the Hessian and its properties.
