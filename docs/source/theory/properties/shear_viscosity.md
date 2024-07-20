@@ -255,7 +255,7 @@ With these requirements, the viscosity can be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acfint, plot_results
+from stacie import compute_spectrum, estimate_acint, plot_results
 
 # Load all the required inputs, of which the details depend on your use case.
 # `pcomps` is assumed to be an array with 6 rows, in Voigt notation:
@@ -281,13 +281,13 @@ spectrum = compute_spectrum(
     prefactor=0.5 * volume / (temperature * boltzmann_const),
     timestep=timestep,
 )
-result = estimate_acfint(spectrum)
+result = estimate_acint(spectrum)
 print("The mean", seuqences.mean())
-print("Variance on the mean", result.props["acfint"])
+print("Variance on the mean", result.props["acint"])
 
 # The unit configuration assumes SI units are used systematically.
 uc = UnitConfig(
-    acfint_unit_str="Pa s",
+    acint_unit_str="Pa s",
     time_unit=1e-12,
     time_unit_str="ps",
     freq_unit=1e12,

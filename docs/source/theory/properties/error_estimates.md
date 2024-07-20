@@ -76,7 +76,7 @@ as it will result in more meaningful plots and time scales.
 If not available, you can set `timestep=1` or remove it from the script altogether.
 
 ```python
-from stacie import compute_spectrum, estimate_acfint, plot_results
+from stacie import compute_spectrum, estimate_acint, plot_results
 
 # Load your sequences and the time step.
 # The details depend on your use case.
@@ -93,9 +93,9 @@ spectrum = compute_spectrum(
     timestep=timestep,
     include_zero_freq=False,
 )
-result = estimate_acfint(spectrum)
+result = estimate_acint(spectrum)
 print("The mean", seuqences.mean())
-print("Variance on the mean", result.props["acfint"])
+print("Variance on the mean", result.props["acint"])
 plot_results("error.pdf", result)
 ```
 

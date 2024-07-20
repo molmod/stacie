@@ -199,18 +199,18 @@ class ExpTailModel(SpectrumModel):
             raise ValueError("Argument deriv must be zero or positive.")
         if omegas.ndim != 1:
             raise TypeError("Argument omegas must be a 1D array.")
-        acfint_short, acfint_tail, ctt = pars
+        acint_short, acint_tail, ctt = pars
         r = np.exp(-2 / ctt)
         cs = np.cos(omegas)
         denom = r**2 - 2 * r * cs + 1
         tail_model = ((1 - r) / (1 + r)) * (2 * (1 - r * cs) / denom - 1)
-        results = [acfint_short + acfint_tail * tail_model]
+        results = [acint_short + acint_tail * tail_model]
         if deriv >= 1:
             tail_model_diff_r = -2 * (cs - 1) * (r**2 - 1) / denom**2
             r_diff_ctt = 2 * r / ctt**2
             tail_model_diff_ctt = tail_model_diff_r * r_diff_ctt
             results.append(
-                np.array([np.ones(len(omegas)), tail_model, acfint_tail * tail_model_diff_ctt])
+                np.array([np.ones(len(omegas)), tail_model, acint_tail * tail_model_diff_ctt])
             )
         if deriv >= 2:
             tail_model_diff_r_r = 4 * (cs - 1) * (r**3 - 3 * r + 2 * cs) / denom**3
@@ -226,7 +226,7 @@ class ExpTailModel(SpectrumModel):
                         [
                             np.zeros(len(omegas)),
                             tail_model_diff_ctt,
-                            acfint_tail * tail_model_diff_ctt_ctt,
+                            acint_tail * tail_model_diff_ctt_ctt,
                         ],
                     ]
                 )
@@ -240,13 +240,13 @@ class ExpTailModel(SpectrumModel):
         cls, pars: NDArray[float], covar: NDArray[float], timestep: float
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters."""
-        acfint_var = covar[:2, :2].sum()
+        acint_var = covar[:2, :2].sum()
         corrtime_tail_var = covar[2, 2] * timestep**2
         return {
             "model": cls.name,
-            "acfint": pars[:2].sum(),
-            "acfint_var": acfint_var,
-            "acfint_std": np.sqrt(acfint_var) if acfint_var >= 0 else np.inf,
+            "acint": pars[:2].sum(),
+            "acint_var": acint_var,
+            "acint_std": np.sqrt(acint_var) if acint_var >= 0 else np.inf,
             "corrtime_tail": pars[2] * timestep,
             "corrtime_tail_var": corrtime_tail_var,
             "corrtime_tail_std": (np.sqrt(corrtime_tail_var) if corrtime_tail_var >= 0 else np.inf),
@@ -301,9 +301,9 @@ class WhiteNoiseModel(SpectrumModel):
         """Return additional properties derived from model-specific parameters."""
         return {
             "model": cls.name,
-            "acfint": pars[0],
-            "acfint_var": covar[0, 0],
-            "acfint_std": np.sqrt(covar[0, 0]) if covar[0, 0] >= 0 else np.inf,
+            "acint": pars[0],
+            "acint_var": covar[0, 0],
+            "acint_std": np.sqrt(covar[0, 0]) if covar[0, 0] >= 0 else np.inf,
             "corrtime_tail": np.inf,
             "corrtime_tail_var": np.inf,
             "corrtime_tail_std": np.inf,

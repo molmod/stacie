@@ -30,15 +30,15 @@ from .model import ExpTailModel, SpectrumModel
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
 
-__all__ = ("Result", "FCutWarning", "estimate_acfint", "fit_model_spectrum")
+__all__ = ("Result", "FCutWarning", "estimate_acint", "fit_model_spectrum")
 
 
 @attrs.define
 class Result:
-    """Container class holding all the results of the ACF integral estimate."""
+    """Container class holding all the results of the autocorrelation integral estimate."""
 
     spectrum: Spectrum = attrs.field()
-    """The input spectrum from which the ACF integral is estimated."""
+    """The input spectrum from which the autocorrelation integral is estimated."""
 
     ncut: int = attrs.field()
     """
@@ -68,7 +68,7 @@ class FCutWarning(Warning):
     """Raised when there is an issue with the frequency cutoff."""
 
 
-def estimate_acfint(
+def estimate_acint(
     spectrum: Spectrum,
     *,
     fcutmax: float | None = None,
@@ -94,7 +94,7 @@ def estimate_acfint(
     ----------
     spectrum
         The power spectrum and related metadata,
-        used as inputs for the estimation of the ACF integral.
+        used as inputs for the estimation of the autocorrelation integral.
         This object can be prepared with the function: :py:func:`stacie.spectrum.compute_spectrum`.
     fcutmax
         The maximum cutoff on the frequency axis (units of frequency).
@@ -237,9 +237,9 @@ def fit_model_spectrum(
     - ``cost_hess_evals``: the Hessian eigenvalues.
     - ``cost_hess_evecs``: the Hessian eigenvectors.
     - ``covar``: the covariance matrix of the parameters.
-    - ``acfint``: the estimate of the ACF integral.
-    - ``acfint_var``: the variance of the estimate of the ACF integral.
-    - ``acfint_std``: the standard error of the estimate of the ACF integral.
+    - ``acint``: the estimate of the autocorrelation integral.
+    - ``acint_var``: the variance of the estimate of the autocorrelation integral.
+    - ``acint_std``: the standard error of the estimate of the autocorrelation integral.
     - ``corrtime_tail``: the estimate of the slowest time scale in the sequences.
     - ``corrtime_tail_var``: the variance of the estimate of the slowest time scale.
     - ``corrtime_tail_std``: the standard error of the estimate of the slowest time scale.

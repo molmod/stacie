@@ -81,7 +81,7 @@ def compute_spectrum(
     timestep: float = 1,
     include_zero_freq: bool = True,
 ) -> Spectrum:
-    """Compute a spectrum and store all inputs for ``estimate_acfint`` in a ``Spectrum`` instance.
+    """Compute a spectrum and store all inputs for ``estimate_acint`` in a ``Spectrum`` instance.
 
     Parameters
     ----------

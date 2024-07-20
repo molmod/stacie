@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Unit tests for ``acfint.rpi``."""
+"""Unit tests for ``acint.rpi``."""
 
 import numpy as np
 import pytest

@@ -23,7 +23,7 @@ because the algorithm is known and expected to be flaky for specific combination
 
 import pytest
 from path import Path
-from stacie.estimate import estimate_acfint
+from stacie.estimate import estimate_acint
 from stacie.model import ExpTailModel, SpectrumModel, WhiteNoiseModel
 from stacie.msgpack import dump, load
 from stacie.plot import plot_results
@@ -46,7 +46,7 @@ def output_test_result(prefix, res):
 
 def register_result(regtest, res):
     with regtest:
-        print(f"ACF Int  = {res.props['acfint']:.5e} ± {res.props['acfint_std']:.5e}")
+        print(f"AC Int   = {res.props['acint']:.5e} ± {res.props['acint_std']:.5e}")
         print(f"Tau tail = {res.props['corrtime_tail']:.5e} ± {res.props['corrtime_tail_std']:.5e}")
         print(f"Log lh   = {res.props['ll']:.5e}")
         print("---")
@@ -61,7 +61,7 @@ def check_noscan_single(
     model: SpectrumModel | None = None,
     flaky: bool = False,
 ):
-    res = estimate_acfint(spectrum, fcutmax=fcutmax, maxscan=1, model=model)
+    res = estimate_acint(spectrum, fcutmax=fcutmax, maxscan=1, model=model)
     if not flaky:
         register_result(regtest, res)
     output_test_result(prefix, res)
@@ -98,7 +98,7 @@ def test_exptail_noscan_multi(regtest, names):
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-        r = estimate_acfint(spectrum, fcutmax=0.005, maxscan=1)
+        r = estimate_acint(spectrum, fcutmax=0.005, maxscan=1)
         if not flaky:
             register_result(regtest, r)
         res.append(r)
@@ -116,7 +116,7 @@ def test_exptail_scan(regtest, fcutmax, name):
         # Any occurrence of this will raise an error.
         spectrum = spectrum.without_zero_freq()
     flaky = fcutmax is None and name == "white1"
-    res = estimate_acfint(spectrum, fcutmax=fcutmax, maxscan=10)
+    res = estimate_acint(spectrum, fcutmax=fcutmax, maxscan=10)
     if not flaky:
         register_result(regtest, res)
     prefix = f"exptail_scan_{name}"
@@ -135,7 +135,7 @@ def test_scan_multi(regtest, zero_freq, model, names):
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
         if not zero_freq:
             spectrum = spectrum.without_zero_freq()
-        r = estimate_acfint(spectrum, fcutmax=0.01, maxscan=10, model=model)
+        r = estimate_acint(spectrum, fcutmax=0.01, maxscan=10, model=model)
         if not flaky:
             register_result(regtest, r)
         res.append(r)

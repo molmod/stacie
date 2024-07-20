@@ -57,7 +57,7 @@ class LowFreqCost:
         Returns
         -------
         negll
-            The negative log-likelihood of the parameters for the given ACF data.
+            The negative log-likelihood of the parameters.
         """
         if not self.model.valid(pars):
             return np.inf, np.full(len(pars), np.inf)

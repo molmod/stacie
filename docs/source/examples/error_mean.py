@@ -17,7 +17,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import quad
-from stacie import UnitConfig, compute_spectrum, estimate_acfint
+from stacie import UnitConfig, compute_spectrum, estimate_acint
 from stacie.plot import (
     plot_criterion,
     plot_fitted_spectrum,
@@ -141,8 +141,8 @@ spectrum = compute_spectrum(
 # The integral has units of length squared, $\ell^2$. (It is the variance of the mean.)
 # In MC sampling, time and frequency are fictitious and therefore made dimensionless here.
 uc = UnitConfig(
-    acfint_fmt=".1e",
-    acfint_unit_str=r"$\ell^2$",
+    acint_fmt=".1e",
+    acint_unit_str=r"$\ell^2$",
     freq_unit_str="1",
     time_unit_str="1",
 )
@@ -157,16 +157,16 @@ plot_spectrum(ax, uc, spectrum, 180)
 # In the following, a model is fitted to the spectrum to get a more precise estimate.
 
 # %%
-result = estimate_acfint(spectrum, verbose=True)
+result = estimate_acint(spectrum, verbose=True)
 
 # %%
 # The essential result:
-error_mc = np.sqrt(result.props["acfint"])
+error_mc = np.sqrt(result.props["acint"])
 print(f"Error of the mean = {error_mc:.5f}")
 
 # Because Stacie can estimate errors of the autocorrelation integral,
 # it can also estimate errors of errors of means.
-error_of_error_mc = 0.5 * result.props["acfint_std"] / error_mc
+error_of_error_mc = 0.5 * result.props["acint_std"] / error_mc
 print(f"Uncertainty of the error of mean = {error_of_error_mc:.5f}")
 
 # %%
