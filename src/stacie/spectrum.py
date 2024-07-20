@@ -36,8 +36,11 @@ class Spectrum:
     prefactor: float = attrs.field()
     """The given prefactor for the spectrum to fix the units for the autocorrelation integral."""
 
-    times: NDArray[float] = attrs.field()
-    """The equidistant time axis of the sequences, always starts at zero."""
+    timestep: float = attrs.field()
+    """The time between two subsequent elements in the given sequence."""
+
+    nstep: int = attrs.field()
+    """The number of time steps in the input."""
 
     freqs: NDArray[float] = attrs.field()
     """The equidistant frequency axis of the spectrum."""
@@ -47,16 +50,6 @@ class Spectrum:
 
     amplitudes_ref: NDArray[float] | None = attrs.field(default=None)
     """Optionally, the known analytical model of the power spectrum, on the same frequency grid."""
-
-    @property
-    def nstep(self) -> int:
-        """The number of time steps of the input sequences."""
-        return len(self.times)
-
-    @property
-    def timestep(self) -> float:
-        """The time between two subsequent elements in the given sequence."""
-        return self.times[1] - self.times[0]
 
     @property
     def nfreq(self) -> int:
@@ -106,7 +99,6 @@ def compute_spectrum(
     """
     # Get basic parameters of the input sequences.
     nindep, nstep = sequences.shape
-    times = np.arange(nstep) * timestep
     freqs = np.fft.rfftfreq(nstep, d=timestep)
 
     # Number of "degrees of freedom" (contributions) to each amplitude
@@ -125,4 +117,4 @@ def compute_spectrum(
         freqs = freqs[1:]
         amplitudes = amplitudes[1:]
 
-    return Spectrum(ndofs, prefactor, times, freqs, amplitudes)
+    return Spectrum(ndofs, prefactor, timestep, nstep, freqs, amplitudes)

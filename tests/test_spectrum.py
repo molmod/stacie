@@ -38,10 +38,6 @@ def test_basics():
     assert spectrum.nstep == 6
     assert spectrum.prefactor == prefactor
     assert spectrum.timestep == timestep
-    assert spectrum.times[0] == 0.0
-    assert spectrum.times[1] == timestep
-    assert spectrum.times[-1] == timestep * 5
-    assert len(spectrum.times) == 6
     assert spectrum.freqs[0] == 0.0
     assert len(spectrum.freqs) == 4
     assert_allclose(spectrum.freqs[1], 1 / (6 * timestep))
