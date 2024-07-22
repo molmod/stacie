@@ -226,17 +226,17 @@ There are two reasons to exclude parts of the spectrum from the fit:
 - The Exponential Tail model of Stacie is only applicable to low-frequency data.
   It is not designed to describe all features in a spectrum.
 
-The log likelihood of the model $C^\text{model}_k$ becomes:
+The log likelihood of the model $C^\text{model}_k(\mathbf{b})$ with parameter vector $\mathbf{b}$ becomes:
 
 $$
-    \ln\mathcal{L}
+    \ln\mathcal{L}(\mathbf{b})
     &=\sum_{k\in K} \ln p_{\gdist(\kappa_k,\theta_k)}(\hat{C}_k)
     \\
     &=\sum_{k\in K}
       -\ln \Gamma(\kappa_k)
-      - \ln(\theta_k)
-      + (\kappa_k - 1)\ln\left(\frac{\hat{C}_k}{\theta_k}\right)
-      - \frac{\hat{C}_k}{\theta_k}
+      - \ln\bigl(\theta_k(\mathbf{b})\bigr)
+      + (\kappa_k - 1)\ln\left(\frac{\hat{C}_k}{\theta_k(\mathbf{b})}\right)
+      - \frac{\hat{C}_k}{\theta_k(\mathbf{b})}
 $$
 
 with
@@ -244,11 +244,50 @@ with
 $$
     \kappa_k &= \frac{\nu_k}{2}
     \\
-    \theta_k &= \frac{2 C^\text{model}_k}{\nu_k}
+    \theta_k(\mathbf{b}) &= \frac{2 C^\text{model}_k(\mathbf{b})}{\nu_k}
 $$
 
-A true optimum is characterized by a negative-definite Hessian
-of $\ln \mathcal{L}$ with respect to the model parameters.
-The covariance matrix of the estimated parameters equals minus the inverse of the Hessian.
+This log-likelihood is maximized to estimate the model parameters.
+The zero-frequency limit of the fitted model is then the estimate of the autocorrelation integral.
 
-To facilitate the implementation of the maximization with SciPy, $-\ln \mathcal{L}$ is minimized.
+For compatibility with the SciPy optimizers,
+the cost function $\ell(\mathbf{b}) = -\ln \mathcal{L}(\mathbf{b})$ is minimized.
+Stacie implements first and second derivatives of $\ell(\mathbf{b})$,
+and also a good initial guess of the parameters, using efficient vectorzed NumPy code.
+These features make the optimization of the parameters both efficient and reliable.
+
+The Hessian computed with the estimated parameters, $\ell(\mathbf{\hat{b}})$,
+must be positive definite.
+(If non-positive eigenvalues are found, the optimization is treated as failed.)
+
+$$
+    \mathbf{H} > 0 \quad \text{with}
+    \quad
+    H_{ij} =
+        \left.
+        \frac{\partial^2 \ell}{\partial b_i \partial b_j}
+        \right|_{\mathbf{b}=\mathbf{\hat{b}}}
+$$
+
+The estimated covariance matrix of the estimated parameters
+is approximated by the inverse of the Hessian:
+{cite:p}`millar_2011_maximum`.
+
+$$
+    \widehat{\cov}[\hat{b}_i,\hat{b}_j] = (-\mathbf{H}^{-1})_{ij}
+$$
+
+This covariance matrix is used to estimate the uncertainties on the model parameters
+and thus also on the autocorrelation integral.
+More accurate covariance estimates can be obtained with Monte Carlo sampling,
+but this is not implemented in Stacie.
+
+:::{note}
+The estimated covariance has no factor $N_\text{fit}/(N_\text{fit} - N_\text{par})$,
+where $N_\text{fit}$ is the amount of data in the fit
+and $N_\text{par}$ is the number of parameters.
+This is factor is specific for the case of (non)linear regression with normal deviates of
+which the standard deviation is not known a priori {cite:p}`millar_2011_maximum`.
+Here, the amplitudes are Gamma-distributed with a known shape parameter.
+Only the scale parameter at each frequency is predicted by the model.
+:::

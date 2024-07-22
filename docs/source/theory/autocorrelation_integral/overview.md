@@ -46,6 +46,13 @@ It is computed with a forward and an inverse transform, after which $\eta$ can b
 When $\eta$ is derived from the Fourier transform, the inverse can be skipped.
 As we will see later, there are other advantages to using this limit to compute the integral.
 
+:::{note}
+Some derivations of Green-Kubo relations of transport properties,
+conventionally formulated as integrals of autocorrelation functions,
+also express them as the zero-frequency limit of an appropriate spectrum
+{cite:p}`hansen_2013_theory`.
+:::
+
 ## Discretized time, periodic sequences
 
 A similar result can be formulated for discrete and periodic sequences, $\hat{x}_n$.
