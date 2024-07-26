@@ -50,18 +50,25 @@ mpl.rc_file("matplotlibrc")
 # $$
 #
 # where $K$ is the force constant and $r_0$ the equilibrium bond length.
-# The sampled probability density is a Boltzmann distribution with inverse temperature $\beta$.
+# The sampled probability density is a Boltzmann distribution:
 #
-# For simplicity, this example works in arbitrary units and uses round parameter values.
+# $$
+#     p_r(r) = \frac{1}{Z} \exp\left(-\frac{U(r)}{k_\text{B}T}\right)
+# $$
 #
-# The MCMC implementation below is non-standard in the sense that it
-# is vectorized to generate multiple sequences in parallel.
+# where the normalization $Z$ is the classical partition function.
+#
+# In this example, the force constant and bond length of the lithium dimer are used,
+# with parameters from {cite:t}`zhao_2022_bond` converted to atomic units.
+# A high temperature is used to skew the distribution to larger distances.
 
 # %%
-K = 0.4
-R0 = 1.5
-BETA = 50.0
-PROPOSAL_STEP = 0.05
+K = 0.015
+R0 = 5.150
+TEMPERATURE = 1000
+BOLTZMANN = 3.167e-6
+BETA = 1 / (BOLTZMANN * TEMPERATURE)
+PROPOSAL_STEP = 0.1
 
 
 def logprob(r):
@@ -70,6 +77,26 @@ def logprob(r):
     return -BETA * energy
 
 
+def plot_potential_dist():
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    rgrid = np.linspace(0.5 * R0, 2 * R0, 100)
+    ax2.sharex(ax1)
+    ax1.plot(rgrid, -logprob(rgrid) / BETA)
+    ax1.set_ylabel(r"Potential energy [E$_\text{h}$]")
+    ax2.plot(rgrid, np.exp(logprob(rgrid)))
+    ax2.set_ylabel("Boltzmann factor\n(unnormalized probability density)")
+    ax2.set_xlabel("Internuclear distance [a$_0$]")
+
+
+plot_potential_dist()
+
+
+# %% [markdown]
+# The MCMC implementation below is non-standard in the sense that it
+# is vectorized to generate multiple sequences in parallel.
+
+
+# %%
 def sample_mcmc_chain(niter, stride, ndim, burnin, seed=42):
     """Sample independent Metroplis Markov Chains with the Metropolis Monte Carlo algorithm."""
     rng = np.random.default_rng(seed)
@@ -104,20 +131,20 @@ mean_mc = sequences.mean()
 print(f"Monte Carlo E[r] ≈ {mean_mc:.5f} > {R0:.5f}")
 
 # %% [markdown]
-# Because of the finite temperature,
+# Because of the finite temperature and the anharmonicity of the potential,
 # the average distance is greater than the equilibrium bond length.
 
 
 # %%
 # Plot the beginning of a few sequences.
-# The arbitrary unit of length is represented by $\ell$.
+# The atomic unit of length is the Bohr radius, $\mathrm{a}_0$.
 def plot_chains():
     fig, ax = plt.subplots()
     ax.plot(sequences[0][:500])
     ax.plot(sequences[1][:500])
     ax.plot(sequences[2][:500])
     ax.set_xlabel("Step")
-    ax.set_ylabel(r"Bond length [$\ell$]")
+    ax.set_ylabel(r"Bond length [a$_0$]")
     ax.set_title("Markov Chain samples")
 
 
@@ -126,9 +153,6 @@ plot_chains()
 # %% [markdown]
 #
 # The sequences in the plot are clearly time-correlated.
-# The bond length distribution is skewed to larger values
-# due to the anharmonicity (in $r$) of the Kratzer--Feus potential.
-# As a result, the average bond length is also larger then the equilibrium value.
 # The following cells show how Stacie can be used to compute the uncertainty of this average,
 # taking into account that not all samples are independent due to time correlations.
 
@@ -146,12 +170,16 @@ spectrum = compute_spectrum(
     include_zero_freq=False,
 )
 
-# The UnitConfig object contains settings that are reused by most plotting functions.
-# The integral has units of length squared, $\ell^2$. (It is the variance of the mean.)
+# %% [markdown]
+# The `UnitConfig` object contains settings that are reused by most plotting functions.
+# The integral has units of length squared, $\mathrm{a}_0^2$.
+# (It is the variance of the mean.)
 # In MC sampling, time and frequency are fictitious and therefore made dimensionless here.
+
+# %%
 uc = UnitConfig(
     acint_fmt=".1e",
-    acint_unit_str=r"$\ell^2$",
+    acint_unit_str=r"a$^2_0$",
     freq_unit_str="1",
     time_unit_str="1",
 )
@@ -160,7 +188,7 @@ plot_spectrum(ax, uc, spectrum, 180)
 
 # %% [markdown]
 # From the spectrum, one can already visually estimate the variance of the mean:
-# the limit to zero frequency is about $2.0 \times 10^{-5}\,\ell^2$.
+# the limit to zero frequency is about $3.5 \times 10^{-5}\,\mathrm{a}_0^2$.
 # By normalizing the spectrum with the total simulation time,
 # the spectrum has a unit of length squared, which is correct for the variance in this case.
 # In the following, a model is fitted to the spectrum to get a more precise estimate.
@@ -210,8 +238,8 @@ plot_uncertainty(ax, uc, result)
 # is on the order of the estimated uncertainty of the MC result.
 
 # %%
-numer_quad = quad(lambda r: r * np.exp(logprob(r)), 0, 1000)[0]
-denom_quad = quad(lambda r: np.exp(logprob(r)), 0, 1000)[0]
+numer_quad = quad(lambda r: r * np.exp(logprob(r)), 0, 50)[0]
+denom_quad = quad(lambda r: np.exp(logprob(r)), 0, 50)[0]
 mean_quad = numer_quad / denom_quad
 print(f"Quadrature  E[r]   ≈ {mean_quad:8.5f}")
 print(f"Monte Carlo E[r]   ≈ {mean_mc:8.5f}")
@@ -225,7 +253,7 @@ print(f"Estimated MC error = {error_mc:8.5f}")
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(mean_mc - 1.6284) > 1e-3:
+if abs(mean_mc - 5.28807) > 1e-3:
     raise ValueError(f"Wrong mean_mc: {mean_mc:.5f}")
-if abs(error_mc - 0.0047) > 1e-3:
+if abs(error_mc - 0.00577) > 1e-3:
     raise ValueError(f"Wrong error_mc: {error_mc:.5f}")
