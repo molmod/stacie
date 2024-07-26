@@ -70,14 +70,14 @@ def general_ufc(residuals: NDArray[float]) -> float:
     """
     if residuals.ndim != 1:
         raise TypeError("The residuals must be given in a 1D array.")
-    nres = len(residuals)
-    if nres < 2:
+    nfit = len(residuals)
+    if nfit < 2:
         raise TypeError("The underfitting criterion is meaningless for zero or one residual.")
-    scs = np.zeros(nres + 1)
+    scs = np.zeros(nfit + 1)
     np.cumsum(residuals, out=scs[1:])
     scs -= scs[-1] / 2
     scs *= 2
-    return (scs**2).mean() - nres
+    return (scs**2).mean() - nfit
 
 
 def akaike_criterion(props: dict[str, NDArray]) -> float:

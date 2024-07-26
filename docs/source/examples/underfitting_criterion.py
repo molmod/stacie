@@ -50,9 +50,10 @@ yvalues = ytruth + rng.normal(0, sigma, len(xgrid))
 # Fit a polynomial to the data, using an increasing number of points.
 def fit_poly(nfit, degree):
     """Fit a polynomial to the data up to nfit, using a Chebyshev basis."""
-    dm = np.polynomial.chebyshev.chebvander(xgrid[:nfit], degree)
-    pars = np.linalg.lstsq(dm, yvalues[:nfit])[0]
-    return np.dot(dm, pars), pars
+    tgrid = (xgrid - xgrid[0]) / (xgrid[nfit - 1] - xgrid[0])
+    dm = np.polynomial.chebyshev.chebvander(tgrid, degree)
+    pars = np.linalg.lstsq(dm[:nfit], yvalues[:nfit])[0]
+    return np.dot(dm, pars)
 
 
 degree = 3
@@ -62,7 +63,7 @@ ufcs = np.zeros(nfits.shape)
 nrvars = np.zeros(nfits.shape)
 aics = np.zeros(nfits.shape)
 for ifit, nfit in enumerate(nfits):
-    normalized_residuals = (fit_poly(nfit, degree)[0] - yvalues[:nfit]) / sigma
+    normalized_residuals = (fit_poly(nfit, degree)[:nfit] - yvalues[:nfit]) / sigma
     ufcs[ifit] = general_ufc(normalized_residuals)
     nrvars[ifit] = (normalized_residuals**2).mean()
     aics[ifit] = (normalized_residuals**2).sum() + 2 * (len(xgrid) - nfit)
@@ -126,8 +127,7 @@ plot_underfitting()
 
 # %%
 # Plot the fit over the whole domain.
-pars = fit_poly(nfit_best, degree)[1]
-ymodel = np.dot(np.polynomial.chebyshev.chebvander(xgrid, degree), pars)
+ymodel = fit_poly(nfit_best, degree)
 
 
 def plot_model_and_data():
@@ -191,8 +191,12 @@ plot_cumulative_sums()
 # Regression residuals are anticorrelated, meaning that summed residuals
 # have a lower variance than a sum of independent random variables with the same variance.
 
-# %%
-# Basic regression tests to verify that the results in the notebook do not change unexpectedly.
+# %%  [markdown]
+# ## Regression tests
+#
+# If you experiment with this notebook, you can ignore any exceptions below.
+# The tests are only meant to pass for the notebook in its original form.
 
+# %%
 if nfit_best != 32:
     raise ValueError(f"Wrong nfit_best: {nfit_best}")

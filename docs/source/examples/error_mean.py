@@ -8,6 +8,14 @@
 #
 # This is a completely self-contained example that generates the input sequences (with MCMC)
 # and then analyzes them with Stacie.
+#
+# We suggest you experiment with this notebook by making the following changes:
+#
+# - Change the number of sequences and their length.
+# - Change the correlation time through `PROPOSAL_STEP`.
+# - Change the cutoff criterion to the AIC.
+#   (Add the argument `cutoff_criterion=akaike_criterion` to `estimate_acint`,
+#    where `akaike_criterion` is imported from `stacie.cutoff`.)
 
 # %% [markdown]
 # ## Import Libraries and Configure `matplotlib`
@@ -53,6 +61,7 @@ mpl.rc_file("matplotlibrc")
 K = 0.4
 R0 = 1.5
 BETA = 50.0
+PROPOSAL_STEP = 0.05
 
 
 def logprob(r):
@@ -70,7 +79,7 @@ def sample_mcmc_chain(niter, stride, ndim, burnin, seed=42):
     irow = 0
     istep = 0
     while irow < result.shape[1]:
-        r_new = r_old + rng.normal(0, 0.05, ndim)
+        r_new = r_old + rng.normal(0, PROPOSAL_STEP, ndim)
         lp_new = logprob(r_new)
         accept = lp_new > lp_old
         mask = ~accept
@@ -175,7 +184,7 @@ fig, ax = plt.subplots()
 plot_fitted_spectrum(ax, uc, result)
 
 # %%
-# Plot of the cunderfitting riterion minimization as a function of the frequency cutoff.
+# Plot of the underfitting criterion minimization as a function of the frequency cutoff.
 fig, ax = plt.subplots()
 plot_criterion(ax, uc, result)
 
@@ -209,9 +218,13 @@ print(f"Monte Carlo E[r]   ≈ {mean_mc:8.5f}")
 print(f"|Difference|       = {abs(mean_quad - mean_mc):8.5f}")
 print(f"Estimated MC error = {error_mc:8.5f}")
 
+# %%  [markdown]
+# ## Regression tests
+#
+# If you experiment with this notebook, you can ignore any exceptions below.
+# The tests are only meant to pass for the notebook in its original form.
+
 # %%
-# Basic regression tests to verify that the results in the notebook
-# do not change unexpectedly.
 if abs(mean_mc - 1.6284) > 1e-3:
     raise ValueError(f"Wrong mean_mc: {mean_mc:.5f}")
 if abs(error_mc - 0.0047) > 1e-3:
