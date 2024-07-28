@@ -1,8 +1,6 @@
 # Development
 
-CONCEPT:
-
-- Explain the audience
+This section contains some technical details about the development of Stacie.
 
 ```{toctree}
 :hidden:

@@ -169,9 +169,11 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         f"{r.props['model']} // "
         f"acint = {r.props['acint'] / uc.acint_unit:{uc.acint_fmt}} "
         f"± {r.props['acint_std'] / uc.acint_unit:{uc.acint_fmt}} "
-        f"{uc.acint_unit_str} // "
+        + ("" if uc.acint_unit_str == "1" else uc.acint_unit_str)
+        + " // "
         f"corrtime_tail = {r.props['corrtime_tail'] / uc.time_unit:{uc.time_fmt}} "
-        f"± {r.props['corrtime_tail_std'] / uc.time_unit:{uc.time_fmt}} " + uc.time_unit_str
+        f"± {r.props['corrtime_tail_std'] / uc.time_unit:{uc.time_fmt}} "
+        + ("" if uc.time_unit_str == "1" else uc.time_unit_str)
     )
 
 

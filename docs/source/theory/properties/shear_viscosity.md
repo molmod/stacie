@@ -247,7 +247,11 @@ how many independent sequences are used as input, which allows precise uncertain
 ## How to Compute with Stacie
 
 It is assumed that you can load the time-dependent pressure tensor components
-(diagonal and off-diagonal) into a NumPy array.
+(diagonal and off-diagonal) into a NumPy array `pcomps`.
+Each row of this array corresponds to one pressure tensor component
+in the order $P_{xx}$, $P_{yy}$, $P_{zz}$, $P_{zx}$, $P_{yz}$, $P_{xy}$.
+(Same order as in Voigt notation.)
+The columns correspond to time steps.
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,
 all in consistent units.
@@ -257,10 +261,7 @@ With these requirements, the viscosity can be computed as follows:
 import numpy as np
 from stacie import compute_spectrum, estimate_acint, plot_results
 
-# Load all the required inputs, of which the details depend on your use case.
-# `pcomps` is assumed to be an array with 6 rows, in Voigt notation:
-#    P_xx, P_yy, P_zz, P_zx, P_yz, P_xy
-# Columns correspond to time steps.
+# Load all the required inputs, the details of which will depend on your use case.
 pcomps = ...
 volume, temperature, boltzmann_const, timestep = ...
 
@@ -282,10 +283,11 @@ spectrum = compute_spectrum(
     timestep=timestep,
 )
 result = estimate_acint(spectrum)
-print("The mean", seuqences.mean())
-print("Variance on the mean", result.props["acint"])
+print("Shear viscosity", result.props["acint"])
+print("Uncertainty of the shear viscosity", result.props["acint_std"])
 
 # The unit configuration assumes SI units are used systematically.
+# You may need to adapt this to the units of your data.
 uc = UnitConfig(
     acint_unit_str="Pa s",
     time_unit=1e-12,
@@ -293,7 +295,7 @@ uc = UnitConfig(
     freq_unit=1e12,
     freq_unit_str="THz",
 )
-plot_results("error.pdf", result, uc)
+plot_results("shear_viscosity.pdf", result, uc)
 ```
 
 This script is trivially extended to combine data from multiple trajectories.

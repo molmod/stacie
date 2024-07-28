@@ -53,6 +53,7 @@ docs = [
     "sphinx_autodoc_typehints",
     "sphinx-codeautolink",
     "sphinxcontrib-bibtex",
+    "sphinxcontrib-svg2pdfconverter",
     "sphinx-copybutton",
     "sphinx-autobuild",
 ]

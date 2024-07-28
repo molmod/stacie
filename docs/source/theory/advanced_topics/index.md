@@ -1,13 +1,12 @@
 # Advanced Topics
 
-CONCEPT:
-
-- Provide some scope here: these advanced topics are useful for production simulations that try to maximize the significance of the results.
+This section discusses some useful technical details for (large-scale) production simulations:
+how to reduction of storage requirements and how to obtain more accurate results.
 
 ```{toctree}
 :hidden:
 
-block_summing.md
+block_averages.md
 insufficient_data.md
 box_size_extrapolation.md
 ```

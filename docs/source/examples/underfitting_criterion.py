@@ -29,7 +29,8 @@ mpl.rc_file("matplotlibrc")
 # %% [markdown]
 # ## Example Data
 #
-# The data for the fitting problem is a cosine function plus some normally distributed noise.
+# The data for the fitting problem
+# is a cosine function plus some normally distributed noise.
 
 # %%
 rng = np.random.default_rng(42)
@@ -63,7 +64,9 @@ ufcs = np.zeros(nfits.shape)
 nrvars = np.zeros(nfits.shape)
 aics = np.zeros(nfits.shape)
 for ifit, nfit in enumerate(nfits):
-    normalized_residuals = (fit_poly(nfit, degree)[:nfit] - yvalues[:nfit]) / sigma
+    normalized_residuals = (
+        fit_poly(nfit, degree)[:nfit] - yvalues[:nfit]
+    ) / sigma
     ufcs[ifit] = general_ufc(normalized_residuals)
     nrvars[ifit] = (normalized_residuals**2).mean()
     aics[ifit] = (normalized_residuals**2).sum() + 2 * (len(xgrid) - nfit)
@@ -92,7 +95,12 @@ def plot_underfitting():
     ax2 = ax1.twinx()
     ax2.spines["right"].set_visible(True)
     ax2.plot(nfits[:nplot], nrvars[:nplot], color="C3")
-    ax2.plot(nfits[:nplot], np.sqrt((nfits - npar) / nfits)[:nplot], color="C3", ls="--")
+    ax2.plot(
+        nfits[:nplot],
+        np.sqrt((nfits - npar) / nfits)[:nplot],
+        color="C3",
+        ls="--",
+    )
     ax2.set_ylim(0, 2)
     ax2.set_ylabel("Sampling variance normalized residuals [1]", color="C3")
     ax2.tick_params(axis="y", labelcolor="C3")
@@ -101,23 +109,28 @@ def plot_underfitting():
 plot_underfitting()
 
 # %% [markdown]
-# The red dashed line show the expectation value of the variance of the normalized residuals
-# in case of linear regression.
-# As this example illustrates, there is no simple way of selecting the amount of data by directly
+# The red dashed line show the expectation value of the variance
+# of the normalized residuals in case of linear regression.
+# As this example illustrates,
+# there is no simple way of selecting the amount of data by directly
 # analyzing the variance of the residuals:
 #
-# - There are multiple sample sizes for which the sampling variance of the residuals is close
-#   to the expected value. Which one should be used?
-#   Try setting `ifit_best = 32` above, as a reasonable choice and rerun the notebook.
+# - There are multiple sample sizes for which the sampling variance
+#   of the residuals is close to the expected value.
+#   Which one should be used?
+#   Try setting `ifit_best = 32` above,
+#   as a reasonable choice and rerun the notebook.
 #   In this case, the plot of the residuals below exhibits an oscillatory trend.
 #
-# - When the sampling variance clearly exceeds the expected value, e.g. becomes 2,
-#   the model is also clearly overfitting.
+# - When the sampling variance clearly exceeds the expected value,
+#   e.g. becomes 2, the model is also clearly overfitting.
 #   For example, try `ifit_best = 38`.
 #
-# In comparison, the minimizer of the underfitting criterion (`ifit_best = 27`) is fairly robust.
+# In comparison, the minimizer of the underfitting criterion (`ifit_best = 27`)
+# is fairly robust.
 # For this cutoff, the residuals show no apparent trend.
-# For this example, also the minimizer of the AIC (`ifit_best = 26`) would be a good cutoff value.
+# For this example,
+# also the minimizer of the AIC (`ifit_best = 26`) would be a good cutoff value.
 
 # %%
 
@@ -187,9 +200,10 @@ def plot_cumulative_sums():
 plot_cumulative_sums()
 
 # %% [markdown]
-# The squared cumulative sums are well below the upper limit of the expectation value.
+# The squared cumulative sums are much smaller than the expectation value.
 # Regression residuals are anticorrelated, meaning that summed residuals
-# have a lower variance than a sum of independent random variables with the same variance.
+# have a lower variance than a sum of independent random variables
+# with the same variance.
 
 # %%  [markdown]
 # ## Regression tests

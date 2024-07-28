@@ -50,6 +50,7 @@ extensions = [
     "sphinx_codeautolink",
     "sphinx_copybutton",
     "sphinxcontrib.bibtex",
+    "sphinxcontrib.inkscapeconverter",
 ]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
@@ -135,6 +136,7 @@ nb_execution_mode = "cache"
 nb_merge_streams = True
 exclude_patterns = ["conf.py"]
 codeautolink_concat_default = True
+nb_mime_priority_overrides = [("latex", "image/svg+xml", 15)]
 
 
 # -- Configuration for autodoc extensions -------------------------------------
