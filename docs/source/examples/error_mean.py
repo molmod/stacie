@@ -116,9 +116,7 @@ def sample_mcmc_chain(niter, stride, ndim, burnin, seed=42):
         mask = ~accept
         nrnd = mask.sum()
         if nrnd > 0:
-            accept[mask] = rng.uniform(0, 1, nrnd) < np.exp(
-                lp_new[mask] - lp_old[mask]
-            )
+            accept[mask] = rng.uniform(0, 1, nrnd) < np.exp(lp_new[mask] - lp_old[mask])
         r_old[accept] = r_new[accept]
         lp_old[accept] = lp_new[accept]
         if burnin > 0:

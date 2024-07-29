@@ -64,9 +64,7 @@ ufcs = np.zeros(nfits.shape)
 nrvars = np.zeros(nfits.shape)
 aics = np.zeros(nfits.shape)
 for ifit, nfit in enumerate(nfits):
-    normalized_residuals = (
-        fit_poly(nfit, degree)[:nfit] - yvalues[:nfit]
-    ) / sigma
+    normalized_residuals = (fit_poly(nfit, degree)[:nfit] - yvalues[:nfit]) / sigma
     ufcs[ifit] = general_ufc(normalized_residuals)
     nrvars[ifit] = (normalized_residuals**2).mean()
     aics[ifit] = (normalized_residuals**2).sum() + 2 * (len(xgrid) - nfit)

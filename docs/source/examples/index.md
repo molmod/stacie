@@ -14,6 +14,7 @@ which you must run before such notebooks can be used.
 :hidden:
 
 error_mean
+applicability
 surface_diffusion
 underfitting_criterion
 ```
