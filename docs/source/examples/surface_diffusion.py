@@ -43,13 +43,35 @@ mpl.rc_file("matplotlibrc")
 #
 # The first cell below defines the potential energy of a particle on the surface
 # and the force exerted by the surface on the particle.
-# The model for the potential energy is a superposition of cosine functions
-# with a few wavevectors and all the same amplitude.
-# The second cell plots the potential energy surface.
+# The model for the potential energy is a superposition of cosine functions:
+#
+# $$
+#     U(\mathbf{r}) = -A \sum_{n=1}^N \cos(2\pi \mathbf{r}\cdot\mathbf{e}_n / \lambda)
+# $$
+#
+# with
+#
+# $$
+#     \mathbf{e}_n = \mathbf{e}_x \cos(n\alpha)  + \mathbf{e}_y \sin(n\alpha)
+# $$
+#
+# The default settings for this notebook result in a hexagonal lattice:
+# $A = 0.2\,\mathrm{eV}$,
+# $\lambda = 5\,\mathrm{a}_0$,
+# $N=3$, and
+# $\alpha = 2\pi/3$.
+# One may change these parameters to construct different types of surfaces:
+#
+# - A square lattice: $N = 2$ and $\alpha = \pi/2$.
+# - A quasi-periodic pentagonal lattice: $N=5$ and $\alpha = 2\pi/5$.
+#
+# The remainder of the notebook is configured to work well for the default parameters.
+# If you change the potential energy model, remaining settings also need to be adapted.
 
 # %%
 WAVELENGTH = 5.0
-ANGLES = np.linspace(0, 2 * np.pi, 3, endpoint=False)
+ALPHA = 2 * np.pi / 3
+ANGLES = np.arange(3) * ALPHA
 AMPLITUDE = 0.2 * sc.value("electron volt") / sc.value("atomic unit of energy")
 
 
