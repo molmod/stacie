@@ -36,6 +36,7 @@ c_\Delta^\text{short}
     \rbrace
 $$
 
+
 ### Tail Component
 
 The tail component is the periodic repetition (sum over $i$) of two exponential functions:
@@ -69,13 +70,16 @@ $$
 
 
 The exponential decay of the tail component is characterized by
-a correlation time, $\tau_\text{tail}$:
+its autocorrelation time, $\tau_\text{exp}$ {cite:p}`sokal_1997_monte`:
 
 $$
-    r = \exp\left(-\frac{2}{\tau_\text{tail} / h}\right)
+    r = \exp\left(-\frac{h}{\tau_\text{exp}}\right)
 $$
 
 where $h$ is the time step.
+(In Stacie's implementation of this model, the parameter `corrtime` is
+the dimensionless autocorrelation time, i.e., $\tau_\text{exp} / h$.)
+
 
 ### Discrete Fourier Transform
 
@@ -109,10 +113,14 @@ Finally, we can substitute $\omega^k + \omega^{-k} = 2\cos(2\pi k/N)$:
 
 $$
 C^\text{exp-tail}_k
-    \approx
+    &\approx
     a_\text{short} + a_\text{tail} \frac{1-r}{1+r} \left(
          2\frac{1 - r\cos(2\pi k/N)}{1 - 2r\cos(2\pi k/N) + r^2} - 1
     \right)
+    \\
+    &\approx
+    a_\text{short} + a_\text{tail} \frac{(1-r)^2}{1 - 2r\cos(2\pi k/N) + r^2}
+    \\
 $$
 
 
@@ -123,9 +131,59 @@ $$
     \eta \approx \hat{\eta} = \hat{C}^\text{exp-tail}_0 = \hat{a}_\text{short} + \hat{a}_\text{tail}
 $$
 
+
+### Peak width
+
+As illustrated in the
+[Exponential Tail Model](../../examples/model.py)
+example, the exponential decay of the autocorrelation function results in
+a peak in the power spectrum at zero frequency.
+The width of this peak at half the maximum of the tail term is found by solving:
+
+$$
+    1 - 2 r \cos(2\pi k_\text{half}/N) + r^2 = 2 (1 - r)^2
+$$
+
+The solution is:
+
+$$
+    k_\text{half}
+        &= \frac{N}{2\pi}\arccos\left(\frac{4r - r^2 -1 }{2r}\right)
+    \\
+        &= \frac{N}{2\pi}\arccos\left(2 - \cosh\left(\frac{h}{\tau_\text{exp}}\right)\right)
+$$
+
+Using RFFT conventions, $f=k/hN$, this can be rewritten as a frequency:
+
+$$
+    f_\text{half}
+        = \frac{1}{2\pi h}\arccos\left(2 - \cosh\left(\frac{h}{\tau_\text{exp}}\right)\right)
+$$
+
+We can rely on the following series expansion:
+
+$$
+    \arccos(2 - \cosh(u))
+    \approx
+    |u + \frac{1}{12} u^3 + \frac{1}{96} u^5 + \mathcal{O}(u^7)|
+$$
+
+Hence, in the limit $\tau_\text{exp} \gg h$, we find:
+
+$$
+    f_\text{half}
+        \approx \frac{1}{2\pi \tau_\text{exp}}
+$$
+
+Sequences obtained from computer simulations
+usually have sufficiently small time steps to satisfy this limit:
+The steps must be able to resolve the fastest oscillations in the system
+to correctly simulate its dynamics.
+
+
 ## White Noise Model
 
-In the limit of $a_\text{tail} \rightarrow 0$ or $\tau_\text{tail} \rightarrow 0$,
+In the limit of $a_\text{tail} \rightarrow 0$ or $\tau_\text{exp} \rightarrow 0$,
 the exponential tail model reduces to a white noise model:
 
 $$

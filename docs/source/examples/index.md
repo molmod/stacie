@@ -13,8 +13,9 @@ which you must run before such notebooks can be used.
 ```{toctree}
 :hidden:
 
-error_mean
-applicability
-surface_diffusion
-underfitting_criterion
+error_mean.py
+applicability.py
+surface_diffusion.py
+underfitting_criterion.py
+model.py
 ```

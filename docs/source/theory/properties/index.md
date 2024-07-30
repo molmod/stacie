@@ -9,7 +9,7 @@ as a starting point for your calculations.
 :hidden:
 
 error_estimates.md
-correlation_times.md
+autocorrelation_time.md
 diffusion_coefficient.md
 electrical_conductivity.md
 thermal_conductivity.md

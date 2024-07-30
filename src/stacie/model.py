@@ -116,7 +116,7 @@ class ExpTailModel(SpectrumModel):
 
     .. math::
 
-        r = \exp\left(-\frac{2}{\tau_\text{tail} / h}\right)
+        r = \exp\left(-\frac{h}{\tau_\text{exp}}\right)
 
     where :math:`h` is the time step and :math:`k` is the index of the RFFT vector.
     (Note that in the implementation :math:`2\pi k/N` is computed as :math:`2\pi h f`,
@@ -128,9 +128,10 @@ class ExpTailModel(SpectrumModel):
       The prefactor for the short-term (white noise) component.
     - :math:`a_\text{tail}`:
       The prefactor for the exponential tail component.
-    - :math:`\tau_\text{tail} / h`:
-      The correlation time of the exponential tail.
-      This is in dimensionless time units, i.e. assuming the time step is 1.
+    - :math:`\tau_\text{exp} / h`:
+      The correlation time of the exponential tail
+      {cite:p}`sokal_1997_monte`.
+      This is in dimensionless time units, as if the time step is 1.
     """
 
     name: str = "exptail"
@@ -148,7 +149,7 @@ class ExpTailModel(SpectrumModel):
         ndofs: NDArray[float],
     ) -> NDArray[float]:
         """Guess initial values of the parameters."""
-        # This is implemented as a 1D non-linear optimization of corrtime_tail.
+        # This is implemented as a 1D non-linear optimization of corrtime.
         # For each tau, the two remaining parameters are found with weighted linear regression.
         omegas = 2 * np.pi * timestep * freqs
         amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
@@ -167,26 +168,26 @@ class ExpTailModel(SpectrumModel):
             return (((model - amplitudes) / amplitudes_std) ** 2).mean()
 
         # Perform a quick scan of correlation times
-        cttmin = 0.2 / omegas[-1]
-        cttmax = 2 / omegas[1]
+        ctmin = 0.1 / omegas[-1]
+        ctmax = 1 / omegas[1]
         nscan = 10
-        ctts = np.exp(np.linspace(np.log(cttmin), np.log(cttmax), nscan))
-        rmsds = np.array([linear_fit_rmsd(ctt) for ctt in ctts])
+        cts = np.exp(np.linspace(np.log(ctmin), np.log(ctmax), nscan))
+        rmsds = np.array([linear_fit_rmsd(ct) for ct in cts])
 
         # Try to identify and refine a bracket
         ibest = rmsds.argmin()
         if ibest not in (0, nscan - 1):
-            bracket = ctts[ibest - 1 : ibest + 2]
+            bracket = cts[ibest - 1 : ibest + 2]
 
             # Refine the bracket
             minres = minimize_scalar(
-                linear_fit_rmsd, bracket, method="golden", options={"xtol": 0.1 * cttmin}
+                linear_fit_rmsd, bracket, method="golden", options={"xtol": 0.1 * ctmin}
             )
             if minres.success:
                 return linear_fit_rmsd(minres.x, True)
 
         # Minimize_scalar did not work: take the best from the scan.
-        return linear_fit_rmsd(ctts[ibest], True)
+        return linear_fit_rmsd(cts[ibest], True)
 
     @staticmethod
     def compute(
@@ -199,34 +200,34 @@ class ExpTailModel(SpectrumModel):
             raise ValueError("Argument deriv must be zero or positive.")
         if omegas.ndim != 1:
             raise TypeError("Argument omegas must be a 1D array.")
-        acint_short, acint_tail, ctt = pars
-        r = np.exp(-2 / ctt)
+        acint_short, acint_tail, ct = pars
+        r = np.exp(-1 / ct)
         cs = np.cos(omegas)
         denom = r**2 - 2 * r * cs + 1
-        tail_model = ((1 - r) / (1 + r)) * (2 * (1 - r * cs) / denom - 1)
+        tail_model = (1 - r) ** 2 / denom
         results = [acint_short + acint_tail * tail_model]
         if deriv >= 1:
             tail_model_diff_r = -2 * (cs - 1) * (r**2 - 1) / denom**2
-            r_diff_ctt = 2 * r / ctt**2
-            tail_model_diff_ctt = tail_model_diff_r * r_diff_ctt
+            r_diff_ct = r / ct**2
+            tail_model_diff_ct = tail_model_diff_r * r_diff_ct
             results.append(
-                np.array([np.ones(len(omegas)), tail_model, acint_tail * tail_model_diff_ctt])
+                np.array([np.ones(len(omegas)), tail_model, acint_tail * tail_model_diff_ct])
             )
         if deriv >= 2:
             tail_model_diff_r_r = 4 * (cs - 1) * (r**3 - 3 * r + 2 * cs) / denom**3
-            r_diff_ctt_ctt = 4 * (1 - ctt) * r / ctt**4
-            tail_model_diff_ctt_ctt = (
-                tail_model_diff_r_r * r_diff_ctt**2 + tail_model_diff_r * r_diff_ctt_ctt
+            r_diff_ct_ct = (1 - 2 * ct) * r / ct**4
+            tail_model_diff_ct_ct = (
+                tail_model_diff_r_r * r_diff_ct**2 + tail_model_diff_r * r_diff_ct_ct
             )
             results.append(
                 np.array(
                     [
                         [np.zeros(len(omegas)), np.zeros(len(omegas)), np.zeros(len(omegas))],
-                        [np.zeros(len(omegas)), np.zeros(len(omegas)), tail_model_diff_ctt],
+                        [np.zeros(len(omegas)), np.zeros(len(omegas)), tail_model_diff_ct],
                         [
                             np.zeros(len(omegas)),
-                            tail_model_diff_ctt,
-                            acint_tail * tail_model_diff_ctt_ctt,
+                            tail_model_diff_ct,
+                            acint_tail * tail_model_diff_ct_ct,
                         ],
                     ]
                 )
@@ -241,15 +242,15 @@ class ExpTailModel(SpectrumModel):
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters."""
         acint_var = covar[:2, :2].sum()
-        corrtime_tail_var = covar[2, 2] * timestep**2
+        corrtime_var = covar[2, 2] * timestep**2
         return {
             "model": cls.name,
             "acint": pars[:2].sum(),
             "acint_var": acint_var,
             "acint_std": np.sqrt(acint_var) if acint_var >= 0 else np.inf,
-            "corrtime_tail": pars[2] * timestep,
-            "corrtime_tail_var": corrtime_tail_var,
-            "corrtime_tail_std": (np.sqrt(corrtime_tail_var) if corrtime_tail_var >= 0 else np.inf),
+            "corrtime": pars[2] * timestep,
+            "corrtime_var": corrtime_var,
+            "corrtime_std": (np.sqrt(corrtime_var) if corrtime_var >= 0 else np.inf),
         }
 
 
@@ -304,7 +305,7 @@ class WhiteNoiseModel(SpectrumModel):
             "acint": pars[0],
             "acint_var": covar[0, 0],
             "acint_std": np.sqrt(covar[0, 0]) if covar[0, 0] >= 0 else np.inf,
-            "corrtime_tail": np.inf,
-            "corrtime_tail_var": np.inf,
-            "corrtime_tail_std": np.inf,
+            "corrtime": np.inf,
+            "corrtime_var": np.inf,
+            "corrtime_std": np.inf,
         }

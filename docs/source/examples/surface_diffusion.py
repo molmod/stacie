@@ -143,7 +143,9 @@ plot_pes()
 
 # %%
 MASS = sc.value("unified atomic mass unit") * 39.948 / sc.value("atomic unit of mass")
-TIMESTEP = 5e-15 / sc.value("atomic unit of time")
+FEMTOSECOND = 1e-15 / sc.value("atomic unit of time")
+PICOSECOND = 1e-12 / sc.value("atomic unit of time")
+TIMESTEP = 5 * FEMTOSECOND
 
 
 @attrs.define
@@ -287,7 +289,9 @@ def demo_chaos():
 demo_chaos()
 
 # %% [markdown]
-# Because the trajectories are chaotic, the short term motion is ballistic,
+# Because the trajectories are
+# [chaotic](https://en.wikipedia.org/wiki/Chaos_theory),
+# the short term motion is ballistic,
 # while the long term motion is a random walk.
 # Note that the random walk is only found in a specific energy window.
 # If the energy is too small,
@@ -350,7 +354,6 @@ def demo_stacie(stride=1):
 result_1 = demo_stacie()
 
 # %% [markdown]
-
 # The spectrum has several peaks related to oscillations of the particles
 # around a local minimum.
 # These are irrelevant to the diffusion coefficient.
@@ -361,6 +364,21 @@ result_1 = demo_stacie()
 # is not based on an experimental case.
 # The order of magnitude is comparable to the self-diffusion constants
 # of pure liquids {cite:p}`baba_2022_prediction`.
+#
+# It is also interesting to compare the integrated and exponential autocorrelation time,
+# as they are not the same in this case.
+
+# %%
+print(f"corrtime_exp = {result_1.corrtime_exp/PICOSECOND:.3f} ps")
+print(f"corrtime_int = {result_1.corrtime_int/PICOSECOND:.3f} ps")
+
+# %% [markdown]
+# The integrated autocorrelation time is smaller than
+# the exponential autocorrelation time
+# because the former represents an average of all time scales in the particle velocities.
+# This includes the slow diffusion and faster oscillations in local minima.
+# The exponential autocorrelation time only considers the slow diffusive motion.
+
 
 # %% [markdown]
 # ## Self-diffusion with block averages
@@ -370,11 +388,45 @@ result_1 = demo_stacie()
 # [Block averages](../theory/advanced_topics/block_averages.md)
 # are primarily useful for reducing storage requirements
 # when saving trajectories to disk before processing them with Stacie.
-# In this example, a block size of 20 steps is used,
-# which has no visible implications on the low-frequency part of the spectrum.
+# In this example, the block size is determined by the following guideline:
 
 # %%
-result_20 = demo_stacie(20)
+print(0.05 * result_1.corrtime_exp * np.pi / TIMESTEP)
+
+# %% [markdown]
+# Let's use a block size of 30 to stay on the safe side.
+
+# %%
+result_30 = demo_stacie(30)
+
+# %% [markdown]
+# As expected, there are not significant changes in the results.
+#
+# It is again interesting to compare the integrated and exponential autocorrelation times.
+
+# %%
+print(f"corrtime_exp = {result_30.corrtime_exp/PICOSECOND:.3f} ps")
+print(f"corrtime_int = {result_30.corrtime_int/PICOSECOND:.3f} ps")
+
+# %% [markdown]
+# The exponential autocorrelation time is not affected by the block averages,
+# but the integrated autocorrelation time has increased
+# compared to the result without block averages.
+# This is a consequence of the fact that
+# the integrated correlation averages over all time scales in the input,
+# and some of the fastest ones are washed out by the block averages.
+
+# %% [markdown]
+# We recommend not to exaggerate with block sizes.
+# The artifacts are illustrated below with a block size of 150 and 600.
+# Note the increase in uncertainties,
+# and in the latter case, the systematic errors due to the block averages.
+
+# %%
+
+result_150 = demo_stacie(150)
+result_600 = demo_stacie(600)
+
 
 # %%  [markdown]
 # ## Regression tests
@@ -384,9 +436,15 @@ result_20 = demo_stacie(20)
 
 # %%
 acint_unit = sc.value("atomic unit of time") / sc.value("atomic unit of length") ** 2
-acint_1 = result_1.props["acint"] / acint_unit
+acint_1 = result_1.acint / acint_unit
 if abs(acint_1 - 6.07e-7) > 1e-9:
     raise ValueError(f"Wrong acint (no block average): {acint_1:.2e}")
-acint_20 = result_20.props["acint"] / acint_unit
-if abs(acint_20 - 6.06e-7) > 1e-9:
-    raise ValueError(f"Wrong acint (block size 20): {acint_20:.2e}")
+acint_30 = result_30.acint / acint_unit
+if abs(acint_30 - 6.08e-7) > 1e-9:
+    raise ValueError(f"Wrong acint (block size 30): {acint_30:.2e}")
+acint_150 = result_150.acint / acint_unit
+if abs(acint_150 - 6.05e-7) > 1e-9:
+    raise ValueError(f"Wrong acint (block size 150): {acint_150:.2e}")
+acint_600 = result_600.acint / acint_unit
+if abs(acint_600 - 6.22e-7) > 1e-9:
+    raise ValueError(f"Wrong acint (block size 600): {acint_600:.2e}")

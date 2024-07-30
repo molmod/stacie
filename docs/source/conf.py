@@ -137,7 +137,7 @@ nb_merge_streams = True
 exclude_patterns = ["conf.py"]
 codeautolink_concat_default = True
 nb_mime_priority_overrides = [("latex", "image/svg+xml", 15)]
-
+myst_heading_anchors = 4
 
 # -- Configuration for autodoc extensions -------------------------------------
 # https://sphinx-autodoc2.readthedocs.io/en/latest/config.html

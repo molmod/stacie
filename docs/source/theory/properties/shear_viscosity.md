@@ -244,7 +244,7 @@ $$
 Working with the five components, as we propose, is advantageous because it makes explicit
 how many independent sequences are used as input, which allows precise uncertainty quantification.
 
-## How to Compute with Stacie
+## How to Compute with Stacie?
 
 It is assumed that you can load the time-dependent pressure tensor components
 (diagonal and off-diagonal) into a NumPy array `pcomps`.
@@ -283,8 +283,8 @@ spectrum = compute_spectrum(
     timestep=timestep,
 )
 result = estimate_acint(spectrum)
-print("Shear viscosity", result.props["acint"])
-print("Uncertainty of the shear viscosity", result.props["acint_std"])
+print("Shear viscosity", result.acint)
+print("Uncertainty of the shear viscosity", result.acint_std)
 
 # The unit configuration assumes SI units are used systematically.
 # You may need to adapt this to the units of your data.

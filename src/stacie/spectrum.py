@@ -36,6 +36,9 @@ class Spectrum:
     prefactor: float = attrs.field()
     """The given prefactor for the spectrum to fix the units for the autocorrelation integral."""
 
+    variance: float = attrs.field()
+    """The variance of the input sequences."""
+
     timestep: float = attrs.field()
     """The time between two subsequent elements in the given sequence."""
 
@@ -117,4 +120,4 @@ def compute_spectrum(
         freqs = freqs[1:]
         amplitudes = amplitudes[1:]
 
-    return Spectrum(ndofs, prefactor, timestep, nstep, freqs, amplitudes)
+    return Spectrum(ndofs, prefactor, sequences.var(), timestep, nstep, freqs, amplitudes)

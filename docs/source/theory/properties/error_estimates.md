@@ -66,7 +66,7 @@ $$
 $$
 
 
-## How to Compute with Stacie
+## How to Compute with Stacie?
 
 It is assumed that you can load the time-dependent sequences into a NumPy array,
 where each row is a sequence and each column a time step.
@@ -95,7 +95,7 @@ spectrum = compute_spectrum(
 )
 result = estimate_acint(spectrum)
 print("The mean", seuqences.mean())
-print("Variance on the mean", result.props["acint"])
+print("Error of the mean", np.sqrt(result.acint))
 plot_results("error.pdf", result)
 ```
 

@@ -3,7 +3,7 @@
 # %% [markdown]
 # # Applicability of the Exponential Tail Model
 #
-# The Exponential Tail Model of Stacie assumes that
+# Stacie's Exponential Tail Model assumes that
 # the autocorrelation function decays exponentially for large lag times.
 # Not all dynamical systems exhibit this exponential relaxation.
 # If you still want to apply Stacie to such cases,
@@ -29,7 +29,7 @@
 # a larger part of the spectrum can be fitted.
 # This is shown below by computing the error of the mean of numerical solutions.
 #
-# For $b=0$, the solutions become random walks with anomalous diffusion.
+# For $b=0$, the solutions become random walks with anomalous diffusion
 # {cite:p}`rowlands_2008_simple`.
 # In this case, it makes more sense to work with
 # the spectrum of the time direvative of the solutions.
@@ -71,7 +71,7 @@ NSTEP = 20000
 TIMESTEP = 0.3
 
 
-def time_derivatives(state: ArrayLike, *, b: float = 0.15) -> NDArray:
+def time_derivatives(state: ArrayLike, *, b: float = 0.1) -> NDArray:
     """Compute the time derivatives defining the differential equations."""
     return np.sin(np.roll(state, 1)) - b * state
 
@@ -154,7 +154,28 @@ plot_criterion(ax, uc, result)
 # %%
 mean = sequences.mean()
 print(f"Mean: {mean:.3e}")
-error_mean = np.sqrt(result.props["acint"])
+error_mean = np.sqrt(result.acint)
 print(f"Error of the mean: {error_mean:.3e}")
-nindep = (sequences**2).mean() / result.props["acint"]
-print(f"Number of independent samples: {nindep:.1f}")
+
+# %% [markdown]
+# For sufficiently small values of $b$, the autocorrelation function is a simple
+# exponentially decaying function, so that the two
+# [autocorrelation times](../theory/properties/autocorrelation_time.md)
+# are very similar:
+
+# %%
+print(f"corrtime_exp = {result.corrtime_exp:.3f} ± {result.corrtime_exp_std:.3f}")
+print(f"corrtime_int = {result.corrtime_int:.3f} ± {result.corrtime_int_std:.3f}")
+
+
+# %%  [markdown]
+# ## Regression tests
+#
+# If you experiment with this notebook, you can ignore any exceptions below.
+# The tests are only meant to pass for the notebook in its original form.
+
+# %%
+if abs(result.acint - 2.4772e-4) > 1e-7:
+    raise ValueError(f"Wrong acint: {result.acint:.4e}")
+if abs(result.corrtime_exp - 9.7475) > 1e-3:
+    raise ValueError(f"Wrong corrtime_exp: {result.corrtime_exp:.4e}")

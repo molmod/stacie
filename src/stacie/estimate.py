@@ -63,6 +63,36 @@ class Result:
         """
         return self.history[self.nfit]
 
+    @property
+    def acint(self) -> float:
+        """The autocorrelation integral."""
+        return self.props["acint"]
+
+    @property
+    def acint_std(self) -> float:
+        """The uncertainty of the autocorrelation integral."""
+        return self.props["acint_std"]
+
+    @property
+    def corrtime_exp(self) -> float:
+        """The exponential correlation time."""
+        return self.props["corrtime"]
+
+    @property
+    def corrtime_exp_std(self) -> float:
+        """The uncertainty of the exponential correlation time."""
+        return self.props["corrtime_std"]
+
+    @property
+    def corrtime_int(self) -> float:
+        """The integrated correlation time."""
+        return self.props["acint"] / (2 * self.spectrum.prefactor * self.spectrum.variance)
+
+    @property
+    def corrtime_int_std(self) -> float:
+        """The uncertainty of the integrated correlation time."""
+        return self.props["acint_std"] / (2 * self.spectrum.prefactor * self.spectrum.variance)
+
 
 class FCutWarning(Warning):
     """Raised when there is an issue with the frequency cutoff."""
@@ -243,9 +273,9 @@ def fit_model_spectrum(
     - ``acint``: the estimate of the autocorrelation integral.
     - ``acint_var``: the variance of the estimate of the autocorrelation integral.
     - ``acint_std``: the standard error of the estimate of the autocorrelation integral.
-    - ``corrtime_tail``: the estimate of the slowest time scale in the sequences.
-    - ``corrtime_tail_var``: the variance of the estimate of the slowest time scale.
-    - ``corrtime_tail_std``: the standard error of the estimate of the slowest time scale.
+    - ``corrtime``: the estimate of the slowest time scale in the sequences.
+    - ``corrtime_var``: the variance of the estimate of the slowest time scale.
+    - ``corrtime_std``: the standard error of the estimate of the slowest time scale.
     """
     # Maximize likelihood
     pars_init = model.guess(timestep, freqs[:nfit], amplitudes[:nfit], ndofs[:nfit])

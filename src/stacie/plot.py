@@ -167,12 +167,12 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax.axvline(r.props["freqs"][-1] / uc.freq_unit, ymax=0.1, color="k")
     ax.set_title(
         f"{r.props['model']} // "
-        f"acint = {r.props['acint'] / uc.acint_unit:{uc.acint_fmt}} "
-        f"± {r.props['acint_std'] / uc.acint_unit:{uc.acint_fmt}} "
+        f"acint = {r.acint / uc.acint_unit:{uc.acint_fmt}} "
+        f"± {r.acint_std / uc.acint_unit:{uc.acint_fmt}} "
         + ("" if uc.acint_unit_str == "1" else uc.acint_unit_str)
         + " // "
-        f"corrtime_tail = {r.props['corrtime_tail'] / uc.time_unit:{uc.time_fmt}} "
-        f"± {r.props['corrtime_tail_std'] / uc.time_unit:{uc.time_fmt}} "
+        f"corrtime_exp = {r.corrtime_exp / uc.time_unit:{uc.time_fmt}} "
+        f"± {r.corrtime_exp_std / uc.time_unit:{uc.time_fmt}} "
         + ("" if uc.time_unit_str == "1" else uc.time_unit_str)
     )
 
@@ -242,8 +242,8 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     s = r.spectrum
     ax.errorbar(
         [r.props["freqs"][-1] / uc.freq_unit],
-        [r.props["acint"] / uc.acint_unit],
-        [r.props["acint_std"] * uc.sfac / uc.acint_unit],
+        [r.acint / uc.acint_unit],
+        [r.acint_std * uc.sfac / uc.acint_unit],
         marker="o",
         ms=2,
         color="k",
@@ -296,7 +296,7 @@ def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
     cdfs = (np.arange(len(rs)) + 0.5) / len(rs)
     quantiles = stats.norm().ppf(cdfs)
     limit = rs[0].spectrum.amplitudes_ref[0]
-    normed_errors = np.array([(r.props["acint"] - limit) / r.props["acint_std"] for r in rs])
+    normed_errors = np.array([(r.acint - limit) / r.acint_std for r in rs])
     normed_errors.sort()
     ax.scatter(quantiles, normed_errors, c="C0", s=3)
     ax.plot([-2, 2], [-2, 2], **REF_PROPS)
@@ -307,8 +307,8 @@ def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
 
 def plot_acint_estimates(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
     """Plot the sorted autocorrelation integral estimates and their uncertainties."""
-    values = np.array([r.props["acint"] for r in rs])
-    errors = np.array([uc.sfac * r.props["acint_std"] for r in rs])
+    values = np.array([r.acint for r in rs])
+    errors = np.array([uc.sfac * r.acint_std for r in rs])
     order = values.argsort()
     values = values[order]
     errors = errors[order]

@@ -31,7 +31,7 @@ or Section 13.3 of "Statistical Mechanics: Theory and Molecular Simulation"
 by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
 
-## How to Compute with Stacie
+## How to Compute with Stacie?
 
 It is assumed that you can load the particle velocities into a NumPy array `velocities`.
 Each row of this array corresponds to the Cartesian velocity component of a particle.
@@ -56,8 +56,8 @@ spectrum = compute_spectrum(
     timestep=timestep,
 )
 result = estimate_acint(spectrum)
-print("Diffusion coefficient", result.props["acint"])
-print("Uncertainty of the diffusion coefficient", result.props["acint_std"])
+print("Diffusion coefficient", result.acint)
+print("Uncertainty of the diffusion coefficient", result.acint_std)
 
 # The unit configuration assumes SI units are used systematically.
 # You may need to adapt this to the units of your data.
@@ -71,4 +71,5 @@ uc = UnitConfig(
 plot_results("diffusion_coefficient.pdf", result, uc)
 ```
 
-For more details, check out the example notebook: [Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).
+For more details, check out the example notebook:
+[Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).

@@ -209,12 +209,12 @@ result = estimate_acint(spectrum, verbose=True)
 
 # %%
 # The essential result:
-error_mc = np.sqrt(result.props["acint"])
+error_mc = np.sqrt(result.acint)
 print(f"Error of the mean = {error_mc:.5f}")
 
 # Because Stacie can estimate errors of the autocorrelation integral,
 # it can also estimate errors of errors of means.
-error_of_error_mc = 0.5 * result.props["acint_std"] / error_mc
+error_of_error_mc = 0.5 * result.acint_std / error_mc
 print(f"Uncertainty of the error of mean = {error_of_error_mc:.5f}")
 
 # %%
@@ -260,6 +260,25 @@ print(f"Quadrature  E[r]   ≈ {mean_quad:8.5f}")
 print(f"Monte Carlo E[r]   ≈ {mean_mc:8.5f}")
 print(f"|Difference|       = {abs(mean_quad - mean_mc):8.5f}")
 print(f"Estimated MC error = {error_mc:8.5f}")
+
+# %% [markdown]
+# ## Autocorrelation time
+#
+# The Exponential Tail model directly estimates the correlation time from the width
+# of the peak at zero frequency in the spectrum.
+# This correlation time is formally equivalent to the "exponential autocorrelation time",
+# as defined by Sokal {cite:p}`sokal_1997_monte`.
+# It may differ from the "integrated autocorrelation time".
+# Only if the autocorrelation function is nothing but an exponentially decaying function,
+# both should match.
+
+# %%
+print("Autocorrelation times:")
+print(f"exponential: {result.corrtime_exp:.2f}")
+print(f"integrated: {result.corrtime_int:.2f}")
+
+# %% [markdown]
+# In this case, both autocorrelation times agree quite well.
 
 # %%  [markdown]
 # ## Regression tests

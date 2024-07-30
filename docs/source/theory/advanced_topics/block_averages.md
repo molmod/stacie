@@ -2,9 +2,11 @@
 
 When computer simulations generate time-dependent data,
 they often use a time step that is much shorter than needed for an autocorrelation integral.
-Storing (and processing) all data may require too many resources.
+Storing (and processing) all the data may require too much resources.
 To reduce the amount of data, we recommend taking block averages.
-These block averages form a new time series with a time step corresponding to the block size.
+These block averages form a new time series with a time step equal to the block size.
+This reduces the storage requirements by a factor equal to the block size.
+
 If the blocks are sufficiently small compared to the decay rate of the autocorrelation function,
 Stacie will produce virtually the same results for all parameters of the Exponential Tail Model.
 This should not be surprising,
@@ -41,17 +43,49 @@ $$
 
 The approximations assume that for small indexes $k$,
 $\omega_N^{-kn}$ is nearly independent of $n$,
-which is only true for slowly varying Fourier basis functions.
+which is indeed true for slowly varying Fourier basis functions.
 The last expression for the sample spectrum is simply that of the spectrum of the block averages,
 with Stacie's normalization convention for a step size $hB$.
 
-Increasing the block size even further is possible, but less useful.
-This will gradually lead to block averages that resemble white noise as the block size increases.
-The (slowest) relaxation time can no longer be derived from such block averages.
-The integral of the autocorrelation function can still be estimated correctly,
-but the statistical uncertainty will increase with the block size.
-Therefore, it is recommended to keep the block size well below
-the decay time of the exponential tail model (e.g., factor 20).
+A good value for the block size is related to
+[the exponential autocorrelation time](../properties/autocorrelation_time.md),
+$\tau_\text{exp}$.
+The block averages have a step size $Bh$,
+which means that the highest frequency in the power spectrum of the block averages is $1/2 B h$,
+due to the [Nyquist-Shannon Sampling Theorem](https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem).
+(This is also the maximum RFFT frequency.)
+This maximum frequency should be high enough to fully contain
+the [peak at zero frequency](../autocorrelation_integral/model.md#peak-width)
+associated with the exponential decay of the autocorrelation function.
+Thus, we find $1/2 B h \gg 1/2\pi \tau_\text{exp}$ or:
+
+$$
+    B \ll \frac{\pi \tau_\text{exp}}{h}
+$$
+
+For example, $B = \frac{1}{20}\times\frac{\pi \tau_\text{exp}}{h}$ will ensure that
+all the relevant features are present without any distortion
+in the spectrum derived from the block averages.
+Hence, when estimating $\tau_\text{exp}$ for a
+[a suitable simulation length](../properties/autocorrelation_time.md),
+one can also fix a suitable block size.
+
+Larger block sizes will generally lead to worse results:
+
+- The approximations in the derivation above will become worse.
+  This will distort the low-frequency spectrum,
+  so that the exponential tail model can only be fitted to a smaller portion.
+
+- Useful information is lost in the block averages.
+  The statistical uncertainties can be reduced by decreasing the block size.
+
+- For very large blocks, one essentially obtains a white noise spectrum.
+  Fitting an Exponential Tail Model to white noise can lead to overfitting.
+  If you have no choice, you can circumvent this issue by specifying a
+  {py:class}`stacie.model.WhiteNoiseModel` instance
+  as an optional argument to the {py:func}`stacie.estimate.estimate_acint` function.
+  This workaround is not ideal because
+  the (slowest) relaxation time can no longer be derived from such block averages.
 
 An application of Stacie with block averages can be found in the following example notebook:
 [Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).

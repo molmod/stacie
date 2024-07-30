@@ -1,8 +1,10 @@
-AC Int   = 1.29843e+02 ± 1.50939e+00
-Tau tail = inf ± inf
-Log lh   = -6.04744e+01
+acint = 1.29843e+02 ± 1.50939e+00
+corrtime exp = inf ± inf
+corrtime int = 5.08553e-01 ± 5.91181e-03
+log(lh) = -6.04744e+01
 ---
-AC Int   = 1.26327e+02 ± 1.71910e+00
-Tau tail = inf ± inf
-Log lh   = -4.51941e+01
+acint = 1.26327e+02 ± 1.71910e+00
+corrtime exp = inf ± inf
+corrtime int = 4.93662e-01 ± 6.71789e-03
+log(lh) = -4.51941e+01
 ---

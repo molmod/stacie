@@ -46,9 +46,10 @@ def output_test_result(prefix, res):
 
 def register_result(regtest, res):
     with regtest:
-        print(f"AC Int   = {res.props['acint']:.5e} ± {res.props['acint_std']:.5e}")
-        print(f"Tau tail = {res.props['corrtime_tail']:.5e} ± {res.props['corrtime_tail_std']:.5e}")
-        print(f"Log lh   = {res.props['ll']:.5e}")
+        print(f"acint = {res.acint:.5e} ± {res.acint_std:.5e}")
+        print(f"corrtime exp = {res.corrtime_exp:.5e} ± {res.corrtime_exp_std:.5e}")
+        print(f"corrtime int = {res.corrtime_int:.5e} ± {res.corrtime_int_std:.5e}")
+        print(f"log(lh) = {res.props['ll']:.5e}")
         print("---")
 
 
