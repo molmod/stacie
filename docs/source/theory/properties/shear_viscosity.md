@@ -6,7 +6,7 @@ of microscopic off-diagonal pressure tensor fluctuations as follows:
 $$
     \eta = \frac{V}{2 k_\text{B} T}
         \int_{-\infty}^{+\infty}
-        \cov[\hat{P}_{xy}(t_0), \hat{P}_{xy}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
+        \cov[\hat{P}_{xy}(t_0) \,,\, \hat{P}_{xy}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
 where $V$ is the volume of the simulation cell,
@@ -17,11 +17,11 @@ The time origin $t_0$ is arbitrary:
 the expectation value is computed over all possible time origins.
 
 The derivation of this result can be found in several references, e.g.,
-Appendix C.3 of "Understanding Molecular Simulation"
+Appendix C.3.2 of "Understanding Molecular Simulation"
 by Frenkel and Smit {cite:p}`frenkel_2002_understanding`,
 Section 8.4 of "Theory of Simple Liquids"
 by Hansen and McDonald {cite:p}`hansen_2013_theory`,
-or Section 13.3 of "Statistical Mechanics: Theory and Molecular Simulation"
+or Section 13.3.1 of "Statistical Mechanics: Theory and Molecular Simulation"
 by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
 
@@ -120,7 +120,7 @@ $$
     \frac{V}{2 k_\text{B} T}
     \int_{-\infty}^{+\infty}
     \cov[
-        \hat{P}_i^{\prime}(t_0) \hat{P}_i^\prime(t_0 + \Delta_t)
+        \hat{P}_i^{\prime}(t_0) \,,\, \hat{P}_i^\prime(t_0 + \Delta_t)
     ]
     \,\mathrm{d}\Delta_t
     \qquad
@@ -181,51 +181,53 @@ for the case of an isotropic liquid,
 they have the same expectation values if $\alpha=\frac{1}{\sqrt{3}}$.
 First expand the covariances:
 
-\begin{align*}
-&\begin{aligned}
-    \cov[\hat{P}'_1(t_0), \hat{P}'_1(\Delta_t)] =
-    &\,
-        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
-        - \frac{\alpha^2}{2} \cov[\hat{P}_{yy}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
+$$
+    &\cov[\hat{P}'_1(t_0) \,,\, \hat{P}'_1(t_0 + \Delta_t)] =
     \\
-    &\,
-        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
-        - \frac{\alpha^2}{2} \cov[\hat{P}_{zz}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
+    &\qquad
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
     \\
-    &\,
-        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
-        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
+    &\qquad
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
     \\
-    &\,
-        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
-        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
+    &\qquad
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
     \\
-    &\,
-        + \alpha^2 \cov[\hat{P}_{xx}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
-\end{aligned}
-\\
-&\begin{aligned}
-    \cov[\hat{P}'_2(t_0), \hat{P}'_2(\Delta_t)] =
-    &\,
-        - \frac{1}{4} \cov[\hat{P}_{yy}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
-        - \frac{1}{4} \cov[\hat{P}_{zz}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
+    &\qquad
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
     \\
-    &\,
-        + \frac{1}{4} \cov[\hat{P}_{yy}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
-        + \frac{1}{4} \cov[\hat{P}_{zz}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
-\end{aligned}
-\end{align*}
+    &\qquad
+        + \alpha^2 \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+    \\[0.5em]
+    &\cov[\hat{P}'_2(t_0) \,,\, \hat{P}'_2(t_0 + \Delta_t)] =
+    \\
+    &\qquad
+        - \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+        - \frac{1}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        + \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        + \frac{1}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+$$
 
 Because the liquid is isotropic, permutations of Cartesian axes do not affect the expectations values, which greatly simplifies both expressions:
 
 $$
-    \cov[\hat{P}'_1(t_0), \hat{P}'_1(\Delta_t)] &=
-        \frac{3\alpha^2}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
-        - \frac{3\alpha^2}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
+    &\cov[\hat{P}'_1(t_0), \hat{P}'_1(t_0 + \Delta_t)]
     \\
-    \cov[\hat{P}'_2(t_0), \hat{P}'_2(\Delta_t)] &=
-        \frac{1}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
-        - \frac{1}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
+    &\qquad
+        \frac{3\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        - \frac{3\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\[0.5em]
+    &\cov[\hat{P}'_2(t_0), \hat{P}'_2(t_0 + \Delta_t)] =
+    \\
+    &\qquad
+        \frac{1}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        - \frac{1}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
 $$
 
 These two expectation values are consistent when $\alpha^2 = 1/3$.
@@ -241,8 +243,9 @@ $$
 $$
 
 (This is Eq. A5 in their paper rewritten in the current notation.)
-Working with the five components, as we propose, is advantageous because it makes explicit
-how many independent sequences are used as input, which allows precise uncertainty quantification.
+Working with the five components, as we propose, is advantageous.
+It makes explicit how many independent sequences are used as input,
+which allows for a precise uncertainty quantification.
 
 ## How to Compute with Stacie?
 

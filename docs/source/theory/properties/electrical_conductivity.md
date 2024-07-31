@@ -7,7 +7,7 @@ $$
     \sigma = \frac{1}{2 V k_\text{B} T}
         \frac{1}{D}\sum_{d=1}^D
         \int_{-\infty}^{+\infty}
-        \cov[\hat{J}^\text{c}_d(t_0), \hat{J}^\text{c}_d(t_0 + \Delta_t)]
+        \cov[\hat{J}^\text{c}_d(t_0) \,,\, \hat{J}^\text{c}_d(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
 $$
 
@@ -20,7 +20,9 @@ The time origin $t_0$ is arbitrary:
 the expectation value is computed over all possible time origins.
 
 The derivation of this result can be found in
-Section 7.7 of "Theory of Simple Liquids"
+Appendix C.3.1 of "Understanding Molecular Simulation"
+by Frenkel and Smit {cite:p}`frenkel_2002_understanding`,
+or Section 7.7 of "Theory of Simple Liquids"
 by Hansen and McDonald {cite:p}`hansen_2013_theory`.
 
 If your simulation code does not print out the charge current,
@@ -32,11 +34,13 @@ $$
 $$
 
 where $N_q$ is the number of charge carriers.
+The charge current can also be interpreted as the time-derivative of the instantaneous dipole moment of the system.
 
 In case of molecular ions, the center-of-mass velocity can be used, but this is not critical.
 You will get the same conductivity (possibly with slightly larger uncertainties)
 when using the velocity of any single atom in a molecular ion instead.
-The charges of ions must be integer multiples of the elementary charge.
+The charges of ions must be integer multiples of the elementary charge
+{cite:p}`grasselli_2019_topological`.
 
 ## Nernst-Einstein Approximation
 
@@ -58,7 +62,7 @@ $$
         \sum_{n=1}^{N_q} \sum_{m=1}^{N_q}
         q_n q_m
         \int_{-\infty}^{+\infty}
-        \cov[\hat{v}_{n,d}(t_0), \hat{v}_{m,d}(t_0 + \Delta_t)]
+        \cov[\hat{v}_{n,d}(t_0) \,,\, \hat{v}_{m,d}(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
 $$
 
@@ -72,7 +76,7 @@ $$
         q_n^2
         \frac{1}{D}\sum_{d=1}^D
         \int_{-\infty}^{+\infty}
-        \cov[\hat{v}_{n,d}(t_0), \hat{v}_{n,d}(t_0 + \Delta_t)]
+        \cov[\hat{v}_{n,d}(t_0) \,,\, \hat{v}_{n,d}(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
 $$
 
@@ -90,7 +94,7 @@ $$
         \frac{1}{2 N_k D}\sum_{d=1}^D
         \sum_{n\in S_k}
         \int_{-\infty}^{+\infty}
-        \cov[\hat{v}_{n,d}(t_0), \hat{v}_{n,d}(t_0 + \Delta_t)]
+        \cov[\hat{v}_{n,d}(t_0) \,,\, \hat{v}_{n,d}(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
         \right)
 $$

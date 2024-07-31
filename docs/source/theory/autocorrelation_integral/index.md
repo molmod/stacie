@@ -19,7 +19,7 @@ The three main parts of the derivation consist of:
   to identify the low-frequency part of the spectrum.
 
 ```{toctree}
-:maxdepth: 1
+:hidden:
 
 notation.md
 overview.md

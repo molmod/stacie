@@ -88,7 +88,7 @@ def compute_spectrum(
         (Time correlations within one sequence are fine, obviously.)
         You may also provide a single sequence,
         in which case the shape of the array is ``(nstep,)``.
-        However, we recommend using multiple independent sequences to reduce the uncertainty.
+        However, we recommend using multiple independent sequences to reduce uncertainties.
     prefactor
         A factor to be multiplied with the autocorrelation function
         to give it a physically meaningful unit.

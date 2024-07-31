@@ -10,10 +10,10 @@ Other notebooks process the output of external simulation codes.
 Input files are provided for these simulations,
 which you must run before such notebooks can be used.
 
-The rendered notebooks, including all outputs, are included in the documentation:
+The rendered notebooks, including all outputs, are included in the following sections.
 
 ```{toctree}
-:maxdepth: 1
+:hidden:
 
 error_mean.py
 applicability.py

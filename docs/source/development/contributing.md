@@ -13,7 +13,7 @@ but we are always open to (suggestions for) improvements that fit within the goa
 New worked examples that are not too computationally demanding are also highly appreciated!
 Even simple things like correcting typos or fixing minor mistakes are welcome.
 
-This document does not document how to use of Git and GitHub, or how to develop software in general.
+This section does not document how to use of Git and GitHub, or how to develop software in general.
 We assume that you already have the basic skills to contribute.
 Below are some links to documentation for those who are not familiar with these technicalities yet.
 
@@ -37,7 +37,7 @@ Below are some links to documentation for those who are not familiar with these 
   we currently use for source code and documentation.
 
 
-## How to report a bug
+## How to Report a Bug
 
 Create a new issue (or find an existing one) and include the following information:
 
@@ -60,14 +60,14 @@ you may find the following online references helpful:
 If something goes wrong in the process of creating a pull request, we'll try to help out.
 
 
-## Contribution workflow
+## Contribution Workflow
 
 Contributing to Stacie always involves the following steps:
 
 1. Create an issue on GitHub to discuss your plans.
 1. Fork the Stacie repository on GitHub.
 1. Clone the original repository on your computer and add your fork as a second remote.
-1. Install [pre-commit](https://pre-commit.com/)
+1. Install [pre-commit](https://pre-commit.com/).
 1. Create a new branch. (Do not commit changes to the main branch.)
 1. Make changes to the source code. New features must have unit tests and documentation.
 1. Make sure all the tests pass, the documentation builds without errors or warnings,

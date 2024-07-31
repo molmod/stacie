@@ -1,9 +1,9 @@
 # Development
 
-This section contains some technical details about the development of Stacie:
+This section contains some technical details about the development of Stacie.
 
 ```{toctree}
-:maxdepth: 1
+:hidden:
 
 contributing.md
 setup.md

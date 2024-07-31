@@ -52,7 +52,8 @@ Both definitions are useful and relevant for different purposes.
     The first factor is the "naive" variance of the mean,
     assuming that all $N$ inputs are uncorrelated.
     The second factor corrects for the presence of time correlations
-    and is called the sampling inefficiency:
+    and is called the statistical inefficiency
+    {cite:p}`allen_2017_computer,friedberg_1970_test`:
 
     $$
         s = \frac{2\tau_\text{int}}{h}

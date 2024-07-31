@@ -24,14 +24,14 @@ The variance of this sample mean is:
 $$
   \var[\hat{x}_\text{av}] =
       \frac{1}{N^2} \sum_{n=0}^{N-1} \sum_{m=0}^{N-1}
-      \cov[\hat{x}_n,\hat{x}_m]
+      \cov[\hat{x}_n \,,\, \hat{x}_m]
 $$
 
 We assume that the sequence is drawn from a stationary process,
 such that the covariance depends only on $\Delta = n-m$:
 
 $$
-    c_\Delta = \cov[\hat{x}_n,\hat{x}_m]
+    c_\Delta = \cov[\hat{x}_n \,,\, \hat{x}_m]
 $$
 
 leading to:
@@ -39,7 +39,7 @@ leading to:
 $$
   \var[\hat{x}_\text{av}] =
     \frac{1}{N^2} \sum_{n=0}^{N-1} \sum_{\Delta=n-N+1}^{n}
-    \cov[\hat{x}_n,\hat{x}_\Delta]
+    \cov[\hat{x}_n \,,\, \hat{x}_\Delta]
 $$
 
 To simplify this expression, we must further assume that the second summation

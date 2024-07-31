@@ -16,8 +16,8 @@ The following notation is used throughout Stacie's documentation.
   We find it useful to identify all stochastic variables clearly.
   For example:
 
-    - If $\eta$ is the ground truth of the autocorrelation integral,
-      then $\hat{\eta}$ is an estimate of $\eta$.
+    - If $\mathcal{I}$ is the ground truth of the autocorrelation integral,
+      then $\hat{\mathcal{I}}$ is an estimate of $\mathcal{I}$.
     - A sample point from a distribution $p_a(a)$ is denoted as $\hat{a}$.
     - A realization of a continuous stochastic process $p_{a(t)}[a]$ is written as $\hat{a}(t)$.
     - Similarly, a sample from a discrete stochastic process $p_{a_n}[a]$ is written as $\hat{a}_n$.

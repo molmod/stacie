@@ -128,7 +128,7 @@ This model can be fitted to the low-frequency part of an empirical autocorrelati
 Once the parameters are fitted to an empirical spectrum, one finds:
 
 $$
-    \eta \approx \hat{\eta} = \hat{C}^\text{exp-tail}_0 = \hat{a}_\text{short} + \hat{a}_\text{tail}
+    \mathcal{I} \approx \hat{\mathcal{I}} = \hat{C}^\text{exp-tail}_0 = \hat{a}_\text{short} + \hat{a}_\text{tail}
 $$
 
 

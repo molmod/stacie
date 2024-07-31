@@ -21,7 +21,6 @@ Copy-pasteable citation records in various formats are provided in [How to Cite?
 
 ```{toctree}
 :hidden:
-:maxdepth: 2
 
 getting_started/index.md
 theory/index.md

@@ -6,7 +6,7 @@ of isotropic pressure fluctuations as follows:
 $$
     \eta = \frac{V}{2 k_\text{B} T}
         \int_{-\infty}^{+\infty}
-        \cov[\hat{P}_\text{iso}(t_0), \hat{P}_\text{iso}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
+        \cov[\hat{P}_\text{iso}(t_0) \,,\, \hat{P}_\text{iso}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
 where $V$ is the volume of the simulation cell,
