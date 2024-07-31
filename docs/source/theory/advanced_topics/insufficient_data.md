@@ -10,19 +10,24 @@ There are several heuristics that can be used to detect a lack of data.
 Ideally, all of the following conditions are met to obtain robust results.
 If not, one should be cautious in interpretating the results and consider generating more data.
 
-- The individual the input sequences must be (much) longer than the tail correlation time.
+- The individual the input sequences must be (much) longer than the exponential correlation time, $\tau_\text{exp}$.
 
     > The slowest time correlations can only be detected
     > if these slow changes in the inputs are repeated a few times.
     > This is a rather general requirement, not specific to Stacie.
     > If this condition is not met, the relevant information for estimating
     > the autocorrelation integral is simply missing.
+    > More details can be found in the section on the
+    > [autocorrelation time](../properties/autocorrelation_time.md).
 
-- The product of the tail correlation time and the cutoff frequency should be of the order of 1.
+- The product $2\pi\tau_\text{exp} f_\text{cut}$,
+  where $f_\text{cut}$ is the cutoff frequency
+  used to determine the number of fitting points,
+  should be of the order of 1.
 
     > - If this product is much less than 1,
     >   the selected part of the spectrum does not have enough relevant features
-    >   to fit the exponential tail model.
+    >   to fit the Exponential Tail Model.
     >   The selected part of the spectrum should show some trend,
     >   except for the trivial case where the inputs are white noise.
     > - When this product is much greater than 1,

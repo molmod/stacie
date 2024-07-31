@@ -5,14 +5,14 @@ of microscopic off-diagonal pressure tensor fluctuations as follows:
 
 $$
     \eta = \frac{V}{2 k_\text{B} T}
-           \int_{-\infty}^{+\infty}
-           \cov[P_{xy}(t_0), P_{xy}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
+        \int_{-\infty}^{+\infty}
+        \cov[P_{xy}(t_0), P_{xy}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
 where $V$ is the volume of the simulation cell,
 $k_\text{B}$ is the Boltzmann constant,
 $T$ is the temperature,
-and $P_{xy}$ is an off-diagonal pressure tensor element.
+and $P_{xy}$ is an instantaneous off-diagonal pressure tensor element.
 The time origin $t_0$ is arbitrary:
 the expectation value is computed over all possible time origins.
 
@@ -251,11 +251,11 @@ It is assumed that you can load the time-dependent pressure tensor components
 Each row of this array corresponds to one pressure tensor component
 in the order $P_{xx}$, $P_{yy}$, $P_{zz}$, $P_{zx}$, $P_{yz}$, $P_{xy}$.
 (Same order as in Voigt notation.)
-The columns correspond to time steps.
+Columns correspond to time steps.
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,
 all in consistent units.
-With these requirements, the viscosity can be computed as follows:
+With these requirements, the shear viscosity can be computed as follows:
 
 ```python
 import numpy as np
@@ -269,8 +269,8 @@ volume, temperature, boltzmann_const, timestep = ...
 # This is the optimal usage of pressure information
 # and it informs Stacie of the amount of independent inputs.
 indep_pcomps = np.array([
-    (pcomps[0] - 0.5 * pcoms[1] - 0.5 * pcoms[2]) / np.sqrt(3),
-    0.5 * pcoms[1] - 0.5 * pcoms[2],
+    (pcomps[0] - 0.5 * pcomps[1] - 0.5 * pcomps[2]) / np.sqrt(3),
+    0.5 * pcomps[1] - 0.5 * pcomps[2],
     pcomps[3],
     pcomps[4],
     pcomps[5],

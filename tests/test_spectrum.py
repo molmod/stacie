@@ -55,3 +55,33 @@ def test_basics():
     assert_equal(spectrum2.freqs, spectrum.freqs[1:])
     assert_equal(spectrum2.amplitudes, spectrum.amplitudes[1:])
     assert spectrum2.amplitudes_ref is None
+
+
+def test_single():
+    sequence = np.array([0.66134257, 1.69596962, 2.08533685, 0.62396761, -0.21445517, 1.2226847])
+    prefactor = 0.25
+    timestep = 2.5
+    spectrum = compute_spectrum(sequence, prefactor=prefactor, timestep=timestep)
+    # Test simple properties.
+    assert spectrum.nfreq == 4
+    assert_equal(spectrum.ndofs, [1, 2, 2, 1])
+    assert spectrum.nstep == 6
+    assert spectrum.prefactor == prefactor
+    assert spectrum.timestep == timestep
+    assert spectrum.freqs[0] == 0.0
+    assert len(spectrum.freqs) == 4
+    assert_allclose(spectrum.freqs[1], 1 / (6 * timestep))
+    assert spectrum.amplitudes_ref is None
+    # Test the DC-component.
+    scale = prefactor * timestep / sequence.shape[0]
+    dccomp = sequence.sum() ** 2
+    assert_allclose(spectrum.amplitudes[0], dccomp * scale)
+    # Test the Plancherel theorem (taking into account RFFT conventions).
+    sumsq = (sequence**2).sum()
+    assert_allclose((spectrum.amplitudes * spectrum.ndofs).sum(), sumsq * prefactor * timestep)
+    # Test removing the zero frequency
+    spectrum2 = spectrum.without_zero_freq()
+    assert_equal(spectrum2.ndofs, spectrum.ndofs[1:])
+    assert_equal(spectrum2.freqs, spectrum.freqs[1:])
+    assert_equal(spectrum2.amplitudes, spectrum.amplitudes[1:])
+    assert spectrum2.amplitudes_ref is None

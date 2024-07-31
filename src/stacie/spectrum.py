@@ -86,6 +86,9 @@ def compute_spectrum(
         of which each row is a time-dependent sequence.
         All sequences are assumed to be statistically independent and have length ``nstep``.
         (Time correlations within one sequence are fine, obviously.)
+        You may also provide a single sequence,
+        in which case the shape of the array is ``(nstep,)``.
+        However, we recommend using multiple independent sequences to reduce the uncertainty.
     prefactor
         A factor to be multiplied with the autocorrelation function
         to give it a physically meaningful unit.
@@ -100,6 +103,10 @@ def compute_spectrum(
         A ``Spectrum`` object holding all the inputs needed to estimate
         the integral of the autocorrelation function.
     """
+    # Handle single sequence case
+    if sequences.ndim == 1:
+        sequences = sequences.reshape(1, -1)
+
     # Get basic parameters of the input sequences.
     nindep, nstep = sequences.shape
     freqs = np.fft.rfftfreq(nstep, d=timestep)
