@@ -32,8 +32,8 @@ by Allen and Tildesley {cite:p}`allen_2017_computer`.
 It is assumed that you can load the diagonal time-dependent pressure tensor components
 into a NumPy array `pcomps`.
 (The same array as for [shear viscosity](shear_viscosity.md) can be used.)
-Each row of this array corresponds to one pressure tensor component
-in the order $P_{xx}$, $P_{yy}$, $P_{zz}$, $P_{zx}$, $P_{yz}$, $P_{xy}$.
+Each row of this array corresponds to one pressure tensor component in the order
+$\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, $\hat{P}_{xy}$.
 (Same order as in Voigt notation. The last three are not used and can be omitted.)
 Columns correspond to time steps.
 You also need to store the cell volume, temperature,

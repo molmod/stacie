@@ -5,10 +5,10 @@ The diffusion coefficient (or diffusivity) of a set of $N$ particles in $D$ dime
 $$
     D = \frac{1}{2ND}\int_{-\infty}^{+\infty}
         \sum_{n=1}^N \sum_{d=1}^D
-        \cov[v_{n,d}(t_0), v_{n,d}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
+        \cov[\hat{v}_{n,d}(t_0), \hat{v}_{n,d}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
-where $v_{n,d}(t)$ is the Cartesian component $d$ of the time-dependent velocity of particle $n$.
+where $\hat{v}_{n,d}(t)$ is the Cartesian component $d$ of the time-dependent velocity of particle $n$.
 If the particles are molecules, their center of mass velocities can be used.
 
 For a simple fluid, the result is called the self-diffusion coefficient or self-diffusivity.

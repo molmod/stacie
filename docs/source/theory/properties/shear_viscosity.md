@@ -6,13 +6,13 @@ of microscopic off-diagonal pressure tensor fluctuations as follows:
 $$
     \eta = \frac{V}{2 k_\text{B} T}
         \int_{-\infty}^{+\infty}
-        \cov[P_{xy}(t_0), P_{xy}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
+        \cov[\hat{P}_{xy}(t_0), \hat{P}_{xy}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
 where $V$ is the volume of the simulation cell,
 $k_\text{B}$ is the Boltzmann constant,
 $T$ is the temperature,
-and $P_{xy}$ is an instantaneous off-diagonal pressure tensor element.
+and $\hat{P}_{xy}$ is an instantaneous off-diagonal pressure tensor element.
 The time origin $t_0$ is arbitrary:
 the expectation value is computed over all possible time origins.
 
@@ -36,16 +36,16 @@ To facilitate working with linear transformations of pressure tensors,
 we use Voigt notation:
 
 $$
-    \mathbf{P} =
+    \hat{\mathbf{P}} =
     \Bigl[
         \begin{matrix}
-            P_{xx} & P_{yy} & P_{zz} & P_{yz} & P_{zx} & P_{xy}
+            \hat{P}_{xx} & \hat{P}_{yy} & \hat{P}_{zz} & \hat{P}_{yz} & \hat{P}_{zx} & \hat{P}_{xy}
         \end{matrix}
     \Bigr]^\top
 $$
 
 The transformation to the traceless form then becomes
-$\mathbf{\tilde{P}} = \mathbf{T} \mathbf{P}$ with:
+$\hat{\mathbf{P}}_\text{tl} = \mathbf{T} \hat{\mathbf{P}}$ with:
 
 $$
     \mathbf{T} =
@@ -93,7 +93,7 @@ The zero eigenvalue corresponds to the isotropic component being removed.
 Transforming the pressure to this basis of eigenvectors constructs five off-diagonal components.
 Since this transformation is orthonormal, the five components remain statistically uncorrelated.
 It can be shown that the two first off-diagonal components must be rescaled
-with a factor $1/\sqrt{2}$, as in $\mathbf{P}^\prime = \mathbf{V} \mathbf{P}$ with
+with a factor $1/\sqrt{2}$, as in $\hat{\mathbf{P}}^\prime = \mathbf{V} \hat{\mathbf{P}}$ with
 
 $$
     \mathbf{V} =
@@ -120,7 +120,7 @@ $$
     \frac{V}{2 k_\text{B} T}
     \int_{-\infty}^{+\infty}
     \cov[
-        P_i^{\prime}(t_0) P_i^\prime(t_0 + \Delta_t)
+        \hat{P}_i^{\prime}(t_0) \hat{P}_i^\prime(t_0 + \Delta_t)
     ]
     \,\mathrm{d}\Delta_t
     \qquad
@@ -128,104 +128,104 @@ $$
 $$
 
 For the last three components, this result is trivial.
-The second component, $P'_2$, is found by rotating the Cartesian axes $45^\circ$ about the $x$-axis.
+The second component, $\hat{P}'_2$, is found by rotating the Cartesian axes $45^\circ$ about the $x$-axis.
 
 $$
-    \mathbf{R} &= \left[\begin{matrix}
+    \mathcal{R} &= \left[\begin{matrix}
         1 & & \\
         & \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \\
         & \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}}
     \end{matrix}\right]
     \\
-    \mathbf{P} &= \left[\begin{matrix}
-        P_{xx} & P_{xy} & P_{zx} \\
-        P_{xy} & P_{yy} & P_{yz} \\
-        P_{zx} & P_{yz} & P_{zz}
+    \hat{\mathcal{P}} &= \left[\begin{matrix}
+        \hat{P}_{xx} & \hat{P}_{xy} & \hat{P}_{zx} \\
+        \hat{P}_{xy} & \hat{P}_{yy} & \hat{P}_{yz} \\
+        \hat{P}_{zx} & \hat{P}_{yz} & \hat{P}_{zz}
     \end{matrix}\right]
     \\
-    \mathbf{R}\mathbf{P}\mathbf{R}^\top &= \left[\begin{matrix}
-        p_{xx} &
-        \frac{\sqrt{2} P_{xy}}{2} - \frac{\sqrt{2} P_{zx}}{2} &
-        \frac{\sqrt{2} P_{xy}}{2} + \frac{\sqrt{2} P_{zx}}{2}
+    \mathbf{R}\hat{\mathcal{P}}\mathbf{R}^\top &= \left[\begin{matrix}
+        \hat{P}_{xx} &
+        \frac{\sqrt{2} \hat{P}_{xy}}{2} - \frac{\sqrt{2} \hat{P}_{zx}}{2} &
+        \frac{\sqrt{2} \hat{P}_{xy}}{2} + \frac{\sqrt{2} \hat{P}_{zx}}{2}
         \\
-        \frac{\sqrt{2} P_{xy}}{2} - \frac{\sqrt{2} P_{zx}}{2} &
-        \frac{P_{yy}}{2} - P_{yz} + \frac{P_{zz}}{2} &
-        \frac{P_{yy}}{2} - \frac{P_{zz}}{2}
+        \frac{\sqrt{2} \hat{P}_{xy}}{2} - \frac{\sqrt{2} \hat{P}_{zx}}{2} &
+        \frac{\hat{P}_{yy}}{2} - \hat{P}_{yz} + \frac{\hat{P}_{zz}}{2} &
+        \frac{\hat{P}_{yy}}{2} - \frac{\hat{P}_{zz}}{2}
         \\
-        \frac{\sqrt{2} P_{xy}}{2} + \frac{\sqrt{2} P_{zx}}{2} &
-        \frac{P_{yy}}{2} - \frac{P_{zz}}{2} &
-        \frac{P_{yy}}{2} + P_{yz} + \frac{P_{zz}}{2}
+        \frac{\sqrt{2} \hat{P}_{xy}}{2} + \frac{\sqrt{2} \hat{P}_{zx}}{2} &
+        \frac{\hat{P}_{yy}}{2} - \frac{\hat{P}_{zz}}{2} &
+        \frac{\hat{P}_{yy}}{2} + \hat{P}_{yz} + \frac{\hat{P}_{zz}}{2}
     \end{matrix}\right]
 $$
 
 In the new axes frame, the last off-diagonal element is a proper off-diagonal term equal to
-$\frac{P_{yy}}{2}-\frac{P_{zz}}{2}$.
+$\frac{\hat{P}_{yy}}{2}-\frac{\hat{P}_{zz}}{2}$.
 
-For the first component, $P'_1$, the proof is a little more involved.
+For the first component, $\hat{P}'_1$, the proof is a little more involved.
 There is no rotation of the Cartesian axis frame
 in which this linear combination appears as an off-diagonal element.
 Instead, it is simply a scaled sum of two off-diagonal stresses:
 
 $$
-    P'_1 = \alpha\left(
-        P_{xx} - \frac{P_{yy}}{2} - \frac{P_{zz}}{2}
+    \hat{P}'_1 = \alpha\left(
+        \hat{P}_{xx} - \frac{\hat{P}_{yy}}{2} - \frac{\hat{P}_{zz}}{2}
     \right) = \alpha\left(
-        \frac{P_{xx}}{2} - \frac{P_{yy}}{2}
+        \frac{\hat{P}_{xx}}{2} - \frac{\hat{P}_{yy}}{2}
     \right) + \alpha\left(
-        \frac{P_{xx}}{2} - \frac{P_{zz}}{2}
+        \frac{\hat{P}_{xx}}{2} - \frac{\hat{P}_{zz}}{2}
     \right)
 $$
 
-By working out the autocorrelation functions of $P'_1$ and $P'_2$ one finds that,
+By working out the autocorrelation functions of $\hat{P}'_1$ and $\hat{P}'_2$ one finds that,
 for the case of an isotropic liquid,
 they have the same expectation values if $\alpha=\frac{1}{\sqrt{3}}$.
 First expand the covariances:
 
 \begin{align*}
 &\begin{aligned}
-    \cov[P'_1(t_0), P'_1(\Delta_t)] =
+    \cov[\hat{P}'_1(t_0), \hat{P}'_1(\Delta_t)] =
     &\,
-        - \frac{\alpha^2}{2} \cov[P_{xx}(t_0), P_{yy}(t_0+\Delta_t)]
-        - \frac{\alpha^2}{2} \cov[P_{yy}(t_0), P_{xx}(t_0+\Delta_t)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{yy}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
     \\
     &\,
-        - \frac{\alpha^2}{2} \cov[P_{xx}(t_0), P_{zz}(t_0+\Delta_t)]
-        - \frac{\alpha^2}{2} \cov[P_{zz}(t_0), P_{xx}(t_0+\Delta_t)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{zz}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
     \\
     &\,
-        + \frac{\alpha^2}{4} \cov[P_{yy}(t_0), P_{zz}(t_0+\Delta_t)]
-        + \frac{\alpha^2}{4} \cov[P_{zz}(t_0), P_{xx}(t_0+\Delta_t)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
     \\
     &\,
-        + \frac{\alpha^2}{4} \cov[P_{yy}(t_0), P_{yy}(t_0+\Delta_t)]
-        + \frac{\alpha^2}{4} \cov[P_{zz}(t_0), P_{zz}(t_0+\Delta_t)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
     \\
     &\,
-        + \alpha^2 \cov[P_{xx}(t_0), P_{xx}(t_0+\Delta_t)]
+        + \alpha^2 \cov[\hat{P}_{xx}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
 \end{aligned}
 \\
 &\begin{aligned}
-    \cov[P'_2(t_0), P'_2(\Delta_t)] =
+    \cov[\hat{P}'_2(t_0), \hat{P}'_2(\Delta_t)] =
     &\,
-        - \frac{1}{4} \cov[P_{yy}(t_0), P_{zz}(t_0+\Delta_t)]
-        - \frac{1}{4} \cov[P_{zz}(t_0), P_{yy}(t_0+\Delta_t)]
+        - \frac{1}{4} \cov[\hat{P}_{yy}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
+        - \frac{1}{4} \cov[\hat{P}_{zz}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
     \\
     &\,
-        + \frac{1}{4} \cov[P_{yy}(t_0), P_{yy}(t_0+\Delta_t)]
-        + \frac{1}{4} \cov[P_{zz}(t_0), P_{zz}(t_0+\Delta_t)]
+        + \frac{1}{4} \cov[\hat{P}_{yy}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
+        + \frac{1}{4} \cov[\hat{P}_{zz}(t_0), \hat{P}_{zz}(t_0+\Delta_t)]
 \end{aligned}
 \end{align*}
 
 Because the liquid is isotropic, permutations of Cartesian axes do not affect the expectations values, which greatly simplifies both expressions:
 
 $$
-    \cov[P'_1(t_0), P'_1(\Delta_t)] &=
-        \frac{3\alpha^2}{2} \cov[P_{xx}(t_0), P_{xx}(t_0+\Delta_t)]
-        - \frac{3\alpha^2}{2} \cov[P_{xx}(t_0), P_{yy}(t_0+\Delta_t)]
+    \cov[\hat{P}'_1(t_0), \hat{P}'_1(\Delta_t)] &=
+        \frac{3\alpha^2}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
+        - \frac{3\alpha^2}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
     \\
-    \cov[P'_2(t_0), P'_2(\Delta_t)] &=
-        \frac{1}{2} \cov[P_{xx}(t_0), P_{xx}(t_0+\Delta_t)]
-        - \frac{1}{2} \cov[P_{xx}(t_0), P_{yy}(t_0+\Delta_t)]
+    \cov[\hat{P}'_2(t_0), \hat{P}'_2(\Delta_t)] &=
+        \frac{1}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{xx}(t_0+\Delta_t)]
+        - \frac{1}{2} \cov[\hat{P}_{xx}(t_0), \hat{P}_{yy}(t_0+\Delta_t)]
 $$
 
 These two expectation values are consistent when $\alpha^2 = 1/3$.
@@ -236,7 +236,7 @@ the equation proposed by Daivis and Evans {cite:p}`daivis_1994_comparison`:
 
 $$
     \eta = \frac{1}{10} \frac{V}{2k_\text{B} T} \int_{-\infty}^{+\infty}
-        \mean\left[\mathbf{\tilde{P}}(t_0):\mathbf{\tilde{P}}(t_0 + \Delta_t)\right]
+        \mean\left[\hat{\mathbf{P}}_\text{tl}(t_0):\hat{\mathbf{P}}_\text{tl}(t_0 + \Delta_t)\right]
         \,\mathrm{d}\Delta_t
 $$
 
@@ -248,8 +248,8 @@ how many independent sequences are used as input, which allows precise uncertain
 
 It is assumed that you can load the time-dependent pressure tensor components
 (diagonal and off-diagonal) into a NumPy array `pcomps`.
-Each row of this array corresponds to one pressure tensor component
-in the order $P_{xx}$, $P_{yy}$, $P_{zz}$, $P_{zx}$, $P_{yz}$, $P_{xy}$.
+Each row of this array corresponds to one pressure tensor component in the order
+$\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, $\hat{P}_{xy}$.
 (Same order as in Voigt notation.)
 Columns correspond to time steps.
 You also need to store the cell volume, temperature,

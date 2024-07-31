@@ -33,7 +33,7 @@ which limits its applicability.
 It is assumed that you can load the time-dependent heat current components
 into a NumPy array `heatcurrent`.
 Each row of this array corresponds to one pressure tensor component
-in the order $J_x$, $J_y$ and $J_z$.
+in the order $\hat{J}_x$, $\hat{J}_y$ and $\hat{J}_z$.
 Columns correspond to time steps.
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,

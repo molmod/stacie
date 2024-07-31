@@ -12,6 +12,8 @@ The following notation is used throughout Stacie's documentation.
 - $p_x(x)$ is the probability density function of $\hat{x}$.
 
 - A hat is used to denote a stochastic quantity, including functions of stochastic quantities.
+  This is more general than the common practice of using hats for statistical estimates only.
+  We find it useful to identify all stochastic variables clearly.
   For example:
 
     - If $\eta$ is the ground truth of the autocorrelation integral,
