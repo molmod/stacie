@@ -33,7 +33,14 @@ shear_viscosity.md
 bulk_viscosity.md
 ```
 
-Notte that all transport properties estimated from molecular dynamics simulations
+Note that all transport properties estimated from molecular dynamics simulations
 (of periodic systems) may be affected by finite size effects.
 If relevant, one should extrapolate the results to an infinite box size
 {cite:p}`yeh_2004_system`.
+The thermostat (and barostat) can be another important source of systematic errors.
+Basconi et al. recommend a thermostat with slow relaxation times,
+global coupling, and continuous rescaling (as opposed to random force contributions)
+{cite:p}`basconi_2013_effects`.
+For example, a Nosé-Hoover thermostat with a relaxation time of 1 ps (or higher) should be fine.
+One can rule out such errors more rigorously by running multiple simulations
+with systematically increased thermostat (and barostat) relaxation times.
