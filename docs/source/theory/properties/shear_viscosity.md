@@ -27,28 +27,28 @@ by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
 ## Five Independent Off-Diagonal Pressure Components of an Isotropic Liquid
 
-To the best of our knowledge, there is no prior work showing how to prepare
+To the best of our knowledge, there is no previous work showing how to prepare
 five *independent* inputs with off-diagonal pressure tensor contributions
-that can be used as inputs for the autocorrelation function.
+that can be used as inputs to the autocorrelation integral.
 For example, the result below is not mentioned in a recent comparison of methods
-to include contributions from the diagonal of the traceless pressure tensor
+for including diagonal elements of the traceless pressure tensor
 {cite:p}`mercier_2023_computation`.
-Given that a pressure tensor has 6 degrees of freedom
-of which one is the isotropic pressure,
+Since a pressure tensor has 6 degrees of freedom
+one of which is the isotropic pressure,
 the remaining five should be related to anisotropic contributions.
 
-It is well known that the viscosity can be derived from six off-diagonal and diagonal
-traceless pressure tensor elements in the case of an isotropic fluid
+It is well known that the viscosity of an isotropic fluid can be derived from
+six off-diagonal and diagonal traceless pressure tensor elements in the case
 {cite:p}`daivis_1994_comparison`.
 However, by subtracting the isotropic term, the remaining six components
 become statistically correlated.
 For a proper uncertainty analysis of the estimated viscosity,
 Stacie requires the inputs to be statistically independent,
-so we cannot use the equation by Daivis and Evans.
-Here, we provide a transformation of the pressure tensor
+so we cannot use the Daivis and Evans equation.
+Here we provide a transformation of the pressure tensor
 that yields five independent components,
-all of which can be used individually to compute the viscosity.
-The average over these five viscosities is equivalent to the result of Daivis and Evans.
+each of which can be used individually to compute the viscosity.
+The average of these five viscosities is equivalent to the result of Daivis and Evans.
 
 To facilitate working with linear transformations of pressure tensors,
 we use Voigt notation:
