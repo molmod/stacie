@@ -25,12 +25,29 @@ or Section 13.3.1 of "Statistical Mechanics: Theory and Molecular Simulation"
 by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
 
-## Five Independent Off-diagonal Pressure Components of an Isotropic Liquid
+## Five Independent Off-Diagonal Pressure Components of an Isotropic Liquid
 
-There are few references explaining how to compute
-five independent components of the pressure tensor {cite:p}`daivis_1994_comparison`
+To the best of our knowledge, there is no prior work showing how to prepare
+five *independent* inputs with off-diagonal pressure tensor contributions
+that can be used as inputs for the autocorrelation function.
+For example, the result below is not mentioned in a recent comparison of methods
+to include contributions from the diagonal of the traceless pressure tensor
+{cite:p}`mercier_2023_computation`.
+Given that a pressure tensor has 6 degrees of freedom
+of which one is the isotropic pressure,
+the remaining five should be related to anisotropic contributions.
+
+It is well known that the viscosity can be derived from six off-diagonal and diagonal
+traceless pressure tensor elements {cite:p}`daivis_1994_comparison`
 in the case of an isotropic fluid.
-We will derive this result below, as it provides a useful recipe for computations.
+However, by subtracting the isotropic term, the remaining six components
+become statistically correlated.
+For a proper uncertainty analysis of the estimated viscosity,
+Stacie requires the inputs to be statistically independent,
+so we cannot use the equation by Daivis and Evans.
+Here, we provide a transformation of the pressure tensor that yields five independent
+time-dependent components, all of which can be used individually to compute the viscosity.
+The average over this five is equivalent to the result of Daivis and Evans.
 
 To facilitate working with linear transformations of pressure tensors,
 we use Voigt notation:
@@ -119,9 +136,7 @@ $$
     \eta =
     \frac{V}{2 k_\text{B} T}
     \int_{-\infty}^{+\infty}
-    \cov[
-        \hat{P}_i^{\prime}(t_0) \,,\, \hat{P}_i^\prime(t_0 + \Delta_t)
-    ]
+    \cov[\hat{P}_i^{\prime}(t_0) \,,\, \hat{P}_i^\prime(t_0 + \Delta_t)]
     \,\mathrm{d}\Delta_t
     \qquad
     \forall\,i\in\{1,2,3,4,5\}
@@ -214,35 +229,142 @@ $$
         + \frac{1}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
 $$
 
-Because the liquid is isotropic, permutations of Cartesian axes do not affect the expectations values, which greatly simplifies both expressions:
+Because the liquid is isotropic,
+permutations of Cartesian axes do not affect the expectations values,
+which greatly simplifies the expressions.
 
 $$
     &\cov[\hat{P}'_1(t_0), \hat{P}'_1(t_0 + \Delta_t)]
     \\
     &\qquad
         \frac{3\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
-        - \frac{3\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        - \frac{3\alpha^2}{4} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        - \frac{3\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
     \\[0.5em]
     &\cov[\hat{P}'_2(t_0), \hat{P}'_2(t_0 + \Delta_t)] =
     \\
     &\qquad
         \frac{1}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
-        - \frac{1}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        - \frac{1}{4} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        - \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
 $$
 
 These two expectation values are consistent when $\alpha^2 = 1/3$.
 
-Using the same expansion technique, without permutations, one can show (after a lot of writing)
-that the average viscosity over the five components proposed here is equivalent to
-the equation proposed by Daivis and Evans {cite:p}`daivis_1994_comparison`:
+Using the same expansion technique,
+it is shown below that the average viscosity over the five components proposed here
+is equivalent to the equation proposed by Daivis and Evans {cite:p}`daivis_1994_comparison`:
 
 $$
-    \eta = \frac{1}{10} \frac{V}{2k_\text{B} T} \int_{-\infty}^{+\infty}
-        \mean\left[\hat{\mathbf{P}}_\text{tl}(t_0):\hat{\mathbf{P}}_\text{tl}(t_0 + \Delta_t)\right]
+    \eta = \frac{1}{5} \frac{V}{2k_\text{B} T} \int_{-\infty}^{+\infty}
+        \frac{1}{2}\mean\left[\hat{\mathbf{P}}_\text{tl}(t_0):\hat{\mathbf{P}}_\text{tl}(t_0 + \Delta_t)\right]
         \,\mathrm{d}\Delta_t
 $$
 
-(This is Eq. A5 in their paper rewritten in the current notation.)
+(This is Eq. A5 in their paper rewritten in our notation.)
+Working out the expansion, using
+$\hat{\mathbf{P}}_{\text{tl},xx} =
+\frac{1}{3}(2\hat{\mathbf{P}}_{xx} - \hat{\mathbf{P}}_{yy} - \hat{\mathbf{P}}_{zz})$
+and similar definitions for the two other Cartesian components, we get:
+
+$$
+    &\frac{1}{2}\mean\left[\hat{\mathbf{P}}_\text{tl}(t_0):\hat{\mathbf{P}}_\text{tl}(t_0 + \Delta_t)\right] =
+    \\
+    &\qquad
+        \cov[\hat{P}_{yz}(t_0) \,,\, \hat{P}_{yz}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        +\cov[\hat{P}_{zx}(t_0) \,,\, \hat{P}_{zx}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        +\cov[\hat{P}_{xy}(t_0) \,,\, \hat{P}_{xy}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        +\frac{1}{3}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        +\frac{1}{3}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        +\frac{1}{3}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        -\frac{1}{6}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+        -\frac{1}{6}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        -\frac{1}{6}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        -\frac{1}{6}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        -\frac{1}{6}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        -\frac{1}{6}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+$$
+
+We can do the same for our average viscosity over the five independent components:
+
+$$
+    \eta = \frac{1}{5} \frac{V}{2 k_\text{B} T}
+    \int_{-\infty}^{+\infty}
+    \sum_{i=1}^5 \cov[\hat{P}_i^{\prime}(t_0) \,,\, \hat{P}_i^\prime(t_0 + \Delta_t)]
+    \,\mathrm{d}\Delta_t
+$$
+
+Working out the expansion of the five terms in Cartesian pressure tensor components yields:
+
+$$
+    &\cov[ \hat{P}_1^{\prime}(t_0) \,,\, \hat{P}_1^\prime(t_0 + \Delta_t)] =
+    \\
+    &\qquad
+        +\frac{1}{3}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        +\frac{1}{12}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        +\frac{1}{12}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        +\frac{1}{12}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+        +\frac{1}{12}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        -\frac{1}{6}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        -\frac{1}{6}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        -\frac{1}{6}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        -\frac{1}{6}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+    \\[0.5em]
+    &\cov[ \hat{P}_2^{\prime}(t_0) \,,\, \hat{P}_2^\prime(t_0 + \Delta_t)] =
+    \\
+    &\qquad
+        +\frac{1}{4}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        +\frac{1}{4}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+    \\
+    &\qquad
+        -\frac{1}{4}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+        -\frac{1}{4}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+    \\[0.5em]
+    &\cov[ \hat{P}_3^{\prime}(t_0) \,,\, \hat{P}_3^\prime(t_0 + \Delta_t)] =
+        \cov[\hat{P}_{yz}(t_0) \,,\, \hat{P}_{yz}(t_0+\Delta_t)]
+    \\[0.5em]
+    &\cov[ \hat{P}_4^{\prime}(t_0) \,,\, \hat{P}_4^\prime(t_0 + \Delta_t)] =
+        \cov[\hat{P}_{zx}(t_0) \,,\, \hat{P}_{zx}(t_0+\Delta_t)]
+    \\[0.5em]
+    &\cov[ \hat{P}_5^{\prime}(t_0) \,,\, \hat{P}_5^\prime(t_0 + \Delta_t)] =
+        \cov[\hat{P}_{xy}(t_0) \,,\, \hat{P}_{xy}(t_0+\Delta_t)]
+$$
+
+Adding up those five contributions
+results in exactly the same expansion as that of Daivis and Evans.
+
 Working with the five components, as we propose, is advantageous.
 It makes explicit how many independent sequences are used as input,
 which allows for a precise uncertainty quantification.
