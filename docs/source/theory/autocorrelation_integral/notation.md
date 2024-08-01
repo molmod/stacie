@@ -9,9 +9,21 @@ The following notation is used throughout Stacie's documentation.
 
 ## Statistics
 
+- Several symbols are used to denote some form of time:
+
+    - $t$ is an absolute time.
+    - $t_0$ is a reference point on the time axis.
+    - $\Delta_t$ is a time difference or lag.
+    - $\tau$ denotes a relaxation or autocorrelation time,
+      and usually gets a subscript $\text{int}$ or $\text{exp}$
+      to distinguish between integrated and exponential autocorrelation times.
+    - $h$ is the time step of a discretized time axis
+      (with equal specing between the grid points).
+    - Integer steps on a discretized time axis are denoted as indexes $n$ or $m$, the difference between them as $\Delta$.
+
 - $p_x(x)$ is the probability density function of $\hat{x}$.
 
-- A hat is used to denote a stochastic quantity, including functions of stochastic quantities.
+- A hat is used for all stochastic quantities, including functions of stochastic quantities.
   This is more general than the common practice of using hats for statistical estimates only.
   We find it useful to identify all stochastic variables clearly.
   For example:
@@ -51,5 +63,8 @@ The following notation is used throughout Stacie's documentation.
   complex and periodic with period $N$.
 - When $S$ samples of the sequence are considered, they are denoted as $\mathbf{x}^s$
   with elements $x^s_n$.
-  Their discrete Fourier transforms are $\mathbf{X}^s$ with elements $X^s_n$.
+  Their discrete Fourier transforms are $\mathbf{X}^s$ with elements $X^s_k$.
+- The grid spacing on the frequency axis is $1/hN$, where $h$ is the spacing of the time axis.
+- Frequency grid points are labeled by an index $k$,
+  such that the $k$<sup>th</sup> frequency is $k/hN$.
 - Hats are added if the sequences are stochastic.

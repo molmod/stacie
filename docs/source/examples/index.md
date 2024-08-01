@@ -13,7 +13,7 @@ which you must run before such notebooks can be used.
 The rendered notebooks, including all outputs, are included in the following sections.
 
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 error_mean.py
 applicability.py

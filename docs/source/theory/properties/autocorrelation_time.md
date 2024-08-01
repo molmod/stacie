@@ -7,15 +7,15 @@ There are two definitions {cite:p}`sokal_1997_monte`:
 1. The *integrated* autocorrelation time is derived from the autocorrelation integral:
 
     $$
-        \tau_\text{int} = \frac{\int_{-\infty}^{+\infty} c(\Delta t)\,\mathrm{d}\Delta t}{2 c(0)}
+        \tau_\text{int} = \frac{\int_{-\infty}^{+\infty} c(\Delta_t)\,\mathrm{d}\Delta_t}{2 c(0)}
     $$
 
 2. The *exponential* autocorrelation time is defined as
    the limit of the exponential decay rate of the autocorrelation function.
-   In Stacie's notation, this means that for large $\Delta t$, we have:
+   In Stacie's notation, this means that for large $\Delta_t$, we have:
 
     $$
-        c(\Delta t) \propto \exp\left(-\frac{|\Delta t|}{\tau_\text{exp}}\right)
+        c(\Delta_t) \propto \exp\left(-\frac{|\Delta_t|}{\tau_\text{exp}}\right)
     $$
 
     The exponential autocorrelation time characterizes the slowest mode in the input.
@@ -27,7 +27,7 @@ Both correlation times are the same if the autocorrelation is nothing more than
 an exponentially decaying function:
 
 $$
-    c(\Delta t) = c_0 \exp\left(-\frac{|\Delta t|}{\tau_\text{exp}}\right)
+    c(\Delta_t) = c_0 \exp\left(-\frac{|\Delta_t|}{\tau_\text{exp}}\right)
 $$
 
 In practice, however, the two correlation times may differ.
