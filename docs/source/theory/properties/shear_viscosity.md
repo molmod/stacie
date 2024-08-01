@@ -40,7 +40,7 @@ the remaining five should be related to anisotropic contributions.
 It is well known that the viscosity of an isotropic fluid can be derived from
 six off-diagonal and diagonal traceless pressure tensor elements in the case
 {cite:p}`daivis_1994_comparison`.
-However, by subtracting the isotropic term, the remaining six components
+However, by subtracting the isotropic term, the six components of the traceless pressure tensor
 become statistically correlated.
 For a proper uncertainty analysis of the estimated viscosity,
 Stacie requires the inputs to be statistically independent,
