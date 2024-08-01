@@ -38,16 +38,17 @@ of which one is the isotropic pressure,
 the remaining five should be related to anisotropic contributions.
 
 It is well known that the viscosity can be derived from six off-diagonal and diagonal
-traceless pressure tensor elements {cite:p}`daivis_1994_comparison`
-in the case of an isotropic fluid.
+traceless pressure tensor elements in the case of an isotropic fluid
+{cite:p}`daivis_1994_comparison`.
 However, by subtracting the isotropic term, the remaining six components
 become statistically correlated.
 For a proper uncertainty analysis of the estimated viscosity,
 Stacie requires the inputs to be statistically independent,
 so we cannot use the equation by Daivis and Evans.
-Here, we provide a transformation of the pressure tensor that yields five independent
-time-dependent components, all of which can be used individually to compute the viscosity.
-The average over this five is equivalent to the result of Daivis and Evans.
+Here, we provide a transformation of the pressure tensor
+that yields five independent components,
+all of which can be used individually to compute the viscosity.
+The average over these five viscosities is equivalent to the result of Daivis and Evans.
 
 To facilitate working with linear transformations of pressure tensors,
 we use Voigt notation:
