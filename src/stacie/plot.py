@@ -43,7 +43,7 @@ class UnitConfig:
     acint_unit: float = attrs.field(default=1.0)
     """The unit of an autocorrelation integral."""
 
-    acint_fmt: str = attrs.field(default=".1f")
+    acint_fmt: str = attrs.field(default=".2e")
     """The format string for an autocorrelation integral."""
 
     freq_unit_str: str = attrs.field(default="Hz")
@@ -58,7 +58,7 @@ class UnitConfig:
     time_unit: float = attrs.field(default=1.0)
     """The unit of a frequency."""
 
-    time_fmt: str = attrs.field(default=".1f")
+    time_fmt: str = attrs.field(default=".2e")
     """The format string for a time value."""
 
     sfac: float = attrs.field(default=2.0)
