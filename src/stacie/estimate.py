@@ -304,7 +304,11 @@ def fit_model_spectrum(
     evals, evecs = np.linalg.eigh(props["cost_hess"])
     props["cost_hess_evals"] = evals
     props["cost_hess_evecs"] = evecs
-    props["covar"] = np.linalg.inv(props["cost_hess"])
+    if (evals >= 0).all() and np.isfinite(evals).all():
+        half = evecs / np.sqrt(evals)
+        props["covar"] = np.dot(half, half.T)
+    else:
+        props["covar"] = np.full_like(props["cost_hess"], np.inf)
 
     # Derive estimates from model parameters.
     props.update(model.derive_props(props["pars"], props["covar"], props["timestep"]))
