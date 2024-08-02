@@ -148,6 +148,20 @@ def _plot_ref_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: in
         )
 
 
+INFO_TEMPLATE = """\
+model = {model}
+acint = {acint:{uc.acint_fmt}}\
+ ± {acint_std:{uc.acint_fmt}}\
+{acint_unit_str}
+corrtime_exp = {corrtime_exp:{uc.time_fmt}}\
+ ± {corrtime_exp_std:{uc.time_fmt}}\
+{time_unit_str}
+corrtime_int = {corrtime_int:{uc.time_fmt}}\
+ ± {corrtime_int_std:{uc.time_fmt}}\
+{time_unit_str}
+"""
+
+
 def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the fitted model spectrum."""
     nplot = 2 * r.nfit
@@ -165,15 +179,26 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         lw=0,
     )
     ax.axvline(r.props["freqs"][-1] / uc.freq_unit, ymax=0.1, color="k")
-    ax.set_title(
-        f"{r.props['model']} // "
-        f"acint = {r.acint / uc.acint_unit:{uc.acint_fmt}} "
-        f"± {r.acint_std / uc.acint_unit:{uc.acint_fmt}} "
-        + ("" if uc.acint_unit_str == "1" else uc.acint_unit_str)
-        + " // "
-        f"corrtime_exp = {r.corrtime_exp / uc.time_unit:{uc.time_fmt}} "
-        f"± {r.corrtime_exp_std / uc.time_unit:{uc.time_fmt}} "
-        + ("" if uc.time_unit_str == "1" else uc.time_unit_str)
+    ax.set_title("Fitted spectrum")
+    ax.text(
+        0.95,
+        0.95,
+        INFO_TEMPLATE.format(
+            uc=uc,
+            model=r.props["model"],
+            acint=r.acint / uc.acint_unit,
+            acint_std=r.acint_std / uc.acint_unit,
+            acint_unit_str="" if uc.acint_unit_str == "1" else " " + uc.acint_unit_str,
+            corrtime_exp=r.corrtime_exp / uc.time_unit,
+            corrtime_exp_std=r.corrtime_exp_std / uc.time_unit,
+            corrtime_int=r.corrtime_int / uc.time_unit,
+            corrtime_int_std=r.corrtime_int_std / uc.time_unit,
+            time_unit_str="" if uc.time_unit_str == "1" else " " + uc.time_unit_str,
+        ),
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        linespacing=2.0,
     )
 
 

@@ -339,6 +339,7 @@ def demo_stacie(stride=1):
         freq_unit_str="THz",
         time_unit=1e-12 / sc.value("atomic unit of time"),
         time_unit_str="ps",
+        time_fmt=".2f",
     )
     plot_spectrum(ax, uc, spectrum, nplot=500)
 
