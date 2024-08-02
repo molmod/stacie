@@ -143,14 +143,23 @@ myst_heading_anchors = 4
 # https://sphinx-autodoc2.readthedocs.io/en/latest/config.html
 # https://github.com/tox-dev/sphinx-autodoc-typehints
 
+add_module_names = False
 autodoc_default_options = {
     "undoc-members": True,
     "members": None,
     "ignore-module-all": True,
 }
+autodoc_type_aliases = {
+    "ArrayLike": ":py:class:`ArrayLike`",
+}
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "all"
+nitpick_ignore = [
+    ("py:class", "ArrayLike"),
+    ("py:class", "matplotlib.axes._axes.Axes"),
+]
 napoleon_use_rtype = False
-add_module_names = False
-
+napoleon_use_param = True
 
 # -- Configuration of mathjax extension ---------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/math.html#module-sphinx.ext.mathjax

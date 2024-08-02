@@ -18,15 +18,31 @@
 """Tests for ``stacie.utils``."""
 
 from numpy.testing import assert_equal
-from stacie.utils import split_sequences
+from stacie.utils import block_average, split
 
 
 def test_split_sequences():
-    assert_equal(split_sequences([1, 2, 3, 4, 5, 6], 2), [[1, 2, 3], [4, 5, 6]])
-    assert_equal(split_sequences([1, 2, 3, 4, 5, 6, 7], 2), [[1, 2, 3], [4, 5, 6]])
-    assert_equal(split_sequences([[1, 2, 3, 4, 5, 6]], 2), [[1, 2, 3], [4, 5, 6]])
-    assert_equal(split_sequences([[1, 2, 3, 4, 5, 6, 7]], 2), [[1, 2, 3], [4, 5, 6]])
-    assert_equal(split_sequences([[1, 2, 3, 4], [5, 6, 7, 8]], 2), [[1, 2], [3, 4], [5, 6], [7, 8]])
+    assert_equal(split([1, 2, 3, 4, 5, 6], 2), [[1, 2, 3], [4, 5, 6]])
+    assert_equal(split([1, 2, 3, 4, 5, 6, 7], 2), [[1, 2, 3], [4, 5, 6]])
+    assert_equal(split([[1, 2, 3, 4, 5, 6]], 2), [[1, 2, 3], [4, 5, 6]])
+    assert_equal(split([[1, 2, 3, 4, 5, 6, 7]], 2), [[1, 2, 3], [4, 5, 6]])
+    assert_equal(split([[1, 2, 3, 4], [5, 6, 7, 8]], 2), [[1, 2], [3, 4], [5, 6], [7, 8]])
+    assert_equal(split([[1, 2, 3, 4, -1], [5, 6, 7, 8, -2]], 2), [[1, 2], [3, 4], [5, 6], [7, 8]])
+
+
+def test_block_average():
+    assert_equal(block_average([1, 2, 3, 4, 5, 6], 2), [[1.5, 3.5, 5.5]])
+    assert_equal(block_average([1, 2, 3, 4, 5, 6, 7], 2), [[1.5, 3.5, 5.5]])
+    assert_equal(block_average([[1, 2, 3, 4, 5, 6]], 2), [[1.5, 3.5, 5.5]])
+    assert_equal(block_average([[1, 2, 3, 4, 5, 6, 7]], 2), [[1.5, 3.5, 5.5]])
+    assert_equal(block_average([[1, 2, 3, 4], [5, 6, 7, 8]], 3), [[2.0], [6.0]])
     assert_equal(
-        split_sequences([[1, 2, 3, 4, -1], [5, 6, 7, 8, -2]], 2), [[1, 2], [3, 4], [5, 6], [7, 8]]
+        block_average(
+            [
+                [1, 2, 3, 4, 5, 6, 7, 8],
+                [9, 10, 11, 12, 13, 14, 15, 16],
+            ],
+            4,
+        ),
+        [[2.5, 6.5], [10.5, 14.5]],
     )

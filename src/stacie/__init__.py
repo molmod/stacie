@@ -17,6 +17,8 @@
 # --
 """The Stacie package."""
 
+from __future__ import annotations
+
 from .estimate import estimate_acint
 from .plot import UnitConfig, plot_results
 from .spectrum import compute_spectrum

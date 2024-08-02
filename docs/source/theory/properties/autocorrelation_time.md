@@ -86,6 +86,11 @@ Both definitions are useful and relevant for different purposes.
     you should first analyze preliminary data to get a first estimate of $\tau_\text{exp}$,
     after which you can plan the data generation more carefully.
 
+    If you notice your input sequences are many orders of magnitudes longer than $\tau_\text{exp}$,
+    the number of relevant frequency grid points in the spectrum can become impractical.
+    In this case, splitting up the input sequences in shorter parts with
+    {py:func}`stacie.utils.split`.
+
     Note that $\tau_\text{exp}$ is also related to the block size
     when working with [block averages](../advanced_topics/block_averages.md)
     to reduce storage requirements for production simulations.

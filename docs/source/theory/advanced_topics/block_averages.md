@@ -6,6 +6,8 @@ Storing (and processing) all the data may require too much resources.
 To reduce the amount of data, we recommend taking block averages.
 These block averages form a new time series with a time step equal to the block size.
 This reduces the storage requirements by a factor equal to the block size.
+If the program generating the sequences does not support block averages,
+you can use {py:func}`stacie.utils.block_average`.
 
 If the blocks are sufficiently small compared to the decay rate of the autocorrelation function,
 Stacie will produce virtually the same results for all parameters of the Exponential Tail Model.
