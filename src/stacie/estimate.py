@@ -291,20 +291,13 @@ def fit_model_spectrum(
         method="trust-constr",
         options={"xtol": 1e-10, "gtol": 1e-10},
     )
-
-    # Compute all properties and derive the cutoff criterion
     props = cost.props(opt.x, 2)
-    props["pars_init"] = pars_init
-    props["freqs_rest"] = freqs[nfit:]
-    props["amplitudes_rest"] = amplitudes[nfit:]
-    props["ndofs_rest"] = ndofs[nfit:]
-    props["criterion"] = cutoff_criterion(props)
 
     # Compute the Hessian and its properties.
     evals, evecs = np.linalg.eigh(props["cost_hess"])
     props["cost_hess_evals"] = evals
     props["cost_hess_evecs"] = evecs
-    if (evals >= 0).all() and np.isfinite(evals).all():
+    if (evals > 0).all() and np.isfinite(evals).all():
         half = evecs / np.sqrt(evals)
         props["covar"] = np.dot(half, half.T)
     else:
@@ -312,4 +305,11 @@ def fit_model_spectrum(
 
     # Derive estimates from model parameters.
     props.update(model.derive_props(props["pars"], props["covar"], props["timestep"]))
+
+    # Compute remaining properties and derive the cutoff criterion
+    props["pars_init"] = pars_init
+    props["freqs_rest"] = freqs[nfit:]
+    props["amplitudes_rest"] = amplitudes[nfit:]
+    props["ndofs_rest"] = ndofs[nfit:]
+    props["criterion"] = cutoff_criterion(props)
     return props
