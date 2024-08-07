@@ -323,24 +323,37 @@ def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
     limit = rs[0].spectrum.amplitudes_ref[0]
     normed_errors = np.array([(r.acint - limit) / r.acint_std for r in rs])
     normed_errors.sort()
+    distance = abs(quantiles - normed_errors).mean()
     ax.scatter(quantiles, normed_errors, c="C0", s=3)
     ax.plot([-2, 2], [-2, 2], **REF_PROPS)
     ax.set_xlabel("Normal quantiles [1]")
     ax.set_ylabel("Sorted normalized errors [1]")
-    ax.set_title("QQ Plot")
+    ax.set_title(f"QQ Plot (Wasserstein Distance = {distance:.4f})")
+
+
+RELERR_TEMPLATE = """\
+MRE = {mre:.1f} %
+RMSRE = {rmsre:.1f} %
+RMSRF = {rmsrf:.1f} %
+RMSPRE = {rmspre:.1f} %
+"""
+
+
+def rms(x):
+    return np.sqrt((x**2).mean())
 
 
 def plot_acint_estimates(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
     """Plot the sorted autocorrelation integral estimates and their uncertainties."""
     values = np.array([r.acint for r in rs])
-    errors = np.array([uc.sfac * r.acint_std for r in rs])
+    errors = np.array([r.acint_std for r in rs])
     order = values.argsort()
     values = values[order]
     errors = errors[order]
     ax.errorbar(
         np.arange(len(rs)),
         values / uc.acint_unit,
-        errors,
+        uc.sfac * errors,
         fmt="o",
         lw=1,
         ms=2,
@@ -349,6 +362,22 @@ def plot_acint_estimates(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
     if rs[0].spectrum.amplitudes_ref is not None:
         limit = rs[0].spectrum.amplitudes_ref[0]
         ax.axhline(limit / uc.acint_unit, **REF_PROPS)
+        relative_errors = 100 * (values - limit) / values
+        mre = relative_errors.mean()
+        ax.text(
+            0.05,
+            0.95,
+            RELERR_TEMPLATE.format(
+                mre=mre,
+                rmsre=rms(relative_errors),
+                rmsrf=rms(relative_errors - mre),
+                rmspre=rms(errors / values) * 100,
+            ),
+            transform=ax.transAxes,
+            ha="left",
+            va="top",
+            linespacing=2.0,
+        )
     ax.set_xlabel("Rank")
     ax.set_ylabel(f"Mean and uncertainty [{uc.acint_unit_str}]")
     ax.set_title("Autocorrelation Integral")
