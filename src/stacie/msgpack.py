@@ -32,6 +32,8 @@ arrays are stored as binary blobs (extension type 93) in NPY format, with ``allo
 
 Arbitrary objects can be stored. They are unstructered with `cattrs <https://catt.rs/>`_.
 Files are compressed with ``xz`` by default (not optional).
+
+Keep in mind that individual arrays cannot exceed the 4GB size limit imposed by the msgpack format.
 """
 
 import io
