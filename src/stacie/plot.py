@@ -166,9 +166,10 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the fitted model spectrum."""
     nplot = 2 * r.nfit
     plot_spectrum(ax, uc, r.spectrum, nplot)
-    mean = r.props["amplitudes_model"]
-    std = r.props["amplitudes_std_model"]
-    freqs = r.props["freqs"]
+    kappas = 0.5 * r.spectrum.ndofs[: r.nfit]
+    mean = r.props["thetas"] * kappas
+    std = r.props["thetas"] * np.sqrt(kappas)
+    freqs = r.spectrum.freqs[: r.nfit]
     ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2")
     ax.fill_between(
         freqs / uc.freq_unit,
@@ -178,7 +179,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         alpha=0.3,
         lw=0,
     )
-    ax.axvline(r.props["freqs"][-1] / uc.freq_unit, ymax=0.1, color="k")
+    ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
     ax.set_title("Fitted spectrum")
     ax.text(
         0.95,
@@ -205,8 +206,9 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
 def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot all fitted model spectra (for all tested cutoffs)."""
     for nfit, props in r.history.items():
-        mean = props["amplitudes_model"]
-        freqs = props["freqs"]
+        kappas = 0.5 * r.spectrum.ndofs[:nfit]
+        mean = props["thetas"] * kappas
+        freqs = r.spectrum.freqs[:nfit]
         if nfit == r.nfit:
             ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="k", lw=2, zorder=2.5)
         else:
@@ -222,15 +224,15 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the cutoff criterion as a function of cutoff frequency."""
     freqs = []
     criteria = []
-    for _nfit, props in sorted(r.history.items()):
-        freqs.append(props["freqs"][-1])
+    for nfit, props in sorted(r.history.items()):
+        freqs.append(r.spectrum.freqs[nfit - 1])
         criteria.append(props["criterion"])
     freqs = np.array(freqs)
     criteria = np.array(criteria)
     criteria -= criteria[0]
 
     ax.plot(freqs / uc.freq_unit, criteria, color="C1", lw=1)
-    ax.axvline(r.props["freqs"][-1] / uc.freq_unit, ymax=0.1, color="k")
+    ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
     ax.set_ylabel("Criterion - Criterion[0]")
     ax.set_title("Cutoff criterion")
@@ -247,8 +249,8 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     acints = []
     acint_stds = []
     s = r.spectrum
-    for _nfit, props in sorted(r.history.items()):
-        freqs.append(props["freqs"][-1])
+    for nfit, props in sorted(r.history.items()):
+        freqs.append(r.spectrum.freqs[nfit - 1])
         acints.append(props["acint"])
         acint_stds.append(props["acint_std"])
     freqs = np.array(freqs)
@@ -266,7 +268,7 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     )
     s = r.spectrum
     ax.errorbar(
-        [r.props["freqs"][-1] / uc.freq_unit],
+        [r.spectrum.freqs[r.nfit - 1] / uc.freq_unit],
         [r.acint / uc.acint_unit],
         [r.acint_std * uc.sfac / uc.acint_unit],
         marker="o",
@@ -286,7 +288,7 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     freqs = []
     evals = []
     for nfit, props in sorted(r.history.items()):
-        freqs.append(props["freqs"][-1])
+        freqs.append(r.spectrum.freqs[nfit - 1])
         evals.append(props["hess_evals"])
         if nfit == r.nfit:
             ax.plot([freqs[-1]], [evals[-1]], color="k", marker="o", ms=2, zorder=2.5)
@@ -302,8 +304,8 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
 
 def plot_residuals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the normalized residuals between the model and empirical spectra."""
-    amplitudes = r.props["amplitudes"]
-    kappas = r.props["kappas"]
+    amplitudes = r.spectrum.amplitudes[: r.nfit]
+    kappas = 0.5 * r.spectrum.ndofs[: r.nfit]
     thetas = r.props["thetas"]
     residuals = (amplitudes / thetas - kappas) / np.sqrt(kappas)
     with np.errstate(invalid="ignore"):

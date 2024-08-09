@@ -134,10 +134,8 @@ def cost_low(
     - ``amplitudes``: the given frequencies.
     - ``ll``: the log likelihood.
     - ``cost_value``: the cost function value.
-    - ``cost_hess``: the cost Gradient vector (if ``deriv>=1``).
+    - ``cost_grad``: the cost Gradient vector (if ``deriv>=1``).
     - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``).
-    - ``amplitudes_model``: The model of the spectrum (function of pars).
-    - ``amplitudes_std_model``: The model of the standard error of the spectrum (function of pars).
     """
     # Convert frequencies to dimensionless omegas, as if time step was 1
     # With RFFT, the highest omega would then be +pi.
@@ -161,8 +159,6 @@ def cost_low(
         "thetas": thetas,
         "ll": ll,
         "cost_value": -ll,
-        "amplitudes_model": amplitudes_model[0],
-        "amplitudes_std_model": amplitudes_model[0] / np.sqrt(0.5 * ndofs),
     }
 
     if deriv >= 1:

@@ -96,7 +96,7 @@ def akaike_criterion(props: dict[str, NDArray]) -> float:
         Lower is better.
     """
     amplitudes_rest = props["amplitudes_rest"]
-    kappas_rest = 0.5 * props["ndofs_rest"]
+    kappas_rest = props["kappas_rest"]
     thetas_rest = amplitudes_rest / (kappas_rest - 1)
     ll_lowfreq = props["ll"]
     ll_rest = (

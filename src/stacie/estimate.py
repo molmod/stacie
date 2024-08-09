@@ -258,24 +258,26 @@ def fit_model_spectrum(
 
     Notes
     -----
-    In addition to the properties returned by :func:`stacie.cost.cost_low`,
-    the returned dictionary also contains the following items:
+    The returned dictionary contains the following items:
 
-    - ``pars_init``: the initial guess of the parameters.
-    - ``pars``: the optimized parameters.
-    - ``freqs_rest``: the frequencies not used for the fit.
-    - ``amplitudes_rest``: the amplitudes of the spectrum not used for the fit.
-    - ``ndofs_rest``: the degrees of freedom not used for the fit.
-    - ``criterion``: the value of the criterion whose minimizer determines the frequency cutoff.
-    - ``cost_hess_evals``: the Hessian eigenvalues.
-    - ``cost_hess_evecs``: the Hessian eigenvectors.
-    - ``covar``: the covariance matrix of the parameters.
     - ``acint``: the estimate of the autocorrelation integral.
     - ``acint_var``: the variance of the estimate of the autocorrelation integral.
     - ``acint_std``: the standard error of the estimate of the autocorrelation integral.
     - ``corrtime``: the estimate of the slowest time scale in the sequences.
     - ``corrtime_var``: the variance of the estimate of the slowest time scale.
     - ``corrtime_std``: the standard error of the estimate of the slowest time scale.
+    - ``cost_value``: the cost function value.
+    - ``cost_grad``: the cost Gradient vector (if ``deriv>=1``).
+    - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``).
+    - ``cost_hess_evals``: the Hessian eigenvalues.
+    - ``cost_hess_evecs``: the Hessian eigenvectors.
+    - ``covar``: the covariance matrix of the parameters.
+    - ``criterion``: the value of the criterion whose minimizer determines the frequency cutoff.
+    - ``ll``: the log likelihood.
+    - ``pars_init``: the initial guess of the parameters.
+    - ``pars``: the optimized parameters.
+    - ``thetas``: scale parameters for the gamma distribution.
+    - ``timestep``: the time step.
     """
     # Maximize likelihood
     pars_init = model.guess(timestep, freqs[:nfit], amplitudes[:nfit], ndofs[:nfit])
@@ -310,6 +312,15 @@ def fit_model_spectrum(
     props["pars_init"] = pars_init
     props["freqs_rest"] = freqs[nfit:]
     props["amplitudes_rest"] = amplitudes[nfit:]
-    props["ndofs_rest"] = ndofs[nfit:]
+    props["kappas_rest"] = 0.5 * ndofs[nfit:]
     props["criterion"] = cutoff_criterion(props)
+
+    # Remove some intermediate properties to reduce the size of the Result object.
+    del props["freqs"]
+    del props["kappas"]
+    del props["amplitudes"]
+    del props["freqs_rest"]
+    del props["amplitudes_rest"]
+    del props["kappas_rest"]
+
     return props
