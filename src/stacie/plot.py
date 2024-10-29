@@ -65,7 +65,9 @@ class UnitConfig:
     """The scale factor used for error bars (multiplier for sigma, standard error)."""
 
 
-def plot_results(path_pdf: str, rs: Result | list[Result], uc: UnitConfig | None = None):
+def plot_results(
+    path_pdf: str, rs: Result | list[Result], uc: UnitConfig | None = None, title: str | None = None
+):
     """Generate a multi-page PDF with plots of the autocorrelation integral estimation.
 
     Parameters
@@ -94,6 +96,8 @@ def plot_results(path_pdf: str, rs: Result | list[Result], uc: UnitConfig | None
         for r in rs:
             fig, ax = plt.subplots(figsize=(6, 6))
             plot_fitted_spectrum(ax, uc, r)
+            if title is not None:
+                ax.set_title(title)
             pdf.savefig(fig)
             plt.close(fig)
 
@@ -148,18 +152,18 @@ def _plot_ref_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: in
         )
 
 
-INFO_TEMPLATE = """\
-model = {model}
-acint = {acint:{uc.acint_fmt}}\
- ± {acint_std:{uc.acint_fmt}}\
-{acint_unit_str}
-corrtime_exp = {corrtime_exp:{uc.time_fmt}}\
- ± {corrtime_exp_std:{uc.time_fmt}}\
-{time_unit_str}
-corrtime_int = {corrtime_int:{uc.time_fmt}}\
- ± {corrtime_int_std:{uc.time_fmt}}\
-{time_unit_str}
-"""
+INFO_TEMPLATE = (
+    "model = {model}\n"
+    "$\\eta \\pm \\Delta \\eta$ = {acint:{uc.acint_fmt}}"
+    " ± {acint_std:{uc.acint_fmt}}"
+    "{acint_unit_str}\n"
+    "$\\tau_\\text{{exp}} \\pm \\Delta \\tau_\\text{{exp}}$ = {corrtime_exp:{uc.time_fmt}}"
+    " ± {corrtime_exp_std:{uc.time_fmt}}"
+    "{time_unit_str}\n"
+    "$\\tau_\\text{{int}} \\pm \\Delta \\tau_\\text{{int}}$ = {corrtime_int:{uc.time_fmt}}"
+    " ± {corrtime_int_std:{uc.time_fmt}}"
+    "{time_unit_str}"
+)
 
 
 def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
@@ -170,7 +174,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     mean = r.props["thetas"] * kappas
     std = r.props["thetas"] * np.sqrt(kappas)
     freqs = r.spectrum.freqs[: r.nfit]
-    ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2")
+    ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2", label="Fit")
     ax.fill_between(
         freqs / uc.freq_unit,
         (mean - uc.sfac * std) / uc.acint_unit,
@@ -200,7 +204,9 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         ha="right",
         va="top",
         linespacing=2.0,
+        bbox={"facecolor": "none", "edgecolor": "green", "boxstyle": "round"},
     )
+    ax.legend()
 
 
 def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
@@ -215,6 +221,8 @@ def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
             ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2", lw=1, alpha=0.5)
     nplot = min(2 * max(r.history), r.spectrum.nfreq)
     _plot_ref_spectrum(ax, uc, r.spectrum, nplot)
+    # Print the number of fitted model spectra in the title to show how many models were tested.
+    ax.set_title(f"Model spectra ({len(r.history)} models)")
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
     ax.set_ylabel(f"Model Spectrum [{uc.acint_unit_str}]")
     ax.set_xscale("log")
@@ -310,6 +318,7 @@ def plot_residuals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     residuals = (amplitudes / thetas - kappas) / np.sqrt(kappas)
     with np.errstate(invalid="ignore"):
         ax.plot(residuals)
+        ax.axhline(0, ls="--", lw=1.0, color="k")
     ax.set_title("Normalized residuals")
     ax.set_xlabel("index")
     ax.set_ylabel("Residual [1]")
