@@ -206,7 +206,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         linespacing=2.0,
         bbox={"facecolor": "none", "edgecolor": "green", "boxstyle": "round"},
     )
-    ax.legend()
+    ax.legend(loc="lower left")
 
 
 def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
