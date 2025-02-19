@@ -36,3 +36,17 @@ Now you can edit the documentation and see the result as soon as you save a file
 
 Please, use [Semantic Line Breaks](https://sembr.org/)
 because it facilitates reviewing documentation changes.
+
+
+## Nix(OS) setup.
+
+As an alternative to the instructions above, you can also create a development environment for NixOS
+with devenv (>= 1.4.0), by putting the following in your `.envrc`:
+
+```bash
+export DIRENV_WARN_TIMEOUT=20s
+
+eval "$(devenv direnvrc)"
+
+use devenv
+```
