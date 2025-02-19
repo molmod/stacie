@@ -159,7 +159,12 @@ class ExpTailModel(SpectrumModel):
         ) -> float | tuple[float, float]:
             pars = np.array([1.0, 1.0, corrtime_tau])
             basis = self.compute(omegas, [1.0, 1.0, corrtime_tau], 1)[1][:2]
-            pars[:2] = np.linalg.lstsq((basis / amplitudes_std).T, amplitudes / amplitudes_std)[0]
+            pars[:2] = np.linalg.lstsq(
+                (basis / amplitudes_std).T,
+                amplitudes / amplitudes_std,
+                # For compatibility with numpy < 2.0
+                rcond=-1,
+            )[0]
             if not self.valid(pars):
                 pars[:2] = amplitudes[0] / 2
             if return_pars:
