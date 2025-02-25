@@ -156,7 +156,7 @@ def cost_low(
         "freqs": freqs,
         "amplitudes": amplitudes,
         "kappas": kappas,
-        "thetas": thetas,
+        "thetas": thetas * model.amplitude_scale,
         "ll": ll,
         "cost_value": -ll,
     }
