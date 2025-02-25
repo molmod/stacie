@@ -58,6 +58,8 @@ def mycost():
     freqs = np.linspace(0, 0.5 / timestep, 10)
     model = ExpTailModel()
     amplitudes = np.array([1.5, 1.4, 1.1, 0.9, 0.8, 1.0, 0.9, 0.9, 0.8, 1.1])
+    model.precondition(timestep, amplitudes)
+    assert model.amplitude_scale != 1.0
     ndofs = np.array([5, 10, 10, 10, 10, 10, 10, 10, 10, 5])
     return LowFreqCost(timestep, freqs, amplitudes, ndofs, model)
 

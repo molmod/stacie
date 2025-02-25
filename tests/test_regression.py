@@ -75,6 +75,16 @@ def test_exptail_noscan(regtest, name):
     check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}", flaky=flaky)
 
 
+@pytest.mark.parametrize("name", ALL_NAMES)
+def test_exptail_noscan_conditioning(regtest, name):
+    spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
+    scale = 1e-15
+    spectrum.amplitudes *= scale
+    spectrum.variance *= scale
+    flaky = name == "white1"
+    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}_conditioning", flaky=flaky)
+
+
 @pytest.mark.parametrize("name", WHITE_NAMES)
 def test_white_noscan(regtest, name):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)

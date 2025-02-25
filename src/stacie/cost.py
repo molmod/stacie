@@ -61,14 +61,14 @@ class LowFreqCost:
         """
         if not self.model.valid(pars):
             return np.inf, np.full(len(pars), np.inf)
-        props = cost_low(pars, 1, *attrs.astuple(self))
+        props = cost_low(pars, 1, *attrs.astuple(self, recurse=False))
         return props["cost_value"], props["cost_grad"]
 
     def hess(self, pars: NDArray[float]) -> NDArray[float]:
         """Compute the Hessian matrix of the cost function."""
         if not self.model.valid(pars):
             return np.full((len(pars), len(pars)), np.inf)
-        props = cost_low(pars, 2, *attrs.astuple(self))
+        props = cost_low(pars, 2, *attrs.astuple(self, recurse=False))
         return props["cost_hess"]
 
     def props(self, pars: NDArray[float], deriv: int = 0) -> dict[str, NDArray[float]]:
@@ -89,7 +89,7 @@ class LowFreqCost:
         """
         if not self.model.valid(pars):
             raise ValueError("Invalid parameters")
-        return cost_low(pars, deriv, *attrs.astuple(self))
+        return cost_low(pars, deriv, *attrs.astuple(self, recurse=False))
 
 
 def cost_low(
@@ -141,13 +141,13 @@ def cost_low(
     # With RFFT, the highest omega would then be +pi.
     omegas = 2 * np.pi * timestep * freqs
 
-    amplitudes_model = model.compute(omegas, pars, deriv)
+    amplitudes_model = [row / model.amplitude_scale for row in model.compute(omegas, pars, deriv)]
 
     # Log-likelihood computed with the scaled Chi-squared distribution.
     # The Gamma distribution is used because the scale parameter is easily incorporated.
     kappas = 0.5 * ndofs
     thetas = amplitudes_model[0] / kappas
-    ll_terms = logpdf_gamma(amplitudes, kappas, thetas, deriv)
+    ll_terms = logpdf_gamma(amplitudes / model.amplitude_scale, kappas, thetas, deriv)
     ll = ll_terms[0].sum()
 
     props = {
