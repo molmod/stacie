@@ -55,7 +55,6 @@ def test_rpi_opt_wavy_max():
 
     cache = {}
     rpi_opt(objective, (0, 20), cache=cache, mode="max")
-    print(cache)
     assert cache[0] == pytest.approx(1.0)
     assert cache[10] == pytest.approx(1.0)
 
