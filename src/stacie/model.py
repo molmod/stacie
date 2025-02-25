@@ -22,7 +22,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import minimize_scalar
 
-__all__ = ("SpectrumModel", "ExpTailModel", "WhiteNoiseModel")
+__all__ = ("ExpTailModel", "SpectrumModel", "WhiteNoiseModel")
 
 
 @attrs.define
@@ -32,10 +32,6 @@ class SpectrumModel:
     Subclasses must override the attribute ``name``
     and the methods ``bounds``, ``guess``, ``compute`` and ``derive_props``.
     """
-
-    # Attributes used for pre-conditioning the parameter space.
-    timestep: float = attrs.field(default=1.0)
-    amplitude_scale: float = attrs.field(default=1.0)
 
     @property
     def name(self):
@@ -56,22 +52,25 @@ class SpectrumModel:
         """Return ``True`` when the parameters are within the feasible region."""
         return all(pmin < par < pmax for (pmin, pmax), par in zip(cls.bounds(), pars, strict=True))
 
-    def precondition(
-        self,
-        timestep: float,
-        amplitudes: NDArray[float],
-    ) -> NDArray[float]:
-        """Precondition the parameter space and the cost function value."""
-        self.timestep = timestep
-        self.amplitude_scale = np.median(abs(amplitudes[amplitudes != 0]))
-        if self.amplitude_scale == 0:
-            self.amplitude_scale = 1
+    def _get_scales_low(self, timestep: float, amplitudes: NDArray[float]) -> dict[str, float]:
+        """Helper for the get_scales method."""
+        return {
+            "freq_scale": 1 / timestep,
+            "amp_scale": np.median(abs(amplitudes[amplitudes != 0])),
+        }
+
+    def get_scales(
+        self, timestep: float, amplitudes: NDArray[float]
+    ) -> tuple[NDArray[float], float]:
+        """Return the scales of the parameters and the cost function."""
+        raise NotImplementedError
 
     def guess(
         self,
         freqs: NDArray[float],
         amplitudes: NDArray[float],
         ndofs: NDArray[float],
+        timestep: float,
     ) -> NDArray[float]:
         """Guess initial values of the parameters."""
         raise NotImplementedError
@@ -101,7 +100,7 @@ class SpectrumModel:
         raise NotImplementedError
 
     def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float]
+        self, pars: NDArray[float], covar: NDArray[float], timestep: float
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters."""
         raise NotImplementedError
@@ -160,24 +159,31 @@ class ExpTailModel(SpectrumModel):
         """Return parameter bounds for the optimizer."""
         return [(0, np.inf), (0, np.inf), (0, np.inf)]
 
+    def get_scales(
+        self, timestep: float, amplitudes: NDArray[float]
+    ) -> tuple[NDArray[float], float]:
+        """Return the scales of the parameters and the cost function."""
+        sl = self._get_scales_low(timestep, amplitudes)
+        return np.array([sl["amp_scale"], sl["amp_scale"], 1]), 1
+
     def guess(
         self,
         freqs: NDArray[float],
         amplitudes: NDArray[float],
         ndofs: NDArray[float],
+        timestep: float,
     ) -> NDArray[float]:
         """Guess initial values of the parameters."""
         # This is implemented as a 1D non-linear optimization of corrtime.
         # For each tau, the two remaining parameters are found with weighted linear regression.
-        omegas = 2 * np.pi * self.timestep * freqs
-        amplitudes = amplitudes / self.amplitude_scale
+        omegas = 2 * np.pi * timestep * freqs
         amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
 
         def linear_fit_rmsd(
             corrtime_tau: float, return_pars: bool = False
         ) -> float | tuple[float, float]:
-            pars = np.array([1.0 / self.amplitude_scale, 1.0 / self.amplitude_scale, corrtime_tau])
-            basis = self.compute(omegas, pars, 1)[1][:2] / self.amplitude_scale
+            pars = np.array([1.0, 1.0, corrtime_tau])
+            basis = self.compute(omegas, pars, 1)[1][:2]
             pars[:2] = np.linalg.lstsq(
                 (basis / amplitudes_std).T,
                 amplitudes / amplitudes_std,
@@ -224,11 +230,7 @@ class ExpTailModel(SpectrumModel):
         if omegas.ndim != 1:
             raise TypeError("Argument omegas must be a 1D array.")
 
-        # Unpack parameters and undo preconditioning
         acint_short, acint_tail, ct = pars
-        acint_short *= self.amplitude_scale
-        acint_tail *= self.amplitude_scale
-
         r = np.exp(-1 / ct)
         cs = np.cos(omegas)
         denom = r**2 - 2 * r * cs + 1
@@ -239,13 +241,7 @@ class ExpTailModel(SpectrumModel):
             r_diff_ct = r / ct**2
             tail_model_diff_ct = tail_model_diff_r * r_diff_ct
             results.append(
-                np.array(
-                    [
-                        np.ones(len(omegas)) * self.amplitude_scale,
-                        tail_model * self.amplitude_scale,
-                        acint_tail * tail_model_diff_ct,
-                    ]
-                )
+                np.array([np.ones(len(omegas)), tail_model, acint_tail * tail_model_diff_ct])
             )
         if deriv >= 2:
             tail_model_diff_r_r = 4 * (cs - 1) * (r**3 - 3 * r + 2 * cs) / denom**3
@@ -260,11 +256,11 @@ class ExpTailModel(SpectrumModel):
                         [
                             np.zeros(len(omegas)),
                             np.zeros(len(omegas)),
-                            tail_model_diff_ct * self.amplitude_scale,
+                            tail_model_diff_ct,
                         ],
                         [
                             np.zeros(len(omegas)),
-                            tail_model_diff_ct * self.amplitude_scale,
+                            tail_model_diff_ct,
                             acint_tail * tail_model_diff_ct_ct,
                         ],
                     ]
@@ -275,13 +271,13 @@ class ExpTailModel(SpectrumModel):
         return results
 
     def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float]
+        self, pars: NDArray[float], covar: NDArray[float], timestep: float
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters."""
-        acint = pars[:2].sum() * self.amplitude_scale
-        acint_var = covar[:2, :2].sum() * self.amplitude_scale**2
-        corrtime = pars[2] * self.timestep
-        corrtime_var = covar[2, 2] * self.timestep**2
+        acint = pars[:2].sum()
+        acint_var = covar[:2, :2].sum()
+        corrtime = pars[2] * timestep
+        corrtime_var = covar[2, 2] * timestep**2
         return {
             "model": self.name,
             "acint": acint,
@@ -306,14 +302,22 @@ class WhiteNoiseModel(SpectrumModel):
         """Return parameter bounds for the optimizer."""
         return [(0, np.inf)]
 
+    def get_scales(
+        self, timestep: float, amplitudes: NDArray[float]
+    ) -> tuple[NDArray[float], float]:
+        """Return the scales of the parameters and the cost function."""
+        sl = self._get_scales_low(timestep, amplitudes)
+        return np.array([sl["amp_scale"]]), 1
+
     def guess(
         self,
         freqs: NDArray[float],
         amplitudes: NDArray[float],
         ndofs: NDArray[float],
+        timestep: float,
     ) -> NDArray[float]:
         """Guess initial values of the parameters."""
-        return np.array([amplitudes.mean()]) / self.amplitude_scale
+        return np.array([amplitudes.mean()])
 
     def compute(
         self, omegas: NDArray[float], pars: NDArray[float], deriv: int = 0
@@ -326,9 +330,9 @@ class WhiteNoiseModel(SpectrumModel):
         if omegas.ndim != 1:
             raise TypeError("Argument omegas must be a 1D array.")
         npt = len(omegas)
-        results = [np.full(npt, pars[0] * self.amplitude_scale)]
+        results = [np.full(npt, pars[0])]
         if deriv >= 1:
-            results.append(np.ones((1, npt)) * self.amplitude_scale)
+            results.append(np.ones((1, npt)))
         if deriv >= 2:
             results.append(np.zeros((1, 1, npt)))
         if deriv >= 3:
@@ -336,16 +340,14 @@ class WhiteNoiseModel(SpectrumModel):
         return results
 
     def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float]
+        self, pars: NDArray[float], covar: NDArray[float], timestep: float
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters."""
         return {
             "model": self.name,
-            "acint": pars[0] * self.amplitude_scale,
-            "acint_var": covar[0, 0] * self.amplitude_scale**2,
-            "acint_std": np.sqrt(covar[0, 0]) * self.amplitude_scale
-            if covar[0, 0] >= 0
-            else np.inf,
+            "acint": pars[0],
+            "acint_var": covar[0, 0],
+            "acint_std": np.sqrt(covar[0, 0]) if covar[0, 0] >= 0 else np.inf,
             "corrtime": np.inf,
             "corrtime_var": np.inf,
             "corrtime_std": np.inf,

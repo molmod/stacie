@@ -1,10 +1,10 @@
-acint = 1.31070e+02 ± 2.07240e+00
+acint = 1.29752e+02 ± 1.52914e+00
 corrtime exp = inf ± inf
-corrtime int = 5.13359e-01 ± 8.11693e-03
-log(lh) = 1.61372e+01
+corrtime int = 5.08197e-01 ± 5.98916e-03
+log(lh) = -5.72488e+01
 ---
-acint = 1.25949e+02 ± 1.99143e+00
+acint = 1.25383e+02 ± 1.80974e+00
 corrtime exp = inf ± inf
-corrtime int = 4.92183e-01 ± 7.78210e-03
-log(lh) = 1.66732e+01
+corrtime int = 4.89970e-01 ± 7.07211e-03
+log(lh) = -3.77753e+01
 ---

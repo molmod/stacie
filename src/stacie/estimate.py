@@ -24,13 +24,14 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import minimize
 
+from .conditioning import ConditionedCost
 from .cost import LowFreqCost
 from .cutoff import CutoffCriterion, underfitting_criterion
 from .model import ExpTailModel, SpectrumModel
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
 
-__all__ = ("Result", "FCutWarning", "estimate_acint", "fit_model_spectrum")
+__all__ = ("FCutWarning", "Result", "estimate_acint", "fit_model_spectrum")
 
 
 @attrs.define
@@ -280,21 +281,23 @@ def fit_model_spectrum(
     - ``timestep``: the time step.
     """
     # Maximize likelihood
-    model.precondition(timestep, amplitudes[:nfit])
-    pars_init = model.guess(freqs[:nfit], amplitudes[:nfit], ndofs[:nfit])
+    par_scales, cost_scale = model.get_scales(timestep, amplitudes[:nfit])
+    pars_init = model.guess(freqs[:nfit], amplitudes[:nfit], ndofs[:nfit], timestep)
     if not model.valid(pars_init):
         raise AssertionError("Infeasible guess")
     cost = LowFreqCost(timestep, freqs[:nfit], amplitudes[:nfit], ndofs[:nfit], model)
+    conditioned_cost = ConditionedCost(cost, par_scales, cost_scale)
     opt = minimize(
-        cost.funcgrad,
-        pars_init,
+        conditioned_cost.funcgrad,
+        conditioned_cost.to_reduced(pars_init),
         jac=True,
-        hess=cost.hess,
+        hess=conditioned_cost.hess,
         bounds=model.bounds(),
         method="trust-constr",
         options={"xtol": 1e-10, "gtol": 1e-10},
     )
-    props = cost.props(opt.x, 2)
+    pars_opt = conditioned_cost.from_reduced(opt.x)
+    props = cost.props(pars_opt, 2)
 
     # Compute the Hessian and its properties.
     evals, evecs = np.linalg.eigh(props["cost_hess"])
@@ -307,7 +310,7 @@ def fit_model_spectrum(
         props["covar"] = np.full_like(props["cost_hess"], np.inf)
 
     # Derive estimates from model parameters.
-    props.update(model.derive_props(props["pars"], props["covar"]))
+    props.update(model.derive_props(props["pars"], props["covar"], timestep))
 
     # Compute remaining properties and derive the cutoff criterion
     props["pars_init"] = pars_init

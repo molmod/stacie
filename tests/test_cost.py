@@ -58,8 +58,6 @@ def mycost():
     freqs = np.linspace(0, 0.5 / timestep, 10)
     model = ExpTailModel()
     amplitudes = np.array([1.5, 1.4, 1.1, 0.9, 0.8, 1.0, 0.9, 0.9, 0.8, 1.1])
-    model.precondition(timestep, amplitudes)
-    assert model.amplitude_scale != 1.0
     ndofs = np.array([5, 10, 10, 10, 10, 10, 10, 10, 10, 5])
     return LowFreqCost(timestep, freqs, amplitudes, ndofs, model)
 
@@ -76,8 +74,8 @@ PARS_REF_EXP_TAIL = [
 def test_gradient_exptail(mycost, pars_ref):
     pars_ref = np.array(pars_ref)
     assert_allclose(
-        mycost.funcgrad(pars_ref)[1],
-        nd.Gradient(lambda pars: mycost.funcgrad(pars)[0])(pars_ref),
+        mycost(pars_ref, 1)[1],
+        nd.Gradient(lambda pars: mycost(pars)[0])(pars_ref),
         atol=1e-12,
         rtol=1e-12,
     )
@@ -87,8 +85,8 @@ def test_gradient_exptail(mycost, pars_ref):
 def test_hessian_exptail(mycost, pars_ref):
     pars_ref = np.array(pars_ref)
     assert_allclose(
-        mycost.hess(pars_ref),
-        nd.Gradient(lambda pars: mycost.funcgrad(pars)[1])(pars_ref),
+        mycost(pars_ref, 2)[2],
+        nd.Gradient(lambda pars: mycost(pars, 1)[1])(pars_ref),
         atol=1e-12,
         rtol=1e-12,
     )

@@ -1,10 +1,10 @@
-acint = 1.40581e+02 ± 6.36273e+00
-corrtime exp = 1.23767e+02 ± 8.83957e+01
-corrtime int = 5.50611e-01 ± 2.49208e-02
-log(lh) = 1.77900e+01
+acint = 1.40595e+02 ± 6.46546e+00
+corrtime exp = 1.37906e+02 ± 8.49841e+01
+corrtime int = 5.50667e-01 ± 2.53232e-02
+log(lh) = -6.10718e+01
 ---
-acint = 1.39323e+02 ± 9.85167e+00
-corrtime exp = 1.55533e+05 ± 2.01536e+07
-corrtime int = 5.44448e-01 ± 3.84983e-02
-log(lh) = 1.62748e+01
+acint = 1.39323e+02 ± 9.85164e+00
+corrtime exp = 2.03882e+05 ± 3.55335e+07
+corrtime int = 5.44448e-01 ± 3.84982e-02
+log(lh) = -4.09823e+01
 ---
