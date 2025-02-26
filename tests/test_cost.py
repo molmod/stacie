@@ -17,9 +17,9 @@
 # --
 """Tests for ``stacie.cost``."""
 
-import numdifftools as nd
 import numpy as np
 import pytest
+from conftest import check_curv, check_deriv, check_gradient, check_hessian
 from stacie.cost import LowFreqCost, logpdf_gamma
 from stacie.model import ExpTailModel
 
@@ -33,22 +33,12 @@ LOGPDF_GAMMA_CASES = [
 
 @pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_logpdf_gamma_deriv1(x, kappa, theta_ref):
-    deriv = logpdf_gamma(x, kappa, theta_ref, 1)[1]
-    num_deriv, info = nd.Derivative(
-        lambda theta: logpdf_gamma(x, kappa, theta)[0], full_output=True
-    )(theta_ref)
-    error = info.error_estimate
-    assert deriv / error == pytest.approx(num_deriv / error, abs=10)
+    check_deriv(lambda theta, deriv=0: logpdf_gamma(x, kappa, theta, deriv), theta_ref)
 
 
 @pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_logpdf_gamma_deriv2(x, kappa, theta_ref):
-    curv = logpdf_gamma(x, kappa, theta_ref, 2)[2]
-    num_curv, info = nd.Derivative(
-        lambda theta: logpdf_gamma(x, kappa, theta, 1)[1], full_output=True
-    )(theta_ref)
-    error = info.error_estimate
-    assert curv / error == pytest.approx(num_curv / error, abs=10)
+    check_curv(lambda theta, deriv=0: logpdf_gamma(x, kappa, theta, deriv), theta_ref)
 
 
 @pytest.fixture()
@@ -71,17 +61,9 @@ PARS_REF_EXP_TAIL = [
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_gradient_exptail(mycost, pars_ref):
-    pars_ref = np.array(pars_ref)
-    gradient = mycost(pars_ref, 1)[1]
-    num_gradient, info = nd.Gradient(lambda pars: mycost(pars)[0], full_output=True)(pars_ref)
-    error = info.error_estimate
-    assert num_gradient / error == pytest.approx(gradient / error, abs=10)
+    check_gradient(mycost, pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_hessian_exptail(mycost, pars_ref):
-    pars_ref = np.array(pars_ref)
-    hessian = mycost(pars_ref, 2)[2]
-    num_hessian, info = nd.Gradient(lambda pars: mycost(pars, 1)[1], full_output=True)(pars_ref)
-    error = info.error_estimate
-    assert num_hessian / error == pytest.approx(hessian / error, abs=10)
+    check_hessian(mycost, pars_ref)

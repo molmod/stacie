@@ -18,7 +18,8 @@
 """Unit tests for ``stacie.spectrum``."""
 
 import numpy as np
-from numpy.testing import assert_allclose, assert_equal
+import pytest
+from numpy.testing import assert_equal
 from stacie.spectrum import compute_spectrum
 
 
@@ -40,15 +41,17 @@ def test_basics():
     assert spectrum.timestep == timestep
     assert spectrum.freqs[0] == 0.0
     assert len(spectrum.freqs) == 4
-    assert_allclose(spectrum.freqs[1], 1 / (6 * timestep))
+    assert spectrum.freqs[1] == pytest.approx(1 / (6 * timestep))
     assert spectrum.amplitudes_ref is None
     # Test the DC-component.
     scale = prefactor * timestep / sequences.shape[1]
     dccomp = (sequences.sum(axis=1) ** 2).mean()
-    assert_allclose(spectrum.amplitudes[0], dccomp * scale)
+    assert spectrum.amplitudes[0] == pytest.approx(dccomp * scale)
     # Test the Plancherel theorem (taking into account RFFT conventions).
     sumsq = (sequences**2).sum()
-    assert_allclose((spectrum.amplitudes * spectrum.ndofs).sum(), sumsq * prefactor * timestep)
+    assert (spectrum.amplitudes * spectrum.ndofs).sum() == pytest.approx(
+        sumsq * prefactor * timestep
+    )
     # Test removing the zero frequency
     spectrum2 = spectrum.without_zero_freq()
     assert_equal(spectrum2.ndofs, spectrum.ndofs[1:])
@@ -70,15 +73,17 @@ def test_single():
     assert spectrum.timestep == timestep
     assert spectrum.freqs[0] == 0.0
     assert len(spectrum.freqs) == 4
-    assert_allclose(spectrum.freqs[1], 1 / (6 * timestep))
+    assert spectrum.freqs[1] == pytest.approx(1 / (6 * timestep))
     assert spectrum.amplitudes_ref is None
     # Test the DC-component.
     scale = prefactor * timestep / sequence.shape[0]
     dccomp = sequence.sum() ** 2
-    assert_allclose(spectrum.amplitudes[0], dccomp * scale)
+    assert spectrum.amplitudes[0] == pytest.approx(dccomp * scale)
     # Test the Plancherel theorem (taking into account RFFT conventions).
     sumsq = (sequence**2).sum()
-    assert_allclose((spectrum.amplitudes * spectrum.ndofs).sum(), sumsq * prefactor * timestep)
+    assert (spectrum.amplitudes * spectrum.ndofs).sum() == pytest.approx(
+        sumsq * prefactor * timestep
+    )
     # Test removing the zero frequency
     spectrum2 = spectrum.without_zero_freq()
     assert_equal(spectrum2.ndofs, spectrum.ndofs[1:])

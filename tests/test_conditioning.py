@@ -17,9 +17,9 @@
 # --
 """Tests for ``stacie.conditioning``."""
 
-import numdifftools as nd
 import numpy as np
-from numpy.testing import assert_allclose
+import pytest
+from conftest import check_gradient, check_hessian
 from stacie.conditioning import ConditionedCost
 
 
@@ -46,55 +46,35 @@ def function(x, deriv: int = 0):
 
 def test_function_deriv1():
     x0 = np.array([1.0, 2.0, 3.0, 4.0])
-    assert_allclose(
-        function(x0, 1)[1],
-        nd.Gradient(lambda x: function(x)[0])(x0),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    check_gradient(function, x0)
 
 
 def test_function_deriv2():
     x0 = np.array([1.0, 2.0, 3.0, 4.0])
-    assert_allclose(
-        function(x0, 2)[2],
-        nd.Gradient(lambda x: function(x, deriv=1)[1])(x0),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    check_hessian(function, x0)
 
 
 def test_conditioned_cost():
     par_scales = np.array([1.0, 2.0, 3.0, 4.0])
     cost = ConditionedCost(function, par_scales, 5.0)
     x0 = np.array([0.1, 0.2, 0.3, 0.4])
-    assert_allclose(cost(x0, 0), [np.prod(x0 * par_scales) / 5.0])
-    assert_allclose(cost.from_reduced(x0), x0 * par_scales)
-    assert_allclose(cost.to_reduced(x0), x0 / par_scales)
-    assert_allclose(cost.funcgrad(x0)[0], cost(x0)[0])
-    assert_allclose(cost.funcgrad(x0)[1], cost(x0, 1)[1])
-    assert_allclose(cost.hess(x0), cost(x0, 2)[2])
+    assert cost(x0, 0) == pytest.approx([np.prod(x0 * par_scales) / 5.0])
+    assert cost.from_reduced(x0) == pytest.approx(x0 * par_scales)
+    assert cost.to_reduced(x0) == pytest.approx(x0 / par_scales)
+    assert cost.funcgrad(x0)[0] == pytest.approx(cost(x0)[0])
+    assert cost.funcgrad(x0)[1] == pytest.approx(cost(x0, 1)[1])
+    assert cost.hess(x0) == pytest.approx(cost(x0, 2)[2])
 
 
 def test_conditioned_cost_deriv1():
     par_scales = np.array([1.0, 2.0, 3.0, 4.0])
     cost = ConditionedCost(function, par_scales, 5.0)
     x0 = np.array([0.1, 0.2, 0.3, 0.4])
-    assert_allclose(
-        cost(x0, 1)[1],
-        nd.Gradient(lambda x: cost(x)[0])(x0),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    check_gradient(cost, x0)
 
 
 def test_conditioned_cost_deriv2():
     par_scales = np.array([1.0, 2.0, 3.0, 4.0])
     cost = ConditionedCost(function, par_scales, 5.0)
     x0 = np.array([0.1, 0.2, 0.3, 0.4])
-    assert_allclose(
-        cost(x0, 2)[2],
-        nd.Gradient(lambda x: cost(x, deriv=1)[1])(x0),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    check_hessian(cost, x0)
