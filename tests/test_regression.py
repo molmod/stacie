@@ -23,7 +23,7 @@ because the algorithm is known and expected to be flaky for specific combination
 
 import pytest
 from path import Path
-from stacie.estimate import estimate_acint
+from stacie.estimate import Result, estimate_acint
 from stacie.model import ExpTailModel, SpectrumModel, WhiteNoiseModel
 from stacie.msgpack import dump, load
 from stacie.plot import plot_results
@@ -35,7 +35,7 @@ NAME_LISTS = DOUBLE_NAMES, WHITE_NAMES
 ALL_NAMES = [j for i in NAME_LISTS for j in i]
 
 
-def output_test_result(prefix, res):
+def output_test_result(prefix: str, res: Result):
     dn_out = Path("tests/outputs")
     dn_out.makedirs_p()
     path_pdf = dn_out / f"{prefix}.pdf"
@@ -44,10 +44,23 @@ def output_test_result(prefix, res):
     dump(path_zip, res)
 
 
-def register_result(regtest, res):
+def register_result(regtest, res: Result, white: bool = False):
+    """Register the result of a test with regtest.
+
+    Parameters
+    ----------
+    res
+        The ``stacie.estimate.Result`` to register.
+    white
+        Whether the test uses a white-noise model or white-noise data.
+        In this case, there is no point in writing the exponential correlation time.
+    """
     with regtest:
         print(f"acint = {res.acint:.5e} ± {res.acint_std:.5e}")
-        print(f"corrtime exp = {res.corrtime_exp:.5e} ± {res.corrtime_exp_std:.5e}")
+        if not white:
+            # Do not check flaky results, as they will depend on irrelevant details,
+            # like CPU architecture and NumPy version.
+            print(f"corrtime exp = {res.corrtime_exp:.5e} ± {res.corrtime_exp_std:.5e}")
         print(f"corrtime int = {res.corrtime_int:.5e} ± {res.corrtime_int_std:.5e}")
         print(f"log(lh) = {res.props['ll']:.5e}")
         print("---")
@@ -60,33 +73,29 @@ def check_noscan_single(
     *,
     fcutmax: float = 0.005,
     model: SpectrumModel | None = None,
-    flaky: bool = False,
 ):
     res = estimate_acint(spectrum, fcutmax=fcutmax, maxscan=1, model=model)
-    if not flaky:
-        register_result(regtest, res)
+    register_result(regtest, res, "white" in prefix or isinstance(model, WhiteNoiseModel))
     output_test_result(prefix, res)
 
 
 @pytest.mark.parametrize("name", ALL_NAMES)
-def test_exptail_noscan(regtest, name):
+def test_exptail_noscan(regtest, name: str):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-    flaky = name == "white1"
-    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}", flaky=flaky)
+    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}")
 
 
 @pytest.mark.parametrize("name", ALL_NAMES)
-def test_exptail_noscan_conditioning(regtest, name):
+def test_exptail_noscan_conditioning(regtest, name: str):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     scale = 1e-15
     spectrum.amplitudes *= scale
     spectrum.variance *= scale
-    flaky = name == "white1"
-    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}_conditioning", flaky=flaky)
+    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}_conditioning")
 
 
 @pytest.mark.parametrize("name", WHITE_NAMES)
-def test_white_noscan(regtest, name):
+def test_white_noscan(regtest, name: str):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     check_noscan_single(
         regtest, spectrum, f"white_noscan_{name}", fcutmax=0.1, model=WhiteNoiseModel()
@@ -94,31 +103,27 @@ def test_white_noscan(regtest, name):
 
 
 @pytest.mark.parametrize(("name", "fcutmax"), [("white2", 0.008), ("double1", 0.05)])
-def test_exptail_noscan_fail(regtest, name, fcutmax):
+def test_exptail_noscan_fail(regtest, name: str, fcutmax: float):
     # Try cutoffs for which the convergence of the ExpTail parameters is known to be problematic.
     # Stacie should still produce some output without raising exceptions.
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-    check_noscan_single(
-        regtest, spectrum, f"exptail_noscan_{name}_fail", fcutmax=fcutmax, flaky=True
-    )
+    check_noscan_single(regtest, spectrum, f"exptail_noscan_{name}_fail", fcutmax=fcutmax)
 
 
 @pytest.mark.parametrize("names", NAME_LISTS)
-def test_exptail_noscan_multi(regtest, names):
-    flaky = names[0].startswith("white")
+def test_exptail_noscan_multi(regtest, names: list[str]):
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
         r = estimate_acint(spectrum, fcutmax=0.005, maxscan=1)
-        if not flaky:
-            register_result(regtest, r)
+        register_result(regtest, r, "white" in name)
         res.append(r)
     output_test_result("exptail_noscan_multi", res)
 
 
 @pytest.mark.parametrize("name", ALL_NAMES)
 @pytest.mark.parametrize("fcutmax", [0.03, None])
-def test_exptail_scan(regtest, fcutmax, name):
+def test_exptail_scan(regtest, fcutmax: float, name: list[str]):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     if fcutmax is None:
         # By dropping the DC component,
@@ -126,10 +131,8 @@ def test_exptail_scan(regtest, fcutmax, name):
         # This means spectrum.freqs[nfit] will not work.
         # Any occurrence of this will raise an error.
         spectrum = spectrum.without_zero_freq()
-    flaky = fcutmax is None and name == "white1"
     res = estimate_acint(spectrum, fcutmax=fcutmax, maxscan=10)
-    if not flaky:
-        register_result(regtest, res)
+    register_result(regtest, res, "white" in name)
     prefix = f"exptail_scan_{name}"
     if fcutmax is None:
         prefix += "_nofcut"
@@ -139,16 +142,14 @@ def test_exptail_scan(regtest, fcutmax, name):
 @pytest.mark.parametrize("names", NAME_LISTS)
 @pytest.mark.parametrize("model", [ExpTailModel(), WhiteNoiseModel()])
 @pytest.mark.parametrize("zero_freq", [False, True])
-def test_scan_multi(regtest, zero_freq, model, names):
-    flaky = not zero_freq and isinstance(model, ExpTailModel) and names[0].startswith("white")
+def test_scan_multi(regtest, zero_freq: bool, model: SpectrumModel, names: list[str]):
     res = []
     for name in names:
         spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
         if not zero_freq:
             spectrum = spectrum.without_zero_freq()
         r = estimate_acint(spectrum, fcutmax=0.01, maxscan=10, model=model)
-        if not flaky:
-            register_result(regtest, r)
+        register_result(regtest, r, "white" in name or isinstance(model, WhiteNoiseModel))
         res.append(r)
     prefix = f"{model.name}_scan_multi"
     if not zero_freq:
