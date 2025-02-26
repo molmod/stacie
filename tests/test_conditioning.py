@@ -23,7 +23,17 @@ from numpy.testing import assert_allclose
 from stacie.conditioning import ConditionedCost
 
 
-def toyfunc(x, deriv: int = 0):
+def function(x, deriv: int = 0):
+    """Compute the product of all items in x, and its gradient and Hessian.
+
+    Parameters
+    ----------
+    x
+        The input vector.
+    deriv
+        The order of the derivative to compute. Default is 0.
+    This is just a simple function to test conditioning implementation.
+    """
     results = [float(np.prod(x))]
     if deriv >= 1:
         results.append(results[0] / x)
@@ -34,21 +44,21 @@ def toyfunc(x, deriv: int = 0):
     return results
 
 
-def test_toyfunc_deriv1():
+def test_function_deriv1():
     x0 = np.array([1.0, 2.0, 3.0, 4.0])
     assert_allclose(
-        toyfunc(x0, 1)[1],
-        nd.Gradient(lambda x: toyfunc(x)[0])(x0),
+        function(x0, 1)[1],
+        nd.Gradient(lambda x: function(x)[0])(x0),
         atol=1e-12,
         rtol=1e-12,
     )
 
 
-def test_toyfunc_deriv2():
+def test_function_deriv2():
     x0 = np.array([1.0, 2.0, 3.0, 4.0])
     assert_allclose(
-        toyfunc(x0, 2)[2],
-        nd.Gradient(lambda x: toyfunc(x, deriv=1)[1])(x0),
+        function(x0, 2)[2],
+        nd.Gradient(lambda x: function(x, deriv=1)[1])(x0),
         atol=1e-12,
         rtol=1e-12,
     )
@@ -56,7 +66,7 @@ def test_toyfunc_deriv2():
 
 def test_conditioned_cost():
     par_scales = np.array([1.0, 2.0, 3.0, 4.0])
-    cost = ConditionedCost(toyfunc, par_scales, 5.0)
+    cost = ConditionedCost(function, par_scales, 5.0)
     x0 = np.array([0.1, 0.2, 0.3, 0.4])
     assert_allclose(cost(x0, 0), [np.prod(x0 * par_scales) / 5.0])
     assert_allclose(cost.from_reduced(x0), x0 * par_scales)
@@ -68,7 +78,7 @@ def test_conditioned_cost():
 
 def test_conditioned_cost_deriv1():
     par_scales = np.array([1.0, 2.0, 3.0, 4.0])
-    cost = ConditionedCost(toyfunc, par_scales, 5.0)
+    cost = ConditionedCost(function, par_scales, 5.0)
     x0 = np.array([0.1, 0.2, 0.3, 0.4])
     assert_allclose(
         cost(x0, 1)[1],
@@ -80,7 +90,7 @@ def test_conditioned_cost_deriv1():
 
 def test_conditioned_cost_deriv2():
     par_scales = np.array([1.0, 2.0, 3.0, 4.0])
-    cost = ConditionedCost(toyfunc, par_scales, 5.0)
+    cost = ConditionedCost(function, par_scales, 5.0)
     x0 = np.array([0.1, 0.2, 0.3, 0.4])
     assert_allclose(
         cost(x0, 2)[2],

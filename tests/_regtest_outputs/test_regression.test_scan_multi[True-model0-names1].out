@@ -3,8 +3,8 @@ corrtime exp = 1.37906e+02 ± 8.49841e+01
 corrtime int = 5.50667e-01 ± 2.53232e-02
 log(lh) = -6.10718e+01
 ---
-acint = 1.39323e+02 ± 9.85164e+00
-corrtime exp = 2.03882e+05 ± 3.55335e+07
-corrtime int = 5.44448e-01 ± 3.84982e-02
+acint = 1.39324e+02 ± 9.85199e+00
+corrtime exp = 8.77798e+05 ± 6.58660e+08
+corrtime int = 5.44450e-01 ± 3.84996e-02
 log(lh) = -4.09823e+01
 ---

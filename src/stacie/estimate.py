@@ -281,12 +281,12 @@ def fit_model_spectrum(
     - ``timestep``: the time step.
     """
     # Maximize likelihood
-    par_scales, cost_scale = model.get_scales(timestep, amplitudes[:nfit])
+    par_scales = model.get_par_scales(timestep, freqs[:nfit], amplitudes[:nfit])
     pars_init = model.guess(freqs[:nfit], amplitudes[:nfit], ndofs[:nfit], timestep)
     if not model.valid(pars_init):
         raise AssertionError("Infeasible guess")
     cost = LowFreqCost(timestep, freqs[:nfit], amplitudes[:nfit], ndofs[:nfit], model)
-    conditioned_cost = ConditionedCost(cost, par_scales, cost_scale)
+    conditioned_cost = ConditionedCost(cost, par_scales, 1.0)
     opt = minimize(
         conditioned_cost.funcgrad,
         conditioned_cost.to_reduced(pars_init),
@@ -310,7 +310,7 @@ def fit_model_spectrum(
         props["covar"] = np.full_like(props["cost_hess"], np.inf)
 
     # Derive estimates from model parameters.
-    props.update(model.derive_props(props["pars"], props["covar"], timestep))
+    props.update(model.derive_props(props["pars"], props["covar"]))
 
     # Compute remaining properties and derive the cutoff criterion
     props["pars_init"] = pars_init

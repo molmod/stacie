@@ -23,7 +23,8 @@ import pytest
 from numpy.testing import assert_allclose
 from stacie.model import ExpTailModel, WhiteNoiseModel
 
-OMEGAS = np.linspace(0, np.pi, 10)
+FREQS = np.linspace(0, 0.5, 10)
+TIMESTEP = 1.2
 
 PARS_REF_EXP_TAIL = [
     [1.2, 0.9, 1.1],
@@ -42,8 +43,8 @@ def test_gradient_exptail(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpTailModel()
     assert_allclose(
-        model.compute(OMEGAS, pars_ref, 1)[1].T,
-        nd.Gradient(lambda pars: model.compute(OMEGAS, pars)[0])(pars_ref),
+        model.compute(FREQS, TIMESTEP, pars_ref, 1)[1].T,
+        nd.Gradient(lambda pars: model.compute(FREQS, TIMESTEP, pars)[0])(pars_ref),
         atol=1e-12,
         rtol=1e-12,
     )
@@ -54,8 +55,8 @@ def test_hessian_exptail(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpTailModel()
     assert_allclose(
-        model.compute(OMEGAS, pars_ref, 2)[2].transpose(2, 0, 1),
-        nd.Gradient(lambda pars: model.compute(OMEGAS, pars, 1)[1].T)(pars_ref),
+        model.compute(FREQS, TIMESTEP, pars_ref, 2)[2].transpose(2, 0, 1),
+        nd.Gradient(lambda pars: model.compute(FREQS, TIMESTEP, pars, 1)[1].T)(pars_ref),
         atol=1e-12,
         rtol=1e-12,
     )
@@ -69,8 +70,8 @@ def test_gradient_white(pars_ref):
     pars_ref = np.array(pars_ref)
     model = WhiteNoiseModel()
     assert_allclose(
-        model.compute(OMEGAS, pars_ref, 1)[1][0],
-        nd.Gradient(lambda pars: model.compute(OMEGAS, pars)[0])(pars_ref),
+        model.compute(FREQS, TIMESTEP, pars_ref, 1)[1][0],
+        nd.Gradient(lambda pars: model.compute(FREQS, TIMESTEP, pars)[0])(pars_ref),
         atol=1e-12,
         rtol=1e-12,
     )
@@ -81,8 +82,8 @@ def test_hessian_white(pars_ref):
     pars_ref = np.array(pars_ref)
     model = WhiteNoiseModel()
     assert_allclose(
-        model.compute(OMEGAS, pars_ref, 2)[2][0, 0],
-        nd.Gradient(lambda pars: model.compute(OMEGAS, pars, 1)[1].T)(pars_ref),
+        model.compute(FREQS, TIMESTEP, pars_ref, 2)[2][0, 0],
+        nd.Gradient(lambda pars: model.compute(FREQS, TIMESTEP, pars, 1)[1].T)(pars_ref),
         atol=1e-12,
         rtol=1e-12,
     )

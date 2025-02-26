@@ -438,14 +438,14 @@ result_600 = demo_stacie(600)
 # %%
 acint_unit = sc.value("atomic unit of time") / sc.value("atomic unit of length") ** 2
 acint_1 = result_1.acint / acint_unit
-if abs(acint_1 - 6.07e-7) > 1e-9:
+if abs(acint_1 - 5.88e-7) > 1e-9:
     raise ValueError(f"Wrong acint (no block average): {acint_1:.2e}")
 acint_30 = result_30.acint / acint_unit
-if abs(acint_30 - 6.08e-7) > 1e-9:
+if abs(acint_30 - 5.86e-7) > 1e-9:
     raise ValueError(f"Wrong acint (block size 30): {acint_30:.2e}")
 acint_150 = result_150.acint / acint_unit
-if abs(acint_150 - 6.05e-7) > 1e-9:
+if abs(acint_150 - 6.00e-7) > 1e-9:
     raise ValueError(f"Wrong acint (block size 150): {acint_150:.2e}")
 acint_600 = result_600.acint / acint_unit
-if abs(acint_600 - 6.22e-7) > 1e-9:
+if abs(acint_600 - 5.95e-7) > 1e-9:
     raise ValueError(f"Wrong acint (block size 600): {acint_600:.2e}")

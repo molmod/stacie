@@ -144,11 +144,8 @@ def cost_low(
     - ``cost_grad``: the cost Gradient vector (if ``deriv>=1``).
     - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``).
     """
-    # Convert frequencies to dimensionless omegas, as if time step was 1
-    # With RFFT, the highest omega would then be +pi.
-    omegas = 2 * np.pi * timestep * freqs
-
-    amplitudes_model = model.compute(omegas, pars, deriv)
+    # Compute the model spectrum and its derivatives.
+    amplitudes_model = model.compute(freqs, timestep, pars, deriv)
 
     # Log-likelihood computed with the scaled Chi-squared distribution.
     # The Gamma distribution is used because the scale parameter is easily incorporated.

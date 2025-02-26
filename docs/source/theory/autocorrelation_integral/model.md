@@ -77,8 +77,6 @@ $$
 $$
 
 where $h$ is the time step.
-(In Stacie's implementation of this model, the parameter `corrtime` is
-the dimensionless autocorrelation time, i.e., $\tau_\text{exp} / h$.)
 
 
 ### Discrete Fourier Transform
@@ -165,7 +163,7 @@ We can rely on the following series expansion:
 $$
     \arccos(2 - \cosh(u))
     \approx
-    |u + \frac{1}{12} u^3 + \frac{1}{96} u^5 + \mathcal{O}(u^7)|
+    \left|u + \frac{1}{12} u^3 + \frac{1}{96} u^5 + \mathcal{O}(u^7)\right|
 $$
 
 Hence, in the limit $\tau_\text{exp} \gg h$, we find:

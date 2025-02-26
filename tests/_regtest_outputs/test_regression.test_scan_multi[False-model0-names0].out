@@ -4,7 +4,7 @@ corrtime int = 2.51783e+01 ± 1.34474e+00
 log(lh) = -3.83948e+01
 ---
 acint = 1.59334e+02 ± 1.07581e+01
-corrtime exp = 1.37157e+02 ± 1.71377e+01
-corrtime int = 2.65090e+01 ± 1.78986e+00
+corrtime exp = 1.37157e+02 ± 1.71376e+01
+corrtime int = 2.65090e+01 ± 1.78985e+00
 log(lh) = -4.64089e+01
 ---

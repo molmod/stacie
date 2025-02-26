@@ -17,6 +17,8 @@
 # --
 """Cost function pre-conditioning."""
 
+from collections.abc import Callable
+
 import attrs
 import numpy as np
 from numpy.typing import NDArray
@@ -33,11 +35,11 @@ class ConditionedCost:
     even if the spectra and the frequencies have very different orders of magnitude.
     """
 
-    cost: callable = attrs.field()
-    par_scales: NDArray[np.float64] = attrs.field()
+    cost: Callable[[NDArray[float], int], list[NDArray[float]]] = attrs.field()
+    par_scales: NDArray[float] = attrs.field()
     cost_scale: float = attrs.field()
 
-    def __call__(self, pars: NDArray[np.float64], deriv: int = 0) -> list[NDArray[float]]:
+    def __call__(self, pars: NDArray[float], deriv: int = 0) -> list[NDArray[float]]:
         """Evaluate the pre-conditioned cost function.
 
         Parameters
@@ -71,7 +73,7 @@ class ConditionedCost:
             return results
         raise NotImplementedError("Third and higher-order derivatives are not supported.")
 
-    def to_reduced(self, pars: NDArray[np.float64]) -> NDArray[np.float64]:
+    def to_reduced(self, pars: NDArray[float]) -> NDArray[float]:
         """Convert parameters from the original to the reduced space.
 
         Parameters
@@ -86,7 +88,7 @@ class ConditionedCost:
         """
         return pars / self.par_scales
 
-    def from_reduced(self, pars: NDArray[np.float64]) -> NDArray[np.float64]:
+    def from_reduced(self, pars: NDArray[float]) -> NDArray[float]:
         """Convert parameters from the reduced to the original space.
 
         Parameters
