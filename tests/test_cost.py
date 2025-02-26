@@ -20,7 +20,6 @@
 import numdifftools as nd
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose
 from stacie.cost import LowFreqCost, logpdf_gamma
 from stacie.model import ExpTailModel
 
@@ -34,22 +33,22 @@ LOGPDF_GAMMA_CASES = [
 
 @pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_logpdf_gamma_deriv1(x, kappa, theta_ref):
-    assert_allclose(
-        logpdf_gamma(x, kappa, theta_ref, 1)[1],
-        nd.Derivative(lambda theta: logpdf_gamma(x, kappa, theta)[0])(theta_ref),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    deriv = logpdf_gamma(x, kappa, theta_ref, 1)[1]
+    num_deriv, info = nd.Derivative(
+        lambda theta: logpdf_gamma(x, kappa, theta)[0], full_output=True
+    )(theta_ref)
+    error = info.error_estimate
+    assert deriv / error == pytest.approx(num_deriv / error, abs=10)
 
 
 @pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_logpdf_gamma_deriv2(x, kappa, theta_ref):
-    assert_allclose(
-        logpdf_gamma(x, kappa, theta_ref, 2)[2],
-        nd.Derivative(lambda theta: logpdf_gamma(x, kappa, theta, 1)[1])(theta_ref),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    curv = logpdf_gamma(x, kappa, theta_ref, 2)[2]
+    num_curv, info = nd.Derivative(
+        lambda theta: logpdf_gamma(x, kappa, theta, 1)[1], full_output=True
+    )(theta_ref)
+    error = info.error_estimate
+    assert curv / error == pytest.approx(num_curv / error, abs=10)
 
 
 @pytest.fixture()
@@ -73,20 +72,16 @@ PARS_REF_EXP_TAIL = [
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_gradient_exptail(mycost, pars_ref):
     pars_ref = np.array(pars_ref)
-    assert_allclose(
-        mycost(pars_ref, 1)[1],
-        nd.Gradient(lambda pars: mycost(pars)[0])(pars_ref),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    gradient = mycost(pars_ref, 1)[1]
+    num_gradient, info = nd.Gradient(lambda pars: mycost(pars)[0], full_output=True)(pars_ref)
+    error = info.error_estimate
+    assert num_gradient / error == pytest.approx(gradient / error, abs=10)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_hessian_exptail(mycost, pars_ref):
     pars_ref = np.array(pars_ref)
-    assert_allclose(
-        mycost(pars_ref, 2)[2],
-        nd.Gradient(lambda pars: mycost(pars, 1)[1])(pars_ref),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    hessian = mycost(pars_ref, 2)[2]
+    num_hessian, info = nd.Gradient(lambda pars: mycost(pars, 1)[1], full_output=True)(pars_ref)
+    error = info.error_estimate
+    assert num_hessian / error == pytest.approx(hessian / error, abs=10)
