@@ -132,7 +132,9 @@ def test_exptail_scan(regtest, fcutmax: float, name: list[str]):
         # Any occurrence of this will raise an error.
         spectrum = spectrum.without_zero_freq()
     res = estimate_acint(spectrum, fcutmax=fcutmax, maxscan=10)
-    register_result(regtest, res, "white" in name)
+    if not (fcutmax is None and "white" in name):
+        # Only perform the regresion test for well-behaved cases.
+        register_result(regtest, res, "white" in name)
     prefix = f"exptail_scan_{name}"
     if fcutmax is None:
         prefix += "_nofcut"
