@@ -46,30 +46,37 @@ class LowFreqCost:
     model: SpectrumModel = attrs.field()
     """The model to be fitted to the spectrum."""
 
-    def funcgrad(self, pars: NDArray[float]) -> tuple[float, NDArray[float]]:
-        """Compute the cost function (the negative log-likelihood) and the gradient.
+    def __call__(self, pars: NDArray[float], deriv: int = 0) -> float:
+        """Evaluate the cost function and its derivatives.
 
         Parameters
         ----------
         pars
-            The parameters.
+            The parameter vector for which the loss function must be computed.
+        deriv
+            The order of derivatives of the cost function to include.
 
         Returns
         -------
-        negll
-            The negative log-likelihood of the parameters.
+        results
+            A list with the cost function and the requested derivatives.
         """
         if not self.model.valid(pars):
-            return np.inf, np.full(len(pars), np.inf)
-        props = cost_low(pars, 1, *attrs.astuple(self))
-        return props["cost_value"], props["cost_grad"]
-
-    def hess(self, pars: NDArray[float]) -> NDArray[float]:
-        """Compute the Hessian matrix of the cost function."""
-        if not self.model.valid(pars):
-            return np.full((len(pars), len(pars)), np.inf)
-        props = cost_low(pars, 2, *attrs.astuple(self))
-        return props["cost_hess"]
+            if deriv == 0:
+                return [np.inf]
+            if deriv == 1:
+                return [np.inf, np.full_like(pars, np.nan)]
+            if deriv == 2:
+                return [np.inf, np.full_like(pars, np.nan), np.full((len(pars), len(pars)), np.nan)]
+            raise ValueError("Third or higher derivatives are not supported.")
+        props = cost_low(pars, deriv, *attrs.astuple(self, recurse=False))
+        if deriv == 0:
+            return [props["cost_value"]]
+        if deriv == 1:
+            return [props["cost_value"], props["cost_grad"]]
+        if deriv == 2:
+            return [props["cost_value"], props["cost_grad"], props["cost_hess"]]
+        raise ValueError("Third or higher derivatives are not supported.")
 
     def props(self, pars: NDArray[float], deriv: int = 0) -> dict[str, NDArray[float]]:
         """Compute properties of the fit for the given parameters.
@@ -89,7 +96,7 @@ class LowFreqCost:
         """
         if not self.model.valid(pars):
             raise ValueError("Invalid parameters")
-        return cost_low(pars, deriv, *attrs.astuple(self))
+        return cost_low(pars, deriv, *attrs.astuple(self, recurse=False))
 
 
 def cost_low(
@@ -137,11 +144,8 @@ def cost_low(
     - ``cost_grad``: the cost Gradient vector (if ``deriv>=1``).
     - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``).
     """
-    # Convert frequencies to dimensionless omegas, as if time step was 1
-    # With RFFT, the highest omega would then be +pi.
-    omegas = 2 * np.pi * timestep * freqs
-
-    amplitudes_model = model.compute(omegas, pars, deriv)
+    # Compute the model spectrum and its derivatives.
+    amplitudes_model = model.compute(freqs, timestep, pars, deriv)
 
     # Log-likelihood computed with the scaled Chi-squared distribution.
     # The Gamma distribution is used because the scale parameter is easily incorporated.

@@ -17,10 +17,9 @@
 # --
 """Tests for ``stacie.cost``."""
 
-import numdifftools as nd
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose
+from conftest import check_curv, check_deriv, check_gradient, check_hessian
 from stacie.cost import LowFreqCost, logpdf_gamma
 from stacie.model import ExpTailModel
 
@@ -34,22 +33,12 @@ LOGPDF_GAMMA_CASES = [
 
 @pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_logpdf_gamma_deriv1(x, kappa, theta_ref):
-    assert_allclose(
-        logpdf_gamma(x, kappa, theta_ref, 1)[1],
-        nd.Derivative(lambda theta: logpdf_gamma(x, kappa, theta)[0])(theta_ref),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    check_deriv(lambda theta, deriv=0: logpdf_gamma(x, kappa, theta, deriv), theta_ref)
 
 
 @pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_logpdf_gamma_deriv2(x, kappa, theta_ref):
-    assert_allclose(
-        logpdf_gamma(x, kappa, theta_ref, 2)[2],
-        nd.Derivative(lambda theta: logpdf_gamma(x, kappa, theta, 1)[1])(theta_ref),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    check_curv(lambda theta, deriv=0: logpdf_gamma(x, kappa, theta, deriv), theta_ref)
 
 
 @pytest.fixture()
@@ -72,21 +61,9 @@ PARS_REF_EXP_TAIL = [
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_gradient_exptail(mycost, pars_ref):
-    pars_ref = np.array(pars_ref)
-    assert_allclose(
-        mycost.funcgrad(pars_ref)[1],
-        nd.Gradient(lambda pars: mycost.funcgrad(pars)[0])(pars_ref),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    check_gradient(mycost, pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_hessian_exptail(mycost, pars_ref):
-    pars_ref = np.array(pars_ref)
-    assert_allclose(
-        mycost.hess(pars_ref),
-        nd.Gradient(lambda pars: mycost.funcgrad(pars)[1])(pars_ref),
-        atol=1e-12,
-        rtol=1e-12,
-    )
+    check_hessian(mycost, pars_ref)

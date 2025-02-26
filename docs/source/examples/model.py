@@ -38,7 +38,7 @@ corrtime_exp = 2.0
 # Derived quantities
 r = np.exp(-timestep / corrtime_exp)
 cos = np.cos(2 * np.pi * ks / nfreq)
-freq_half = np.acos(2 - np.cosh(timestep / corrtime_exp)) / (2 * np.pi * timestep)
+freq_half = np.arccos(2 - np.cosh(timestep / corrtime_exp)) / (2 * np.pi * timestep)
 freq_half_approx = 1 / (2 * np.pi * corrtime_exp)
 
 # Model to be plotted
@@ -77,7 +77,7 @@ plot_model()
 def plot_series():
     fig, ax = plt.subplots()
     us = np.linspace(-1.7627, 1.7627, 501)
-    ax.plot(us, np.acos(2 - np.cosh(us)), label="acos(2-cosh(u))")
+    ax.plot(us, np.arccos(2 - np.cosh(us)), label="acos(2-cosh(u))")
     ax.plot(us, abs(us), label="1st order expansion")
     ax.plot(us, abs(us + us**3 / 12), label="3rd order expansion")
     ax.plot(us, abs(us + us**3 / 12 + us**5 / 96), label="5th order expansion")
