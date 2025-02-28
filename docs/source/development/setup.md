@@ -45,8 +45,6 @@ with devenv (>= 1.4.0), by putting the following in your `.envrc`:
 
 ```bash
 export DIRENV_WARN_TIMEOUT=20s
-
 eval "$(devenv direnvrc)"
-
 use devenv
 ```

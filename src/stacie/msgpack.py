@@ -45,7 +45,7 @@ import msgpack
 import numpy as np
 from numpy.typing import NDArray
 
-__all__ = ("load", "dump")
+__all__ = ("dump", "load")
 
 
 T = TypeVar("T")

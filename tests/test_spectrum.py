@@ -20,6 +20,7 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_equal
+
 from stacie.spectrum import compute_spectrum
 
 
@@ -90,3 +91,23 @@ def test_single():
     assert_equal(spectrum2.freqs, spectrum.freqs[1:])
     assert_equal(spectrum2.amplitudes, spectrum.amplitudes[1:])
     assert spectrum2.amplitudes_ref is None
+
+
+def test_nsplit():
+    sequence = np.array(
+        [
+            0.25958082,
+            0.90295639,
+            0.95906289,
+            0.14652049,
+            0.6751826,
+            0.99754354,
+            0.2955122,
+            0.18958874,
+            0.29405263,
+        ]
+    )
+    spectrum = compute_spectrum(sequence, nsplit=2)
+    assert spectrum.nstep == 4
+    assert spectrum.nfreq == 3
+    assert_equal(spectrum.ndofs, [2, 4, 4])

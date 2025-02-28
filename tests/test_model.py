@@ -20,6 +20,7 @@
 import numpy as np
 import pytest
 from conftest import check_gradient, check_hessian
+
 from stacie.model import ExpTailModel, WhiteNoiseModel
 
 FREQS = np.linspace(0, 0.5, 10)

@@ -2,13 +2,12 @@
 
 {
   # https://devenv.sh/packages/
+  # See https://github.com/cachix/devenv/issues/1264
   packages = with pkgs; [
     # Packages with binaries: take from nix instead of pip
-    (python3.withPackages (ps: with ps; [
-      matplotlib
-      numpy
-      msgpack
-    ]))
+    stdenv.cc.cc.lib # required by jupyter
+    gcc-unwrapped # fix: libstdc++.so.6: cannot open shared object file
+    libz # fix: for numpy/pandas import
   ];
 
   # https://devenv.sh/languages/
@@ -16,6 +15,14 @@
   languages.python = {
     enable = true;
     venv.enable = true;
-    venv.requirements = "-e .[docs,tests]";
+    venv.requirements = ''
+      ipykernel
+      matplotlib
+      numpy
+      msgpack
+      -e .[docs,tests]
+    '';
   };
+
+  env.LD_LIBRARY_PATH = "${pkgs.gcc-unwrapped.lib}/lib64:${pkgs.libz}/lib";
 }

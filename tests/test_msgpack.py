@@ -23,6 +23,7 @@ import attrs
 import numpy as np
 from numpy.testing import assert_equal
 from numpy.typing import NDArray
+
 from stacie.msgpack import dump, load
 
 

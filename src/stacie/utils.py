@@ -22,7 +22,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-__all__ = ("split", "block_average")
+__all__ = ("block_average", "split")
 
 
 def split(sequences: ArrayLike, nsplit: int) -> NDArray:
@@ -48,6 +48,8 @@ def split(sequences: ArrayLike, nsplit: int) -> NDArray:
     sequences = np.asarray(sequences)
     if sequences.ndim == 1:
         sequences.shape = (1, -1)
+    if not isinstance(nsplit, int) or nsplit <= 0 or nsplit > sequences.shape[-1] / 2:
+        raise ValueError("nsplit must be a positive integer smaller than half the sequence length.")
     length = sequences.shape[1] // nsplit
     return sequences[:, : length * nsplit].reshape(-1, length)
 

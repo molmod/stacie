@@ -370,8 +370,8 @@ result_1 = demo_stacie()
 # as they are not the same in this case.
 
 # %%
-print(f"corrtime_exp = {result_1.corrtime_exp/PICOSECOND:.3f} ps")
-print(f"corrtime_int = {result_1.corrtime_int/PICOSECOND:.3f} ps")
+print(f"corrtime_exp = {result_1.corrtime_exp / PICOSECOND:.3f} ps")
+print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 
 # %% [markdown]
 # The integrated autocorrelation time is smaller than
@@ -406,8 +406,8 @@ result_30 = demo_stacie(30)
 # It is again interesting to compare the integrated and exponential autocorrelation times.
 
 # %%
-print(f"corrtime_exp = {result_30.corrtime_exp/PICOSECOND:.3f} ps")
-print(f"corrtime_int = {result_30.corrtime_int/PICOSECOND:.3f} ps")
+print(f"corrtime_exp = {result_30.corrtime_exp / PICOSECOND:.3f} ps")
+print(f"corrtime_int = {result_30.corrtime_int / PICOSECOND:.3f} ps")
 
 # %% [markdown]
 # The exponential autocorrelation time is not affected by the block averages,
@@ -430,9 +430,9 @@ result_600 = demo_stacie(600)
 
 
 # %%  [markdown]
-# ## Regression tests
+# ## Regression Tests
 #
-# If you experiment with this notebook, you can ignore any exceptions below.
+# If you are experimenting with this notebook, you can ignore any exceptions below.
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%

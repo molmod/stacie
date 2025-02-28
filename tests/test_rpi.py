@@ -19,6 +19,7 @@
 
 import numpy as np
 import pytest
+
 from stacie.rpi import rpi_opt
 
 

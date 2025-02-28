@@ -24,12 +24,12 @@ from .plot import UnitConfig, plot_results
 from .spectrum import compute_spectrum
 
 __all__ = (
+    "UnitConfig",
     "__version__",
     "__version_tuple__",
     "compute_spectrum",
     "estimate_acint",
     "plot_results",
-    "UnitConfig",
 )
 
 

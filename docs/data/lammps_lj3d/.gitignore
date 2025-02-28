@@ -1,0 +1,6 @@
+*.txt
+*.restart
+*.png
+*.yaml
+production/
+.stepup

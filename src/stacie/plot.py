@@ -27,7 +27,7 @@ from scipy import stats
 from .estimate import Result
 from .spectrum import Spectrum
 
-__all__ = ("plot_results", "UnitConfig")
+__all__ = ("UnitConfig", "plot_results")
 
 
 @attrs.define
@@ -37,28 +37,31 @@ class UnitConfig:
     Note that values are *divided* by their units before plotting.
     """
 
-    acint_unit_str: str = attrs.field(default="A s")
+    acint_symbol: str = attrs.field(default=r"\eta", kw_only=True)
+    """The symbol used for the autocorrelation integral."""
+
+    acint_unit_str: str = attrs.field(default="A s", kw_only=True)
     """The text used for the autocorrelation integral unit."""
 
-    acint_unit: float = attrs.field(default=1.0)
+    acint_unit: float = attrs.field(default=1.0, kw_only=True)
     """The unit of an autocorrelation integral."""
 
-    acint_fmt: str = attrs.field(default=".2e")
+    acint_fmt: str = attrs.field(default=".2e", kw_only=True)
     """The format string for an autocorrelation integral."""
 
-    freq_unit_str: str = attrs.field(default="Hz")
+    freq_unit_str: str = attrs.field(default="Hz", kw_only=True)
     """The text used for the frequency unit."""
 
-    freq_unit: float = attrs.field(default=1.0)
+    freq_unit: float = attrs.field(default=1.0, kw_only=True)
     """The unit of a frequency."""
 
-    time_unit_str: str = attrs.field(default="s")
+    time_unit_str: str = attrs.field(default="s", kw_only=True)
     """The text used for a time unit."""
 
-    time_unit: float = attrs.field(default=1.0)
+    time_unit: float = attrs.field(default=1.0, kw_only=True)
     """The unit of a frequency."""
 
-    time_fmt: str = attrs.field(default=".2e")
+    time_fmt: str = attrs.field(default=".2e", kw_only=True)
     """The format string for a time value."""
 
     sfac: float = attrs.field(default=2.0)
@@ -135,6 +138,7 @@ def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int | N
         s.amplitudes[:nplot] / uc.acint_unit,
         color="C0",
         lw=1,
+        label="Empirical spectrum",
     )
     _plot_ref_spectrum(ax, uc, s, nplot)
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
@@ -154,7 +158,7 @@ def _plot_ref_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: in
 
 INFO_TEMPLATE = (
     "model = {model}\n"
-    "$\\eta \\pm \\Delta \\eta$ = {acint:{uc.acint_fmt}}"
+    "${uc.acint_symbol} \\pm \\Delta {uc.acint_symbol}$ = {acint:{uc.acint_fmt}}"
     " ± {acint_std:{uc.acint_fmt}}"
     "{acint_unit_str}\n"
     "$\\tau_\\text{{exp}} \\pm \\Delta \\tau_\\text{{exp}}$ = {corrtime_exp:{uc.time_fmt}}"
@@ -174,7 +178,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     mean = r.props["thetas"] * kappas
     std = r.props["thetas"] * np.sqrt(kappas)
     freqs = r.spectrum.freqs[: r.nfit]
-    ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2", label="Fit")
+    ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2", label="Model μ")
     ax.fill_between(
         freqs / uc.freq_unit,
         (mean - uc.sfac * std) / uc.acint_unit,
@@ -182,6 +186,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         color="C2",
         alpha=0.3,
         lw=0,
+        label=f"Model {uc.sfac}σ",
     )
     ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
     ax.set_title("Fitted spectrum")
@@ -203,8 +208,8 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         transform=ax.transAxes,
         ha="right",
         va="top",
-        linespacing=2.0,
-        bbox={"facecolor": "none", "edgecolor": "green", "boxstyle": "round"},
+        linespacing=1.5,
+        bbox={"facecolor": "none", "edgecolor": "C2", "boxstyle": "round,pad=1"},
     )
     ax.legend(loc="lower left")
 
@@ -387,7 +392,7 @@ def plot_acint_estimates(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
             transform=ax.transAxes,
             ha="left",
             va="top",
-            linespacing=2.0,
+            linespacing=1.5,
         )
     ax.set_xlabel("Rank")
     ax.set_ylabel(f"Mean and uncertainty [{uc.acint_unit_str}]")
