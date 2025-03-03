@@ -1,22 +1,20 @@
 #!/usr/bin/env python
 
 # %% [markdown]
-# # Thermal Conductivity of a Lennard-Jones Liquid Near the Tripple Point
+# # Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point
 
 # This example shows how to derive the thermal conductivity
-# from pressure tensor trajectories from a LAMMPS simulation.
+# using heat flux data from a LAMMPS simulation.
 #
-# In addition to demonstrating how to use Stacie,
-# this notebook also illustrates Stacie's efficienct use of the information in the trajectories.
-# The results in this notebook are comparable in statistical uncertainty to state-of-the-art results,
-# while using only a small fraction of the data as input.
+# This notebook shows how to use Stacie and how it makes effective use of trajectory information.
+# The results in this notebook are comparable in terms of statistical uncertainty of the
+# state-of-the-art results, even though the simulation time is much shorter.
 #
 # This notebook has the same structure is the one on
 # [Viscosity for the Lennard-Jones liquid](lj_viscosity.py),
-# and it post-processes outputs from the same LAMMPS simulations.
-# This notebook just demonstrates how to perform the thermal conductivity analysis
-# and will not repeat comments that were already in the viscosity notebook.
-# It is assumed that you've worked through the viscosity notebook first.
+# and it post-processes outputs from the same LAMMPS simulations. However, it focuses only on
+# the thermal conductivity and does not repeat the comments that were already in
+# the viscosity notebook. It is assumed that you've worked through the viscosity notebook first.
 #
 # The following output files from the LAMMPS simulations are used in this notebook:
 #
@@ -27,8 +25,8 @@
 # - In `docs/data/lammps_lj3d/production/0*`
 #     - `info.yaml`: simulation parameters that may be useful for post-processing
 #     - `nve_thermo.txt`: subsampled instantaneous temperature and related quantities
-#     - `nve_pressure_blav.txt`: diagonal elements of the heat flux tensor
-#       (Off-diagonal are included but are not used.)
+#     - `nve_heatflux_blav.txt`: $x$, $y$, and $z$ components of the full heat flux vector.
+#        (i.e. $J_x$, $J_y$, and $J_z$)
 #
 # All MD simulations and this notebook use reduced Lennard-Jones units.
 # For convenience, the reduced unit of thermal conductivity is written as κ<sup>\*</sup>,
@@ -54,7 +52,7 @@ mpl.rc_file("matplotlibrc")
 
 # %%
 def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep):
-    # Create the spectrum of the pressure fluctuations.
+    # Create the spectrum of the heat flux fluctuations.
     # Note that the Boltzmann constant is 1 in reduced LJ units.
     uc = UnitConfig(
         acint_fmt=".3f",
@@ -123,11 +121,11 @@ def demo_exploration():
 
 kappa_exploration = demo_exploration()
 # %% [markdown]
-# Compared to the visccosity analysis, the timescales of the heat flux tensor fluctuations
+# Compared to the viscosity analysis, the timescales of the heat flux tensor fluctuations
 # are about half as short.
 # The same simulation lengths and block sizes are used as in the viscosity notebook
 # for simplicity.
-# Because our recommendations are rather conservative, a factor of 2 difference still works well.
+# Our rather conservative guidelines work well even with this factor-of-2 difference.
 
 # %% [markdown]
 # ## Analysis of the Production Simulations
@@ -184,9 +182,9 @@ kappa_production = demo_production()
 #
 # A detailed literature survey of computational estimates of the thermal conductivity
 # of a Lennard-Jones fluid can be found in {cite:p}`viscardi_2007_transport2`.
-# Viscardi also presents new results, one of which is included in the table below.
-# This values should be directly comparable to the current notebook,
-# because the settings are exactly the same:
+# Viscardi also presents new results, one of them is included in the table below.
+# This values can be directly comparable to the current notebook,
+# because the settings are identical
 # $r_\text{cut}^{*}=2.5$, $N=1372$, $T^*=0.722$ and $\rho^{*}=0.8442$.
 #
 # | Method                     | Simulation time<sup>\*</sup> | $\eta^*$       | Reference |
@@ -195,14 +193,23 @@ kappa_production = demo_production()
 # | EMD NVE (Stacie)           | 3000                         | 7.041 +- 0.093 | This notebook |
 #
 # This comparison confirms that Stacie can reproduce a well-known thermal conductivity result,
-# and that it obtains small error bars with much less trajectory data than existing methods.
+# with smaller error bars, even using much less trajectory data than existing methods.
 #
-# To be fair, the simulation time only accounts for production runs.
-# Our setup also includes a small exploration run (210 τ<sup>\*</sup>)
-# and a significant amount of equilibration (3000 τ<sup>\*</sup>)
+# Note that the simulation time mentioned in the table only covers the production runs.
+# Our setup also includes a short exploration run (210 τ<sup>\*</sup>)
+# and a long equilibration run (3000 τ<sup>\*</sup>)
 # to ensure that different production runs are uncorrelated.
-# Even when we include these runs, the total simulation time is still significantly lower
+# Even when we include these runs, the total simulation time is still much lower
 # than in the Helfland-moment paper.
+
+# %% [markdown]
+# :::{warning}
+# LAMMPS `compute/heat flux` command is reported to produce unphysical results when many-body interaction terms (i.e. angle,
+# dihedral, impropers..) are present {cite:p}`jamali_2019_octp`, {cite:p}`surblys_2019_application`, {cite:p}`boone_2019_heat`, {cite:p}`surblys_2021_methodology`.
+# In those cases, one should use the `compute heat/flux` command with [`compute centroid/stress/atom` command](https://docs.lammps.org/compute_heat_flux.html).
+# For systems with only 2-body interactions, using the `compute heat/flux` command with `compute stress/atom` command is not problematic.
+# This warning is important for molecular systems.
+# :::
 
 # %%  [markdown]
 # ## Regression Tests
@@ -212,6 +219,6 @@ kappa_production = demo_production()
 
 # %%
 if abs(kappa_exploration - 7.00) > 0.2:
-    raise ValueError(f"wrong viscosity (exploratory): {kappa_exploration:.3e}")
+    raise ValueError(f"wrong thermal conductivity (exploratory): {kappa_exploration:.3e}")
 if abs(kappa_production - 7.04) > 0.1:
-    raise ValueError(f"wrong viscosity (extended): {kappa_production:.3e}")
+    raise ValueError(f"wrong thermal conductivity (extended): {kappa_production:.3e}")
