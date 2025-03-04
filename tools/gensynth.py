@@ -3,6 +3,7 @@
 
 import numpy as np
 from celerite2 import GaussianProcess, terms
+
 from stacie.msgpack import dump
 from stacie.spectrum import Spectrum, compute_spectrum
 

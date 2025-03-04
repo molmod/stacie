@@ -23,6 +23,7 @@ because the algorithm is known and expected to be flaky for specific combination
 
 import pytest
 from path import Path
+
 from stacie.estimate import Result, estimate_acint
 from stacie.model import ExpTailModel, SpectrumModel, WhiteNoiseModel
 from stacie.msgpack import dump, load

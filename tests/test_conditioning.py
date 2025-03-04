@@ -20,6 +20,7 @@
 import numpy as np
 import pytest
 from conftest import check_gradient, check_hessian
+
 from stacie.conditioning import ConditionedCost
 
 

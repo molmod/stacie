@@ -56,6 +56,8 @@ docs = [
     "sphinxcontrib-svg2pdfconverter",
     "sphinx-copybutton",
     "sphinx-autobuild",
+    "stepup>=2.1.4",
+    "stepup-reprep>=2.3.2",
 ]
 tests = [
     "pytest",
@@ -102,5 +104,6 @@ ignore = [
     "PLR0917",  # https://docs.astral.sh/ruff/rules/too-many-positional/
     "PLR2004",  # https://docs.astral.sh/ruff/rules/magic-value-comparison/
     "PT011",  # https://docs.astral.sh/ruff/rules/pytest-raises-too-broad/
+    "RUF001",  # https://docs.astral.sh/ruff/rules/ambiguous-unicode-character-string/
     "TRY003",  # https://docs.astral.sh/ruff/rules/raise-vanilla-args/
 ]

@@ -24,7 +24,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.special import gammaln
 
-__all__ = ("CutoffCriterion", "underfitting_criterion", "general_ufc", "akaike_criterion")
+__all__ = ("CutoffCriterion", "akaike_criterion", "general_ufc", "underfitting_criterion")
 
 
 CutoffCriterion = NewType("CutoffCriterion", Callable[[dict[str, NDArray]], float])

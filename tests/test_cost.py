@@ -20,6 +20,7 @@
 import numpy as np
 import pytest
 from conftest import check_curv, check_deriv, check_gradient, check_hessian
+
 from stacie.cost import LowFreqCost, logpdf_gamma
 from stacie.model import ExpTailModel
 
@@ -41,7 +42,7 @@ def test_logpdf_gamma_deriv2(x, kappa, theta_ref):
     check_curv(lambda theta, deriv=0: logpdf_gamma(x, kappa, theta, deriv), theta_ref)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mycost():
     timestep = 1.3
     freqs = np.linspace(0, 0.5 / timestep, 10)

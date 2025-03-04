@@ -18,6 +18,7 @@
 """Tests for ``stacie.utils``."""
 
 from numpy.testing import assert_equal
+
 from stacie.utils import block_average, split
 
 

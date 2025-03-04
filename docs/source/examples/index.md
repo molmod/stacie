@@ -18,6 +18,8 @@ The rendered notebooks, including all outputs, are included in the following sec
 error_mean.py
 applicability.py
 surface_diffusion.py
+lj_viscosity.py
+lj_thermal_conductivity.py
 underfitting_criterion.py
 model.py
 ```

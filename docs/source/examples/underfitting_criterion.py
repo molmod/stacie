@@ -204,9 +204,9 @@ plot_cumulative_sums()
 # with the same variance.
 
 # %%  [markdown]
-# ## Regression tests
+# ## Regression Tests
 #
-# If you experiment with this notebook, you can ignore any exceptions below.
+# If you are experimenting with this notebook, you can ignore any exceptions below.
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%

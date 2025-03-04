@@ -23,6 +23,8 @@ import attrs
 import numpy as np
 from numpy.typing import NDArray
 
+from .utils import split
+
 __all__ = ("Spectrum", "compute_spectrum")
 
 
@@ -76,6 +78,7 @@ def compute_spectrum(
     prefactor: float = 0.5,
     timestep: float = 1,
     include_zero_freq: bool = True,
+    nsplit: int = 1,
 ) -> Spectrum:
     """Compute a spectrum and store all inputs for ``estimate_acint`` in a ``Spectrum`` instance.
 
@@ -96,6 +99,11 @@ def compute_spectrum(
         The time step of the input sequence.
     include_zero_freq
         When set to False, the DC component of the spectrum is discarded.
+    nsplit
+        If larger than 1, the sequences are split into ``nsplit`` chuncks
+        and the spectrum of each chunck is computed separately, as if they are separate sequences.
+        This reduces the resolution of the frequency axis and the variance of the spectrum.
+        The function ``stacie.utils.split`` is used for this purpose.
 
     Returns
     -------
@@ -106,6 +114,12 @@ def compute_spectrum(
     # Handle single sequence case
     if sequences.ndim == 1:
         sequences = sequences.reshape(1, -1)
+    elif sequences.ndim != 2:
+        raise ValueError("Sequences must be a 1D or 2D array.")
+
+    # Split the sequences into chunks for better statistics if requested.
+    if nsplit > 1:
+        sequences = split(sequences, nsplit)
 
     # Get basic parameters of the input sequences.
     nindep, nstep = sequences.shape
