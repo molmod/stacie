@@ -4,3 +4,4 @@
 *.yaml
 production/
 .stepup
+*-old

@@ -6,8 +6,8 @@
 # This example shows how to calculate viscosity
 # from pressure tensor data obtained via a LAMMPS simulation.
 # The simulation consists of 1372 atoms
-# and is conducted at the thermodynamic state ($\rho^*=0.8442$ and $T^*=0.722$) which corresponds to the liquid phase
-# near the triple point ($\rho^*=0.0845$ and $T^*=0.69$).
+# and is conducted at the thermodynamic state $\rho^*=0.8442$ and $T^*=0.722$,
+# which corresponds to a liquid phase near the triple point $(\rho^*=0.0845$ and $T^*=0.69)$.
 # This liquid state is known to exhibit slow relaxation times,
 # which complicates the convergence of transport properties and
 # makes it a popular benchmark for computational methods.
@@ -18,12 +18,14 @@
 #    and the time scales of the anisotropic pressure fluctuations.
 #    Details of this run can be found in the LAMMPS input file
 #    [../../data/lammps_lj3d/exploration/in.lammps](../../data/lammps_lj3d/exploration/in.lammps).
-# 2. A set of 100 production simulations to achieve a more accurate estimate of the viscosity,
+# 2. A set of 100 production simulations to get a more accurate estimate of the viscosity,
 #    with the block averaged trajectory data to reduce storage requirements.
-#    Details of the production runs can be found the LAMMPS input file
-#    [../../data/lammps_lj3d/template.lammps](../../data/lammps_lj3d/template.lammps).
-#    Note that this input is actually a [Jinja2](https://jinja.palletsprojects.com/) template,
-#    which is rendered with a different random seed for each run.
+#    Details of the production runs can be found the LAMMPS inputs
+#    [../../data/lammps_lj3d/template-prod-init.lammps](../../data/lammps_lj3d/template-prod-init.lammps)
+#    and [../../data/lammps_lj3d/template-prod-extend.lammps](../../data/lammps_lj3d/template-prod-extend.lammps).
+#    These inputs are actually [Jinja2](https://jinja.palletsprojects.com/) templates
+#    that are rendered with different random seeds for each run.
+#    The production was initially planned for 4000 steps, but it was extended by 4000 more steps.
 #
 # In addition to demonstrating how to use Stacie,
 # this notebook also illustrates its efficient use of the trajectory information.
@@ -38,18 +40,17 @@
 #     - `info.yaml`: simulation parameters that may be useful for post-processing
 #     - `nve_thermo.txt`: instantaneous temperature and related quantities
 #     - `nve_pressure.txt`: (off)diagonal instantaneous pressure tensor components
-# - In `docs/data/lammps_lj3d/production/????`:
+# - In `docs/data/lammps_lj3d/production/*`:
 #     - `info.yaml`: simulation parameters that may be useful for post-processing.
 #     - `nve_thermo.txt`: subsampled instantaneous temperature and related quantities
 #     - `nve_pressure_blav.txt`: block-averaged (off)diagonal pressure tensor components
 #
 # All MD simulations and this notebook use reduced Lennard-Jones units.
-# For convenience, the reduced unit of viscosity is written as η<sup>\*</sup>,
+# For convenience, the reduced unit of viscosity is denoted as η<sup>\*</sup>,
 # and the reduced unit of time as τ<sup>\*</sup>.
 
 
 # %%
-from glob import glob
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -64,8 +65,8 @@ mpl.rc_file("matplotlibrc")
 
 # %% [markdown]
 # ## Analysis of the Exploratory Simulation
-# This simulation consists of two NVT equilibration runs to melt the initial FCC lattice
-# and to reach the desired temperature.
+# This simulation consists of two NVT equilibration runs:
+# one to melt the initial FCC lattice and one to reach the desired temperature.
 # It is followed by an NVE run of 50000 steps, which is used for post-processing.
 #
 # The following code cell defines several analysis functions employed in
@@ -76,7 +77,7 @@ mpl.rc_file("matplotlibrc")
 #   as explained in the [shear viscosity](../theory/properties/shear_viscosity.md) theory section.
 # - `plot_temperature` plots the instantaneous temperature and compares it to the desired temperature.
 # - `estimate_viscosity` calculates the viscosity and plots the results.
-#   It also prints recommendations for data reduction (block averaging) and number of time steps,
+#   It also prints recommendations for data reduction (block averaging) and simulation time,
 #   as explained in the following two sections of the documentation:
 #     - [Autocorrelation Time](../theory/properties/autocorrelation_time.md)
 #     - [Block Averages](../theory/advanced_topics/block_averages.md)
@@ -144,8 +145,8 @@ def estimate_viscosity(name, pcomps, av_temperature, volume, timestep):
     print(f"Recommended block size: {block_size:.3f} τ*")
 
     # Give a recommendation for the simulation time
-    num_steps = 40 * result.corrtime_exp * np.pi
-    print(f"Recommended simulation time: {num_steps:.3f} τ*")
+    sim_time = 20 * result.corrtime_exp * np.pi
+    print(f"Recommended simulation time: {sim_time:.3f} τ*")
 
     # Return the viscosity
     return result.acint
@@ -153,12 +154,12 @@ def estimate_viscosity(name, pcomps, av_temperature, volume, timestep):
 
 # %% [markdown]
 # The next cell performs the analysis of the exploratory simulation.
-# It prints the recommended block size and the number of time steps for the extended simulation,
+# It prints the recommended block size and the simulation time for the production runs,
 # and then generates the following figures:
 #
 # - The time-dependence of the instantaneous temperature.
 # - The underfitting criterion to find the low-frequency part of the spectrum for parameter fitting.
-# - The spectrum of the pressure fluctuations, and the model fitted to the spectrum.
+# - The spectrum of the off-diagonal pressure fluctuations, and the model fitted to the spectrum.
 
 # %%
 
@@ -193,15 +194,15 @@ eta_exploration = demo_exploration()
 #
 # - The recommended block size (in reduced time units)
 #   for block averaging the pressure tensor components.
-#   This block size corresponds to roughly 10 time steps,
-#   which is used to write smaller output files in the production simulations.
-# - The recommended simulation time for production runs,
-#   corresponding to approximately 10000 steps.
+#   This corresponds to about 10 time steps,
+#   which is used to write smaller files in the production simulations.
+# - The recommended simulation time to be used for production runs,
+#   corresponding to about 4000 steps.
 #   This means that trajectories should be at least this long.
 #   Although longer simulation can be performed to gather more statistics, lower uncertainties
-#   can typically be obtained by running more independent simulations of 10000 steps.
+#   can typically be obtained by running more independent simulations of 4000 steps.
 #   Additionally, these shorter simulations can be run in parallel.
-#   Simulations shorter than this time should be avoided,
+#   Even shorter simulations should be avoided,
 #   as these will not sufficiently resolve the low-frequency part of the spectrum.
 #
 # A warning is also printed, by default, Stacie fits the spectrum using a  maximum of 1000 points
@@ -212,18 +213,23 @@ eta_exploration = demo_exploration()
 # %% [markdown]
 # ## Analysis of the Production Simulations
 #
-# We ran 100 independent production runs of 10000 steps.
-# Each run uses the final snapshot from the exploratory simulation as its initial state.
-# First, the system is re-equilibrated with an NVT run of 10000 steps,
-# followed by an NVE run of the same length for post-processing.
-# The relatively long equilibration phase ensures that all production runs
-# provide uncorrelated data.
+# We initially ran 100 independent production runs of 4000 steps.
+# Each production run uses the last snapshot of the exploratory simulation as its initial state.
+# This state is first re-equilibrated with an NVT run of 10000 steps.
+# Then the simulation is continued in the NVE ensemble for 4000 steps, which is used for analysis.
+# The relatively long equilibration phase ensures that production runs provide uncorrelated data.
 # Note that there is no velocity rescaling after the NVT equilibration:
-# each NVE runs have a slightly different average temperature, which is intentional.
+# each NVE run has a slightly different average temperature, which is intentional.
 # This spread is necessary to make them (as a whole) representative for the NVT ensemble
 # and to prevent any bias in the viscosity estimate.
 #
-# The following cell implements the analysis of the production simulations.
+# When performing the analysis only with the initial production runs,
+# it becomes clear that the recommended simulation time from the exploration run was
+# a bit biased towards the low side.
+# By analyzing the initial production data, the recommended simulation time became about 8000 steps.
+# We have therefore extended the production runs by an additional 4000 steps each.
+#
+# The following cell implements the analysis of the production simulations with 8000 steps.
 # As you can see, the code is very similar to the analysis of the exploratory simulation.
 
 # %%
@@ -236,18 +242,30 @@ def demo_production():
     with open(lammps / "exploration/info.yaml") as fh:
         info = safe_load(fh)
     name = "production"
-    with open(lammps / f"{name}/0000/info.yaml") as fh:
+    with open(lammps / f"{name}/replica_0000_part_00/info.yaml") as fh:
         info.update(safe_load(fh))
 
-    # Load trajectory data.
-    thermos = [
-        np.loadtxt(path_txt).T
-        for path_txt in glob(lammps / f"{name}/????/nve_thermo.txt")
-    ]
-    pressures = [
-        np.loadtxt(path_txt).T
-        for path_txt in glob(lammps / f"{name}/????/nve_pressure_blav.txt")
-    ]
+    # Load trajectory data, without hardcoding the number of runs and parts.
+    # - `part_00` corresponds to the initial production run (4000 steps).
+    # - `part_01` corresponds to the first extension of the production run (4000 extra steps).
+    thermos = []
+    pressures = []
+    last_replica = -1
+    for prod_dir in sorted(Path(lammps / name).glob("replica_*_part_*/")):
+        replica = prod_dir.split("/")[-2].split("_")[1]
+        run_thermo = np.loadtxt(prod_dir / "nve_thermo.txt")
+        run_pressures = np.loadtxt(prod_dir / "nve_pressure_blav.txt")
+        if replica == last_replica:
+            thermos[-1].append(run_thermo)
+            pressures[-1].append(run_pressures)
+        else:
+            # In case of thermo, which was created `fix print`, the first row
+            # repeats the last one of the previous run.
+            thermos.append([run_thermo[1:]])
+            pressures.append([run_pressures])
+            last_replica = replica
+    thermos = [np.concatenate(parts).T for parts in thermos]
+    pressures = [np.concatenate(parts).T for parts in pressures]
 
     # Plot the instantaneous and desired temperature.
     time = thermos[0][0] * info["timestep"]
@@ -255,7 +273,7 @@ def demo_production():
         name, time, [thermo[1] for thermo in thermos], info["temperature"]
     )
 
-    # Compute the viscosity, now splitting the trajectory into 500 blocks.
+    # Compute the viscosity.
     pcomps = np.concatenate([get_indep_pcomps(pressure[1:]) for pressure in pressures])
     return estimate_viscosity(
         name,
@@ -267,12 +285,6 @@ def demo_production():
 
 
 eta_production = demo_production()
-
-# %% [markdown]
-# Note that the recommended block size and simulation time of the final analysis have increased.
-# One could rerun the simulations with these new parameters,
-# but the current production runs already yield sufficiently accurate predictions.
-# (The recommendations account for some uncertainty in the analysis of the exploration run.)
 
 # %% [markdown]
 # ## Comparison to Literature Results
@@ -287,17 +299,17 @@ eta_production = demo_production()
 # |----------------------------|------------------------------|----------------|-----------|
 # | EMD NVE (Helfand-Einstein) | 75000                        | 3.277 +- 0.098 | {cite:p}`meier_2024_transport` |
 # | EMD NVE (Helfand-moment)   | 600000                       | 3.268 +- 0.055 | {cite:p}`viscardi_2007_transport1` |
-# | EMD NVE (Stacie)           | 3000                         | 3.211 +- 0.064 | This notebook |
+# | EMD NVE (Stacie)           | 2400                         | 3.236 +- 0.078 | This notebook |
 #
 # This comparison confirms that Stacie can reproduce a well-known viscosity result,
-# and achieves small error bars while using less trajectory data than the cited papers.
+# and that it achieves a small statistical uncertainty with far less data than existing methods.
 #
-# Note that, the reported simulation time only accounts for production runs.
-# Our setup also includes a short exploration run (210 τ<sup>\*</sup>)
-# and a significantly long equilibration (3000 τ<sup>\*</sup>)
-# to ensure that the different production runs are uncorrelated.
+# To be fair, the simulation time only accounts for production runs.
+# Our setup also includes a small exploration run (210 τ<sup>\*</sup>)
+# and a significant amount of equilibration runs (3000 τ<sup>\*</sup>)
+# to ensure that different production runs are uncorrelated.
 # Even when these additional runs are included, the overall simulation time
-# remains significantly lower than that reported in the cited papers.
+# remains significantly lower than in the cited papers.
 
 # %%  [markdown]
 # ## Regression Tests
@@ -308,5 +320,5 @@ eta_production = demo_production()
 # %%
 if abs(eta_exploration - 3.1) > 0.2:
     raise ValueError(f"wrong viscosity (exploratory): {eta_exploration:.3e}")
-if abs(eta_production - 3.21) > 0.1:
+if abs(eta_production - 3.23) > 0.1:
     raise ValueError(f"wrong viscosity (extended): {eta_production:.3e}")

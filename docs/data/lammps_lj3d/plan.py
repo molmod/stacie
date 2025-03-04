@@ -1,24 +1,35 @@
 #!/usr/bin/env python3
-from stepup.core.api import mkdir, static, step
+from runlammps import runlammps
+from stepup.core.api import mkdir, static
 from stepup.reprep.api import render_jinja
 
+static("runlammps.py", "exploration/", "exploration/in.lammps")
+runlammps("exploration/")
 
-def run_lammps(workdir, inp=(), out=()):
-    """Build rule for LAMMPS"""
-    # This implementation is incomplete because it does not track all outputs.
-    # You may have to clean them up manually with `git clean -dfX .`
-    inp = ["in.lammps", *inp]
-    out = ["log.txt", *out]
-    step("lmp -i in.lammps -l log.txt -sc none", inp=inp, out=out, workdir=workdir)
-
-
-static("exploration/", "exploration/in.lammps")
-run_lammps("exploration/", out=["nve_final.restart"])
-
-static("template.lammps")
+static("template-prod-init.lammps", "template-prod-extend.lammps")
 mkdir("production/")
-for irep in range(100):
-    name = f"production/{irep:04d}"
+nreplica = 100
+for ireplica in range(nreplica):
+    name = f"production/replica_{ireplica:04d}_part_00"
     mkdir(f"{name}/")
-    render_jinja("template.lammps", {"seed": irep + 1}, f"{name}/in.lammps")
-    run_lammps(f"{name}/", inp=["../../exploration/nve_final.restart"])
+    render_jinja("template-prod-init.lammps", {"seed": ireplica + 1}, f"{name}/in.lammps")
+    runlammps(f"{name}/", inp=["exploration/nve_final.restart"])
+
+# Number of steps to use in the extensions of the production runs
+extend_num_steps = [4000]
+for ireplica in range(nreplica):
+    for iextend, num_steps in enumerate(extend_num_steps):
+        name = f"production/replica_{ireplica:04d}_part_{iextend + 1:02d}"
+        mkdir(f"{name}/")
+        render_jinja(
+            "template-prod-extend.lammps",
+            {
+                "previous_dir": f"../replica_{ireplica:04d}_part_{iextend:02d}",
+                "additional_steps": num_steps,
+            },
+            f"{name}/in.lammps",
+        )
+        runlammps(
+            f"{name}/",
+            inp=[f"production/replica_{ireplica:04d}_part_{iextend:02d}/nve_final.restart"],
+        )
