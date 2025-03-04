@@ -1,10 +1,10 @@
 # Thermal Conductivity
 
 The thermal conductivity of a system is related to the autocorrelation
-of the heat current as follows:
+of the heat flux as follows:
 
 $$
-    \lambda = \frac{1}{2 V k_\text{B} T^2}
+    \kappa = \frac{1}{2 V k_\text{B} T^2}
         \frac{1}{3}\sum_{\alpha=x, y, z}
         \int_{-\infty}^{+\infty}
         \cov[\hat{J}^\text{h}_\alpha(t_0) \,,\, \hat{J}^\text{h}_\alpha(t_0 + \Delta_t)]
@@ -14,7 +14,7 @@ $$
 where $V$ is the volume of the simulation cell,
 $k_\text{B}$ is the Boltzmann constant,
 $T$ is the temperature,
-and $\hat{J}^\text{h}_\alpha$ is the instantaneous heat current along one of the Cartesian directions.
+and $\hat{J}^\text{h}_\alpha$ is the instantaneous heat flux along one of the Cartesian directions.
 The time origin $t_0$ is arbitrary:
 the expectation value is computed over all possible time origins.
 
@@ -30,9 +30,9 @@ which limits its applicability.
 
 ## How to Compute with Stacie?
 
-It is assumed that you can load the time-dependent heat current components
-into a NumPy array `heatcurrent`.
-Each row of this array corresponds to one pressure tensor component
+It is assumed that you can load the time-dependent heat flux components
+into a NumPy array `heatflux`.
+Each row of this array corresponds to one heat flux component
 in the order $\hat{J}_x$, $\hat{J}_y$ and $\hat{J}_z$.
 Columns correspond to time steps.
 You also need to store the cell volume, temperature,
@@ -45,14 +45,14 @@ import numpy as np
 from stacie import compute_spectrum, estimate_acint, plot_results
 
 # Load all the required inputs, the details of which will depend on your use case.
-heatcurrent = ...
+heatflux = ...
 volume, temperature, boltzmann_const, timestep = ...
 
 # Actual computation with Stacie.
 # Note that the average spectrum over the three components is implicit.
 # There is no need to include 1/3 here.
 spectrum = compute_spectrum(
-    heatcurrent,
+    heatflux,
     prefactor=0.5 / (volume * temperature**2 * boltzmann_const),
     timestep=timestep,
 )
