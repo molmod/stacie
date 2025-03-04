@@ -4,7 +4,6 @@
   # https://devenv.sh/packages/
   # See https://github.com/cachix/devenv/issues/1264
   packages = with pkgs; [
-    # Packages with binaries: take from nix instead of pip
     stdenv.cc.cc.lib # required by jupyter
     gcc-unwrapped # fix: libstdc++.so.6: cannot open shared object file
     libz # fix: for numpy/pandas import
