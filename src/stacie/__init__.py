@@ -22,6 +22,7 @@ from __future__ import annotations
 from .estimate import estimate_acint
 from .plot import UnitConfig, plot_results
 from .spectrum import compute_spectrum
+from .summary import summarize_results
 
 __all__ = (
     "UnitConfig",
@@ -30,6 +31,7 @@ __all__ = (
     "compute_spectrum",
     "estimate_acint",
     "plot_results",
+    "summarize_results",
 )
 
 

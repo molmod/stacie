@@ -84,7 +84,7 @@ Larger block sizes will generally lead to worse results:
 - For very large blocks, one essentially obtains a white noise spectrum.
   Fitting an Exponential Tail Model to white noise can lead to overfitting.
   If you have no choice, you can circumvent this issue by specifying a
-  {py:class}`stacie.model.WhiteNoiseModel` instance
+  {py:class}`stacie.model.ChebyshevModel` instance (with degree 0)
   as an optional argument to the {py:func}`stacie.estimate.estimate_acint` function.
   This workaround is not ideal because
   the (slowest) relaxation time can no longer be derived from such block averages.

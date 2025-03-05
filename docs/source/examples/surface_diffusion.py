@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # %% [markdown]
 # # Diffusion on a Surface with Newtonian Dynamics
@@ -370,7 +370,7 @@ result_1 = demo_stacie()
 # as they are not the same in this case.
 
 # %%
-print(f"corrtime_exp = {result_1.corrtime_exp / PICOSECOND:.3f} ps")
+print(f"corrtime_exp = {result_1.props['corrtime_exp'] / PICOSECOND:.3f} ps")
 print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 
 # %% [markdown]
@@ -392,7 +392,7 @@ print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 # In this example, the block size is determined by the following guideline:
 
 # %%
-print(0.05 * result_1.corrtime_exp * np.pi / TIMESTEP)
+print(0.05 * result_1.props["corrtime_exp"] * np.pi / TIMESTEP)
 
 # %% [markdown]
 # Let's use a block size of 30 to stay on the safe side.
@@ -406,7 +406,7 @@ result_30 = demo_stacie(30)
 # It is again interesting to compare the integrated and exponential autocorrelation times.
 
 # %%
-print(f"corrtime_exp = {result_30.corrtime_exp / PICOSECOND:.3f} ps")
+print(f"corrtime_exp = {result_30.props['corrtime_exp'] / PICOSECOND:.3f} ps")
 print(f"corrtime_int = {result_30.corrtime_int / PICOSECOND:.3f} ps")
 
 # %% [markdown]

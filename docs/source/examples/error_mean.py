@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # %% [markdown]
 # # Standard Error of the Mean
@@ -274,7 +274,7 @@ print(f"Estimated MC error = {error_mc:8.5f}")
 
 # %%
 print("Autocorrelation times:")
-print(f"exponential: {result.corrtime_exp:.2f}")
+print(f"exponential: {result.props['corrtime_exp']:.2f}")
 print(f"integrated: {result.corrtime_int:.2f}")
 
 # %% [markdown]

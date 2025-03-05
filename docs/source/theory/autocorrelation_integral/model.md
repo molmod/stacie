@@ -1,5 +1,40 @@
 # Model Spectrum
 
+Stacie supports two models to be fitted to the low-frequency part of the power spectrum.
+In both cases, the value of the model at zero frequency corresponds to the autocorrelation integral.
+
+1. The Chebyshev model is the most general: it consists of a linear combination of
+   Chebyshev polynomials adjusted to the domain of the frequency grid.
+   One can specify the degree of the model and usually a low degree works fine:
+
+    - Degree 0 is suitable for a white noise spectrum.
+    - Degree 1 can be used to get something useful out of a very noisy spectrum.
+    - Degree 2 or 3 are only applicable to spectra with low statistical uncertainty,
+      e.g. averaged over 100 inputs.
+
+    The main advantage is that this model is applicable to any spectrum,
+    without prior knowledge of its functional form.
+
+2. The Exponential Tail model is designed for autocorrelation functions that decay exponentially.
+   The main advantage of this model is that one can also use it to estimate the
+   exponential correlation time (in addition to the integrated correlation time).
+
+## Chebyshev Model
+
+The Chebyshev model is defined as
+
+$$
+    C^\text{poly}_k \approx \sum_{n=0}^N a_n T_n\left(1-\frac{2f}{f_\text{cut}}\right)
+$$
+
+where $N$ is the degree of the polynomial and $T_n$ are the
+[Chebyshev polynomials](https://en.wikipedia.org/wiki/Chebyshev_polynomials).
+The parameter $f_\text{cut}$ is the cutoff frequency
+used to select the low-frequency part of the spectrum,
+i.e. the highest frequency considered in the fit.
+With this form, the sum of all the coefficients corresponds
+to the integral of the autocorrelation function.
+
 ## Exponential Tail Model
 
 This model represents the autocorrelation function
@@ -8,7 +43,6 @@ as the sum of a short-term component and a (periodic) exponentially decaying tai
 $$
 c_\Delta = c_\Delta^\text{short} + c_\Delta^\text{tail}
 $$
-
 
 ### Short-term component
 
@@ -22,7 +56,6 @@ $$
 
 Because summations in DFT are commonly taken from $0$ to $N-1$, we rewrite this as:
 
-
 $$
 c_\Delta^\text{short}
     \neq 0 &\qquad \forall\,\Delta\in\lbrace
@@ -35,7 +68,6 @@ c_\Delta^\text{short}
         \Delta_\text{short}+1, \ldots, N-\Delta_\text{short} -1
     \rbrace
 $$
-
 
 ### Tail Component
 
@@ -68,7 +100,6 @@ M'
     &= \left(1-r^{-N}\right) \frac{1 + r}{1-r}
 $$
 
-
 The exponential decay of the tail component is characterized by
 its autocorrelation time, $\tau_\text{exp}$ {cite:p}`sokal_1997_monte`:
 
@@ -77,7 +108,6 @@ $$
 $$
 
 where $h$ is the time step.
-
 
 ### Discrete Fourier Transform
 
@@ -129,7 +159,6 @@ $$
     \mathcal{I} \approx \hat{\mathcal{I}} = \hat{C}^\text{exp-tail}_0 = \hat{a}_\text{short} + \hat{a}_\text{tail}
 $$
 
-
 ### Peak width
 
 As illustrated in the
@@ -177,16 +206,3 @@ Sequences obtained from computer simulations
 usually have sufficiently small time steps to satisfy this limit:
 The steps must be able to resolve the fastest oscillations in the system
 to correctly simulate its dynamics.
-
-
-## White Noise Model
-
-In the limit of $a_\text{tail} \rightarrow 0$ or $\tau_\text{exp} \rightarrow 0$,
-the exponential tail model reduces to a white noise model:
-
-$$
-    C^\text{white}_k \approx a_\text{white}
-$$
-
-This model can be useful when the empirical spectrum has no noticeable maximum
-in the zero frequency limit.
