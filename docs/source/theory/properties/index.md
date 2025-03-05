@@ -15,11 +15,11 @@ as autocorrelation integrals of outputs of molecular dynamics simulations,
 using so-called Green-Kubo relations
 {cite:p}`green_1952_markoff,green_1954_markoff,kubo_1957_statistical,helfand_1960_transport`:
 
-- [Diffusion coefficient](diffusion_coefficient.md)
-- [Electrical conductivity](electrical_conductivity.md)
-- [Thermal conductivity](thermal_conductivity.md)
-- [Shear viscosity](shear_viscosity.md)
-- [Bulk viscosity](bulk_viscosity.md)
+- [Diffusion coefficient](diffusion_coefficient.md), $D$
+- [Electrical conductivity](electrical_conductivity.md), $\sigma$
+- [Thermal conductivity](thermal_conductivity.md), $\kappa$
+- [Shear viscosity](shear_viscosity.md), $\eta$
+- [Bulk viscosity](bulk_viscosity.md), $\eta_\text{bulk}$
 
 ```{toctree}
 :hidden:
