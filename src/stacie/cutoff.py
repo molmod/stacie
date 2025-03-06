@@ -30,6 +30,45 @@ __all__ = ("CutoffCriterion", "akaike_criterion", "general_ufc", "underfitting_c
 CutoffCriterion = NewType("CutoffCriterion", Callable[[dict[str, NDArray]], float])
 
 
+def wiener_entropy(props: dict[str, NDArray], nfreqs: int | None = None) -> float:
+    """Compute the Wiener entropy for the spectrum. Wiener entropy is defined as the ratio of
+    the geometric mean to the arithmetic mean."""
+    if nfreqs is None:
+        nfreqs = len(props["freqs"])
+
+    amplitudes = props["amplitudes"][:nfreqs]
+    thetas = props["thetas"][:nfreqs]
+
+    # Compute Wiener entropy for the spectrum
+    ratio = amplitudes / thetas
+    wiener_entropy = np.exp(np.mean(np.log(ratio))) / np.mean(ratio)
+
+    props["wiener"] = wiener_entropy
+
+    return wiener_entropy
+
+
+def entropy_criterion(props: dict[str, NDArray]) -> int:
+    """Determine the optimal number of frequency components where the Wiener entropy
+    is maximum. The Wiener entropy of 1 corresponds to the White Noise.
+
+    Parameters
+    ----------
+    props
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
+    Returns
+    -------
+    optimal_idx
+        The index (number of frequency components) at which the entropy is maximum.
+    """
+    freqs = props["freqs"]
+    nfreqs = np.arange(1, len(freqs) + 1)
+    # Compute WE for different frequency components but discard the first bit
+    wiener_entropies = np.array([wiener_entropy(props, n) for n in nfreqs])
+
+    return np.argmax(wiener_entropies)
+
+
 def underfitting_criterion(props: dict[str, NDArray]) -> float:
     """Quantify the degree of underfitting of a smooth spectrum model to noisy data.
 

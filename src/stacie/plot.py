@@ -107,7 +107,8 @@ def plot_results(
             if len(r.history) > 1:
                 fig, axs = plt.subplots(2, 2, figsize=(6, 6))
                 plot_all_models(axs[0, 0], uc, r)
-                plot_criterion(axs[0, 1], uc, r)
+                # plot_criterion(axs[0, 1], uc, r)
+                plot_entropy_criterion(axs[0, 1], uc, r)
                 plot_uncertainty(axs[1, 0], uc, r)
                 plot_residuals(axs[1, 1], uc, r)
                 pdf.savefig(fig)
@@ -254,6 +255,28 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         criterion_scale = abs(criteria.min())
         if criterion_scale > 0:
             ax.set_ylim(criteria.min() - 0.2 * criterion_scale, 2 * criterion_scale)
+
+
+def plot_entropy_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    """Plot the Wiener entropy as a function of cutoff frequency."""
+    freqs = []
+    wiener_entropy = []
+
+    for nfit, props in sorted(r.history.items()):
+        freqs.append(r.spectrum.freqs[nfit - 1])
+        wiener_entropy.append(props["wiener"])
+    freqs = np.array(freqs)
+    wiener_entropy = np.array(wiener_entropy)
+    ax.plot(freqs / uc.freq_unit, wiener_entropy, color="C1", lw=1.5)
+    # Plot reference line at WE = 1 (Theoretical White Noise limit)
+    ax.axhline(1, color="C3", linestyle="--", label="White Noise limit (WE=1)")
+    best_idx = np.argmax(wiener_entropy)
+    best_freq = freqs[best_idx] / uc.freq_unit
+    ax.axvline(best_freq, ymax=0.1, color="k", linestyle="--")
+    ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
+    ax.set_ylabel("Wiener Entropy")
+    ax.set_xscale("log")
+    ax.legend()
 
 
 def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
