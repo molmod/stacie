@@ -3,30 +3,30 @@
 # %% [markdown]
 # # Ionic Conductivity and Self-diffusivity in Molten Sodium Chloride at 1100 K (OpenMM)
 #
-# This notebook shows how to post-process trajectories from an OpenMM simulations
-# to calculate the ionic conductivity and self-diffusivity.
-# The OpenMM trajectory is converted to NPZ files in the Jupyter Notebook of the simulation,
-# so the approach sketched here is easily transferrable to other codes or physical systems.
+# This notebook shows how to post-process trajectories from OpenMM simulations
+# to calculate ionic conductivity and self-diffusivity.
+# The OpenMM trajectory is converted to NPZ files within the Jupyter Notebook of the simulation,
+# making the approach here easily adaptable to other codes or physical systems.
 #
 # All OpenMM simulation inputs can be found in the directory `docs/data/openmm_salt`
 # in Stacie's source repository.
 #
 # The MD simulations are performed using the Born-Huggins-Mayer-Tosi-Fumi potential,
 # which is a popular choice for molten salts.
-# The functional form does not use mixing rules and it is not natively implemented in OpenMM,
-# but this can be solved with the `CustomNonbondedForce` and some creativity,
+# This potential does not use mixing rules and it is not natively implemented in OpenMM,
+# but it can be incorporated using the `CustomNonbondedForce` and some creativity,
 # see `docs/data/openmm_salt/bhmft.py`.
 #
-# The simulations consist of two parts:
+# The simulations consist of two stages:
 #
-# 1. An exploration trajectory, where a system consisting of 1728 ions is equilibrated
+# 1. An **exploration** trajectory, where a system consisting of 1728 ions is equilibrated
 #    in the NpT ensemble at 1100 K and 1 bar for 50 ps, followed by an NVE simulation for 50 ps,
-#    which preserves the last instantaneous volume and energy of the NpT simulation.
-#    This NVE trajectory is used to for a first estimate of the transport properties,
-#    and to determine a suitable simulation time and the block size for the production runs.
+#    which preserves the final instantaneous volume and energy of the NpT simulation.
+#    This NVE trajectory provides an initial estimate of transport properties and helps to determine
+#    a suitable simulation time and the block size for the production runs.
 # 2. A set of 20 production simulations, where the final state of the equilibration run
-#    is first re-equilibrated in the NpT ensemble for 50 ps, followed by an NVE simulation
-#    for 60 ps. The NVE production trajectories are used for a more accurate estimate of
+#    is first re-equilibrated in the NpT ensemble for 50 ps, followed by 60 ps NVE run.
+#    The NVE production trajectories are used for a more accurate estimate of
 #    the ionic conductivity and self-diffusivity.
 
 # %%
@@ -58,24 +58,25 @@ mpl.rc_file("matplotlibrc")
 BOLTZMAN_CONSTANT = 1.380649e-23  # J/K
 
 
-def analyze(paths_npz: list[str], mode: str, degree: int = 1) -> float:
+def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> float:
     """Analyze MD trajectories to compute the self-diffusivity or ionic conductivity.
 
     Parameters
     ----------
     paths_npz
         List of paths to the NPZ files containing the trajectory data.
-    mode
-        The mode of the analysis, either 'na', 'cl', or 'conductivity'.
-        When specifying 'na' or 'cl', the self-diffusivity of sodium or chlorine ions is computed.
-        When specifying 'conductivity', the ionic conductivity is computed.
+    transport_property
+        Specifies the transport property to compute.
+        - 'na': Computes the self-diffusivity of sodium ions.
+        - 'cl': Computes the self-diffusivity of chloride ions.
+        - 'conductivity': Computes the ionic conductivity.
     degree
         The degree of the Chebyshev polynomial to fit to the spectrum, by default 1.
 
     Returns
     -------
     acint
-        The estimated transport proprty, mainly used for regression testing.
+        The estimated transport property, mainly used for regression testing.
     """
     # Load the trajectory data
     volumes = []
@@ -87,33 +88,36 @@ def analyze(paths_npz: list[str], mode: str, degree: int = 1) -> float:
         volumes.append(data["volume"])
         temperatures.append(data["temperature"])
     trajs_pos = np.array(trajs_pos)
+    print("Trajectory shape:", trajs_pos.shape)
     nstep = trajs_pos.shape[1]
     time = data["time"]
     atnums = data["atnums"]
     volume = np.mean(volumes)
     temperature = np.mean(temperatures)
 
-    if mode.lower() == "na":
-        # Select only the sodium atoms
-        p_signals = trajs_pos[:, :, atnums == 11].transpose(0, 2, 3, 1).reshape(-1, nstep)
-    elif mode.lower() == "cl":
-        # Select only the chlorine atoms
-        p_signals = trajs_pos[:, :, atnums == 17].transpose(0, 2, 3, 1).reshape(-1, nstep)
-    elif mode.lower() == "conductivity":
+    if transport_property.lower() == "na":
+        # Select only the positions sodium atoms for diffusion analysis
+        positions = trajs_pos[:, :, atnums == 11].transpose(0, 2, 3, 1).reshape(-1, nstep)
+    elif transport_property.lower() == "cl":
+        # Select only the positions of chlorine atoms for diffusion analysis
+        positions = trajs_pos[:, :, atnums == 17].transpose(0, 2, 3, 1).reshape(-1, nstep)
+    elif transport_property.lower() == "conductivity":
         # Compute the charge flux
         elementary_charge = 1.60217662e-19  # C
-        p_signals = elementary_charge * (
+        positions = elementary_charge * (
             trajs_pos[:, :, atnums == 11].sum(axis=2)
             - trajs_pos[:, :, atnums == 17].sum(axis=2)
         ).transpose(0, 2, 1).reshape(-1, nstep)
     else:
-        raise ValueError(f"Invalid mode: {mode}, must be 'na', 'cl', or 'conductivity'")
+        raise ValueError(
+            f"Invalid transport_property: {transport_property}, must be 'na', 'cl', or 'conductivity'"
+        )
 
     # Configure units for output
     uc = UnitConfig(
-        acint_symbol=r"\sigma" if mode == "conductivity" else "D",
-        acint_unit_str=r"S/m" if mode == "conductivity" else "m²/s",
-        acint_fmt=".1f" if mode == "conductivity" else ".3e",
+        acint_symbol=r"\sigma" if transport_property == "conductivity" else "D",
+        acint_unit_str=r"S/m" if transport_property == "conductivity" else "m²/s",
+        acint_fmt=".1f" if transport_property == "conductivity" else ".3e",
         time_unit=1e-12,
         time_unit_str="ps",
         time_fmt=".3f",
@@ -123,27 +127,27 @@ def analyze(paths_npz: list[str], mode: str, degree: int = 1) -> float:
 
     # Construct a trajectory of "block-summed" velocities, to be used as input for the spectrum.
     timestep = time[1] - time[0]
-    v_signals = np.diff(p_signals, axis=1) / timestep
+    velocities = np.diff(positions, axis=1) / timestep
     # Perform the analysis with Stacie
     spectrum = compute_spectrum(
-        v_signals,
+        velocities,
         timestep=timestep,
         prefactor=0.5 / (volume * temperature * BOLTZMAN_CONSTANT)
-        if mode == "conductivity"
+        if transport_property == "conductivity"
         else 0.5,
         include_zero_freq=False,
     )
 
     result = estimate_acint(spectrum, model=ChebyshevModel(degree), verbose=True)
 
-    plt.close(mode)
-    _, axs = plt.subplots(1, 3, num=mode, figsize=(7.5, 2.5))
+    plt.close(transport_property)
+    _, axs = plt.subplots(1, 3, num=transport_property, figsize=(7.5, 2.5))
 
     # Make a simple plot of the mean-squared displacement
     msds = (
-        np.linalg.norm(spectrum.prefactor**0.5 * (p_signals - p_signals[:1, 0]), axis=0)
+        np.linalg.norm(spectrum.prefactor**0.5 * (positions - positions[:1, 0]), axis=0)
         ** 2
-        / p_signals.shape[0]
+        / positions.shape[0]
     )
     axs[0].plot(time / uc.time_unit, msds / uc.acint_unit / uc.time_unit)
     axs[0].set_xlabel("Time [ps]")
@@ -152,11 +156,11 @@ def analyze(paths_npz: list[str], mode: str, degree: int = 1) -> float:
     # Plot some basic analysis figures.
     plot_spectrum(axs[1], uc, spectrum)
     plot_criterion(axs[2], uc, result)
-    _, ax = plt.subplots(num=f"{mode}_fitted")
+    _, ax = plt.subplots(num=f"{transport_property}_fitted")
     plot_fitted_spectrum(ax, uc, result)
 
     # Plot the sensitivity of acint to the empirical amplitudes
-    _, ax = plt.subplots(num=f"{mode}_sensitivity")
+    _, ax = plt.subplots(num=f"{transport_property}_sensitivity")
     plot_sensitivity(ax, uc, result)
 
     # Print the recommended block size and simulation time.
@@ -172,13 +176,12 @@ def analyze(paths_npz: list[str], mode: str, degree: int = 1) -> float:
 #
 # The following cells compute the self-diffusivity of sodium and chloride ions,
 # as well as the ionic conductivity of the molten salt at 1100 K.
-# The results are preliminary because only a single and relatively short NVE trajectory is used.
-# However, it does become clear which part of the spectrum is of interest,
-# which can be used to determine
-# a proper simulation time (to get sufficient resolution on the frequency axis)
-# and block size (to save on storage by discarding irrelevant high-frequency data).
+# The results are preliminary, as they are based on a single, relatively short NVE trajectory.
+# However, they provide insights into the relevant part of the spectrum, which helps to determine:
+# - An appropriate simulation time to achieve sufficient frequency resolution.
+# - A suitable block size to reduce storage by discarding irrelevant high-frequency data.
 #
-# A polynomial of degree 1 is fitted to the spectrum, to limit the number parameters.
+# Additionally, a first-degree polynomial is fitted to the spectrum to min9mize the number of parameters.
 
 # %%
 path_nve_npz = "../../data/openmm_salt/output/exploration_nve_traj.npz"
@@ -194,19 +197,18 @@ analyze([path_nve_npz], "conductivity")
 # %%
 
 # %% [markdown]
-# As a comprompise between the three recommendations, we choose a block size of 20 fs
+# As a compromise between the three recommendations, we choose a block size of 20 fs
 # and a simulation time of 60 ps for the production trajectory.
-# In total 20 NVE trajectories were performed with these settings,
+# A total of 20 NVE trajectories were performed with these settings,
 # but one may perform more simulations to improve the statistics.
 
 # %% [markdown]
 # ## Analysis of the Production Simulations
 #
-# The analysis of the production trajectories is performed in the same way
-# as the exploration trajectory.
-# The two differences are:
-# - The trajectory files being loaded as input.
-# - The degree of the Chebyshev polynomial being increased to 3.
+# The analysis of the production trajectories follows the same approach
+# as the exploration trajectory, with two key differences:
+# - The trajectory files are loaded as input.
+# - The degree of the Chebyshev polynomial is increased to 3.
 
 # %%
 paths_nve_npz = glob("../../data/openmm_salt/output/prod????_nve_traj.npz")
@@ -223,9 +225,9 @@ conductivity = analyze(paths_nve_npz, "conductivity", 3)
 
 # %% [markdown]
 #
-# For a proper comparison to experiment and other simulation results,
+# To enable a proper comparison with the experimental and other simulation results,
 # we also need to estimate the density of the system.
-# For this purpose, we take the average over the NpT trajectories of the production runs.
+# This is done by averaging the density over the NpT trajectories from the production runs.
 #
 
 # %%
@@ -233,7 +235,7 @@ conductivity = analyze(paths_nve_npz, "conductivity", 3)
 
 def estimate_density(paths_npz: list[str]):
     densities = []
-    molvols = []
+    molar_vols = []
     masses = {11: 22.990, 17: 35.45}  # g/mol
     avogadro = 6.02214076e23  # 1/mol
     for path_npz in paths_npz:
@@ -241,10 +243,10 @@ def estimate_density(paths_npz: list[str]):
         mass = sum(masses[atnum] for atnum in data["atnums"]) / avogadro
         volume = data["volume"] * 10**6  # cm³
         densities.append(mass / volume)
-        molvols.append(2 * avogadro * volume / len(data["atnums"]) / 2)
+        molar_vols.append(2 * avogadro * volume / len(data["atnums"]) / 2)
     density = np.mean(densities)
     print(f"Mass density: {density:.3f} ± {np.std(densities):.3f} g/m³")
-    print(f"Molar volume: {np.mean(molvols):.4f} ± {np.std(molvols):.4f} cm³/mol")
+    print(f"Molar volume: {np.mean(molar_vols):.4f} ± {np.std(molar_vols):.4f} cm³/mol")
     return density
 
 
@@ -254,14 +256,14 @@ density = estimate_density(paths_npt_npz)
 # %% [markdown]
 # ## Comparison to Literature Results
 #
-# Because this is a difficult system to compute transport properties for,
-# which can be seen in the unusual shape of the spectrum and the MSD,
-# simulation results from the literature may show some variation.
-# The results should be comparable to some extent.
-# Deviations may be expected because different post-processing techniques were used,
-# and error bars are not always reported.
+# Transport properties for this system are challenging to compute accurately,
+# as reflected in the unusually shaped spectrum and MSD.
+# Consequently, simulation results from the literature may  exhibit some variation.
+# While the results should be broadly comparable to some extent, deviations may arise
+# due to the differences in post-processing techniques,
+# and the absence of reported error bars in some studies.
 # Furthermore, in {cite:p}`wang_2014_molecular` smaller simulation cells were used
-# (512 ions instead of 1728).
+# (512 ions instead of 1728), which may also contribute to discrepancies.
 #
 # | Method          | Simulated time [ps] | Density [g/cm<sup>3</sup>] | Na$^+$ diffusivity [10<sup>-9</sup>m<sup>2</sup>/s] | Cl$^-$ diffusivity [10<sup>-9</sup>m<sup>2</sup>/s] | Conductivity [S/m] | Reference |
 # |-----------------|---------------------|----------------------------|-----------------------------------------------------|-----------------------------------------------------|--------------------|-----------|
@@ -270,8 +272,8 @@ density = estimate_density(paths_npt_npz)
 # | NpT+NVT (BHMTF) | > 5 ns              | 1.444                      | 9.36                                                | 8.14                                                | ≈ 310 (from plot)  | {cite:p}`wang_2014_molecular` |
 # | Experiment      | N.A.                | 1.542 ± 0.006              | 9.0 ± 0.5                                           | 6.50 ± 0.14                                         | 366 ± 3            | {cite:p}`janz_1968_molten` {cite:p}`bockris_1961_self` |
 #
-# The comparison shows that the results obtained with Stacie agree reasonably with the literature.
-# In terms of statistical efficiency, Stacie obtains comparable or smaller error bars with
+# The comparison shows that the results obtained with Stacie align reasonably well with the literature.
+# In terms of statistical efficiency, Stacie achieves comparable or smaller error bars with
 # significantly less trajectory data.
 
 # %% [markdown]
@@ -284,7 +286,7 @@ density = estimate_density(paths_npt_npz)
 # - Ionic conductivity {cite:p}`janz_1968_molten`
 #
 # The code below was used to compute the diffusion coefficients from the
-# experimentally fitted Ahrenius equation in {cite:p}`bockris_1961_self`.
+# experimentally fitted Arrhenius equation in {cite:p}`bockris_1961_self`.
 
 # %%
 
@@ -292,9 +294,9 @@ density = estimate_density(paths_npt_npz)
 def compute_experimental_diffusivities():
     """Compute the diffusion coefficients from the experimental data."""
     # Parameters taken from Bockris 1961 (https://doi.org/10.1039/DF9613200218)
-    molar_gas_conststant = 1.98720425864083  # cal/(mol K)
+    molar_gas_constant = 1.98720425864083  # cal/(mol K)
     temperature = 1100  # K
-    rt = molar_gas_conststant * temperature
+    rt = molar_gas_constant * temperature
 
     # Sodium in NaCl
     a_na = 3.360e-7  # m²/s
