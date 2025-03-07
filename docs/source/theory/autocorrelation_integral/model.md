@@ -19,7 +19,7 @@ In both cases, the value of the model at zero frequency corresponds to the autoc
    The main advantage of this model is that one can also use it to estimate the
    exponential correlation time (in addition to the integrated correlation time).
 
-## Chebyshev Model
+## 1. Chebyshev Model
 
 The Chebyshev model is defined as
 
@@ -35,7 +35,7 @@ i.e. the highest frequency considered in the fit.
 With this form, the sum of all the coefficients corresponds
 to the integral of the autocorrelation function.
 
-## Exponential Tail Model
+## 2. Exponential Tail Model
 
 This model represents the autocorrelation function
 as the sum of a short-term component and a (periodic) exponentially decaying tail:
