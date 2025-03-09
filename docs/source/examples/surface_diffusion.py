@@ -380,7 +380,6 @@ print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 # This includes the slow diffusion and faster oscillations in local minima.
 # The exponential autocorrelation time only considers the slow diffusive motion.
 
-
 # %% [markdown]
 # ## Self-diffusion with block averages
 #
@@ -424,10 +423,8 @@ print(f"corrtime_int = {result_30.corrtime_int / PICOSECOND:.3f} ps")
 # and in the latter case, the systematic errors due to the block averages.
 
 # %%
-
 result_150 = demo_stacie(150)
 result_600 = demo_stacie(600)
-
 
 # %%  [markdown]
 # ## Regression Tests

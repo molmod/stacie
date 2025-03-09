@@ -32,7 +32,6 @@ copyright = "2024, Toon Verstraelen"  # noqa: A001
 author = "Toon Verstraelen"
 version, release = _get_version_info()
 
-
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -56,7 +55,6 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 intersphinx_mapping = get_intersphinx_mapping(packages={"python", "numpy", "scipy"})
 nitpicky = True
-
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -91,7 +89,6 @@ html_theme_options = {
     "footer_icons": load_footer_icons(),
 }
 
-
 # -- Options for LaTeX output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/latex.html#module-latex
 latex_engine = "xelatex"
@@ -107,7 +104,6 @@ class DummyTransform(sphinx.builders.latex.transforms.BibliographyTransform):
 
 
 sphinx.builders.latex.transforms.BibliographyTransform = DummyTransform
-
 
 # -- Configuration for myst-nb extensions -------------------------------------
 # https://myst-parser.readthedocs.io/en/latest/configuration.html
@@ -175,12 +171,10 @@ mathjax3_config = {
     },
 }
 
-
 # -- Configuration of bibtex extension ----------------------------------------
 # https://sphinxcontrib-bibtex.readthedocs.io/en/latest/usage.html#configuration
 
 bibtex_bibfiles = ["references.bib"]
-
 
 # -- Pre-build step to regenerate API documentation ---------------------------
 

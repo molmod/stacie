@@ -68,7 +68,6 @@ def plot_model():
 
 plot_model()
 
-
 # %% [markdown]
 # ## Plot of the series expansion used to approximate the peak width
 
