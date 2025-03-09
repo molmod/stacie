@@ -1,14 +1,14 @@
 # Diffusion Coefficient
 
-The diffusion coefficient (or diffusivity) of a set of $N$ particles in $N_D$ dimensions is given by:
+The diffusion coefficient (or diffusivity) of a set of $N$ particles in $d$ dimensions is given by:
 
 $$
-D = \frac{1}{2N\,N_D}\int_{-\infty}^{+\infty}
-    \sum_{n=1}^N \sum_{d=1}^{N_D}
-    \cov[\hat{v}_{n,d}(t_0),\, \hat{v}_{n,d}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
+D = \frac{1}{2N\,d}\int_{-\infty}^{+\infty}
+    \sum_{n=1}^N \sum_{i=1}^{d}
+    \cov[\hat{v}_{n,i}(t_0),\, \hat{v}_{n,i}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
-where $\hat{v}_{n,d}(t)$ is the $d$-th Cartesian component of the time-dependent velocity of particle $n$.
+where $\hat{v}_{n,i}(t)$ is the $d$-th Cartesian component of the time-dependent velocity of particle $n$.
 For molecular systems, the center of mass velocities are typically used.
 
 For a simple fluid, the result is called the self-diffusion coefficient or self-diffusivity.
