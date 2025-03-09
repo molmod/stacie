@@ -20,6 +20,7 @@ applicability.py
 surface_diffusion.py
 lj_viscosity.py
 lj_thermal_conductivity.py
+molten_salt.py
 underfitting_criterion.py
 model.py
 ```

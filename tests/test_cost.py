@@ -17,6 +17,7 @@
 # --
 """Tests for ``stacie.cost``."""
 
+import numdifftools as nd
 import numpy as np
 import pytest
 from conftest import check_curv, check_deriv, check_gradient, check_hessian
@@ -68,3 +69,17 @@ def test_gradient_exptail(mycost, pars_ref):
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_hessian_exptail(mycost, pars_ref):
     check_hessian(mycost, pars_ref)
+
+
+@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
+def test_cost_grad_sensitivity(mycost, pars_ref):
+    amplitudes0 = mycost.amplitudes.copy()
+    sensitivity = mycost.props(pars_ref, deriv=2)["cost_grad_sensitivity"]
+
+    def cost_grad(amplitudes):
+        mycost.amplitudes = amplitudes
+        return mycost(pars_ref, deriv=1)[1]
+
+    num_sensitivity, info = nd.Gradient(cost_grad, full_output=True)(amplitudes0)
+    error = np.clip(info.error_estimate, 1e-15, np.inf)
+    assert sensitivity / error == pytest.approx(num_sensitivity / error, abs=100)

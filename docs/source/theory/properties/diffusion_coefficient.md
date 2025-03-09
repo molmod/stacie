@@ -50,10 +50,13 @@ timestep = ...
 # Computation with Stacie.
 # Note that the factor 1/(N*D) is implied:
 # the average spectrum over all velocity components is computed.
+# Note that the zero-frequency component is usually not reliable
+# because usually the total momentum is constrained or conserved.
 spectrum = compute_spectrum(
     velocities,
     prefactor=0.5,
     timestep=timestep,
+    include_zero_freq=False,
 )
 result = estimate_acint(spectrum)
 print("Diffusion coefficient", result.acint)

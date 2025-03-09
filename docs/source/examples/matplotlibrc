@@ -1,4 +1,5 @@
 backend: SVG
+figure.figsize: 7.5, 4.0
 figure.constrained_layout.use: True
 axes.spines.top: False
 axes.spines.right: False
