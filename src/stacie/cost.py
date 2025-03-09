@@ -96,7 +96,7 @@ class LowFreqCost:
         """
         if not self.model.valid(pars):
             raise ValueError("Invalid parameters")
-        return cost_low(pars, deriv, *attrs.astuple(self, recurse=False))
+        return cost_low(pars, deriv, *attrs.astuple(self, recurse=False), do_props=True)
 
 
 def cost_low(
@@ -121,6 +121,8 @@ def cost_low(
         The parameter vector for which the loss function must be computed.
     deriv
         The order of derivatives of the cost function to include.
+    do_props
+        Whether to include additional properties in the output.
 
     Returns
     -------
@@ -132,6 +134,12 @@ def cost_low(
     -----
     The returned dictionary contains the following items:
 
+    - ``cost_value``: the cost function value.
+    - ``cost_grad``: the cost Gradient vector (if ``deriv>=1``).
+    - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``).
+
+    If ``do_props=True``, the dictionary also contains the following items:
+
     - ``pars``: the given parameters.
     - ``timestep``: the given time step.
     - ``freqs``: the given frequencies.
@@ -140,9 +148,8 @@ def cost_low(
     - ``thetas``: scale parameters for the gamma distribution.
     - ``amplitudes``: the given frequencies.
     - ``ll``: the log likelihood.
-    - ``cost_value``: the cost function value.
-    - ``cost_grad``: the cost Gradient vector (if ``deriv>=1``).
-    - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``).
+    - ``cost_grad_sensitivity``: the sensitivity of the cost gradient to the amplitudes
+      (if ``deriv==2``).
     """
     # Compute the model spectrum and its derivatives.
     amplitudes_model = model.compute(freqs, timestep, pars, deriv)
@@ -155,16 +162,8 @@ def cost_low(
     ll = ll_terms[0].sum()
 
     props = {
-        "pars": pars,
-        "timestep": timestep,
-        "freqs": freqs,
-        "amplitudes": amplitudes,
-        "kappas": kappas,
-        "thetas": thetas,
-        "ll": ll,
         "cost_value": -ll,
     }
-
     if deriv >= 1:
         props["cost_grad"] = -np.dot(amplitudes_model[1], ll_terms[1] / kappas)
     if deriv >= 2:
@@ -176,6 +175,24 @@ def cost_low(
         )
     if deriv >= 3:
         raise ValueError("Third or higher derivatives are not supported.")
+
+    if do_props:
+        props.update(
+            {
+                "pars": pars,
+                "timestep": timestep,
+                "freqs": freqs,
+                "amplitudes": amplitudes,
+                "kappas": kappas,
+                "thetas": thetas,
+                "amplitudes_model": amplitudes_model,
+                "ll": ll,
+            }
+        )
+        if deriv >= 2:
+            # Mix derivative of the cost with respect to
+            # (i) the model parameters and (ii) the empiricl spectrum.
+            props["cost_grad_sensitivity"] = -(amplitudes_model[1] / thetas**2 / kappas)
 
     return props
 

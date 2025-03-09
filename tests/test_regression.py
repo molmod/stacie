@@ -25,10 +25,11 @@ import pytest
 from path import Path
 
 from stacie.estimate import Result, estimate_acint
-from stacie.model import ExpTailModel, SpectrumModel, WhiteNoiseModel
+from stacie.model import ChebyshevModel, ExpTailModel, SpectrumModel
 from stacie.msgpack import dump, load
 from stacie.plot import plot_results
 from stacie.spectrum import Spectrum
+from stacie.summary import summarize_results
 
 DOUBLE_NAMES = ["double1", "double2"]
 WHITE_NAMES = ["white1", "white2"]
@@ -36,11 +37,12 @@ NAME_LISTS = DOUBLE_NAMES, WHITE_NAMES
 ALL_NAMES = [j for i in NAME_LISTS for j in i]
 
 
-def output_test_result(prefix: str, res: Result):
+def output_test_result(prefix: str, res: Result | list[Result]):
     dn_out = Path("tests/outputs")
     dn_out.makedirs_p()
-    path_pdf = dn_out / f"{prefix}.pdf"
-    plot_results(path_pdf, res)
+    plot_results(dn_out / f"{prefix}.pdf", res)
+    with open(dn_out / f"{prefix}.txt", "w") as fh:
+        fh.write(summarize_results(res))
     path_zip = dn_out / f"{prefix}.nmpk.xz"
     dump(path_zip, res)
 
@@ -58,10 +60,13 @@ def register_result(regtest, res: Result, white: bool = False):
     """
     with regtest:
         print(f"acint = {res.acint:.5e} ± {res.acint_std:.5e}")
-        if not white:
+        if not white and "corrtime_exp" in res.props:
             # Do not check flaky results, as they will depend on irrelevant details,
             # like CPU architecture and NumPy version.
-            print(f"corrtime exp = {res.corrtime_exp:.5e} ± {res.corrtime_exp_std:.5e}")
+            print(
+                f"corrtime exp = {res.props['corrtime_exp']:.5e} "
+                f"± {res.props['corrtime_exp_std']:.5e}"
+            )
         print(f"corrtime int = {res.corrtime_int:.5e} ± {res.corrtime_int_std:.5e}")
         print(f"log(lh) = {res.props['ll']:.5e}")
         print("---")
@@ -76,7 +81,7 @@ def check_noscan_single(
     model: SpectrumModel | None = None,
 ):
     res = estimate_acint(spectrum, fcutmax=fcutmax, maxscan=1, model=model)
-    register_result(regtest, res, "white" in prefix or isinstance(model, WhiteNoiseModel))
+    register_result(regtest, res, "white" in prefix or isinstance(model, ChebyshevModel))
     output_test_result(prefix, res)
 
 
@@ -99,7 +104,7 @@ def test_exptail_noscan_conditioning(regtest, name: str):
 def test_white_noscan(regtest, name: str):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     check_noscan_single(
-        regtest, spectrum, f"white_noscan_{name}", fcutmax=0.1, model=WhiteNoiseModel()
+        regtest, spectrum, f"white_noscan_{name}", fcutmax=0.1, model=ChebyshevModel(0)
     )
 
 
@@ -143,7 +148,7 @@ def test_exptail_scan(regtest, fcutmax: float, name: list[str]):
 
 
 @pytest.mark.parametrize("names", NAME_LISTS)
-@pytest.mark.parametrize("model", [ExpTailModel(), WhiteNoiseModel()])
+@pytest.mark.parametrize("model", [ExpTailModel(), ChebyshevModel(0)])
 @pytest.mark.parametrize("zero_freq", [False, True])
 def test_scan_multi(regtest, zero_freq: bool, model: SpectrumModel, names: list[str]):
     res = []
@@ -152,7 +157,7 @@ def test_scan_multi(regtest, zero_freq: bool, model: SpectrumModel, names: list[
         if not zero_freq:
             spectrum = spectrum.without_zero_freq()
         r = estimate_acint(spectrum, fcutmax=0.01, maxscan=10, model=model)
-        register_result(regtest, r, "white" in name or isinstance(model, WhiteNoiseModel))
+        register_result(regtest, r, "white" in name or isinstance(model, ChebyshevModel))
         res.append(r)
     prefix = f"{model.name}_scan_multi"
     if not zero_freq:

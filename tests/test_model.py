@@ -21,7 +21,7 @@ import numpy as np
 import pytest
 from conftest import check_gradient, check_hessian
 
-from stacie.model import ExpTailModel, WhiteNoiseModel
+from stacie.model import ChebyshevModel, ExpTailModel, guess
 
 FREQS = np.linspace(0, 0.5, 10)
 TIMESTEP = 1.2
@@ -52,18 +52,46 @@ def test_hessian_exptail(pars_ref):
     check_hessian(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
 
 
-PARS_REF_WHITE = [[-102.0], [20.0], [-0.1], [0.0], [5.5]]
+def test_guess_exptail():
+    model = ExpTailModel()
+    rng = np.random.default_rng(734)
+    amplitudes = rng.normal(size=len(FREQS)) ** 2
+    ndofs = np.full(len(FREQS), 2)
+    par_scales = model.get_par_scales(TIMESTEP, FREQS, amplitudes)
+    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, par_scales, rng, 10)
+    assert len(pars_init) == 3
+    assert np.isfinite(pars_init).all()
 
 
-@pytest.mark.parametrize("pars_ref", PARS_REF_WHITE)
-def test_gradient_white(pars_ref):
+PARS_REF_CHEBY = [
+    [-12.0, 3.4, 78.3],
+    [9.0, 8.1],
+    [-0.1, 0.02, -0.7, 0.3],
+    [0.0, 0.0, 0.0],
+    [0.0, 3.0],
+]
+
+
+@pytest.mark.parametrize("pars_ref", PARS_REF_CHEBY)
+def test_gradient_cheby(pars_ref):
     pars_ref = np.array(pars_ref)
-    model = WhiteNoiseModel()
+    model = ChebyshevModel(len(pars_ref) - 1)
     check_gradient(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
 
 
-@pytest.mark.parametrize("pars_ref", PARS_REF_WHITE)
-def test_hessian_white(pars_ref):
+@pytest.mark.parametrize("pars_ref", PARS_REF_CHEBY)
+def test_hessian_cheby(pars_ref):
     pars_ref = np.array(pars_ref)
-    model = WhiteNoiseModel()
+    model = ChebyshevModel(len(pars_ref) - 1)
     check_hessian(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+
+
+def test_guess_cheby():
+    model = ChebyshevModel(2)
+    rng = np.random.default_rng(123)
+    amplitudes = rng.normal(size=len(FREQS)) ** 2
+    ndofs = np.full(len(FREQS), 2)
+    par_scales = model.get_par_scales(TIMESTEP, FREQS, amplitudes)
+    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, par_scales, rng, 10)
+    assert len(pars_init) == 3
+    assert np.isfinite(pars_init).all()

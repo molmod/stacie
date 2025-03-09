@@ -27,7 +27,7 @@ from scipy.optimize import minimize
 from .conditioning import ConditionedCost
 from .cost import LowFreqCost
 from .cutoff import CutoffCriterion, entropy_criterion
-from .model import ExpTailModel, SpectrumModel
+from .model import ExpTailModel, SpectrumModel, guess
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
 
@@ -75,16 +75,6 @@ class Result:
         return self.props["acint_std"]
 
     @property
-    def corrtime_exp(self) -> float:
-        """The exponential correlation time."""
-        return self.props["corrtime"]
-
-    @property
-    def corrtime_exp_std(self) -> float:
-        """The uncertainty of the exponential correlation time."""
-        return self.props["corrtime_std"]
-
-    @property
     def corrtime_int(self) -> float:
         """The integrated correlation time."""
         return self.props["acint"] / (2 * self.spectrum.prefactor * self.spectrum.variance)
@@ -108,6 +98,8 @@ def estimate_acint(
     nfitmax_hard: int = 1000,
     model: SpectrumModel | None = None,
     cutoff_criterion: CutoffCriterion = entropy_criterion,
+    rng: np.random.Generator | None = None,
+    nonlinear_budget: int = 10,
     verbose: bool = False,
 ) -> Result:
     """Estimate the integral of the autocorrelation function.
@@ -145,6 +137,13 @@ def estimate_acint(
     cutoff_criterion
         The criterion function that is minimized to find the best cutoff
         (and thus number of points included in the fit).
+    rng
+        A random number generator for sampling gueses of the nonlinear parameters.
+        When not given, ``np.random.default_rng(42)`` is used.
+        The seed is fixed by default for reproducibility.
+    nonlinear_budget
+        The number of samples to use for the nonlinear parameters is
+        ``nonlinear_budget ** num_nonlinear``.
     verbose
         Set this to ``True`` to print progress information of the frequency cutoff search
         to the standard output.
@@ -156,9 +155,12 @@ def estimate_acint(
     """
     if model is None:
         model = ExpTailModel()
+    if rng is None:
+        rng = np.random.default_rng(42)
     history = {}
 
     if verbose and maxscan > 1:
+        print("CUTOFF FREQUENCY SEARCH")
         print("   nfit   criterion  incumbent")
         scratch = {}
 
@@ -181,6 +183,8 @@ def estimate_acint(
             nfit,
             model,
             cutoff_criterion,
+            rng,
+            nonlinear_budget,
         )
         evals = props["cost_hess_evals"]
         history[nfit] = props
@@ -224,7 +228,6 @@ def estimate_acint(
                 stacklevel=2,
             )
             nfit = nfits[0]
-
     return Result(spectrum, nfit, dict(sorted(history.items())))
 
 
@@ -236,6 +239,8 @@ def fit_model_spectrum(
     nfit: int,
     model: SpectrumModel,
     cutoff_criterion: CutoffCriterion,
+    rng: np.random.Generator,
+    nonlinear_budget: int,
 ) -> dict[str, NDArray]:
     """Optimize the parameter of a model for a given spectrum.
 
@@ -249,6 +254,11 @@ def fit_model_spectrum(
     cutoff_criterion
         The criterion function that is minimized to find the best cutoff
         (and thus number of points included in the fit).
+    rng
+        A random number generator for sampling gueses of the nonlinear parameters.
+    nonlinear_budget
+        The number of samples to use for the nonlinear parameters is
+        ``nonlinear_budget ** num_nonlinear``
 
     Returns
     -------
@@ -261,28 +271,46 @@ def fit_model_spectrum(
     -----
     The returned dictionary contains the following items:
 
-    - ``acint``: the estimate of the autocorrelation integral.
-    - ``acint_var``: the variance of the estimate of the autocorrelation integral.
-    - ``acint_std``: the standard error of the estimate of the autocorrelation integral.
-    - ``corrtime``: the estimate of the slowest time scale in the sequences.
-    - ``corrtime_var``: the variance of the estimate of the slowest time scale.
-    - ``corrtime_std``: the standard error of the estimate of the slowest time scale.
-    - ``cost_value``: the cost function value.
-    - ``cost_grad``: the cost Gradient vector (if ``deriv>=1``).
-    - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``).
-    - ``cost_hess_evals``: the Hessian eigenvalues.
-    - ``cost_hess_evecs``: the Hessian eigenvectors.
-    - ``covar``: the covariance matrix of the parameters.
-    - ``criterion``: the value of the criterion whose minimizer determines the frequency cutoff.
-    - ``ll``: the log likelihood.
-    - ``pars_init``: the initial guess of the parameters.
-    - ``pars``: the optimized parameters.
-    - ``thetas``: scale parameters for the gamma distribution.
-    - ``timestep``: the time step.
+    - ``acint``: estimate of the autocorrelation integral
+    - ``acint_var``: variance of the estimate of the autocorrelation integral
+    - ``acint_std``: standard error of the estimate of the autocorrelation integral
+    - ``cost_value``: cost function value
+    - ``cost_grad``: cost Gradient vector (if ``deriv>=1``)
+    - ``cost_grad_sensitivity``: sensitivity of the cost gradient to the amplitudes
+    - ``cost_hess``: cost Hessian matrix (if ``deriv==2``)
+    - ``cost_hess_evals``: Hessian eigenvalues
+    - ``cost_hess_evecs``: Hessian eigenvectors
+    - ``covar``: covariance matrix of the parameters
+    - ``criterion``: value of the criterion whose minimizer determines the frequency cutoff
+    - ``ll``: log likelihood
+    - ``model``: model name used for the fit
+    - ``pars_init``: initial guess of the parameters
+    - ``pars``: optimized parameters
+    - ``pars_sensitivity``: sensitivity of the parameters to the amplitudes.
+    - ``sensitivity_simulation_time``: recommended simulation time based on the sensitivity analysis
+    - ``sensitivity_block_time``: recommended block time based on the sensitivity analysis
+    - ``thetas``: scale parameters for the gamma distribution
+
+    The ExpTail model has the following additional properties:
+
+    - ``corrtime``: estimate of the slowest time scale in the sequences
+    - ``corrtime_var``: variance of the estimate of the slowest time scale
+    - ``corrtime_std``: standard error of the estimate of the slowest time scale
+    - ``exptail_simulation_time``: recommended simulation time based on the Exptail model
+    - ``exptail_block_time``: recommended block time based on the Exptail model
     """
     # Maximize likelihood
     par_scales = model.get_par_scales(timestep, freqs[:nfit], amplitudes[:nfit])
-    pars_init = model.guess(freqs[:nfit], amplitudes[:nfit], ndofs[:nfit], timestep)
+    pars_init = guess(
+        model,
+        timestep,
+        freqs[:nfit],
+        amplitudes[:nfit],
+        ndofs[:nfit],
+        par_scales,
+        rng,
+        nonlinear_budget,
+    )
     if not model.valid(pars_init):
         raise AssertionError("Infeasible guess")
     cost = LowFreqCost(timestep, freqs[:nfit], amplitudes[:nfit], ndofs[:nfit], model)
@@ -306,11 +334,25 @@ def fit_model_spectrum(
     if (evals > 0).all() and np.isfinite(evals).all():
         half = evecs / np.sqrt(evals)
         props["covar"] = np.dot(half, half.T)
+        props["pars_sensitivity"] = -np.dot(
+            evecs, np.dot(evecs.T, props["cost_grad_sensitivity"]) / evals.reshape(-1, 1)
+        )
     else:
         props["covar"] = np.full_like(props["cost_hess"], np.inf)
+        props["pars_sensitivity"] = np.full((len(pars_opt), nfit), np.inf)
 
     # Derive estimates from model parameters.
-    props.update(model.derive_props(props["pars"], props["covar"]))
+    props.update(model.derive_props(props["pars"], props["covar"], props["pars_sensitivity"]))
+
+    # Give recommendations for the block size and simulation time.
+    props["sensitivity_block_time"] = 0.1 / freqs[nfit - 1]
+    sweights = props["acint_sensitivity"] ** 2
+    sweights_sum = sweights.sum()
+    if np.isfinite(sweights_sum) and sweights_sum > 0:
+        freq_relevant = np.dot(sweights, freqs[:nfit]) / sweights_sum
+        props["sensitivity_simulation_time"] = 10 / freq_relevant
+    else:
+        props["sensitivity_simulation_time"] = np.inf
 
     # Compute remaining properties and derive the cutoff criterion
     props["pars_init"] = pars_init

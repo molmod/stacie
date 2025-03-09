@@ -21,6 +21,7 @@ repos:
     - id: mixed-line-ending
     - id: pretty-format-json
       args: ["--autofix", "--no-sort-keys"]
+      exclude_types: [jupyter]
     - id: trailing-whitespace
 - repo: https://github.com/Lucas-C/pre-commit-hooks
   rev: v1.5.5
@@ -37,3 +38,8 @@ repos:
     - id: ruff-format
     - id: ruff
       args: ["--fix", "--show-fixes"]
+- repo: https://github.com/srstevenson/nb-clean
+  rev: "4.0.1"
+  hooks:
+    - id: nb-clean
+      args: ["--remove-empty-cells"]

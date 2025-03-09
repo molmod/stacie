@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # %% [markdown]
 # # Applicability of the Exponential Tail Model
@@ -164,7 +164,9 @@ print(f"Error of the mean: {error_mean:.3e}")
 # are very similar:
 
 # %%
-print(f"corrtime_exp = {result.corrtime_exp:.3f} ± {result.corrtime_exp_std:.3f}")
+print(
+    f"corrtime_exp = {result.props['corrtime_exp']:.3f} ± {result.props['corrtime_exp_std']:.3f}"
+)
 print(f"corrtime_int = {result.corrtime_int:.3f} ± {result.corrtime_int_std:.3f}")
 
 
@@ -177,5 +179,5 @@ print(f"corrtime_int = {result.corrtime_int:.3f} ± {result.corrtime_int_std:.3f
 # %%
 if abs(result.acint - 2.4772e-4) > 1e-7:
     raise ValueError(f"Wrong acint: {result.acint:.4e}")
-if abs(result.corrtime_exp - 9.7475) > 1e-3:
-    raise ValueError(f"Wrong corrtime_exp: {result.corrtime_exp:.4e}")
+if abs(result.props["corrtime_exp"] - 9.7475) > 1e-3:
+    raise ValueError(f"Wrong corrtime_exp: {result.props['corrtime_exp']:.4e}")

@@ -17,6 +17,8 @@
 # --
 """Plot various aspects of the results of the autocorrelation integral estimate."""
 
+import re
+
 import attrs
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -68,6 +70,21 @@ class UnitConfig:
     """The scale factor used for error bars (multiplier for sigma, standard error)."""
 
 
+def fixformat(s: str) -> str:
+    """Replace standard exponential notation with prettier unicode formatting."""
+
+    def repl(match):
+        factor = match.group(1)
+        exp = str(int(match.group(2)))
+        if exp == 0:
+            return factor
+        return f"${factor}\\times 10^{{{exp}}}$"
+
+    result = re.sub(r"\b([0-9.]+)e([0-9+-]+)\b", repl, s)
+    result = re.sub(r"\binf\b", "∞", result)
+    return re.sub(r"\bnan\b", "?", result)
+
+
 def plot_results(
     path_pdf: str, rs: Result | list[Result], uc: UnitConfig | None = None, title: str | None = None
 ):
@@ -97,7 +114,7 @@ def plot_results(
 
     with PdfPages(path_pdf) as pdf:
         for r in rs:
-            fig, ax = plt.subplots(figsize=(6, 6))
+            fig, ax = plt.subplots(figsize=(9, 6))
             plot_fitted_spectrum(ax, uc, r)
             if title is not None:
                 ax.set_title(title)
@@ -105,23 +122,25 @@ def plot_results(
             plt.close(fig)
 
             if len(r.history) > 1:
-                fig, axs = plt.subplots(2, 2, figsize=(6, 6))
+                fig, axs = plt.subplots(2, 3, figsize=(9, 6))
                 plot_all_models(axs[0, 0], uc, r)
-                # plot_criterion(axs[0, 1], uc, r)
-                plot_entropy_criterion(axs[0, 1], uc, r)
-                plot_uncertainty(axs[1, 0], uc, r)
+                # plot_criterion(axs[1, 0], uc, r)
+                plot_entropy_criterion(axs[1, 0], uc, r)
+                plot_uncertainty(axs[0, 1], uc, r)
                 plot_residuals(axs[1, 1], uc, r)
+                plot_evals(axs[0, 2], uc, r)
+                plot_sensitivity(axs[1, 2], uc, r)
                 pdf.savefig(fig)
                 plt.close(fig)
 
         if len(rs) > 1:
             if rs[0].spectrum.amplitudes_ref is not None:
-                fig, ax = plt.subplots(figsize=(6, 6))
+                fig, ax = plt.subplots(figsize=(9, 6))
                 plot_qq(ax, uc, rs)
                 pdf.savefig(fig)
                 plt.close(fig)
 
-            fig, ax = plt.subplots(figsize=(6, 6))
+            fig, ax = plt.subplots(figsize=(9, 6))
             plot_acint_estimates(ax, uc, rs)
             pdf.savefig(fig)
             plt.close(fig)
@@ -139,9 +158,9 @@ def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int | N
         s.amplitudes[:nplot] / uc.acint_unit,
         color="C0",
         lw=1,
-        label="Empirical spectrum",
     )
     _plot_ref_spectrum(ax, uc, s, nplot)
+    ax.set_xlim(left=0)
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
     ax.set_ylabel(f"Spectrum [{uc.acint_unit_str}]")
     ax.set_title("Spectrum")
@@ -157,16 +176,21 @@ def _plot_ref_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: in
         )
 
 
-INFO_TEMPLATE = (
-    "model = {model}\n"
-    "${uc.acint_symbol} \\pm \\Delta {uc.acint_symbol}$ = {acint:{uc.acint_fmt}}"
-    " ± {acint_std:{uc.acint_fmt}}"
-    "{acint_unit_str}\n"
-    "$\\tau_\\text{{exp}} \\pm \\Delta \\tau_\\text{{exp}}$ = {corrtime_exp:{uc.time_fmt}}"
-    " ± {corrtime_exp_std:{uc.time_fmt}}"
-    "{time_unit_str}\n"
-    "$\\tau_\\text{{int}} \\pm \\Delta \\tau_\\text{{int}}$ = {corrtime_int:{uc.time_fmt}}"
+FIT_LEFT_TITLE_TEMPLATE = (
+    "Spectrum model {model}\n"
+    "${uc.acint_symbol}$ = {acint:{uc.acint_fmt}} ± {acint_std:{uc.acint_fmt}}"
+    "{acint_unit_str}"
+)
+
+FIT_RIGHT_TITLE_TEMPLATE = (
+    "$\\tau_\\text{{int}}$ = {corrtime_int:{uc.time_fmt}}"
     " ± {corrtime_int_std:{uc.time_fmt}}"
+    "{time_unit_str}"
+)
+
+FIT_RIGHT_TITLE_TEMPLATE_EXP = (
+    "$\\tau_\\text{{exp}}$ = {corrtime_exp:{uc.time_fmt}}"
+    " ± {corrtime_exp_std:{uc.time_fmt}}"
     "{time_unit_str}"
 )
 
@@ -179,7 +203,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     mean = r.props["thetas"] * kappas
     std = r.props["thetas"] * np.sqrt(kappas)
     freqs = r.spectrum.freqs[: r.nfit]
-    ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2", label="Model μ")
+    ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2")
     ax.fill_between(
         freqs / uc.freq_unit,
         (mean - uc.sfac * std) / uc.acint_unit,
@@ -187,32 +211,33 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         color="C2",
         alpha=0.3,
         lw=0,
-        label=f"Model {uc.sfac}σ",
     )
     ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
-    ax.set_title("Fitted spectrum")
-    ax.text(
-        0.95,
-        0.95,
-        INFO_TEMPLATE.format(
-            uc=uc,
-            model=r.props["model"],
-            acint=r.acint / uc.acint_unit,
-            acint_std=r.acint_std / uc.acint_unit,
-            acint_unit_str="" if uc.acint_unit_str == "1" else " " + uc.acint_unit_str,
-            corrtime_exp=r.corrtime_exp / uc.time_unit,
-            corrtime_exp_std=r.corrtime_exp_std / uc.time_unit,
-            corrtime_int=r.corrtime_int / uc.time_unit,
-            corrtime_int_std=r.corrtime_int_std / uc.time_unit,
-            time_unit_str="" if uc.time_unit_str == "1" else " " + uc.time_unit_str,
-        ),
-        transform=ax.transAxes,
-        ha="right",
-        va="top",
-        linespacing=1.5,
-        bbox={"facecolor": "none", "edgecolor": "C2", "boxstyle": "round,pad=1"},
-    )
-    ax.legend(loc="lower left")
+    fields = {
+        "uc": uc,
+        "model": r.props["model"],
+        "acint": r.acint / uc.acint_unit,
+        "acint_std": r.acint_std / uc.acint_unit,
+        "acint_unit_str": "" if uc.acint_unit_str == "1" else " " + uc.acint_unit_str,
+        "corrtime_int": r.corrtime_int / uc.time_unit,
+        "corrtime_int_std": r.corrtime_int_std / uc.time_unit,
+        "time_unit_str": "" if uc.time_unit_str == "1" else " " + uc.time_unit_str,
+    }
+    ax.set_title("")
+    ax.set_title(fixformat(FIT_LEFT_TITLE_TEMPLATE.format(**fields)), loc="left")
+    if "corrtime_exp" in r.props:
+        fields["corrtime_exp"] = r.props["corrtime_exp"] / uc.time_unit
+        fields["corrtime_exp_std"] = r.props["corrtime_exp_std"] / uc.time_unit
+        ax.set_title(
+            fixformat(
+                FIT_RIGHT_TITLE_TEMPLATE_EXP.format(**fields)
+                + "\n"
+                + FIT_RIGHT_TITLE_TEMPLATE.format(**fields)
+            ),
+            loc="right",
+        )
+    else:
+        ax.set_title("\n" + fixformat(FIT_RIGHT_TITLE_TEMPLATE.format(**fields)), loc="right")
 
 
 def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
@@ -325,7 +350,7 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     evals = []
     for nfit, props in sorted(r.history.items()):
         freqs.append(r.spectrum.freqs[nfit - 1])
-        evals.append(props["hess_evals"])
+        evals.append(1 / props["cost_hess_evals"])
         if nfit == r.nfit:
             ax.plot([freqs[-1]], [evals[-1]], color="k", marker="o", ms=2, zorder=2.5)
     freqs = np.array(freqs)
@@ -345,11 +370,20 @@ def plot_residuals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     thetas = r.props["thetas"]
     residuals = (amplitudes / thetas - kappas) / np.sqrt(kappas)
     with np.errstate(invalid="ignore"):
-        ax.plot(residuals)
+        ax.plot(r.spectrum.freqs[: r.nfit] / uc.freq_unit, residuals, color="C0")
         ax.axhline(0, ls="--", lw=1.0, color="k")
     ax.set_title("Normalized residuals")
-    ax.set_xlabel("index")
+    ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
     ax.set_ylabel("Residual [1]")
+
+
+def plot_sensitivity(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    """Plot the sensitivity of the autocorrelation integral estimate to spectrum amplitudes."""
+    ax.plot(r.spectrum.freqs[: r.nfit] / uc.freq_unit, r.props["acint_sensitivity"], color="C5")
+    ax.axhline(0, ls="--", lw=1.0, color="k")
+    ax.set_title("Sensitivity of the autocorrelation integral to spectrum amplitudes", wrap=True)
+    ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
+    ax.set_ylabel("Sensitivity [1]")
 
 
 def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):

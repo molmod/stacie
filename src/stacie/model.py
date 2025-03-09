@@ -20,9 +20,8 @@
 import attrs
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import minimize_scalar
 
-__all__ = ("ExpTailModel", "SpectrumModel", "WhiteNoiseModel")
+__all__ = ("ExpTailModel", "SpectrumModel", "guess")
 
 
 @attrs.define
@@ -37,20 +36,27 @@ class SpectrumModel:
     def name(self):
         raise NotImplementedError
 
-    @staticmethod
-    def bounds() -> list[tuple[float, float]]:
+    def bounds(self) -> list[tuple[float, float]]:
         """Return parameter bounds for the optimizer."""
         raise NotImplementedError
 
-    @classmethod
-    def npar(cls):
+    @property
+    def npar(self):
         """Return the number of parameters."""
-        return len(cls.bounds())
+        raise NotImplementedError
 
-    @classmethod
-    def valid(cls, pars) -> bool:
+    def valid(self, pars) -> bool:
         """Return ``True`` when the parameters are within the feasible region."""
-        return all(pmin < par < pmax for (pmin, pmax), par in zip(cls.bounds(), pars, strict=True))
+        return all(pmin < par < pmax for (pmin, pmax), par in zip(self.bounds(), pars, strict=True))
+
+    def which_invalid(self, pars) -> NDArray[bool]:
+        """Return a boolean mask for the parameters outside the feasible region."""
+        return np.array(
+            [
+                pmin >= par or par >= pmax
+                for (pmin, pmax), par in zip(self.bounds(), pars, strict=True)
+            ]
+        )
 
     def get_scales_low(
         self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
@@ -67,14 +73,36 @@ class SpectrumModel:
         """Return the scales of the parameters and the cost function."""
         raise NotImplementedError
 
-    def guess(
+    def get_par_nonlinear(self) -> NDArray[bool]:
+        """Return a boolean mask for the nonlinear parameters."""
+        raise NotImplementedError
+
+    def sample_nonlinear_pars(
         self,
+        rng: np.random.Generator,
+        budget: int,
         freqs: NDArray[float],
-        amplitudes: NDArray[float],
-        ndofs: NDArray[float],
-        timestep: float,
+        par_scales: NDArray[float],
     ) -> NDArray[float]:
-        """Guess initial values of the parameters."""
+        """Return samples of the nonlinear parameters.
+
+        Parameters
+        ----------
+        rng
+            The random number generator.
+        budget
+            The number of samples to generate.
+        freqs
+            The frequencies for which the model spectrum amplitudes are computed.
+        par_scales
+            The scales of the parameters and the cost function.
+
+        Returns
+        -------
+        samples
+            The samples of the nonlinear parameters, array with shape ``(budget, num_nonlinear)``,
+            where ``num_nonlinear`` is the number of nonlinear parameters.
+        """
         raise NotImplementedError
 
     def compute(
@@ -103,13 +131,65 @@ class SpectrumModel:
         -------
         results
             A results list, index corresponds to order of derivative.
+            The shape of the arrays in the results list is as follows:
+
+            - For ``deriv=0``, the shape is ``(len(freqs),)``.
+            - For ``deriv=1``, the shape is ``(len(pars), len(freqs))``.
+            - For ``deriv=2``, the shape is ``(len(pars), len(pars), len(freqs))``
         """
         raise NotImplementedError
 
+    def basis(
+        self, freqs: NDArray[float], timestep: float, nonlinear_pars: NDArray[float]
+    ) -> NDArray[float]:
+        """Return the basis functions for the linear parameters.
+
+        Parameters
+        ----------
+        freqs
+            The frequencies for which the model spectrum amplitudes are computed.
+        timestep
+            The time step of the sequences used to compute the spectrum.
+        nonlinear_pars
+            The values of the nonlinear parameters for which the basis functions are computed.
+
+        Returns
+        -------
+        basis
+            The basis functions, a 2D array with shape ``(len(nonlinear_pars), len(freqs))``.
+        """
+        nonlinear_mask = self.get_par_nonlinear()
+        pars = np.ones(self.npar)
+        pars[nonlinear_mask] = nonlinear_pars
+        return self.compute(freqs, timestep, pars, 1)[1][~nonlinear_mask]
+
     def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float], timestep: float
+        self, pars: NDArray[float], covar: NDArray[float], pars_sensitivity: NDArray[float]
     ) -> dict[str, NDArray[float]]:
-        """Return additional properties derived from model-specific parameters."""
+        """Return additional properties derived from model-specific parameters.
+
+        Parameters
+        ----------
+        pars
+            The parameters.
+        covar
+            The covariance matrix of the parameters.
+        pars_sensitivity
+            The sensitivity of the parameters to the empirical spectrum.
+            This is an array with shape ``(len(pars), len(freqs))``.
+
+        Returns
+        -------
+        props
+            A dictionary with additional properties,
+            whose calculation requires model-specific knowledge.
+            This includes:
+
+            - The estimate of the autocorrelation integral, its variance and standard deviation.
+            - The estimate of the exponential correlation time, its variance and standard deviation.
+              (Set to ``np.nan`` if not applicable.)
+            - The sensitivity of the autocorrelation integral to the empirical spectrum.
+        """
         raise NotImplementedError
 
 
@@ -160,10 +240,14 @@ class ExpTailModel(SpectrumModel):
     def name(self):
         return "exptail"
 
-    @staticmethod
-    def bounds() -> list[tuple[float, float]]:
+    def bounds(self) -> list[tuple[float, float]]:
         """Return parameter bounds for the optimizer."""
         return [(0, np.inf), (0, np.inf), (0, np.inf)]
+
+    @property
+    def npar(self):
+        """Return the number of parameters."""
+        return 3
 
     def get_par_scales(
         self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
@@ -172,57 +256,21 @@ class ExpTailModel(SpectrumModel):
         sl = self.get_scales_low(timestep, freqs, amplitudes)
         return np.array([sl["amp_scale"], sl["amp_scale"], sl["time_scale"]])
 
-    def guess(
+    def get_par_nonlinear(self) -> NDArray[bool]:
+        """Return a boolean mask for the nonlinear parameters."""
+        return np.array([False, False, True])
+
+    def sample_nonlinear_pars(
         self,
+        rng: np.random.Generator,
+        budget: int,
         freqs: NDArray[float],
-        amplitudes: NDArray[float],
-        ndofs: NDArray[float],
-        timestep: float,
+        par_scales: NDArray[float],
     ) -> NDArray[float]:
-        """Guess initial values of the parameters."""
-        # This is implemented as a 1D non-linear optimization of corrtime.
-        # For each tau, the two remaining parameters are found with weighted linear regression.
-        amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
-
-        def linear_fit_rmsd(
-            corrtime_exp: float, return_pars: bool = False
-        ) -> float | tuple[float, float]:
-            pars = np.array([1.0, 1.0, corrtime_exp])
-            basis = self.compute(freqs, timestep, pars, 1)[1][:2]
-            pars[:2] = np.linalg.lstsq(
-                (basis / amplitudes_std).T,
-                amplitudes / amplitudes_std,
-                # For compatibility with numpy < 2.0
-                rcond=-1,
-            )[0]
-            if not self.valid(pars):
-                pars[:2] = amplitudes[0] / 2
-            if return_pars:
-                return pars
-            model = np.dot(pars[:2], basis)
-            return (((model - amplitudes) / amplitudes_std) ** 2).mean()
-
-        # Perform a quick scan of correlation times
+        """Return samples of the nonlinear parameters."""
         corrtime_min = 0.1 / freqs[-1]
         corrtime_max = 1 / freqs[1]
-        nscan = 10
-        corrtimes = np.exp(np.linspace(np.log(corrtime_min), np.log(corrtime_max), nscan))
-        rmsds = np.array([linear_fit_rmsd(corrtime) for corrtime in corrtimes])
-
-        # Try to identify and refine a bracket
-        ibest = rmsds.argmin()
-        if ibest not in (0, nscan - 1):
-            bracket = corrtimes[ibest - 1 : ibest + 2]
-
-            # Refine the bracket
-            minres = minimize_scalar(
-                linear_fit_rmsd, bracket, method="golden", options={"xtol": 0.1 * corrtime_min}
-            )
-            if minres.success:
-                return linear_fit_rmsd(minres.x, True)
-
-        # Minimize_scalar did not work: take the best from the scan.
-        return linear_fit_rmsd(corrtimes[ibest], True)
+        return np.exp(rng.uniform(np.log(corrtime_min), np.log(corrtime_max), (budget, 1)))
 
     def compute(
         self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
@@ -275,7 +323,7 @@ class ExpTailModel(SpectrumModel):
         return results
 
     def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float]
+        self, pars: NDArray[float], covar: NDArray[float], pars_sensitivity: NDArray[float]
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters."""
         acint = pars[:2].sum()
@@ -287,41 +335,45 @@ class ExpTailModel(SpectrumModel):
             "acint": acint,
             "acint_var": acint_var,
             "acint_std": np.sqrt(acint_var) if acint_var >= 0 else np.inf,
-            "corrtime": corrtime,
-            "corrtime_var": corrtime_var,
-            "corrtime_std": (np.sqrt(corrtime_var) if corrtime_var >= 0 else np.inf),
+            "acint_sensitivity": pars_sensitivity[:2].sum(axis=0),
+            "corrtime_exp": corrtime,
+            "corrtime_exp_var": corrtime_var,
+            "corrtime_exp_std": (np.sqrt(corrtime_var) if corrtime_var >= 0 else np.inf),
+            "exptail_block_time": corrtime * np.pi / 20,
+            "exptail_simulation_time": 20 * corrtime * np.pi,
         }
 
 
 @attrs.define
-class WhiteNoiseModel(SpectrumModel):
-    """One may fall back to this model if one suspects there are no time correlations."""
+class ChebyshevModel(SpectrumModel):
+    """A linear combination of Chebyshev polynomials."""
+
+    degree: int = attrs.field(converter=int, validator=attrs.validators.ge(0))
+    """The highest degree of the polynamials included in the model."""
 
     @property
     def name(self):
-        return "white"
+        return f"cheby({self.degree})"
 
-    @staticmethod
-    def bounds() -> list[tuple[float, float]]:
+    def bounds(self) -> list[tuple[float, float]]:
         """Return parameter bounds for the optimizer."""
-        return [(0, np.inf)]
+        return [(-np.inf, np.inf)] * (self.degree + 1)
+
+    @property
+    def npar(self):
+        """Return the number of parameters."""
+        return self.degree + 1
 
     def get_par_scales(
         self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
     ) -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
         sl = self.get_scales_low(timestep, freqs, amplitudes)
-        return np.array([sl["amp_scale"]])
+        return np.full(self.degree + 1, sl["amp_scale"])
 
-    def guess(
-        self,
-        freqs: NDArray[float],
-        amplitudes: NDArray[float],
-        ndofs: NDArray[float],
-        timestep: float,
-    ) -> NDArray[float]:
-        """Guess initial values of the parameters."""
-        return np.array([amplitudes.mean()])
+    def get_par_nonlinear(self) -> NDArray[bool]:
+        """Return a boolean mask for the nonlinear parameters."""
+        return np.zeros(self.degree + 1, dtype=bool)
 
     def compute(
         self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
@@ -333,9 +385,19 @@ class WhiteNoiseModel(SpectrumModel):
             raise ValueError("Argument deriv must be zero or positive.")
         if freqs.ndim != 1:
             raise TypeError("Argument freqs must be a 1D array.")
-        results = [np.full(len(freqs), pars[0])]
+
+        # Construct a basis of Chebyshev polynomials.
+        basis = [np.ones(len(freqs))]
+        if self.degree > 0:
+            basis.append(1 - 2 * freqs / freqs[-1])
+        for _ in range(2, self.degree + 1):
+            basis.append(2 * basis[1] * basis[-1] - basis[-2])
+        basis = np.array(basis)
+
+        # Compute model amplitudes and derivatives.
+        results = [np.dot(pars, basis)]
         if deriv >= 1:
-            results.append(np.ones((1, len(freqs))))
+            results.append(basis)
         if deriv >= 2:
             results.append(np.zeros((1, 1, len(freqs))))
         if deriv >= 3:
@@ -343,15 +405,147 @@ class WhiteNoiseModel(SpectrumModel):
         return results
 
     def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float]
+        self, pars: NDArray[float], covar: NDArray[float], pars_sensitivity: NDArray[float]
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters."""
+        acint = pars.sum()
+        acint_var = covar.sum()
         return {
             "model": self.name,
-            "acint": pars[0],
-            "acint_var": covar[0, 0],
-            "acint_std": np.sqrt(covar[0, 0]) if covar[0, 0] >= 0 else np.inf,
-            "corrtime": np.inf,
-            "corrtime_var": np.inf,
-            "corrtime_std": np.inf,
+            "acint": acint,
+            "acint_var": acint_var,
+            "acint_std": np.sqrt(acint_var) if acint_var >= 0 else np.inf,
+            "acint_sensitivity": pars_sensitivity.sum(axis=0),
         }
+
+
+def guess(
+    model: SpectrumModel,
+    timestep: float,
+    freqs: NDArray[float],
+    amplitudes: NDArray[float],
+    ndofs: NDArray[float],
+    par_scales: NDArray[float],
+    rng: np.random.Generator,
+    nonlinear_budget: int,
+):
+    """Guess initial values of the parameters for a model.
+
+    Parameters
+    ----------
+    model
+        The model for which the parameters are guessed.
+    freqs
+        The frequencies for which the model spectrum amplitudes are computed.
+    amplitudes
+        The amplitudes of the spectrum.
+    ndofs
+        The number of degrees of freedom at each frequency.
+    timestep
+        The time step of the sequences used to compute the spectrum.
+    par_scales
+        The scales of the parameters and the cost function, obtained from the model.
+    rng
+        The random number generator.
+    nonlinear_budget
+        The number of samples of the nonlinear parameters is computed as
+        ``nonlinear_budget ** num_nonlinear``, where ``num_nonlinear`` is the number
+        of nonlinear parameters.
+
+    Returns
+    -------
+    pars
+        An initial guess of the parameters.
+    """
+    if not isinstance(nonlinear_budget, int) or nonlinear_budget < 1:
+        raise ValueError("Argument nonlinear_budget must be a strictly positive integer.")
+
+    # Get the mask for the nonlinear parameters
+    nonlinear_mask = model.get_par_nonlinear()
+    num_nonlinear_pars = nonlinear_mask.sum()
+
+    # If there are no nonlinear parameters, we can directly guess the linear parameters.
+    if num_nonlinear_pars == 0:
+        return _guess_linear(
+            model, [], nonlinear_mask, timestep, freqs, amplitudes, ndofs, par_scales
+        )[1]
+
+    # Otherwise, we need to sample the nonlinear parameters and guess the linear parameters.
+    nonlinear_samples = model.sample_nonlinear_pars(
+        rng, nonlinear_budget**num_nonlinear_pars, freqs, par_scales
+    )
+    best = None
+    for nonlinear_pars in nonlinear_samples:
+        cost, pars = _guess_linear(
+            model, nonlinear_pars, nonlinear_mask, timestep, freqs, amplitudes, ndofs, par_scales
+        )
+        if best is None or best[0] > cost:
+            best = cost, pars
+    return best[1]
+
+
+def _guess_linear(
+    model: SpectrumModel,
+    nonlinear_pars: NDArray[float],
+    nonlinear_mask: NDArray[bool],
+    timestep: float,
+    freqs: NDArray[float],
+    amplitudes: NDArray[float],
+    ndofs: NDArray[float],
+    par_scales: NDArray[float],
+) -> tuple[float, NDArray[float]]:
+    """Guess initial values of the linear parameters for a model.
+
+    Parameters
+    ----------
+    model
+        The model for which the parameters are guessed.
+    nonlinear_pars
+        The values of the nonlinear parameters.
+    nonlinear_mask
+        A boolean mask for the nonlinear parameters.
+    timestep
+        The time step of the sequences used to compute the spectrum.
+    freqs
+        The frequencies for which the model spectrum amplitudes are computed.
+    amplitudes
+        The amplitudes of the spectrum.
+    ndofs
+        The number of degrees of freedom at each frequency.
+    par_scales
+        The scales of the parameters and the cost function, obtained from the model.
+
+    Returns
+    -------
+    cost
+        The cost of the guess.
+    pars
+        An initial guess of the parameters.
+    """
+    # Perform a weighted least squares fit to guess the linear parameters.
+    amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
+    basis = model.basis(freqs, timestep, nonlinear_pars)
+    linear_pars = np.linalg.lstsq(
+        (basis / amplitudes_std).T,
+        amplitudes / amplitudes_std,
+        # For compatibility with numpy < 2.0
+        rcond=-1,
+    )[0]
+
+    # Combine the linear and nonlinear parameters
+    pars = np.zeros(model.npar)
+    pars[nonlinear_mask] = nonlinear_pars
+    pars[~nonlinear_mask] = linear_pars
+
+    # Fix invalid guesses
+    invalid_mask = model.which_invalid(pars)
+    pars[invalid_mask] = par_scales[invalid_mask]
+    if not model.valid(pars):
+        raise RuntimeError("Invalid guess could not be fixed. This should never happen.")
+
+    # Compute the cost
+    # model_amplitudes = np.dot(basis.T, pars[~nonlinear_mask])
+    model_amplitudes = np.dot(pars[~nonlinear_mask], basis)
+    cost = np.sum((amplitudes - model_amplitudes) ** 2)
+
+    return cost, pars
