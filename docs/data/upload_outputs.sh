@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+if [ -z "$1" ]; then
+    echo "Error: Remote host argument missing."
+    exit 1
+fi
 rsync -avR --info=progress2 \
     lammps_lj3d/exploration/*.txt\
     lammps_lj3d/exploration/*.yaml \
