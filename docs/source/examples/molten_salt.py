@@ -78,6 +78,10 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
     acint
         The estimated transport property, mainly used for regression testing.
     """
+    # Sanity check the NPZ files, may be empty due to globbing non-existing files.
+    if len(paths_npz) == 0:
+        raise ValueError("No NPZ files found in the input list.")
+
     # Load the trajectory data
     volumes = []
     temperatures = []
@@ -88,7 +92,6 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
         volumes.append(data["volume"])
         temperatures.append(data["temperature"])
     trajs_pos = np.array(trajs_pos)
-    print("Trajectory shape:", trajs_pos.shape)
     nstep = trajs_pos.shape[1]
     time = data["time"]
     atnums = data["atnums"]
