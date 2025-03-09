@@ -55,7 +55,7 @@ mpl.rc_file("matplotlibrc")
 
 # %%
 
-BOLTZMAN_CONSTANT = 1.380649e-23  # J/K
+BOLTZMANN_CONSTANT = 1.380649e-23  # J/K
 
 
 def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> float:
@@ -105,7 +105,9 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
         # Select only the positions of chlorine atoms for diffusion analysis
         positions = trajs_pos[:, :, atnums == 17].transpose(0, 2, 3, 1).reshape(-1, nstep)
     elif transport_property.lower() == "conductivity":
-        # Compute the charge flux
+        # Compute the instantaneous dipole moment
+        # These are not really "positions", but we use the same variable name
+        # to reused the same code for the conductivity analysis.
         elementary_charge = 1.60217662e-19  # C
         positions = elementary_charge * (
             trajs_pos[:, :, atnums == 11].sum(axis=2)
@@ -128,14 +130,16 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
         freq_unit_str="THz",
     )
 
-    # Construct a trajectory of "block-summed" velocities, to be used as input for the spectrum.
+    # Construct a trajectory of "block-averaged" velocities, to be used as input for the spectrum.
+    # Note that the finite difference computed is just an average of velocities in the Verlet algorithm,
+    # without additional approximations.
     timestep = time[1] - time[0]
     velocities = np.diff(positions, axis=1) / timestep
     # Perform the analysis with Stacie
     spectrum = compute_spectrum(
         velocities,
         timestep=timestep,
-        prefactor=0.5 / (volume * temperature * BOLTZMAN_CONSTANT)
+        prefactor=0.5 / (volume * temperature * BOLTZMANN_CONSTANT)
         if transport_property == "conductivity"
         else 0.5,
         include_zero_freq=False,
@@ -184,7 +188,7 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
 # - An appropriate simulation time to achieve sufficient frequency resolution.
 # - A suitable block size to reduce storage by discarding irrelevant high-frequency data.
 #
-# Additionally, a first-degree polynomial is fitted to the spectrum to min9mize the number of parameters.
+# A degree 1 polynomial is fitted to the spectrum to limit the number of unknowns in the fit.
 
 # %%
 path_nve_npz = "../../data/openmm_salt/output/exploration_nve_traj.npz"
@@ -261,7 +265,7 @@ density = estimate_density(paths_npt_npz)
 #
 # Transport properties for this system are challenging to compute accurately,
 # as reflected in the unusually shaped spectrum and MSD.
-# Consequently, simulation results from the literature may  exhibit some variation.
+# Consequently, simulation results from the literature may exhibit some variation.
 # While the results should be broadly comparable to some extent, deviations may arise
 # due to the differences in post-processing techniques,
 # and the absence of reported error bars in some studies.
