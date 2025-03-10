@@ -63,7 +63,7 @@ print("Uncertainty of the thermal conductivity", result.acint_std)
 # The unit configuration assumes SI units are used systematically.
 # You may need to adapt this to the units of your data.
 uc = UnitConfig(
-    acint_symbol=r"\kappa",
+    acint_symbol="κ",
     acint_unit_str="W m$^{-1}$ K$^{-1}$",
     time_unit=1e-12,
     time_unit_str="ps",

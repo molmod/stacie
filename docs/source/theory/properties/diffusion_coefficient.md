@@ -8,7 +8,7 @@ D = \frac{1}{2N\,d}\int_{-\infty}^{+\infty}
     \cov[\hat{v}_{n,i}(t_0),\, \hat{v}_{n,i}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
-where $\hat{v}_{n,i}(t)$ is the $d$-th Cartesian component of the time-dependent velocity of particle $n$.
+where $\hat{v}_{n,i}(t)$ is the $i$-th Cartesian component of the time-dependent velocity of particle $n$.
 For molecular systems, the center of mass velocities are typically used.
 
 For a simple fluid, the result is called the self-diffusion coefficient or self-diffusivity.
@@ -48,7 +48,7 @@ velocities = ...
 timestep = ...
 
 # Computation with Stacie.
-# Note that the factor 1/(N*N_D) is implied:
+# Note that the factor 1/(N*d) is implied:
 # the average spectrum over all velocity components is computed.
 spectrum = compute_spectrum(
     velocities,
@@ -61,7 +61,8 @@ print("Uncertainty of the diffusion coefficient", result.acint_std)
 
 # The unit configuration assumes SI units are used systematically.
 # You may need to adapt this to the units of your data.
-uc = UnitConfig(acint_symbol="$D$,
+uc = UnitConfig(
+    acint_symbol="D",
     acint_unit_str="m$^2$/s",
     time_unit=1e-12,
     time_unit_str="ps",
