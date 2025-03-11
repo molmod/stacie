@@ -28,7 +28,6 @@
 # and the reduced unit of time as τ\*.
 
 # %%
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -87,9 +86,8 @@ def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep
 # %% [markdown]
 # The following cell implements the analysis of the production simulations.
 
+
 # %%
-
-
 def demo_production():
     lammps = Path("../../data/lammps_lj3d")
 
@@ -145,7 +143,6 @@ kappa_production = demo_production()
 # The same simulation lengths and block sizes are used as in the viscosity notebook
 # for simplicity.
 # This factor-of-2 difference should not have a significant impact on the results.
-
 
 # %% [markdown]
 # ## Comparison to Literature Results

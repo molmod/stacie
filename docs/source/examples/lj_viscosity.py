@@ -52,9 +52,7 @@
 # For convenience, the reduced unit of viscosity is denoted as η\*,
 # and the reduced unit of time as τ\*.
 
-
 # %%
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -87,8 +85,6 @@ mpl.rc_file("matplotlibrc")
 
 
 # %%
-
-
 def get_indep_pcomps(pcomps):
     return np.array(
         [
@@ -161,9 +157,8 @@ def estimate_viscosity(name, pcomps, av_temperature, volume, timestep):
 # - The underfitting criterion to find the low-frequency part of the spectrum for parameter fitting.
 # - The spectrum of the off-diagonal pressure fluctuations, and the model fitted to the spectrum.
 
+
 # %%
-
-
 def demo_exploration():
     lammps = Path("../../data/lammps_lj3d")
 
@@ -209,7 +204,6 @@ eta_exploration = demo_exploration()
 # (to limit the computational cost). Including more points would not provide useful information here,
 # as the high-frequency limit of the spectrum is irrelevant for the viscosity.
 
-
 # %% [markdown]
 # ## Analysis of the Production Simulations
 #
@@ -232,9 +226,8 @@ eta_exploration = demo_exploration()
 # The following cell implements the analysis of the production simulations with 8000 steps.
 # As you can see, the code is very similar to the analysis of the exploratory simulation.
 
+
 # %%
-
-
 def demo_production():
     lammps = Path("../../data/lammps_lj3d")
 

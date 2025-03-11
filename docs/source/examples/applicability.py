@@ -169,7 +169,6 @@ print(
 )
 print(f"corrtime_int = {result.corrtime_int:.3f} ± {result.corrtime_int_std:.3f}")
 
-
 # %%  [markdown]
 # ## Regression Tests
 #

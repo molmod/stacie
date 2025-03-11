@@ -130,11 +130,8 @@ plot_underfitting()
 # For this example,
 # also the minimizer of the AIC (`ifit_best = 26`) would be a good cutoff value.
 
-# %%
-
 # %% [markdown]
 # ## Results
-
 
 # %%
 # Plot the fit over the whole domain.
