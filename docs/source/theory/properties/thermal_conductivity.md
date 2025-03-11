@@ -23,7 +23,7 @@ Section 8.5 of "Theory of Simple Liquids"
 by Hansen and McDonald {cite:p}`hansen_2013_theory`.
 
 The calculation of the heat flux is not discussed here.
-Simulation codes like [LAMMPS](https://lammps.org/)  can write out this quantity.
+Simulation codes like [LAMMPS](https://lammps.org/) can write out this quantity.
 Note, however, that LAMMPS only considers the energy due to pairwise interactions,
 which limits its applicability.
 
@@ -63,6 +63,7 @@ print("Uncertainty of the thermal conductivity", result.acint_std)
 # The unit configuration assumes SI units are used systematically.
 # You may need to adapt this to the units of your data.
 uc = UnitConfig(
+    acint_symbol="κ",
     acint_unit_str="W m$^{-1}$ K$^{-1}$",
     time_unit=1e-12,
     time_unit_str="ps",
