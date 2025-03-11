@@ -43,3 +43,10 @@ repos:
   hooks:
     - id: nb-clean
       args: ["--remove-empty-cells"]
+- repo: https://github.com/DavidAnson/markdownlint-cli2
+  rev: v0.17.2
+  hooks:
+    - id: markdownlint-cli2
+      exclude: '^test'
+      require_serial: true
+      args: ["--fix"]

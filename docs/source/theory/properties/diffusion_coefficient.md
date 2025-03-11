@@ -8,7 +8,8 @@ D = \frac{1}{2N\,d}\int_{-\infty}^{+\infty}
     \cov[\hat{v}_{n,i}(t_0),\, \hat{v}_{n,i}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
-where $\hat{v}_{n,i}(t)$ is the $i$-th Cartesian component of the time-dependent velocity of particle $n$.
+where $\hat{v}_{n,i}(t)$ is the $i$-th Cartesian component of
+the time-dependent velocity of particle $n$.
 For molecular systems, the center of mass velocities are typically used.
 
 For a simple fluid, the result is called the self-diffusion coefficient or self-diffusivity.
@@ -29,7 +30,6 @@ Section 7.7 of "Theory of Simple Liquids"
 by Hansen and McDonald {cite:p}`hansen_2013_theory`,
 or Section 13.3.2 of "Statistical Mechanics: Theory and Molecular Simulation"
 by Tuckerman {cite:p}`tuckerman_2023_statistical`.
-
 
 ## How to Compute with Stacie?
 

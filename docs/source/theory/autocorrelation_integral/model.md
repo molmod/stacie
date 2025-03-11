@@ -151,7 +151,6 @@ C^\text{exp-tail}_k
     \\
 $$
 
-
 This model can be fitted to the low-frequency part of an empirical autocorrelation function.
 Once the parameters are fitted to an empirical spectrum, one finds:
 

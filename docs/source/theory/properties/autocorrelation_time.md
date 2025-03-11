@@ -35,8 +35,6 @@ This can happen if the input sequences
 are a superposition of signals with different relaxation times,
 or when they contain non-diffusive contributions such as oscillations at certain frequencies.
 
-
-
 ## Which Definition Should I Use?
 
 There is no right or wrong.
@@ -94,7 +92,6 @@ Both definitions are useful and relevant for different purposes.
     Note that $\tau_\text{exp}$ is also related to the block size
     when working with [block averages](../advanced_topics/block_averages.md)
     to reduce storage requirements for production simulations.
-
 
 ## How to Compute with Stacie?
 

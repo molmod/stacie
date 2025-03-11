@@ -104,7 +104,9 @@ $$
 Finally, the covariance of the Fourier transform of the input sequence takes the following form:
 
 $$
-    \cov[\hat{X}^*_k \,,\, \hat{X}_\ell] = \delta_{k,\ell} \mean\Bigl[|\hat{X}_k|^2\Bigr] = N \delta_{k,\ell} C_k
+    \cov[\hat{X}^*_k \,,\, \hat{X}_\ell]
+    = \delta_{k,\ell} \mean\Bigl[|\hat{X}_k|^2\Bigr]
+    = N \delta_{k,\ell} C_k
 $$
 
 For the real component of $\hat{X}_k$ $(=\hat{X}^*_{-k})$, we find:
@@ -219,6 +221,7 @@ $$
 $$
 
 (lmax-target)=
+
 ## Likelihood Maximization
 
 To facilitate the treatment of the (log) likelihood,

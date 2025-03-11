@@ -15,6 +15,7 @@ as autocorrelation integrals of outputs of molecular dynamics simulations,
 using so-called Green-Kubo relations
 {cite:p}`green_1952_markoff,green_1954_markoff,kubo_1957_statistical,helfand_1960_transport`.
 These properties are sometimes referred to as diagonal transport coefficients {cite:p}`pegolo_2025_transport`.
+
 - [Diffusion coefficient](diffusion_coefficient.md), $D$
 - [Electrical conductivity](electrical_conductivity.md), $\sigma$
 - [Thermal conductivity](thermal_conductivity.md), $\kappa$
@@ -56,11 +57,13 @@ that the average pressure and temperature remain close to the desired values dur
 ### 3. Thermostats and barostats
 
 Although NVE is generally recommended, transport properties are often computed in NVT ensembles.
-However, thermostats and barostats can introduce systematic errors, particularly if their relaxation times
-are too short. Studies {cite:p}`fanourgakis_2012_determining, basconi_2013_effects, ke_2022_effects` suggest that NVE and
-well-tuned NVT simulations yield comparable results. Basconi et al. recommend a thermostat with slow
-relaxation times, global coupling, and continuous rescaling (as opposed to random force contributions)
-{cite:p}`basconi_2013_effects`. For example, a Nosé-Hoover thermostat with a relaxation
-time of at least 1 ps should be good for minimal interference. One can rule out such errors more
-rigorously by running multiple simulations with systematically increased thermostat (and barostat)
-relaxation times.
+However, thermostats and barostats can introduce systematic errors,
+particularly if their relaxation times are too short.
+Studies suggest that NVE and well-tuned NVT simulations yield comparable results.
+{cite:p}`fanourgakis_2012_determining, basconi_2013_effects, ke_2022_effects`
+Basconi et al. recommend a thermostat with slow relaxation times, global coupling,
+and continuous rescaling (as opposed to random force contributions) {cite:p}`basconi_2013_effects`.
+For example, a Nosé-Hoover thermostat with a relaxation time of at least 1 ps
+should be good for minimal interference.
+One can rule out such errors more rigorously by running multiple simulations
+with systematically increased thermostat (and barostat) relaxation times.

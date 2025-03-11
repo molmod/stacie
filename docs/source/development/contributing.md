@@ -17,7 +17,6 @@ This section does not document how to use of Git and GitHub, or how to develop s
 We assume that you already have the basic skills to contribute.
 Below are some links to documentation for those who are not familiar with these technicalities yet.
 
-
 ## Ground Rules
 
 - We want everyone to have a positive experience with their (online) interactions related to
@@ -36,7 +35,6 @@ Below are some links to documentation for those who are not familiar with these 
   [licenses](../getting_started/licenses.md) that
   we currently use for source code and documentation.
 
-
 ## How to Report a Bug
 
 Create a new issue (or find an existing one) and include the following information:
@@ -46,7 +44,6 @@ Create a new issue (or find an existing one) and include the following informati
 3. What did you do?
 4. What did you expect to see?
 5. What did you see instead?
-
 
 ## First-Time Contributors
 
@@ -58,7 +55,6 @@ you may find the following online references helpful:
 - <https://egghead.io/series/how-to-contribute-to-an-open-source-project-on-github>
 
 If something goes wrong in the process of creating a pull request, we'll try to help out.
-
 
 ## Contribution Workflow
 

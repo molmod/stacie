@@ -34,7 +34,8 @@ $$
 $$
 
 where $N_q$ is the number of charge carriers.
-The charge current can also be interpreted as the time-derivative of the instantaneous dipole moment of the system.
+The charge current can also be interpreted as
+the time-derivative of the instantaneous dipole moment of the system.
 
 In case of molecular ions, the center-of-mass velocity can be used, but this is not critical.
 You will get the same conductivity (possibly with slightly larger uncertainties)
@@ -113,7 +114,6 @@ because it neglects correlated motion between different types of charge carriers
 (The effect may be large!)
 Nevertheless, it is sometimes interesting to quantify the degree of such correlations.
 {cite:p}`shao_2020_role`
-
 
 ## How to Compute with Stacie?
 

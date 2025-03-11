@@ -1,4 +1,4 @@
-# Welcome to Stacie's Documentation!
+# Welcome to Stacie's Documentation
 
 Stacie is a *STable AutoCorrelation Integral Estimator*.
 
@@ -17,7 +17,6 @@ Please use the following citation in any publication that relies on Stacie:
 > TODO
 
 Copy-pasteable citation records in various formats are provided in [How to Cite?](getting_started/cite.md).
-
 
 ```{toctree}
 :hidden:

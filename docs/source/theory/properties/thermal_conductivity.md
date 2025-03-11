@@ -27,7 +27,6 @@ Simulation codes like [LAMMPS](https://lammps.org/) can write out this quantity.
 Note, however, that LAMMPS only considers the energy due to pairwise interactions,
 which limits its applicability.
 
-
 ## How to Compute with Stacie?
 
 It is assumed that you can load the time-dependent heat flux components
