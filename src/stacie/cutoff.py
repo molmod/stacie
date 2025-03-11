@@ -22,7 +22,7 @@ from typing import NewType
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.special import gammaln
+from scipy.special import digamma, gammaln
 
 __all__ = ("CutoffCriterion", "akaike_criterion", "general_ufc", "underfitting_criterion")
 
@@ -30,43 +30,49 @@ __all__ = ("CutoffCriterion", "akaike_criterion", "general_ufc", "underfitting_c
 CutoffCriterion = NewType("CutoffCriterion", Callable[[dict[str, NDArray]], float])
 
 
-def wiener_entropy(props: dict[str, NDArray], nfreqs: int | None = None) -> float:
-    """Compute the Wiener entropy for the spectrum. Wiener entropy is defined as the ratio of
-    the geometric mean to the arithmetic mean."""
-    if nfreqs is None:
-        nfreqs = len(props["freqs"])
+def neg_log_wiener_entropy(props: dict[str, NDArray]) -> float:
+    """Compute negative log Wiener entropy (NLWE). In this re-formulation, it becomes
+    -log(WE) = -log(GM/AM) = log(AM) - log(GM)
+    Parameters
+    ----------
+    props
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
 
-    amplitudes = props["amplitudes"][:nfreqs]
-    thetas = props["thetas"][:nfreqs]
-
-    # Compute Wiener entropy for the spectrum
-    ratio = amplitudes / thetas
-    wiener_entropy = np.exp(np.mean(np.log(ratio))) / np.mean(ratio)
-
-    props["wiener"] = wiener_entropy
-
-    return wiener_entropy
+    Returns
+    -------
+        The negative log Wiener entropy.
+    """
+    amplitudes = props["amplitudes"]
+    return np.log(amplitudes.mean()) - np.log(amplitudes).mean()
 
 
-def entropy_criterion(props: dict[str, NDArray]) -> int:
-    """Determine the optimal number of frequency components where the Wiener entropy
-    is maximum. The Wiener entropy of 1 corresponds to the White Noise.
-
+def expectation_nlwe(props: dict[str, NDArray]) -> float:
+    """Compute the expectation value of the negative log Wiener entropy.
     Parameters
     ----------
     props
         The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
     Returns
     -------
-    optimal_idx
-        The index (number of frequency components) at which the entropy is maximum.
+        The expectation value of the negative log Wiener entropy.
     """
-    freqs = props["freqs"]
-    nfreqs = np.arange(1, len(freqs) + 1)
-    # Compute WE for different frequency components but discard the first bit
-    wiener_entropies = np.array([wiener_entropy(props, n) for n in nfreqs])
+    nfreqs = len(props["freqs"])
+    kappa = props["kappas"]
+    return digamma(nfreqs * kappa) - digamma(kappa) - np.log(nfreqs)
 
-    return np.argmax(wiener_entropies)
+
+def entropy_criterion(props: dict[str, NDArray]) -> float:
+    """The entropy criterion. This is the square of the difference between the negative log
+    Wiener entropy and its expectation value.
+    Parameters
+    ----------
+    props
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
+    Returns
+    -------
+        The entropy criterion. Lower is better.
+    """
+    return ((neg_log_wiener_entropy(props) - expectation_nlwe(props)) ** 2).mean()
 
 
 def underfitting_criterion(props: dict[str, NDArray]) -> float:
