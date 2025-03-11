@@ -1,4 +1,4 @@
-# Properties Derived from Autocorrelation Integrals
+# Properties Derived from the Autocorrelation Function
 
 This section outlines the statistical or physical quantities
 that can be computed as the integral of an autocorrelation function.
