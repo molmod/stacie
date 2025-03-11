@@ -34,36 +34,51 @@ shear_viscosity.md
 bulk_viscosity.md
 ```
 
-## Some general recommendations for MD simulations to compute transport properties
+## General recommendations for MD simulations to compute transport properties
 
 ### 1. Finite size effects
 
-Transport properties in molecular dynamics (MD) simulations of periodic systems can be
-affected by finite size effects. To assess these, one can run simulations with varying box sizes
-and analyze properties e.g. as a function of inverse box size (1/$L$).
-In particular, finite size effects are particularly are known to be significant for diffusion coefficients.
-Extrapolating to the infinite box limit or applying analytical corrections,
-such as the Yeh-Hummer correction {cite:p}`yeh_2004_system,maginn_2020_best`,
-can help mitigate these effects.
+Transport properties in molecular dynamics (MD) simulations of periodic systems
+can be affected by finite size effects.
+Finite size effects are particularly significant for diffusion coefficients.
+This systematic error is known to be proportional to $1/L$,
+allowing for an extrapolation to infinite box size through linear regression
+or by applying analytical corrections, such as the Yeh-Hummer correction
+{cite:p}`yeh_2004_system,maginn_2020_best`.
 
 ### 2. Choice of ensemble
 
-The NVE ensemble is generally recommended for computing transport coefficients, as thermostats
-(used in NVT and NpT ensembles) can interfere with system dynamics and introduce bias.
-A good approach would be to first equilibrate the system using NpT (to determine equilibrium density)
-followed by NVT, before switching to NVE for transport property calculations. One should always verify
-that the average pressure and temperature remain close to the desired values during the NVE run(s).
+The NVE ensemble is generally recommended for computing transport coefficients,
+as thermostats and barostats (used in NVT and NpT ensembles)
+can interfere with system dynamics and introduce bias in the transport property.
+A good approach would be to first equilibrate the system using NVT or NpT,
+before switching to NVE for transport property calculations.
+The main difficulty is that one NVE simulation is not representative for the NVT or NpT ensemble,
+even if the average temperature and pressure coincides perfectly.
+Such a simulation lacks the proper variance in the kinetic energy and/or volume.
+This limitation can be solved by performing an ensemble of NVE simulations that are,
+as a whole, representative for the NVT or NpT ensemble.
+Practically, this can be accomplished by performing multiple NVT or NpT equilibration runs,
+depending on the ensemble of interest.
+The final state of the equilibration run is then used as starting point of the NVE run,
+**without rescaling the volume or kinetic energy**,
+since that would artifically lower the variance in these quantities.
+All examples in the Stacie documentation use this technique.
 
-### 3. Thermostats and barostats
+### 3. Thermostat and barostat settings
 
-Although NVE is generally recommended, transport properties are often computed in NVT ensembles.
-However, thermostats and barostats can introduce systematic errors,
-particularly if their relaxation times are too short.
+For the equilibration runs discussed in the previous section,
+the choice of the time constants of the thermo- and barostats is not critical,
+as long as they allow for a full equilibration of this system
+within the duration of the equilibration run.
+During the equilibration, one can use a local thermostat to make the equilibration more effecient.
+
+In some cases, one may still prefer to run production simulations for transport properties
+in the NVT or NpT ensemble, despite the fact that this introduces an avoidable bias,
+particularly if the relaxation times of the thermo- and/or barostat are too short.
 Studies suggest that NVE and well-tuned NVT simulations yield comparable results.
 {cite:p}`fanourgakis_2012_determining, basconi_2013_effects, ke_2022_effects`
 Basconi et al. recommend a thermostat with slow relaxation times, global coupling,
 and continuous rescaling (as opposed to random force contributions) {cite:p}`basconi_2013_effects`.
-For example, a Nosé-Hoover thermostat with a relaxation time of at least 1 ps
-should be good for minimal interference.
-One can rule out such errors more rigorously by running multiple simulations
-with systematically increased thermostat (and barostat) relaxation times.
+A disadvantage of slow relaxation times is that longer simulations are required
+to fully sample the correct ensemble.
