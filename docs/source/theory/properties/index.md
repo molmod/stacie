@@ -75,10 +75,10 @@ During the equilibration, a local thermostat can be used to make the equilibrati
 
 In some cases, one may still prefer to run production runs for transport properties
 in the NVT or NpT ensemble, despite the fact that this introduces an avoidable bias,
-especially if the thermostat or barostat relaxation times are too short. However, NpT ensemble
-for the production runs should generally be avoided, as barostats introduce volume fluctuations
-which then significantly alters the systems dynamics. Studies suggest well-tuned NVT simulations
-yield comparable results with the NVE simulations.
+especially if the thermostat or barostat relaxation times are too short.
+However, NpT ensemble for the production runs should generally be avoided,
+as barostats introduce volume fluctuations which then significantly alters the system's dynamics.
+Studies suggest well-tuned NVT simulations yield comparable results with the NVE simulations.
 {cite:p}`fanourgakis_2012_determining, basconi_2013_effects, ke_2022_effects`
 Basconi et al. recommended using a thermostat with slow relaxation times, global coupling,
 and continuous rescaling (as opposed to random force contributions) {cite:p}`basconi_2013_effects`.
