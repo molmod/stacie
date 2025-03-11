@@ -30,49 +30,32 @@ __all__ = ("CutoffCriterion", "akaike_criterion", "general_ufc", "underfitting_c
 CutoffCriterion = NewType("CutoffCriterion", Callable[[dict[str, NDArray]], float])
 
 
-def neg_log_wiener_entropy(props: dict[str, NDArray]) -> float:
-    """Compute negative log Wiener entropy (NLWE). In this re-formulation, it becomes
-    -log(WE) = -log(GM/AM) = log(AM) - log(GM)
-    Parameters
-    ----------
-    props
-        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
-
-    Returns
-    -------
-        The negative log Wiener entropy.
+def entropy_criterion(props: dict[str, np.ndarray]) -> float:
     """
-    amplitudes = props["amplitudes"]
-    return np.log(amplitudes.mean()) - np.log(amplitudes).mean()
-
-
-def expectation_nlwe(props: dict[str, NDArray]) -> float:
-    """Compute the expectation value of the negative log Wiener entropy.
+    Compute the entropy criterion based on the negative log Wiener entropy (NLWE).
+    In this case, the NLWE is computed using the following formula:
+        NLWE = -ln(WE) = ln(AM) - ln(GM).
+    The expectation of the NLWE is then uses the properties of the Gamma distribution:
+        E[NLWE] = digamma(n * kappa) - digamma(kappa) - ln(n),
+    where n is the number of frequencies and kappa is the shape parameter of the Gamma distribution.
+    The entropy criterion is then the squared difference between the empirical and expected NLWE.
     Parameters
     ----------
     props
         The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
     Returns
     -------
-        The expectation value of the negative log Wiener entropy.
-    """
-    nfreqs = len(props["freqs"])
-    kappa = props["kappas"]
-    return digamma(nfreqs * kappa) - digamma(kappa) - np.log(nfreqs)
-
-
-def entropy_criterion(props: dict[str, NDArray]) -> float:
-    """The entropy criterion. This is the square of the difference between the negative log
-    Wiener entropy and its expectation value.
-    Parameters
-    ----------
-    props
-        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
-    Returns
-    -------
+    criterion
         The entropy criterion. Lower is better.
     """
-    return ((neg_log_wiener_entropy(props) - expectation_nlwe(props)) ** 2).mean()
+    amplitudes = props["amplitudes"]
+    nfreqs = len(props["freqs"])
+    kappa = props["kappas"]
+
+    nlwe_empirical = np.log(amplitudes.mean()) - np.log(amplitudes).mean()
+    nlwe_expected = digamma(nfreqs * kappa) - digamma(kappa) - np.log(nfreqs)
+
+    return ((nlwe_empirical - nlwe_expected) ** 2).mean()
 
 
 def underfitting_criterion(props: dict[str, NDArray]) -> float:
