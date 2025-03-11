@@ -37,29 +37,43 @@ CutoffCriterion = NewType("CutoffCriterion", Callable[[dict[str, NDArray]], floa
 
 
 def entropy_criterion(props: dict[str, np.ndarray]) -> float:
-    """
+    r"""
     Compute the entropy criterion based on the negative log Wiener entropy (NLWE).
     In this case, the NLWE is computed using the following formula:
-        NLWE = -ln(WE) = ln(AM) - ln(GM).
-    The expectation of the NLWE is then uses the properties of the Gamma distribution:
-        E[NLWE] = digamma(n * kappa) - digamma(kappa) - ln(n),
-    where n is the number of frequencies and kappa is the shape parameter of the Gamma distribution.
+
+    .. math::
+
+        \text{NLWE} = -\ln(\text{WE}) = \ln(\text{AM}) - \ln(\text{GM})
+
+    where AM and GM are the arithmetic and geometric mean, respectively,
+    of the spectrum amplitudes divided by the model of the spectrum.
+
+    The expectation value of the NLWE can be derived using the properties of the Gamma distribution:
+
+    .. math::
+
+        \mathrm{E}[\text{NLWE}] = \psi(n \kappa) - \phi(\kappa) - \ln(n)
+
+    where :math:`\psi` is the digamma function, :math:`n` is the number of frequencies
+    and :math:`\kappa` is the shape parameter of the Gamma distribution.
     The entropy criterion is then the squared difference between the empirical and expected NLWE.
+
     Parameters
     ----------
     props
         The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
+
     Returns
     -------
     criterion
         The entropy criterion. Lower is better.
     """
-    amplitudes = props["amplitudes"]
-    nfreqs = len(props["freqs"])
+    ratio = props["amplitudes"] / props["amplitudes_model"][0]
+    nfreq = len(props["freqs"])
     kappa = props["kappas"]
 
-    nlwe_empirical = np.log(amplitudes.mean()) - np.log(amplitudes).mean()
-    nlwe_expected = digamma(nfreqs * kappa) - digamma(kappa) - np.log(nfreqs)
+    nlwe_empirical = np.log(ratio.mean()) - np.log(ratio).mean()
+    nlwe_expected = digamma(nfreq * kappa) - digamma(kappa) - np.log(nfreq)
 
     return ((nlwe_empirical - nlwe_expected) ** 2).mean()
 
