@@ -73,7 +73,6 @@ Stacie can also be used to evaluate such limits,
 by using samples of the time derivatives of $y$
 as input to the power spectrum computation.
 
-
 ## Discretized time, periodic sequences
 
 A similar result can be formulated for discrete and periodic sequences, $\hat{x}_n$.
@@ -125,7 +124,8 @@ $$
 
 The division by $N$ comes from the fact that the autocorrelation function is defined as
 an average over all $n$ (and all realizations of $\hat{x}_n$).
-We have included the prefactor $F h$ in the definition of the power spectrum, so that $\mathcal{I} = C_0$.
+We have included the prefactor $F h$ in the definition of the power spectrum,
+so that $\mathcal{I} = C_0$.
 Plotting an estimated spectrum with this normalization
 has the advantage of giving a quick visual estimate of $\mathcal{I}$ with the appropriate units.
 

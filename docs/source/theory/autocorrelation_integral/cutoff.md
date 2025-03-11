@@ -31,7 +31,6 @@ Both criteria are illustrated for a simple polynomial fit to noisy cosine data
 in the [Underfitting Criterion Demo](../../examples/underfitting_criterion.py).
 This example may be helpful to gain some intuition for the theory derived below.
 
-
 ## Normalized Residuals
 
 The underfitting criterion is applicable to any 1D curve fitting problem
@@ -52,7 +51,7 @@ $$
 where $\hat{\mu}_i$ and $\hat{\sigma}_i$
 are the maximum-likelihood mean and standard deviation of the model for data point $i$.
 In the case of spectra, the residuals in the notation from the
-[Parameter Estimation](#lmax-target) section are:
+[Parameter Estimation](model.md) section are:
 
 $$
   \hat{Y}_i &= \hat{C}_i
@@ -84,7 +83,6 @@ greater than one can be used to detect underfitting.
 However, such a simple criterion does not detect small misfits.
 In edge cases, the variance of the normalized residuals may still be close to one,
 even though they show a trend.
-
 
 ## Cumulative Sums of Residuals
 
@@ -129,7 +127,6 @@ meaning that nearby residuals are positively correlated.
 In this case, the positively correlated errors will add up in the cumulative sums,
 such that the sample variance of $\hat{U}^2_j$ quickly exceeds the expectation value above.
 
-
 ## Underfitting Criterion
 
 We propose the following criterion to detect underfitting artifacts:
@@ -157,7 +154,6 @@ which is barely visible in the residuals to the naked eye.
 At this point, one has (nearly) the maximum amount of data in the fit
 (and thus minimal uncertainty of the parameters)
 without biasing the estimated parameters due to underfitting.
-
 
 ## Akaike's Information Criterion
 
@@ -204,7 +200,6 @@ where:
 - $N_\text{par}$ is the number of parameters in the model for the low-frequency part of the spectrum
   (3 in case of the Exponential Tail model),
 - $N_\text{discard}$ is the number of discarded data points
-
 
 ## Cutoff selection
 

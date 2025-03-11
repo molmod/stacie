@@ -26,7 +26,6 @@ by Hansen and McDonald {cite:p}`hansen_2013_theory`,
 or Section 2.7 of "Computer Simulation of Liquids"
 by Allen and Tildesley {cite:p}`allen_2017_computer`.
 
-
 ## How to Compute with Stacie?
 
 It is assumed that you can load the diagonal time-dependent pressure tensor components

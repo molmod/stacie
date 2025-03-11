@@ -1,0 +1,14 @@
+{
+  "config": {
+    "MD013": {
+      "line_length": 100,
+      "heading_line_length": 100,
+      "code_block_line_length": 100
+    },
+    "MD007": { "indent": 4 },
+    "MD033": {
+      "allowed_elements": ["sup", "sub"]
+    },
+    "MD046": false
+  }
+}

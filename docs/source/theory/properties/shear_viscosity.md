@@ -24,7 +24,6 @@ by Hansen and McDonald {cite:p}`hansen_2013_theory`,
 or Section 13.3.1 of "Statistical Mechanics: Theory and Molecular Simulation"
 by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
-
 ## Five Independent Off-Diagonal Pressure Components of an Isotropic Liquid
 
 To the best of our knowledge, there is no previous work showing how to prepare
@@ -273,7 +272,9 @@ $\hat{\mathbf{P}}_{\text{tl},xx} =
 and similar definitions for the two other Cartesian components, we get:
 
 $$
-    &\frac{1}{2}\mean\left[\hat{\mathbf{P}}_\text{tl}(t_0):\hat{\mathbf{P}}_\text{tl}(t_0 + \Delta_t)\right] =
+    &\frac{1}{2}\mean\left[
+        \hat{\mathbf{P}}_\text{tl}(t_0):\hat{\mathbf{P}}_\text{tl}(t_0 + \Delta_t)
+    \right] =
     \\
     &\qquad
         \cov[\hat{P}_{yz}(t_0) \,,\, \hat{P}_{yz}(t_0+\Delta_t)]

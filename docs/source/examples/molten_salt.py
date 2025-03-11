@@ -54,7 +54,6 @@ mpl.rc_file("matplotlibrc")
 # to different inputs, and with a different degree for the Chebyshev polynomial.
 
 # %%
-
 BOLTZMANN_CONSTANT = 1.380649e-23  # J/K
 
 
@@ -201,7 +200,6 @@ analyze([path_nve_npz], "cl")
 
 # %%
 analyze([path_nve_npz], "conductivity")
-# %%
 
 # %% [markdown]
 # As a compromise between the three recommendations, we choose a block size of 20 fs
@@ -228,7 +226,6 @@ diffusivity_cl = analyze(paths_nve_npz, "cl", 3)
 
 # %%
 conductivity = analyze(paths_nve_npz, "conductivity", 3)
-# %%
 
 # %% [markdown]
 #
@@ -237,9 +234,8 @@ conductivity = analyze(paths_nve_npz, "conductivity", 3)
 # This is done by averaging the density over the NpT trajectories from the production runs.
 #
 
+
 # %%
-
-
 def estimate_density(paths_npz: list[str]):
     densities = []
     molar_vols = []
@@ -295,9 +291,8 @@ density = estimate_density(paths_npt_npz)
 # The code below was used to compute the diffusion coefficients from the
 # experimentally fitted Arrhenius equation in {cite:p}`bockris_1961_self`.
 
+
 # %%
-
-
 def compute_experimental_diffusivities():
     """Compute the diffusion coefficients from the experimental data."""
     # Parameters taken from Bockris 1961 (https://doi.org/10.1039/DF9613200218)
@@ -347,7 +342,6 @@ def convert_molar_conductivity():
 
 
 convert_molar_conductivity()
-
 
 # %%  [markdown]
 # ## Regression Tests

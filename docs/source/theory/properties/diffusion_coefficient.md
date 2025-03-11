@@ -1,26 +1,27 @@
 # Diffusion Coefficient
 
-The diffusion coefficient (or diffusivity) of a set of $N$ particles in $D$ dimensions is given by:
+The diffusion coefficient (or diffusivity) of a set of $N$ particles in $d$ dimensions is given by:
 
 $$
-    D = \frac{1}{2ND}\int_{-\infty}^{+\infty}
-        \sum_{n=1}^N \sum_{d=1}^D
-        \cov[\hat{v}_{n,d}(t_0) \,,\, \hat{v}_{n,d}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
+D = \frac{1}{2N\,d}\int_{-\infty}^{+\infty}
+    \sum_{n=1}^N \sum_{i=1}^{d}
+    \cov[\hat{v}_{n,i}(t_0),\, \hat{v}_{n,i}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
-where $\hat{v}_{n,d}(t)$ is the Cartesian component $d$ of the time-dependent velocity of particle $n$.
-If the particles are molecules, their center of mass velocities can be used.
+where $\hat{v}_{n,i}(t)$ is the $i$-th Cartesian component of
+the time-dependent velocity of particle $n$.
+For molecular systems, the center of mass velocities are typically used.
 
 For a simple fluid, the result is called the self-diffusion coefficient or self-diffusivity.
 The same expression applies to the diffusion coefficient of components of a mixture
 or guest molecules in porous media.
 
-This definition is valid only if the particles of interest exhibit diffusive motion.
+Note that this definition is valid only if the particles of interest exhibit diffusive motion.
 If they oscillate around a fixed center,
-the zero-frequency component of the velocity autocorrelation spectrum will converge to zero,
-implying that the diffusion coefficient is zero.
-This can be the apparent result when the diffusion is governed by an activated hopping process
-and the simulation is too short to include such rare events.
+the zero-frequency component of the velocity autocorrelation spectrum will approach to zero,
+resulting in a diffusion coefficient of zero.
+This scenario may occur when the diffusion is governed by an activated hopping process
+and the simulation is too short to capture such rare events.
 
 The derivation of this result can be found in several references, e.g.,
 Section 4.4.1 of "Understanding Molecular Simulation"
@@ -30,13 +31,12 @@ by Hansen and McDonald {cite:p}`hansen_2013_theory`,
 or Section 13.3.2 of "Statistical Mechanics: Theory and Molecular Simulation"
 by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
-
 ## How to Compute with Stacie?
 
 It is assumed that you can load the particle velocities into a NumPy array `velocities`.
-Each row of this array corresponds to the Cartesian velocity component of a particle.
-The columns correspond to time steps.
-You also need to store the time step in a Python variable.
+Each row of this array corresponds to a single Cartesian component of particle's velocity, while
+each column corresponds to  a specific time step.
+You should also store the time step in a Python variable.
 The diffusion coefficient can then be computed as follows:
 
 ```python
@@ -48,7 +48,7 @@ velocities = ...
 timestep = ...
 
 # Computation with Stacie.
-# Note that the factor 1/(N*D) is implied:
+# Note that the factor 1/(N*d) is implied:
 # the average spectrum over all velocity components is computed.
 # Note that the zero-frequency component is usually not reliable
 # because usually the total momentum is constrained or conserved.
@@ -65,6 +65,7 @@ print("Uncertainty of the diffusion coefficient", result.acint_std)
 # The unit configuration assumes SI units are used systematically.
 # You may need to adapt this to the units of your data.
 uc = UnitConfig(
+    acint_symbol="D",
     acint_unit_str="m$^2$/s",
     time_unit=1e-12,
     time_unit_str="ps",

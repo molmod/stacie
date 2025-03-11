@@ -19,7 +19,8 @@ The following notation is used throughout Stacie's documentation.
       to distinguish between integrated and exponential autocorrelation times.
     - $h$ is the time step of a discretized time axis
       (with equal specing between the grid points).
-    - Integer steps on a discretized time axis are denoted as indexes $n$ or $m$, the difference between them as $\Delta$.
+    - Integer steps on a discretized time axis are denoted as indexes $n$ or $m$,
+      the difference between them as $\Delta$.
 
 - $p_x(x)$ is the probability density function of $\hat{x}$.
 
@@ -54,7 +55,6 @@ The following notation is used throughout Stacie's documentation.
         = \frac{1}{2^{\nu/2} \Gamma(\nu/2)} x^{\nu/2 - 1} e^{-x/2}
         = p_{\gdist(\nu/2,2)} (x)
     $$
-
 
 ## Discrete Fourier Transform
 

@@ -94,7 +94,6 @@ def plot_potential_dist():
 
 plot_potential_dist()
 
-
 # %% [markdown]
 # The MCMC implementation below is non-standard in the sense that it
 # is vectorized to generate multiple sequences in parallel.

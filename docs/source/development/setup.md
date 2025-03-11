@@ -24,7 +24,8 @@ make latexpdf
 
 The documentation is created using [Sphinx](https://www.sphinx-doc.org/).
 
-Edit the documentation Markdown files with a live preview by running the following command *in the root* of the repository:
+Edit the documentation Markdown files with a live preview
+by running the following command *in the root* of the repository:
 
 ```bash
 sphinx-autobuild docs/source docs/build/html --watch docs/source/ --watch src/stacie/
@@ -36,15 +37,3 @@ Now you can edit the documentation and see the result as soon as you save a file
 
 Please, use [Semantic Line Breaks](https://sembr.org/)
 because it facilitates reviewing documentation changes.
-
-
-## Nix(OS) setup.
-
-As an alternative to the instructions above, you can also create a development environment for NixOS
-with devenv (>= 1.4.0), by putting the following in your `.envrc`:
-
-```bash
-export DIRENV_WARN_TIMEOUT=20s
-eval "$(devenv direnvrc)"
-use devenv
-```
