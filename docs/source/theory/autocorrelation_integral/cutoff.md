@@ -51,7 +51,7 @@ $$
 where $\hat{\mu}_i$ and $\hat{\sigma}_i$
 are the maximum-likelihood mean and standard deviation of the model for data point $i$.
 In the case of spectra, the residuals in the notation from the
-[Parameter Estimation](../model.md#lmax-target) section are:
+[Parameter Estimation](model.md) section are:
 
 $$
   \hat{Y}_i &= \hat{C}_i
