@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # %% [markdown]
-# # Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)
+# # Shear viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)
 #
 # This example shows how to calculate viscosity
 # from pressure tensor data obtained via a LAMMPS simulation.
@@ -240,7 +240,8 @@ def demo_production():
 
     # Load trajectory data, without hardcoding the number of runs and parts.
     # - `part_00` corresponds to the initial production run (4000 steps).
-    # - `part_01` corresponds to the first extension of the production run (4000 extra steps).
+    # - `part_01` corresponds to the first extension of the production run
+    # (4000 extra steps).
     thermos = []
     pressures = []
     last_replica = -1
@@ -282,15 +283,15 @@ eta_production = demo_production()
 # %% [markdown]
 # ## Comparison to Literature Results
 #
-# Comprehensive literature surveys on computational estimates of the viscosity of a Lennard-Jones fluid
-# can be found in {cite:p}`meier_2024_transport` and {cite:p}`viscardi_2007_transport1`.
+# Comprehensive literature surveys on computational estimates of the shear viscosity of a Lennard-Jones fluid
+# can be found in {cite:p}`meier_2004_transport_I` and {cite:p}`viscardi_2007_transport1`.
 # These papers also present new results, which are included in the table below.
 # Since the simulation settings ($r_\text{cut}^{*}=2.5$, $N=1372$, $T^*=0.722$ and $\rho^{*}=0.8442$)
 # are identical to those used in this notebook, the reported values should be directly comparable.
 #
-# | Method                     | Simulation time [τ\*] | Viscosity [η\*] | Reference |
+# | Method                     | Simulation time [τ\*] | Shear viscosity [η\*] | Reference |
 # |----------------------------|-----------------------|-----------------|-----------|
-# | EMD NVE (Helfand-Einstein) | 75000                 | 3.277 ± 0.098   | {cite:p}`meier_2024_transport` |
+# | EMD NVE (Helfand-Einstein) | 75000                 | 3.277 ± 0.098   | {cite:p}`meier_2004_transport_I` |
 # | EMD NVE (Helfand-moment)   | 600000                | 3.268 ± 0.055   | {cite:p}`viscardi_2007_transport1` |
 # | EMD NVE (Stacie)           | 2400                  | 3.236 ± 0.078   | This notebook |
 #
