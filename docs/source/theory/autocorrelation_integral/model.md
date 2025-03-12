@@ -24,7 +24,7 @@ In both cases, the value of the model at zero frequency corresponds to the autoc
 The Chebyshev model is defined as
 
 $$
-    C^\text{poly}_k \approx \sum_{n=0}^N a_n T_n\left(1-\frac{2f}{f_\text{cut}}\right)
+    C^\text{cheb}_k \approx \sum_{n=0}^N a_n T_n\left(1-\frac{2f}{f_\text{cut}}\right)
 $$
 
 where $N$ is the degree of the polynomial and $T_n$ are the
@@ -33,6 +33,18 @@ The parameter $f_\text{cut}$ is the cutoff frequency
 used to select the low-frequency part of the spectrum,
 i.e. the highest frequency considered in the fit.
 With this form, the sum of all the coefficients corresponds
+to the integral of the autocorrelation function.
+
+Stacie also supports a variant of the Chebyshev model, in which all basis functions are even
+functions of the frequency, and only mononomials of even degree are included.
+This variant of the model can be written as:
+
+$$
+    C^\text{evencheb}_k \approx \sum_{n=0}^N a_n (-1)^n T_{2n}\left(\frac{f}{f_\text{cut}}\right)
+$$
+
+The factor :math:`(-1)^n` is included to ensure that all basis functions
+are one at zero frequency, such that the sum of all the coefficients corresponds
 to the integral of the autocorrelation function.
 
 ## 2. Exponential Tail Model

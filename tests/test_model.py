@@ -63,6 +63,15 @@ def test_guess_exptail():
     assert np.isfinite(pars_init).all()
 
 
+@pytest.mark.parametrize("degree", [0, 1, 2, 3, 4])
+def test_cheb_one(degree):
+    model = ChebyshevModel(degree)
+    assert model.npar == degree + 1
+    basis = model.basis(FREQS, 1.0, [])
+    assert basis.shape == (degree + 1, len(FREQS))
+    assert (basis[:, 0] == 1).all()
+
+
 PARS_REF_CHEBY = [
     [-12.0, 3.4, 78.3],
     [9.0, 8.1],
@@ -73,21 +82,77 @@ PARS_REF_CHEBY = [
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_CHEBY)
-def test_gradient_cheby(pars_ref):
+def test_gradient_cheb(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ChebyshevModel(len(pars_ref) - 1)
     check_gradient(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_CHEBY)
-def test_hessian_cheby(pars_ref):
+def test_hessian_cheb(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ChebyshevModel(len(pars_ref) - 1)
     check_hessian(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
 
 
-def test_guess_cheby():
+def test_guess_cheb():
     model = ChebyshevModel(2)
+    rng = np.random.default_rng(123)
+    amplitudes = rng.normal(size=len(FREQS)) ** 2
+    ndofs = np.full(len(FREQS), 2)
+    par_scales = model.get_par_scales(TIMESTEP, FREQS, amplitudes)
+    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, par_scales, rng, 10)
+    assert len(pars_init) == 3
+    assert np.isfinite(pars_init).all()
+
+
+@pytest.mark.parametrize(
+    ("degree", "npar"),
+    [
+        (0, 1),
+        (1, 1),
+        (2, 2),
+        (3, 2),
+        (4, 3),
+        (5, 3),
+        (6, 4),
+        (7, 4),
+    ],
+)
+def test_even_cheb_one(degree, npar):
+    model = ChebyshevModel(degree, even=True)
+    assert model.npar == npar
+    basis = model.basis(FREQS, 1.0, [])
+    assert basis.shape == (npar, len(FREQS))
+    assert (basis[:, 0] == 1).all()
+
+
+PARSE_REF_EVEN_CHEBY = [
+    [1.5],
+    [0.0],
+    [0.0, 0.0],
+    [2.31, 3.71],
+    [0.0, 0.0, 0.0],
+    [-2.0, 0.4, -8.3],
+]
+
+
+@pytest.mark.parametrize("pars_ref", PARSE_REF_EVEN_CHEBY)
+def test_gradient_cheb_even(pars_ref):
+    pars_ref = np.array(pars_ref)
+    model = ChebyshevModel(2 * len(pars_ref) - 2, even=True)
+    check_gradient(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+
+
+@pytest.mark.parametrize("pars_ref", PARSE_REF_EVEN_CHEBY)
+def test_hessian_cheb_even(pars_ref):
+    pars_ref = np.array(pars_ref)
+    model = ChebyshevModel(2 * len(pars_ref) - 2, even=True)
+    check_hessian(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+
+
+def test_guess_cheb_even():
+    model = ChebyshevModel(4, even=True)
     rng = np.random.default_rng(123)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
     ndofs = np.full(len(FREQS), 2)
