@@ -3,7 +3,7 @@
 Stacie supports two models for fitting the low-frequency part of the power spectrum.
 In both models, the value at zero frequency corresponds to the autocorrelation integral.
 
-1. Chebyshev model is the most general: it consists of a linear combination of
+1. The Chebyshev model is the most general: it consists of a linear combination of
    Chebyshev polynomials adjusted to the domain of the frequency grid.
    One can specify the polynomial degree and typically a low degree works fine:
 
@@ -15,7 +15,7 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
     The main advantage of this model is its broad applicability,
     as it does not require prior knowledge of the functional form of the spectra.
 
-2. Exponential Tail model is designed for autocorrelation functions that decay exponentially.
+2. The Exponential Tail model is designed for autocorrelation functions that decay exponentially.
    Its primary advantage is that, in addition to the integrated correlation time,
    it also provides an estimate of the exponential correlation time.
 
