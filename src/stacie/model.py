@@ -349,7 +349,7 @@ class ChebyshevModel(SpectrumModel):
     """A linear combination of Chebyshev polynomials."""
 
     degree: int = attrs.field(converter=int, validator=attrs.validators.ge(0))
-    """The highest degree of the polynamials included in the model.
+    """The highest degree of the polynomials included in the model.
 
     If even is ``True``, only even polynomials are included.
     For example, if degree is 3 and even is ``True``,
