@@ -31,7 +31,6 @@ mpl.rc_file("matplotlibrc")
 # - `get_piso`: Computes the isotropic pressure from the diagonal components
 #   of the time-dependent pressure tensor ($P_{xx}$, $P_{yy}$, and $P_{zz}$),
 #   as explained in the [bulk viscosity](../theory/properties/bulk_viscosity.md) theory section.
-# - `plot_temperature`: Plots the instantaneous temperature and compares it to the target value.
 # - `estimate_bulk_viscosity`: Computes the bulk viscosity, visualizes the results,
 #   and provides recommendations for data reduction (block averaging) and simulation time,
 #   as explained in the following two sections of the documentation:
@@ -91,23 +90,6 @@ def estimate_bulk_viscosity(name, pcomps, av_temperature, volume, timestep):
 
 
 # %%
-def plot_temperature(name, time, temperatures, de_temperature):
-    av_temperature = np.mean(temperatures)
-    plt.close(f"{name}_temp")
-    _, ax = plt.subplots(num=f"{name}_temp")
-    for temperature in temperatures:
-        ax.plot(time, temperature, alpha=0.5, label="__nolegend__")
-    ax.axhline(de_temperature, color="black", label=f"Desired: {de_temperature:.3f}")
-    ax.axhline(
-        av_temperature, color="black", ls=":", label=f"Average {av_temperature:.3f}"
-    )
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Temperature")
-    ax.legend()
-    return av_temperature
-
-
-# %%
 def demo_production():
     lammps = Path("../../data/lammps_lj3d")
 
@@ -141,11 +123,9 @@ def demo_production():
     thermos = [np.concatenate(parts).T for parts in thermos]
     pressures = [np.concatenate(parts).T for parts in pressures]
 
-    # Plot the instantaneous and desired temperature.
-    time = thermos[0][0] * info["timestep"]
-    av_temperature = plot_temperature(
-        name, time, [thermo[1] for thermo in thermos], info["temperature"]
-    )
+    # Compute the average temperature
+    av_temperature = np.mean([thermo[1] for thermo in thermos])
+
     # Compute the bulk viscosity
     pcomps = np.concatenate([get_piso(pressure[1:]) for pressure in pressures])
     return estimate_bulk_viscosity(
@@ -169,12 +149,19 @@ eta_bulk_production = demo_production()
 #
 # | Method                     | Simulation time [τ\*] | Bulk viscosity [η$_b$\*] | Reference |
 # |----------------------------|-----------------------|-----------------|-----------|
-# | EMD NVE (Helfand-Einstein) | 10 $\times$ 10$^6$    | 1.186 ± 0.084   | {cite:p}`meier_2004_transport_III` |
+# | EMD NVE (Helfand-Einstein) | 300000                | 1.186 ± 0.084   | {cite:p}`meier_2004_transport_III` |
 # | EMD NVE (Stacie)           | 2400                  | 1.158 ± 0.064   | This notebook |
 #
 # This comparison demonstrates that Stacie accurately reproduces bulk viscosity results
 # while achieving lower statistical uncertainty with significantly less data than existing methods.
 
+# ::: {note}
+# The results in this study were obtained using
+# [LAMMPS version 7 Feb 2024](https://github.com/lammps/lammps/releases/tag/patch_4Feb2025).
+# Note that minor differences may arise due to updates in numerical algorithms,
+# floating-point precisions across different LAMMPS versions.
+# Users replicating these results with different LAMMPS versions are advised to be aware of
+# these potential discrepancies.
 
 # %%  [markdown]
 # ## Regression Tests
