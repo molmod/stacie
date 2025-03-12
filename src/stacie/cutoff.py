@@ -73,9 +73,9 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> float:
     kappa = props["kappas"]
 
     nlwe_empirical = np.log(ratio.mean()) - np.log(ratio).mean()
-    nlwe_expected = digamma(nfreq * kappa) - digamma(kappa) - np.log(nfreq)
+    nlwe_expected = (digamma(nfreq * kappa) - digamma(kappa)).mean() - np.log(nfreq)
 
-    return ((nlwe_empirical - nlwe_expected) ** 2).mean()
+    return (nlwe_empirical - nlwe_expected) * nfreq
 
 
 def underfitting_criterion(props: dict[str, NDArray]) -> float:

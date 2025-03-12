@@ -267,18 +267,18 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         criteria.append(props["criterion"])
     freqs = np.array(freqs)
     criteria = np.array(criteria)
-    criteria -= criteria[0]
 
     ax.plot(freqs / uc.freq_unit, criteria, color="C1", lw=1)
     ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
+    ax.axhline(0, **REF_PROPS)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel("Criterion - Criterion[0]")
+    ax.set_ylabel("Criterion")
     ax.set_title("Cutoff criterion")
     ax.set_xscale("log")
     if np.isfinite(criteria).any():
-        criterion_scale = abs(criteria.min())
+        criterion_scale = abs(criteria[0] - criteria.min())
         if criterion_scale > 0:
-            ax.set_ylim(criteria.min() - 0.2 * criterion_scale, 2 * criterion_scale)
+            ax.set_ylim(criteria[0] - 1.2 * criterion_scale, criteria[0] + 2 * criterion_scale)
 
 
 def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
