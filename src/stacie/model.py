@@ -349,31 +349,39 @@ class ChebyshevModel(SpectrumModel):
     """A linear combination of Chebyshev polynomials."""
 
     degree: int = attrs.field(converter=int, validator=attrs.validators.ge(0))
-    """The highest degree of the polynamials included in the model."""
+    """The highest degree of the polynomials included in the model.
+
+    If even is ``True``, only even polynomials are included.
+    For example, if degree is 3 and even is ``True``,
+    the model includes the polynomials :math:`T_0`, :math:`T_2`.
+    """
+
+    even: bool = attrs.field(converter=bool, default=False)
+    """If ``True``, only even polynomials are included. If ``False``, all terms are included."""
 
     @property
     def name(self):
-        return f"cheby({self.degree})"
+        return f"evencheb({self.degree})" if self.even else f"cheb({self.degree})"
 
     def bounds(self) -> list[tuple[float, float]]:
         """Return parameter bounds for the optimizer."""
-        return [(-np.inf, np.inf)] * (self.degree + 1)
+        return [(-np.inf, np.inf)] * self.npar
 
     @property
     def npar(self):
         """Return the number of parameters."""
-        return self.degree + 1
+        return (self.degree + 2) // 2 if self.even else self.degree + 1
 
     def get_par_scales(
         self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
     ) -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
         sl = self.get_scales_low(timestep, freqs, amplitudes)
-        return np.full(self.degree + 1, sl["amp_scale"])
+        return np.full(self.npar, sl["amp_scale"])
 
     def get_par_nonlinear(self) -> NDArray[bool]:
         """Return a boolean mask for the nonlinear parameters."""
-        return np.zeros(self.degree + 1, dtype=bool)
+        return np.zeros(self.npar, dtype=bool)
 
     def compute(
         self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
@@ -389,10 +397,18 @@ class ChebyshevModel(SpectrumModel):
         # Construct a basis of Chebyshev polynomials.
         basis = [np.ones(len(freqs))]
         if self.degree > 0:
-            basis.append(1 - 2 * freqs / freqs[-1])
+            if self.even:
+                basis.append(freqs / freqs[-1])
+            else:
+                # Reverse the frequency axis, so all basis functions are 1 at freq 0.
+                basis.append(1 - 2 * freqs / freqs[-1])
         for _ in range(2, self.degree + 1):
             basis.append(2 * basis[1] * basis[-1] - basis[-2])
         basis = np.array(basis)
+        if self.even:
+            basis = basis[::2]
+            # Flip the signs of every other basis function, say they are all 1 at freq 0.
+            basis *= 1 - 2 * (np.arange(len(basis)).reshape(-1, 1) % 2)
 
         # Compute model amplitudes and derivatives.
         results = [np.dot(pars, basis)]
