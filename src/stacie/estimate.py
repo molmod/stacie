@@ -220,6 +220,14 @@ def estimate_acint(
         rpi_opt(compute_criterion, [0, len(nfits) - 1], mode="min")
         if any(np.isfinite(props["criterion"]) for props in history.values()):
             nfit = min((record["criterion"], key) for key, record in history.items())[1]
+            if nfit == nfits[0]:
+                warnings.warn(
+                    "The lowest possible cutoff was selected. "
+                    "This indicates that the time series are too short, "
+                    "in which case the result is most likely biased.",
+                    FCutWarning,
+                    stacklevel=2,
+                )
         else:
             warnings.warn(
                 "Could not find a suitable frequency cutoff. "
