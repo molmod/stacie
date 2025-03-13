@@ -1,5 +1,6 @@
 # Stacie
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![pytest](https://github.com/molmod/stacie/actions/workflows/pytest.yaml/badge.svg)](https://github.com/molmod/stacie/actions/workflows/pytest.yaml)
 [![PyPI](https://img.shields.io/pypi/v/stacie.svg)](https://pypi.python.org/pypi/stacie/)
 ![Version](https://img.shields.io/pypi/pyversions/stacie.svg)
