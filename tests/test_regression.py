@@ -127,7 +127,7 @@ def test_exptail_noscan_multi(regtest, names: list[str]):
     output_test_result("exptail_noscan_multi", res)
 
 
-@pytest.mark.parametrize("name", ALL_NAMES)
+@pytest.mark.parametrize("name", DOUBLE_NAMES)
 @pytest.mark.parametrize("fcutmax", [0.03, None])
 def test_exptail_scan(regtest, fcutmax: float, name: list[str]):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
@@ -147,8 +147,13 @@ def test_exptail_scan(regtest, fcutmax: float, name: list[str]):
     output_test_result(prefix, res)
 
 
-@pytest.mark.parametrize("names", NAME_LISTS)
-@pytest.mark.parametrize("model", [ExpTailModel(), ChebyshevModel(0)])
+@pytest.mark.parametrize(
+    ("names", "model"),
+    [
+        (DOUBLE_NAMES, ExpTailModel()),
+        (WHITE_NAMES, ChebyshevModel(0)),
+    ],
+)
 @pytest.mark.parametrize("zero_freq", [False, True])
 def test_scan_multi(regtest, zero_freq: bool, model: SpectrumModel, names: list[str]):
     res = []

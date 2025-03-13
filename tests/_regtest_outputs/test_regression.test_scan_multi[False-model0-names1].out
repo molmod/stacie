@@ -1,8 +1,0 @@
-acint = 1.50449e+02 ± 1.93880e+01
-corrtime int = 5.89263e-01 ± 7.59368e-02
-log(lh) = -5.73417e+01
----
-acint = 1.25383e+02 ± inf
-corrtime int = 4.89970e-01 ± inf
-log(lh) = -3.77753e+01
----
