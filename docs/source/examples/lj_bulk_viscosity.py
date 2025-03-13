@@ -150,18 +150,17 @@ eta_bulk_production = demo_production()
 # | Method                     | Simulation time [τ\*] | Bulk viscosity [η$_b$\*] | Reference |
 # |----------------------------|-----------------------|-----------------|-----------|
 # | EMD NVE (Helfand-Einstein) | 300000                | 1.186 ± 0.084   | {cite:p}`meier_2004_transport_III` |
-# | EMD NVE (Stacie)           | 2400                  | 1.158 ± 0.064   | This notebook |
+# | EMD NVE (Stacie)           | 2400                  | 1.131 ± 0.058   | This notebook |
 #
 # This comparison demonstrates that Stacie accurately reproduces bulk viscosity results
 # while achieving lower statistical uncertainty with significantly less data than existing methods.
-
+#
 # ::: {note}
-# The results in this study were obtained using
-# [LAMMPS version 7 Feb 2024](https://github.com/lammps/lammps/releases/tag/patch_4Feb2025).
-# Note that minor differences may arise due to updates in numerical algorithms,
-# floating-point precisions across different LAMMPS versions.
-# Users replicating these results with different LAMMPS versions are advised to be aware of
-# these potential discrepancies.
+#
+#     The results in this study were obtained using
+#     [LAMMPS version 19 Nov 2024](https://github.com/lammps/lammps/releases/tag/patch_19Nov2024).
+#     Note that minor differences may arise when using a different version of LAMMPS,
+#     or even the same version compiled with a different compiler.
 
 # %%  [markdown]
 # ## Regression Tests

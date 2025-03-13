@@ -181,7 +181,13 @@ kappa_production = demo_production()
 #    For systems with only two-body interactions, as in this notebook,
 #    the `compute heat/flux` command with `compute stress/atom` command is sufficient.
 #    This warning is important for molecular systems.
-
+#
+# ::: {note}
+#
+#     The results in this study were obtained using
+#     [LAMMPS version 19 Nov 2024](https://github.com/lammps/lammps/releases/tag/patch_19Nov2024).
+#     Note that minor differences may arise when using a different version of LAMMPS,
+#     or even the same version compiled with a different compiler.
 # %%  [markdown]
 # ## Regression Tests
 #

@@ -304,6 +304,13 @@ eta_production = demo_production()
 # to ensure that different production runs are uncorrelated.
 # Even when these additional runs are included, the overall simulation time
 # remains significantly lower than in the cited papers.
+#
+# ::: {note}
+#
+#     The results in this study were obtained using
+#     [LAMMPS version 19 Nov 2024](https://github.com/lammps/lammps/releases/tag/patch_19Nov2024).
+#     Note that minor differences may arise when using a different version of LAMMPS,
+#     or even the same version compiled with a different compiler.
 
 # %%  [markdown]
 # ## Regression Tests
