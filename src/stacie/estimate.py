@@ -26,7 +26,7 @@ from scipy.optimize import minimize
 
 from .conditioning import ConditionedCost
 from .cost import LowFreqCost
-from .cutoff import CutoffCriterion, entropy_criterion
+from .cutoff import CutoffCriterion, underfitting_criterion
 from .model import ExpTailModel, SpectrumModel, guess
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
@@ -97,7 +97,7 @@ def estimate_acint(
     nfitmin: int = 10,
     nfitmax_hard: int = 1000,
     model: SpectrumModel | None = None,
-    cutoff_criterion: CutoffCriterion = entropy_criterion,
+    cutoff_criterion: CutoffCriterion = underfitting_criterion,
     rng: np.random.Generator | None = None,
     nonlinear_budget: int = 10,
     verbose: bool = False,
