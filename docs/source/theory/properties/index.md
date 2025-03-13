@@ -20,7 +20,7 @@ These properties are sometimes referred to as diagonal transport coefficients {c
 - [Electrical conductivity](electrical_conductivity.md), $\sigma$
 - [Thermal conductivity](thermal_conductivity.md), $\kappa$
 - [Shear viscosity](shear_viscosity.md), $\eta$
-- [Bulk viscosity](bulk_viscosity.md), $\eta_\text{bulk}$
+- [Bulk viscosity](bulk_viscosity.md), $\eta_b$
 
 ```{toctree}
 :hidden:

@@ -171,16 +171,23 @@ kappa_production = demo_production()
 
 # %% [markdown]
 # ::: {warning}
+# The LAMMPS `compute/heat flux` command is reported to produce unphysical results
+# when many-body interactions (e.g. angle, dihedral, impropers) are present
+# {cite:p}`jamali_2019_octp`, {cite:p}`surblys_2019_application`,
+# {cite:p}`boone_2019_heat`, {cite:p}`surblys_2021_methodology`.
+# In that case, one should use the `compute heat/flux` command with
+# [`compute centroid/stress/atom`](https://docs.lammps.org/compute_heat_flux.html).
+# For systems with only two-body interactions, as in this notebook,
+# the `compute heat/flux` command with `compute stress/atom` command is sufficient.
+# This warning is important for molecular systems.
+# :::
 #
-#    The LAMMPS `compute/heat flux` command is reported to produce unphysical results
-#    when many-body interactions (e.g. angle, dihedral, impropers) are present
-#    {cite:p}`jamali_2019_octp`, {cite:p}`surblys_2019_application`,
-#    {cite:p}`boone_2019_heat`, {cite:p}`surblys_2021_methodology`.
-#    In that case, one should use the `compute heat/flux` command with
-#    [`compute centroid/stress/atom`](https://docs.lammps.org/compute_heat_flux.html).
-#    For systems with only two-body interactions, as in this notebook,
-#    the `compute heat/flux` command with `compute stress/atom` command is sufficient.
-#    This warning is important for molecular systems.
+# ::: {note}
+# The results in this study were obtained using
+# [LAMMPS version 19 Nov 2024](https://github.com/lammps/lammps/releases/tag/patch_19Nov2024).
+# Note that minor differences may arise when using a different version of LAMMPS,
+# or even the same version compiled with a different compiler.
+# :::
 
 # %%  [markdown]
 # ## Regression Tests

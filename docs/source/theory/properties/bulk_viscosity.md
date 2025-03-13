@@ -4,7 +4,7 @@ The bulk viscosity of a fluid is related to the autocorrelation
 of isotropic pressure fluctuations as follows:
 
 $$
-    \eta = \frac{V}{2 k_\text{B} T}
+    \eta_b = \frac{V}{2 k_\text{B} T}
         \int_{-\infty}^{+\infty}
         \cov[\hat{P}_\text{iso}(t_0) \,,\, \hat{P}_\text{iso}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
