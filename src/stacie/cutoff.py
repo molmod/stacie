@@ -21,14 +21,15 @@
 All ``*_criterion`` functions in this module have the same API:
 they receive a dictionary of properties computed in ``estimate.estimate_acint``
 and return a dictionary with at least one key ``"criterion"``.
-The lower this criterion, the better the cutoff balances between over- and underfitting.
+The lower the value of this criterion,
+the better the cutoff balances between over- and underfitting.
 
 Some function also add a field ``"criterion_expected"`` to the result,
 with the expected value of the criterion.
 
-The functions may also include a field ``"criterion_high"``,
-which is the value of the criterion for which the spectrum would certainly be underfitted.
-This parameter is used to set the limits of the y-axis in the plot of the criterion.
+Additionally, some functions include a field ``"criterion_high"``,
+which indicates the value of the criterion beyond which the spectrum would certainly be underfitted.
+This value is used to set the limits of the y-axis in the plot of the criterion.
 """
 
 from collections.abc import Callable
@@ -80,11 +81,11 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> float:
 
         \text{criterion} = \text{NLWE}_{\text{empirical}} - \text{NLWE}_{\text{expected}} \ln(n)
 
-    Without the second term the NLWE tends to be low and noisy over a range of spectra
-    until it suddenly jumps up when the spectrum is underfitted.
-    By adding the second term, a slowly decreasing function of the frequency,
-    the minimum is shofted to the highest frequency where the spectrum is
-    at worst a little underfitted.
+    Without the second term, the NLWE tends to be low and noisy over a range of spectra,
+    until it suddenly increase when the spectrum is underfitted.
+    Including the second term, which is a slowly decreasing function of frequency, ensures that
+    the criterion minimum shifts toward the highest possible frequency at which the
+    spectrum is at most slightly underfitted.
 
     Parameters
     ----------
@@ -114,7 +115,7 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> float:
 def underfitting_criterion(props: dict[str, NDArray]) -> float:
     """Quantify the degree of underfitting of a smooth spectrum model to noisy data.
 
-    See documentation for details.
+    See documentation for more details.
 
     Parameters
     ----------
@@ -125,7 +126,7 @@ def underfitting_criterion(props: dict[str, NDArray]) -> float:
     -------
     results
         A dictionary with "criterion" and other fields.
-        (See module docstring for details.)
+        (See module docstring for more details.)
     """
     residuals = (props["amplitudes"] / props["thetas"] - props["kappas"]) / np.sqrt(props["kappas"])
     return {
@@ -143,21 +144,21 @@ def general_ufc(residuals: NDArray[float]) -> float:
     residuals
         Normalized residuals,
         i.e. with the maximum likelihood estimate of the mean and standard deviation
-        of the predication at each point.
+        of the prediction at each point.
 
     Returns
     -------
     criterion
-        A criterion quantifying the degree of underfitting.
-        This can be used to compare different selections of (contiguous) fitting data
+        A value quantifying the degree of underfitting.
+        This criterion can be used to compare different selections of (contiguous) fitting data
         to which the same model is fitted.
-        Lower is better.
+        A lower value indicates better fit.
     """
     if residuals.ndim != 1:
-        raise TypeError("The residuals must be given in a 1D array.")
+        raise TypeError("The residuals must be a 1D array.")
     nfit = len(residuals)
     if nfit < 2:
-        raise TypeError("The underfitting criterion is meaningless for zero or one residual.")
+        raise TypeError("The underfitting criterion requires at least two residuals.")
     # 'scs' is the abbreviation of 'symmetric cumulative sum'.
     scs = np.zeros(nfit + 1)
     np.cumsum(residuals, out=scs[1:])
@@ -172,10 +173,10 @@ def expected_ufc(basis: NDArray[float]) -> float:
     Parameters
     ----------
     basis
-        A set of basis functions, obtained by linearizing the regression problem,
-        with shape `(nparameters, nfreq)`, i.e. ech  row is a basis vector.
-        The residuals should be orthogonal to these basis functions.
-        The basis vectors do not need to be orthogonal or normalized.
+        A set of basis functions, obtained by linearizing the regression problem.
+        The array should have a shape of `(nparameters, nfreq)`, where each row
+        represents a basis vector. The residuals must be orthogonal to these basis
+        functions. Note that the basis vectors do not need to be orthogonal or normalized.
 
     Returns
     -------
@@ -282,7 +283,7 @@ def akaike_criterion(props: dict[str, NDArray]) -> float:
 
 
 def halfhalf_criterion(props: dict[str, NDArray]) -> float:
-    """Likelihood that the same parameters fit to the first and second half of the spectrum.
+    """Likelihood that the same parameters fit both the first and second halves of the spectrum.
 
     Parameters
     ----------
