@@ -64,7 +64,7 @@ $$
 The parameter $\hat{\theta}_i$ is the scale of the Gamma distribution at each frequency,
 found with the best parameters, i.e. those that maximize the log-likelihood.
 
-In a regression problem (without underfitting), we would have the following expectation values:
+In a regression problem (without underfitting), we would have the following expected values:
 
 $$
     \mean[\hat{R}_i] = 0 \qquad \mean[\hat{R}^2_i] < 1
@@ -116,7 +116,7 @@ minus the sum of the remaining residuals.
 If $j$ corresponds to the data point where the model goes from over- to undershooting the data,
 then $\hat{U}_j$ will add systematic errors on both sides of $j$ with the same sign.
 
-In the absence of underfitting, the corresponding expectation values should satisfy:
+In the absence of underfitting, the corresponding expected values should satisfy:
 
 $$
     \mean[\hat{U}_j] = 0 \qquad \mean[\hat{U}^2_j] < N_\text{fit}
@@ -125,7 +125,7 @@ $$
 However, in case of underfitting, there is a trend in the residuals,
 meaning that nearby residuals are positively correlated.
 In this case, the positively correlated errors will add up in the cumulative sums,
-such that the sample variance of $\hat{U}^2_j$ quickly exceeds the expectation value above.
+such that the sample variance of $\hat{U}^2_j$ quickly exceeds the expected value above.
 
 ## Underfitting Criterion
 

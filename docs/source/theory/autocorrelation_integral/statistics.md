@@ -35,9 +35,9 @@ are sine- and cosine-like basis functions.
 As a result, the covariance of the sequence $\hat{\mathbf{X}}$ becomes diagonal.
 To make this derivation self-contained, we write out the mean and covariance of $\hat{X}_k$ explicitly.
 Note that the operators $\mean[\cdot]$, $\var[\cdot]$ and $\cov[\cdot,\cdot]$
-are expectation values over all possible realizations of the sequence.
+are expected values over all possible realizations of the sequence.
 
-For the expectation value of the Fourier transform,
+For the expected value of the Fourier transform,
 we take advantage of the fact that all time translations of $\hat{\mathbf{x}}$
 belong to the same distribution.
 We can explicitly compute the average over all time translations,

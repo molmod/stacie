@@ -1,43 +1,57 @@
 #!/usr/bin/env python
-"""Generate synthetic signals and store their spectra in NPZ files for testing."""
+"""Generate synthetic signals and store their spectra as compressed messagepack files for testing.
 
+Four spectra are generated:
+
+- A `white` noise spectrum.
+- A `pure` Lorentzian (without white noise added).
+- A `broad` Lorentzian (with white noise added).
+- A `double` Lorentzian (without white noise added).
+
+All spectra are generated with 8192 time steps and 256 independent realizations.
+The ground truth of the spectrum is stored in `spectrum.amplitudes_ref`.
+The expected value of the autocorrelation integral is always 1.
+"""
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
-from celerite2 import GaussianProcess, terms
 
 from stacie.msgpack import dump
+from stacie.plot import UnitConfig, plot_spectrum
 from stacie.spectrum import Spectrum, compute_spectrum
+from stacie.synthetic import generate
 
 
 def main():
-    dump("../tests/inputs/spectrum_white1.nmpk.xz", generate_white(1, 2000, 400))
-    dump("../tests/inputs/spectrum_white2.nmpk.xz", generate_white(2, 2000, 400))
-    dump("../tests/inputs/spectrum_double1.nmpk.xz", generate_double(1, 2000, 400))
-    dump("../tests/inputs/spectrum_double2.nmpk.xz", generate_double(2, 2000, 400))
+    generate_lorentzian("white", 1, 256, 8192, 1.0, [])
+    generate_lorentzian("pure", 2, 256, 8192, 0.0, [(1.0, 40.0)])
+    generate_lorentzian("broad", 3, 256, 8192, 0.2, [(0.8, 4.0)])
+    generate_lorentzian("double", 4, 256, 8192, 0.0, [(0.1, 4.0), (0.9, 40.0)])
 
 
-def generate_white(seed, nstep, nindep) -> Spectrum:
+def generate_lorentzian(name, seed, nseq, nstep, awhite, lterms) -> Spectrum:
     "Generate an averaged white-noise spectrum"
-    rng = np.random.default_rng(seed)
-    sequences = rng.normal(0, 16, (nindep, nstep))
-    spectrum = compute_spectrum(sequences)
-    spectrum.amplitudes_ref = np.full_like(spectrum.freqs, 0.5 * 16**2)
-    return spectrum
-
-
-def generate_double(seed, nstep, nindep) -> Spectrum:
-    """Generate time-correlated data with a double stochastic harmonic oscillator."""
-    kernel = terms.SHOTerm(S0=50.0, w0=0.1, Q=1.0) + terms.SHOTerm(S0=100.0, w0=0.1, Q=0.1)
-    gp = GaussianProcess(kernel)
-    time = np.arange(nstep, dtype=float)
-    gp.compute(time)
-    # Celerite does not support the new RNG interface of NumPy (yet).
-    np.random.seed(seed)  # noqa: NPY002
-    sequences = gp.sample(size=nindep)
-    spectrum = compute_spectrum(sequences)
+    psd = np.full(nstep // 2 + 1, awhite)
     freqs = np.fft.rfftfreq(nstep)
-    omegas = 2 * np.pi * freqs
-    spectrum.amplitudes_ref = gp.kernel.get_psd(omegas) * np.sqrt(np.pi / 2)
-    return spectrum
+    for amplitude, tau in lterms:
+        omegas = 2 * np.pi * freqs
+        psd += amplitude / (1 + (tau * omegas) ** 2)
+    if abs(psd[0] - 1.0) > 1e-6:
+        raise ValueError("DC component is not unity")
+    rng = np.random.default_rng(seed)
+    sequences = generate(psd, 1.0, nseq, nstep, rng)
+    spectrum = compute_spectrum(sequences)
+    spectrum.amplitudes_ref = psd
+    dump("../tests/inputs/spectrum_" + name + ".nmpk.xz", spectrum)
+
+    mpl.rc_file("../docs/source/examples/matplotlibrc")
+    fig, ax = plt.subplots()
+    uc = UnitConfig()
+    plot_spectrum(ax, uc, spectrum)
+    ax.set_title(f'Spectrum "{name}"')
+    ax.set_xlim(0, 0.1)
+    fig.savefig("spectrum_" + name + ".pdf")
 
 
 if __name__ == "__main__":

@@ -51,7 +51,7 @@ def mycost():
     model = ExpTailModel()
     amplitudes = np.array([1.5, 1.4, 1.1, 0.9, 0.8, 1.0, 0.9, 0.9, 0.8, 1.1])
     ndofs = np.array([5, 10, 10, 10, 10, 10, 10, 10, 10, 5])
-    return LowFreqCost(timestep, freqs, amplitudes, ndofs, model)
+    return LowFreqCost(timestep, freqs, ndofs, amplitudes, model)
 
 
 PARS_REF_EXP_TAIL = [
@@ -74,6 +74,7 @@ def test_hessian_exptail(mycost, pars_ref):
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_cost_grad_sensitivity(mycost, pars_ref):
+    """Test the sensitivity with a finite difference approximation."""
     amplitudes0 = mycost.amplitudes.copy()
     sensitivity = mycost.props(pars_ref, deriv=2)["cost_grad_sensitivity"]
 
@@ -84,3 +85,13 @@ def test_cost_grad_sensitivity(mycost, pars_ref):
     num_sensitivity, info = nd.Gradient(cost_grad, full_output=True)(amplitudes0)
     error = np.clip(info.error_estimate, 1e-15, np.inf)
     assert sensitivity / error == pytest.approx(num_sensitivity / error, abs=100)
+
+
+@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
+def test_cost_sensitivity(mycost, pars_ref):
+    """Test that the gradient of the cost can be reconstructed from the sensitivity."""
+    props = mycost.props(pars_ref, deriv=2)
+    grad2 = np.dot(
+        props["cost_grad_sensitivity"], props["amplitudes"] - props["amplitudes_model"][0]
+    )
+    assert props["cost_grad"] == pytest.approx(grad2)

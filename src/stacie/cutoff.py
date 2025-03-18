@@ -16,7 +16,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Criteria for selecting the part of the spectrum to fit to."""
+"""Criteria for selecting the part of the spectrum to fit to.
+
+All ``*_criterion`` functions in this module have the same API:
+they receive a dictionary of properties computed in ``estimate.estimate_acint``
+and return a dictionary with at least one key ``"criterion"``.
+The lower this criterion, the better the cutoff balances between over- and underfitting.
+
+Some function also add a field ``"criterion_expected"`` to the result,
+with the expected value of the criterion.
+
+The functions may also include a field ``"criterion_high"``,
+which is the value of the criterion for which the spectrum would certainly be underfitted.
+This parameter is used to set the limits of the y-axis in the plot of the criterion.
+"""
 
 from collections.abc import Callable
 from typing import NewType
@@ -29,7 +42,10 @@ __all__ = (
     "CutoffCriterion",
     "akaike_criterion",
     "entropy_criterion",
+    "expected_ufc",
     "general_ufc",
+    "halfhalf_criterion",
+    "sumsq_criterion",
     "underfitting_criterion",
 )
 
@@ -49,7 +65,7 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> float:
     where AM and GM are the arithmetic and geometric mean, respectively,
     of the spectrum amplitudes divided by the model of the spectrum.
 
-    The expectation value of the NLWE can be derived using the properties of the Gamma distribution:
+    The expected value of the NLWE can be derived using the properties of the Gamma distribution:
 
     .. math::
 
@@ -57,7 +73,18 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> float:
 
     where :math:`\psi` is the digamma function, :math:`n` is the number of frequencies
     and :math:`\kappa` is the shape parameter of the Gamma distribution.
-    The entropy criterion is then the squared difference between the empirical and expected NLWE.
+
+    The criterion is then computed as:
+
+    .. math::
+
+        \text{criterion} = \text{NLWE}_{\text{empirical}} - \text{NLWE}_{\text{expected}} \ln(n)
+
+    Without the second term the NLWE tends to be low and noisy over a range of spectra
+    until it suddenly jumps up when the spectrum is underfitted.
+    By adding the second term, a slowly decreasing function of the frequency,
+    the minimum is shofted to the highest frequency where the spectrum is
+    at worst a little underfitted.
 
     Parameters
     ----------
@@ -66,8 +93,9 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> float:
 
     Returns
     -------
-    criterion
-        The entropy criterion. Lower is better.
+    results
+        A dictionary with "criterion" and other fields.
+        (See module docstring for details.)
     """
     ratio = props["amplitudes"] / props["amplitudes_model"][0]
     nfreq = len(props["freqs"])
@@ -76,11 +104,17 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> float:
     nlwe_empirical = np.log(ratio.mean()) - np.log(ratio).mean()
     nlwe_expected = (digamma(nfreq * kappa) - digamma(kappa)).mean() - np.log(nfreq)
 
-    return (nlwe_empirical - nlwe_expected) * nfreq
+    return {
+        "criterion": nlwe_empirical - nlwe_expected * np.log(nfreq),
+        "criterion_expected": nlwe_expected * (1 - np.log(nfreq)),
+        "criterion_high": nlwe_expected,
+    }
 
 
 def underfitting_criterion(props: dict[str, NDArray]) -> float:
     """Quantify the degree of underfitting of a smooth spectrum model to noisy data.
+
+    See documentation for details.
 
     Parameters
     ----------
@@ -89,14 +123,16 @@ def underfitting_criterion(props: dict[str, NDArray]) -> float:
 
     Returns
     -------
-    criterion
-        A criterion quantifying the degree of underfitting.
-        This can be used to compare different selections of (contiguous) fitting data
-        to which the same model is fitted.
-        Lower is better.
+    results
+        A dictionary with "criterion" and other fields.
+        (See module docstring for details.)
     """
     residuals = (props["amplitudes"] / props["thetas"] - props["kappas"]) / np.sqrt(props["kappas"])
-    return general_ufc(residuals)
+    return {
+        "criterion": general_ufc(residuals),
+        "criterion_expected": expected_ufc(props["amplitudes_model"][1]),
+        "criterion_high": 0.0,
+    }
 
 
 def general_ufc(residuals: NDArray[float]) -> float:
@@ -122,6 +158,7 @@ def general_ufc(residuals: NDArray[float]) -> float:
     nfit = len(residuals)
     if nfit < 2:
         raise TypeError("The underfitting criterion is meaningless for zero or one residual.")
+    # 'scs' is the abbreviation of 'symmetric cumulative sum'.
     scs = np.zeros(nfit + 1)
     np.cumsum(residuals, out=scs[1:])
     scs -= scs[-1] / 2
@@ -129,8 +166,57 @@ def general_ufc(residuals: NDArray[float]) -> float:
     return (scs**2).mean() - nfit
 
 
-def akaike_criterion(props: dict[str, NDArray]) -> float:
-    """Compute the Akaike Information Criterion (AIC) for the whole spectrum: fitted + discarded.
+def expected_ufc(basis: NDArray[float]) -> float:
+    """Compute the expected value of the underfitting criterion.
+
+    Parameters
+    ----------
+    basis
+        A set of basis functions, obtained by linearizing the regression problem,
+        with shape `(nparameters, nfreq)`, i.e. ech  row is a basis vector.
+        The residuals should be orthogonal to these basis functions.
+        The basis vectors do not need to be orthogonal or normalized.
+
+    Returns
+    -------
+    expected
+        The expected value of the underfitting criterion
+        (averaged over all possible residuals orthogonal to the basis functions).
+    """
+    nbasis, nfreq = basis.shape
+    overlap = np.dot(basis, basis.T)
+    evals, evecs = np.linalg.eigh(overlap)
+    basis = np.dot(evecs.T, basis) / np.sqrt(evals.reshape(-1, 1))
+    overlap = np.dot(basis, basis.T)
+
+    # 'scs' is the abbreviation of 'symmetric cumulative sum'.
+    scs_basis = np.zeros((nbasis, nfreq + 1))
+    np.cumsum(basis, out=scs_basis[:, 1:], axis=1)
+    scs_basis -= scs_basis[:, -1:] / 2
+    scs_basis *= 2
+    uvec_sqmodel = nfreq - np.sum(scs_basis**2, axis=0)
+    return uvec_sqmodel.sum() / (nfreq + 1) - nfreq
+
+
+def sumsq_criterion(props: dict[str, np.ndarray]) -> float:
+    """A cutoff criterion based on the statistics of the sum of squares of the residuals.
+
+    The sum of (normalized) squared residuals in a regression problem is known
+    to follow a chi-squared distribution with a number of degrees of freedom
+    equal to the number of data points minus the number of parameters.
+
+    This criterion consists of three terms:
+
+      1. Minus the log-likelihood of the sum of squares of the residuals
+         under the assumption that it follows this chi-squared distribution.
+      2. The entropy of the same chi-squared distribution,
+         which corresponds to the expected value of the first term.
+      3. The log of the number of degrees of freedom.
+
+    The sum of the first two terms is flat (with some statistical noise)
+    until the spectrum is clearly underfitted, at which point it jumps up.
+    The third term is added to shift the minimum to the highest frequency
+    where the spectrum is at worst a little underfitted.
 
     Parameters
     ----------
@@ -139,10 +225,47 @@ def akaike_criterion(props: dict[str, NDArray]) -> float:
 
     Returns
     -------
-    criterion
-        The total AIC.
-        This can be used to compare different spectrum cutoffs.
-        Lower is better.
+    results
+        A dictionary with "criterion" and other fields.
+        (See module docstring for details.)
+    """
+    amplitudes = props["amplitudes"]
+    kappas = props["kappas"]
+    thetas = props["thetas"]
+    residuals = (amplitudes / thetas - kappas) / np.sqrt(kappas)
+    sumsq = (residuals**2).sum()
+    ndof = len(residuals) - len(props["pars"])
+    nlogprob = (
+        0.5 * ndof * np.log(2)
+        + gammaln(0.5 * ndof)
+        + (1 - 0.5 * ndof) * np.log(sumsq)
+        + 0.5 * sumsq
+    )
+    entropy = 0.5 * ndof + np.log(2) + gammaln(0.5 * ndof) + (1 - 0.5 * ndof) * digamma(0.5 * ndof)
+    return {
+        "criterion": nlogprob - entropy - np.log(ndof),
+        "criterion_expected": -np.log(ndof),
+        "criterion_high": 0.0,
+    }
+
+
+def akaike_criterion(props: dict[str, NDArray]) -> float:
+    """Compute the Akaike Information Criterion (AIC) for the whole spectrum: fitted + discarded.
+
+    The model used for the AIC is the one used for the spectrum fitting
+    plus one additional free parameter per frequency past the cutoff.
+    The log-likelihood and the number of parameters are computed for the whole spectrum.
+
+    Parameters
+    ----------
+    props
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
+
+    Returns
+    -------
+    results
+        A dictionary with "criterion" and other fields.
+        (See module docstring for details.)
     """
     amplitudes_rest = props["amplitudes_rest"]
     kappas_rest = props["kappas_rest"]
@@ -155,4 +278,58 @@ def akaike_criterion(props: dict[str, NDArray]) -> float:
     ).sum()
     npar_lowfreq = len(props["pars"])
     npar_rest = len(amplitudes_rest)
-    return 2 * (npar_lowfreq + npar_rest) - 2 * (ll_lowfreq + ll_rest)
+    return {"criterion": 2 * (npar_lowfreq + npar_rest) - 2 * (ll_lowfreq + ll_rest)}
+
+
+def halfhalf_criterion(props: dict[str, NDArray]) -> float:
+    """Likelihood that the same parameters fit to the first and second half of the spectrum.
+
+    Parameters
+    ----------
+    props
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
+
+    Returns
+    -------
+    results
+        A dictionary with "criterion" and other fields.
+        (See module docstring for details.)
+    """
+    # Sanity check: we need positive definite hessians.
+    cost_hess_evals = props["cost_hess_evals"]
+    if np.any(cost_hess_evals <= 0) or not np.all(np.isfinite(cost_hess_evals)):
+        return {"criterion": np.inf}
+    # Idem for the Hessians of the fits to the two halves.
+    hess1 = props["cost_hess_half1"]
+    hess2 = props["cost_hess_half2"]
+    if not (np.isfinite(hess1).all() and np.isfinite(hess2).all()):
+        return {"criterion": np.inf}
+    evals1 = np.linalg.eigvalsh(hess1)
+    evals2 = np.linalg.eigvalsh(hess1)
+    if not ((evals1 > 0).all() and (evals2 > 0).all()):
+        return {"criterion": np.inf}
+
+    # Compute the difference in parameters and the expected covariance of this difference.
+    delta = props["pars_half1"] - props["pars_half2"]
+    covar = np.linalg.inv(hess1) + np.linalg.inv(hess2)
+    if not np.isfinite(covar).all():
+        return {"criterion": np.inf}
+    evals, evecs = np.linalg.eigh(covar)
+    # Again, the covariance of the difference must be positive definite.
+    # This is unlikely to fail, but may occasionally happen due to rounding errors.
+    if not ((evals > 0).all() and np.isfinite(evals).all()):
+        return {"criterion": np.inf}
+    # Transform to the eigenbasis of the covariance.
+    delta = np.dot(evecs.T, delta)
+
+    # Compute the negative likelihood of the difference in parameters.
+    nll = 0.5 * (delta**2 / evals).sum() + 0.5 * np.log(2 * np.pi * evals).sum()
+
+    # Compute the expected value of the negative likelihood, which is the entropy.
+    entropy = 0.5 * len(delta) + 0.5 * np.log(2 * np.pi * evals).sum()
+
+    return {
+        "criterion": nll,
+        "criterion_expected": entropy,
+        "criterion_high": entropy + len(delta),
+    }

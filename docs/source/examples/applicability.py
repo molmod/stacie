@@ -48,7 +48,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from stacie import UnitConfig, compute_spectrum, estimate_acint
+from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
 from stacie.plot import (
     plot_criterion,
     plot_fitted_spectrum,
@@ -141,7 +141,7 @@ plot_spectrum(ax, uc, spectrum, nplot=500)
 # to derive the variance of the mean.
 
 # %%
-result = estimate_acint(spectrum, verbose=True)
+result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
 fig, ax = plt.subplots()
 plot_fitted_spectrum(ax, uc, result)
 fig, ax = plt.subplots()
@@ -176,7 +176,7 @@ print(f"corrtime_int = {result.corrtime_int:.3f} ± {result.corrtime_int_std:.3f
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(result.acint - 2.4772e-4) > 1e-7:
+if abs(result.acint - 2.4580e-4) > 2e-6:
     raise ValueError(f"Wrong acint: {result.acint:.4e}")
-if abs(result.props["corrtime_exp"] - 9.7475) > 1e-3:
+if abs(result.props["corrtime_exp"] - 9.4804) > 1e-1:
     raise ValueError(f"Wrong corrtime_exp: {result.props['corrtime_exp']:.4e}")

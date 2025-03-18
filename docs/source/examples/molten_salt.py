@@ -24,7 +24,7 @@
 #    which preserves the final instantaneous volume and energy of the NpT simulation.
 #    This NVE trajectory provides an initial estimate of transport properties and helps to determine
 #    a suitable simulation time and the block size for the production runs.
-# 2. A set of 20 production simulations, where the final state of the equilibration run
+# 2. A set of 100 production simulations, where the final state of the equilibration run
 #    is first re-equilibrated in the NpT ensemble for 50 ps, followed by 60 ps NVE run.
 #    The NVE production trajectories are used for a more accurate estimate of
 #    the ionic conductivity and self-diffusivity.
@@ -81,41 +81,71 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
     if len(paths_npz) == 0:
         raise ValueError("No NPZ files found in the input list.")
 
-    # Load the trajectory data
+    # Compute average volume and temperature
     volumes = []
     temperatures = []
-    trajs_pos = []
     for path_npz in paths_npz:
         data = np.load(path_npz)
-        trajs_pos.append(data["atcoords"])
         volumes.append(data["volume"])
         temperatures.append(data["temperature"])
-    trajs_pos = np.array(trajs_pos)
-    nstep = trajs_pos.shape[1]
     time = data["time"]
     atnums = data["atnums"]
+    nstep = len(time)
     volume = np.mean(volumes)
     temperature = np.mean(temperatures)
+    timestep = time[1] - time[0]
 
-    if transport_property.lower() == "na":
-        # Select only the positions sodium atoms for diffusion analysis
-        positions = trajs_pos[:, :, atnums == 11].transpose(0, 2, 3, 1).reshape(-1, nstep)
-    elif transport_property.lower() == "cl":
-        # Select only the positions of chlorine atoms for diffusion analysis
-        positions = trajs_pos[:, :, atnums == 17].transpose(0, 2, 3, 1).reshape(-1, nstep)
-    elif transport_property.lower() == "conductivity":
-        # Compute the instantaneous dipole moment
-        # These are not really "positions", but we use the same variable name
-        # to reused the same code for the conductivity analysis.
-        elementary_charge = 1.60217662e-19  # C
-        positions = elementary_charge * (
-            trajs_pos[:, :, atnums == 11].sum(axis=2)
-            - trajs_pos[:, :, atnums == 17].sum(axis=2)
-        ).transpose(0, 2, 1).reshape(-1, nstep)
-    else:
-        raise ValueError(
-            f"Invalid transport_property: {transport_property}, must be 'na', 'cl', or 'conductivity'"
-        )
+    def iter_sequences():
+        """A generator that only loads one MD trajectory at a time in memory."""
+        for path_npz in paths_npz:
+            data = np.load(path_npz)
+            positions = data["atcoords"]
+            if transport_property.lower() == "na":
+                # Select only the positions sodium atoms for diffusion analysis
+                positions = (
+                    positions[:, atnums == 11].transpose(1, 2, 0).reshape(-1, nstep)
+                )
+            elif transport_property.lower() == "cl":
+                # Select only the positions of chlorine atoms for diffusion analysis
+                positions = (
+                    positions[:, atnums == 17].transpose(1, 2, 0).reshape(-1, nstep)
+                )
+            elif transport_property.lower() == "conductivity":
+                # Compute the instantaneous dipole moment
+                # These are not really "positions", but we use the same variable name
+                # to reuse the same code for the conductivity analysis.
+                elementary_charge = 1.60217662e-19  # C
+                positions = (
+                    elementary_charge
+                    * (
+                        positions[:, atnums == 11].sum(axis=1)
+                        - positions[:, atnums == 17].sum(axis=1)
+                    ).T
+                )
+            else:
+                raise ValueError(
+                    f"Invalid transport_property: {transport_property}, "
+                    "must be 'na', 'cl', or 'conductivity'"
+                )
+
+            # Construct a trajectory of "block-averaged" velocities,
+            # to be used as input for the spectrum.
+            # Note that the finite difference is just a block average
+            # of velocities in the Verlet algorithm,
+            # without additional approximations.
+            velocities = np.diff(positions, axis=1) / timestep
+            yield velocities
+
+    # Perform the analysis with Stacie
+    spectrum = compute_spectrum(
+        iter_sequences(),
+        timestep=timestep,
+        prefactor=0.5 / (volume * temperature * BOLTZMANN_CONSTANT)
+        if transport_property == "conductivity"
+        else 0.5,
+        include_zero_freq=False,
+    )
+    result = estimate_acint(spectrum, ChebyshevModel(degree), verbose=True)
 
     # Configure units for output
     uc = UnitConfig(
@@ -129,39 +159,12 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
         freq_unit_str="THz",
     )
 
-    # Construct a trajectory of "block-averaged" velocities, to be used as input for the spectrum.
-    # Note that the finite difference computed is just an average of velocities in the Verlet algorithm,
-    # without additional approximations.
-    timestep = time[1] - time[0]
-    velocities = np.diff(positions, axis=1) / timestep
-    # Perform the analysis with Stacie
-    spectrum = compute_spectrum(
-        velocities,
-        timestep=timestep,
-        prefactor=0.5 / (volume * temperature * BOLTZMANN_CONSTANT)
-        if transport_property == "conductivity"
-        else 0.5,
-        include_zero_freq=False,
-    )
-
-    result = estimate_acint(spectrum, model=ChebyshevModel(degree), verbose=True)
-
     plt.close(transport_property)
-    _, axs = plt.subplots(1, 3, num=transport_property, figsize=(7.5, 2.5))
-
-    # Make a simple plot of the mean-squared displacement
-    msds = (
-        np.linalg.norm(spectrum.prefactor**0.5 * (positions - positions[:1, 0]), axis=0)
-        ** 2
-        / positions.shape[0]
-    )
-    axs[0].plot(time / uc.time_unit, msds / uc.acint_unit / uc.time_unit)
-    axs[0].set_xlabel("Time [ps]")
-    axs[0].set_ylabel("MSD [{uc.acint_unit_str} ✕ {uc.time_unit_str}]".format(uc=uc))
+    _, axs = plt.subplots(1, 2, num=transport_property, figsize=(7.5, 3.0))
 
     # Plot some basic analysis figures.
-    plot_spectrum(axs[1], uc, spectrum)
-    plot_criterion(axs[2], uc, result)
+    plot_spectrum(axs[0], uc, spectrum)
+    plot_criterion(axs[1], uc, result)
     _, ax = plt.subplots(num=f"{transport_property}_fitted")
     plot_fitted_spectrum(ax, uc, result)
 
@@ -204,7 +207,7 @@ analyze([path_nve_npz], "conductivity")
 # %% [markdown]
 # As a compromise between the three recommendations, we choose a block size of 20 fs
 # and a simulation time of 60 ps for the production trajectory.
-# A total of 20 NVE trajectories were performed with these settings,
+# A total of 100 NVE trajectories were performed with these settings,
 # but one may perform more simulations to improve the statistics.
 
 # %% [markdown]
@@ -213,7 +216,7 @@ analyze([path_nve_npz], "conductivity")
 # The analysis of the production trajectories follows the same approach
 # as the exploration trajectory, with two key differences:
 # - The trajectory files are loaded as input.
-# - The degree of the Chebyshev polynomial is increased to 3.
+# - For the diffusion constants, the degree of the Chebyshev polynomial is increased to 3.
 
 # %%
 paths_nve_npz = glob("../../data/openmm_salt/output/prod????_nve_traj.npz")
@@ -225,7 +228,7 @@ diffusivity_na = analyze(paths_nve_npz, "na", 3)
 diffusivity_cl = analyze(paths_nve_npz, "cl", 3)
 
 # %%
-conductivity = analyze(paths_nve_npz, "conductivity", 3)
+conductivity = analyze(paths_nve_npz, "conductivity", 1)
 
 # %% [markdown]
 #
@@ -270,14 +273,13 @@ density = estimate_density(paths_npt_npz)
 #
 # | Method          | Simulated time [ps] | Density [g/cm<sup>3</sup>] | Na$^+$ diffusivity [10<sup>-9</sup>m<sup>2</sup>/s] | Cl$^-$ diffusivity [10<sup>-9</sup>m<sup>2</sup>/s] | Conductivity [S/m] | Reference |
 # |-----------------|---------------------|----------------------------|-----------------------------------------------------|-----------------------------------------------------|--------------------|-----------|
-# | NpT+NVE (BGMTF) | 1.2 ns              | 1.453 ± 0.004              | 8.381 ± 0.020                                       | 7.708 ± 0.017                                       | 344 ± 10           | This notebook |
+# | NpT+NVE (BGMTF) | 6 ns                | 1.453 ± 0.004              | 8.396 ± 0.010                                       | 7.726 ± 0.010                                       | 340 ± 9            | This notebook |
 # | NpT+NVT (BHMTF) | 1 ns (D), 6 ns (σ)  | 1.456                      | 8.8 ± 0.4                                           | 8.2 ± 0.5                                           | 348 ± 7            | {cite:p}`wang_2020_comparison` |
 # | NpT+NVT (BHMTF) | > 5 ns              | 1.444                      | 9.36                                                | 8.14                                                | ≈ 310 (from plot)  | {cite:p}`wang_2014_molecular` |
 # | Experiment      | N.A.                | 1.542 ± 0.006              | 9.0 ± 0.5                                           | 6.50 ± 0.14                                         | 366 ± 3            | {cite:p}`janz_1968_molten` {cite:p}`bockris_1961_self` |
 #
 # The comparison shows that the results obtained with Stacie align reasonably well with the literature.
-# In terms of statistical efficiency, Stacie achieves comparable or smaller error bars with
-# significantly less trajectory data.
+# In terms of statistical efficiency, Stacie achieves comparable error bars.
 
 # %% [markdown]
 # ### Technical Details of the Analysis of the Literature Data

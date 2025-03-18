@@ -27,7 +27,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import quad
-from stacie import UnitConfig, compute_spectrum, estimate_acint
+from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
 from stacie.plot import (
     plot_criterion,
     plot_fitted_spectrum,
@@ -204,7 +204,7 @@ plot_spectrum(ax, uc, spectrum, 180)
 # a model is fitted to the spectrum to get a more precise estimate.
 
 # %%
-result = estimate_acint(spectrum, verbose=True)
+result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
 
 # %%
 # The essential result:

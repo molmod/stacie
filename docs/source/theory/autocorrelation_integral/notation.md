@@ -35,7 +35,7 @@ The following notation is used throughout Stacie's documentation.
     - A realization of a continuous stochastic process $p_{a(t)}[a]$ is written as $\hat{a}(t)$.
     - Similarly, a sample from a discrete stochastic process $p_{a_n}[a]$ is written as $\hat{a}_n$.
 
-- Expectation values are denoted as:
+- Expected values are denoted as:
 
     - $\mean[\cdot]$ is the mean operator.
     - $\var[\cdot]$ is the variance operator.

@@ -70,9 +70,6 @@ tests = [
     "pytest-xdist",
     "numdifftools",
 ]
-tools = [
-    "celerite2",
-]
 
 [project.urls]
 Documentation = "https://molmod.github.io/stacie/"

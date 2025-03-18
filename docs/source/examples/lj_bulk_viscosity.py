@@ -15,7 +15,13 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from path import Path
 from yaml import safe_load
-from stacie import UnitConfig, compute_spectrum, estimate_acint, summarize_results
+from stacie import (
+    UnitConfig,
+    compute_spectrum,
+    estimate_acint,
+    summarize_results,
+    ExpTailModel,
+)
 from stacie.plot import plot_fitted_spectrum, plot_criterion
 from IPython.display import display, HTML
 
@@ -62,7 +68,7 @@ def estimate_bulk_viscosity(name, pcomps, av_temperature, volume, timestep):
     )
 
     # Estimate the bulk viscosity from the spectrum.
-    result = estimate_acint(spectrum, verbose=True)
+    result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
 
     # Plot some basic analysis figures.
     plt.close(f"{name}_criterion")
@@ -149,8 +155,8 @@ eta_bulk_production = demo_production()
 #
 # | Method                     | Simulation time [τ\*] | Bulk viscosity [η$_b$\*] | Reference |
 # |----------------------------|-----------------------|-----------------|-----------|
+# | EMD NVE (Stacie)           | 2400                  | 1.138 ± 0.062   | This notebook |
 # | EMD NVE (Helfand-Einstein) | 300000                | 1.186 ± 0.084   | {cite:p}`meier_2004_transport_III` |
-# | EMD NVE (Stacie)           | 2400                  | 1.131 ± 0.058   | This notebook |
 #
 # This comparison demonstrates that Stacie accurately reproduces bulk viscosity results
 # while achieving lower statistical uncertainty with significantly less data than existing methods.
@@ -169,5 +175,5 @@ eta_bulk_production = demo_production()
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(eta_bulk_production - 1.15) > 0.1:
+if abs(eta_bulk_production - 1.14) > 0.1:
     raise ValueError(f"wrong viscosity (production): {eta_bulk_production:.3e}")

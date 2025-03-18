@@ -22,7 +22,7 @@ import numpy as np
 import pytest
 from conftest import check_gradient, check_hessian
 
-from stacie.model import ChebyshevModel, ExpTailModel, guess
+from stacie.model import ChebyshevModel, ExpTailModel, PadeModel, guess
 
 FREQS = np.linspace(0, 0.5, 10)
 TIMESTEP = 1.2
@@ -65,12 +65,9 @@ def test_guess_exptail():
 
 
 @pytest.mark.parametrize("degree", [0, 1, 2, 3, 4])
-def test_cheb_one(degree):
+def test_cheb_npar(degree):
     model = ChebyshevModel(degree)
     assert model.npar == degree + 1
-    basis = model.basis(FREQS, 1.0, [])
-    assert basis.shape == (degree + 1, len(FREQS))
-    assert (basis[:, 0] == 1).all()
 
 
 PARS_REF_CHEBY = [
@@ -120,15 +117,12 @@ def test_guess_cheb():
         (7, 4),
     ],
 )
-def test_even_cheb_one(degree, npar):
+def test_even_cheb_npar(degree, npar):
     model = ChebyshevModel(degree, even=True)
     assert model.npar == npar
-    basis = model.basis(FREQS, 1.0, [])
-    assert basis.shape == (npar, len(FREQS))
-    assert (basis[:, 0] == 1).all()
 
 
-PARSE_REF_EVEN_CHEBY = [
+PARS_REF_EVEN_CHEBY = [
     [1.5],
     [0.0],
     [0.0, 0.0],
@@ -138,14 +132,14 @@ PARSE_REF_EVEN_CHEBY = [
 ]
 
 
-@pytest.mark.parametrize("pars_ref", PARSE_REF_EVEN_CHEBY)
+@pytest.mark.parametrize("pars_ref", PARS_REF_EVEN_CHEBY)
 def test_gradient_cheb_even(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ChebyshevModel(2 * len(pars_ref) - 2, even=True)
     check_gradient(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
 
 
-@pytest.mark.parametrize("pars_ref", PARSE_REF_EVEN_CHEBY)
+@pytest.mark.parametrize("pars_ref", PARS_REF_EVEN_CHEBY)
 def test_hessian_cheb_even(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ChebyshevModel(2 * len(pars_ref) - 2, even=True)
@@ -161,3 +155,57 @@ def test_guess_cheb_even():
     pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, par_scales, rng, 10)
     assert len(pars_init) == 3
     assert np.isfinite(pars_init).all()
+
+
+def test_pade_npar():
+    assert PadeModel([0, 2], [2]).npar == 3
+
+
+PARS_REF_PADE = [
+    [0.0, 0.0, 0.0, 0.0],
+    [0.5, -2.0, 0.4, -8.3],
+    [1.3, 2.0, -0.4, 0.0],
+    [0.0, 0.5, 3.2, 1.3],
+]
+
+
+@pytest.mark.parametrize("pars_ref", PARS_REF_PADE)
+def test_gradient_pade(pars_ref):
+    pars_ref = np.array(pars_ref)
+    model = PadeModel([0, 1, 2], [2])
+    check_gradient(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+
+
+@pytest.mark.parametrize("pars_ref", PARS_REF_PADE)
+def test_hessian_pade(pars_ref):
+    pars_ref = np.array(pars_ref)
+    model = PadeModel([0, 1, 2], [2])
+    check_hessian(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+
+
+def test_guess_pade():
+    model = PadeModel([0, 2], [2])
+    rng = np.random.default_rng(123)
+    amplitudes = rng.normal(size=len(FREQS)) ** 2
+    ndofs = np.full(len(FREQS), 2)
+    par_scales = model.get_par_scales(TIMESTEP, FREQS, amplitudes)
+    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, par_scales, rng, 10)
+    assert len(pars_init) == 3
+    assert np.isfinite(pars_init).all()
+
+
+def test_guess_pade_detailed():
+    model = PadeModel([0, 2], [2])
+    pars_ref = np.array([3.0, 1.5, 2.0])
+    freqs = np.linspace(0, 2.0, 15)
+    amplitudes_ref = model.compute(freqs, 1.0, pars_ref, 0)[0]
+    x = freqs / freqs[-1]
+    assert amplitudes_ref == pytest.approx((3.0 + 1.5 * x**2) / (1.0 + 2.0 * x**2), rel=1e-10)
+    ndofs = np.full(len(freqs), 20)
+    pars_init_low, amplitudes_low = model.solve_linear(1.0, freqs, ndofs, amplitudes_ref, [])
+    assert pars_init_low == pytest.approx(pars_ref, rel=1e-10)
+    assert amplitudes_low == pytest.approx(amplitudes_ref, rel=1e-10)
+    par_scales = np.ones(3)
+    rng = np.random.default_rng(123)
+    pars_init = guess(model, 1.0, freqs, ndofs, amplitudes_ref, par_scales, rng, 10)
+    assert pars_ref == pytest.approx(pars_init, rel=1e-10)

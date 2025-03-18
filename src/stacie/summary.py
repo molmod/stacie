@@ -77,7 +77,7 @@ RECOMMENDED SIMULATION SETTINGS (SENSITIVITY ANALYSIS)
 
 MODEL {model}
     Number of parameters:          {npar}
-    Number points fitted to:       {r.nfit}
+    Number of points fitted to:    {r.nfit}
 """
 
 EXP_TAIL_TEMPLATE = """\

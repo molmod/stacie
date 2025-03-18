@@ -33,7 +33,13 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from path import Path
 from yaml import safe_load
-from stacie import UnitConfig, compute_spectrum, estimate_acint, summarize_results
+from stacie import (
+    UnitConfig,
+    compute_spectrum,
+    estimate_acint,
+    summarize_results,
+    ExpTailModel,
+)
 from stacie.plot import plot_fitted_spectrum, plot_criterion
 
 # %%
@@ -65,7 +71,7 @@ def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep
     )
 
     # Estimate the viscosity from the spectrum.
-    result = estimate_acint(spectrum, verbose=True)
+    result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
 
     # Plot some basic analysis figures.
     plt.close(f"{name}_criterion")
@@ -156,8 +162,8 @@ kappa_production = demo_production()
 #
 # | Method                     | Simulation time  [τ\*] | Thermal conductivity [κ\*] | Reference |
 # |----------------------------|------------------------|----------------------------|-----------|
+# | EMD NVE (Stacie)           | 2400                   | 7.108 ± 0.10               | This notebook |
 # | EMD NVE (Helfand-moment)   | 600000                 | 6.946 ± 0.12               | {cite:p}`viscardi_2007_transport2` |
-# | EMD NVE (Stacie)           | 2400                   | 7.058 ± 0.103              | This notebook |
 #
 # This small comparison confirms that Stacie can reproduce a well-known thermal conductivity result,
 # with small error bars, while using much less trajectory data than existing methods.
@@ -196,5 +202,5 @@ kappa_production = demo_production()
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(kappa_production - 7.05) > 0.1:
+if abs(kappa_production - 7.1) > 0.1:
     raise ValueError(f"wrong thermal conductivity (production): {kappa_production:.3e}")
