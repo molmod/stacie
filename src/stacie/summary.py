@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Utility to print a summary of the results object on screen."""
+"""Utility for printing a summary of the Result object on the screen."""
 
 from .estimate import Result
 from .plot import UnitConfig
@@ -25,7 +25,7 @@ __all__ = ("summarize_results",)
 
 
 def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
-    """Return a string summarizing the results object."""
+    """Return a string summarizing the Result object."""
     if isinstance(res, Result):
         res = [res]
     if uc is None:
@@ -36,6 +36,7 @@ def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
             r=r,
             uc=uc,
             model=r.props["model"],
+            cutoff_criterion=r.props["cutoff_criterion"],
             timestep=r.spectrum.timestep / uc.time_unit,
             prefactor=r.spectrum.prefactor / uc.acint_unit,
             acint=r.acint / uc.acint_unit,
@@ -75,7 +76,7 @@ RECOMMENDED SIMULATION SETTINGS (SENSITIVITY ANALYSIS)
     Simulation time:               {sensitivity_simulation_time:{uc.time_fmt}} {uc.time_unit_str}
     Block time:                    {sensitivity_block_time:{uc.time_fmt}} {uc.time_unit_str}
 
-MODEL {model}
+MODEL {model} | CUTOFF CRITERION {cutoff_criterion}
     Number of parameters:          {npar}
     Number of points fitted to:    {r.nfit}
 """

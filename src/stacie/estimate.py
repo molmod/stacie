@@ -45,15 +45,16 @@ class Result:
     nfit: int = attrs.field()
     """
     The number of low-frequency spectrum data points used to fit the model.
-    This value is the best among a series of tested cutoffs,
-    i.e. by minimizing the cutoff criterion.
+    This value represents the optimal cutoff, selected from a range of tested cutoffs,
+    by minimizing the given cutoff criterion.
     """
 
     history: dict[int, dict[str]] = attrs.field()
     """History of nfit optimization.
 
-    The key is ``nfit``, the number of frequencies fitted to.
-    Each value is a dictionary returned by :func:`fit_model_spectrum`.
+    The key is ``nfit``, which represents the number of frequencies fitted.
+    Each value is a dictionary returned by :func:`fit_model_spectrum`,
+    containing the intermediate results of the fitting process.
     """
 
     @property
@@ -108,11 +109,11 @@ def estimate_acint(
     It is recommended to leave the keyword arguments to their default values,
     except for methodological testing.
 
-    This function fits a model to the low-frequency portion of the spectrum
-    and derives an estimate of the autocorrelation (and its uncertainty) from the fit.
-    The model is fitted to a part of the spectrum op to a cutoff frequency.
-    Multiple cutoffs are tested, each resulting in another number of spectrum amplitudes in the fit,
-    and the one that minimizes the ``cutoff_criterion`` is selected as the best solution.
+    This function fits a model to the low-frequency portion of the spectrum and
+    derives an estimate of the autocorrelation (and its uncertainty) from the fit.
+    The model is fitted to a part of the spectrum up to a cutoff frequency.
+    Multiple cutoff frequencies are tested, each resulting in a different number of spectrum amplitudes in the fit.
+    The one that minimizes the ``cutoff_criterion`` is selected as the optimal solution.
 
     Parameters
     ----------
@@ -122,29 +123,29 @@ def estimate_acint(
         This object can be prepared with the function: :py:func:`stacie.spectrum.compute_spectrum`.
     model
         The model used to fit the low-frequency part of the spectrum.
-        The default is an instance of :py:class:`stacie.model.ExpTailModel`.
+        The default is an instance of :py:class:`stacie.model.ChebyshevModel`.
     fcutmax
-        The maximum cutoff on the frequency axis (units of frequency),
-        which corresponds to the largest value for ``nfit``.
+        The maximum cutoff on the frequency axis (in frequency units),
+        corresponding to the largest value for ``nfit``.
     maxscan
-        The maximum number of cutoffs to test.
-        If 1, then only the given ``fcutmax`` is used.
+        The maximum number of cutoffs to test during the optimization.
+        If set to 1, only the given ``fcutmax`` is used, with no extra cutoff testing.
     nfitmin
-        The minimal amount of frequency data points to use in the fit.
-        When not given, this 10 times the number of model parameters.
+        The minimum number of frequency data points to include in the fit.
+        If not provided, this is set to 10 times the number of model parameters as a default.
     nfitmax_hard
-        The maximal amount of frequency data points to use in the fit.
-        This puts an upper bound on the computational cost of the fit.
+        The maximum number of frequency data points to include in the fit.
+        This imposes an upper bound on the computational cost of the fitting process.
         If this upper limit is stricter than that of ``fcutmax``, a warning is raised.
     cutoff_criterion
-        The criterion function that is minimized to find the best cutoff
-        (and thus number of points included in the fit).
+        The criterion function that is minimized to find the best cutoff frequency and,
+        consequently, the optimal number of points included in the fit.
     rng
-        A random number generator for sampling gueses of the nonlinear parameters.
-        When not given, ``np.random.default_rng(42)`` is used.
+        A random number generator for sampling guesses of the nonlinear parameters.
+        If not provided, ``np.random.default_rng(42)`` is used.
         The seed is fixed by default for reproducibility.
     nonlinear_budget
-        The number of samples to use for the nonlinear parameters is
+        The number of samples used for the nonlinear parameters, calculated as
         ``nonlinear_budget ** num_nonlinear``.
     verbose
         Set this to ``True`` to print progress information of the frequency cutoff search
@@ -218,7 +219,7 @@ def estimate_acint(
         nfits = [nfit]
         compute_criterion(0)
     else:
-        # Only fit to an even number of points, so the grid can be split into two equal halves.
+        # Only fit to an even number of points, so the grid can be splitted into two equal halves.
         nfits = [2 * i for i in build_xgrid_exp([nfitmin // 2, nfitmax // 2], maxscan)]
         rpi_opt(compute_criterion, [0, len(nfits) - 1], mode="min")
         candidates = [
@@ -231,15 +232,15 @@ def estimate_acint(
             if nfit == nfits[0]:
                 warnings.warn(
                     "The lowest possible cutoff was selected. "
-                    "This indicates that the time series are too short, "
-                    "in which case the result is most likely biased.",
+                    "This indicates that the time series are too short. "
+                    "In this case, the result is most likely biased.",
                     FCutWarning,
                     stacklevel=2,
                 )
         else:
             warnings.warn(
                 "Could not find a suitable frequency cutoff. "
-                "The resuts for the smallest cutoff are selected.",
+                "The results for the smallest cutoff are selected.",
                 FCutWarning,
                 stacklevel=2,
             )
@@ -266,12 +267,12 @@ def fit_model_spectrum(
     Parameters
     ----------
     nfit
-        The number of low-frequency data points to use in the fit.
+        The number of low-frequency data points to include in the fit.
     cutoff_criterion
-        The criterion function that is minimized to find the best cutoff
-        (and thus number of points included in the fit).
+        The criterion function that is minimized to find the optimal cutoff
+        (and thus determine the number of points to include in the fit).
     rng
-        A random number generator for sampling gueses of the nonlinear parameters.
+        A random number generator for sampling guesses of the nonlinear parameters.
     nonlinear_budget
         The number of samples to use for the nonlinear parameters is
         ``nonlinear_budget ** num_nonlinear``
@@ -279,7 +280,7 @@ def fit_model_spectrum(
     Returns
     -------
     props
-        A dictionary with various intermediate results of the cost function calculation,
+        A dictionary containing various intermediate results of the cost function calculation,
         computed for the optimized parameters.
         See Notes for details.
 
@@ -306,6 +307,7 @@ def fit_model_spectrum(
     - ``sensitivity_simulation_time``: recommended simulation time based on the sensitivity analysis
     - ``sensitivity_block_time``: recommended block time based on the sensitivity analysis
     - ``thetas``: scale parameters for the gamma distribution
+    - ``cutoff_criterion``: name of the cutoff criterion used to determine the frequency cutoff
 
     The ExpTail model has the following additional properties:
 
@@ -401,6 +403,7 @@ def fit_model_spectrum(
     props["freqs_rest"] = freqs[nfit:]
     props["amplitudes_rest"] = amplitudes[nfit:]
     props["kappas_rest"] = 0.5 * ndofs[nfit:]
+    props["cutoff_criterion"] = cutoff_criterion.__name__
     props.update(cutoff_criterion(props))
 
     # Remove some intermediate properties to reduce the size of the Result object.
