@@ -18,6 +18,7 @@
 # --
 """Utility to prepare the spectrum and other inputs for given sequences."""
 
+from collections.abc import Iterable
 from typing import Self
 
 import attrs
@@ -33,23 +34,26 @@ __all__ = ("Spectrum", "compute_spectrum")
 class Spectrum:
     """Container class holding all the inputs for the autocorrelation integral estimate."""
 
-    ndofs: NDArray[int] = attrs.field()
-    """The number of independnt contributions to each amplitude."""
-
-    prefactor: float = attrs.field()
+    prefactor: float = attrs.field(converter=float)
     """The given prefactor for the spectrum to fix the units for the autocorrelation integral."""
 
-    variance: float = attrs.field()
+    mean: float = attrs.field(converter=float)
+    """The mean of the input sequences."""
+
+    variance: float = attrs.field(converter=float)
     """The variance of the input sequences."""
 
-    timestep: float = attrs.field()
+    timestep: float = attrs.field(converter=float)
     """The time between two subsequent elements in the given sequence."""
 
-    nstep: int = attrs.field()
+    nstep: int = attrs.field(converter=int)
     """The number of time steps in the input."""
 
     freqs: NDArray[float] = attrs.field()
     """The equidistant frequency axis of the spectrum."""
+
+    ndofs: NDArray[int] = attrs.field()
+    """The number of independnt contributions to each amplitude."""
 
     amplitudes: NDArray[float] = attrs.field()
     """The spectrum amplitudes averaged over the given input sequences."""
@@ -64,35 +68,66 @@ class Spectrum:
 
     def without_zero_freq(self) -> Self:
         """Return a copy without the DC component."""
+        if self.freqs[0] != 0.0:
+            raise ValueError("The zero frequency has already been removed.")
+        variance = self.variance - self.mean**2
+        nindep = self.ndofs[0]
+        variance *= (nindep * self.nstep) / (nindep * self.nstep - 1)
         return attrs.evolve(
             self,
-            ndofs=self.ndofs[1:],
+            variance=variance,
             freqs=self.freqs[1:],
+            ndofs=self.ndofs[1:],
             amplitudes=self.amplitudes[1:],
             amplitudes_ref=None if self.amplitudes_ref is None else self.amplitudes_ref[1:],
         )
 
 
 def compute_spectrum(
-    sequences: NDArray[float],
+    sequences: Iterable[NDArray[float]] | NDArray[float],
     *,
     prefactor: float = 0.5,
     timestep: float = 1,
     include_zero_freq: bool = True,
     nsplit: int = 1,
 ) -> Spectrum:
-    """Compute a spectrum and store all inputs for ``estimate_acint`` in a ``Spectrum`` instance.
+    r"""Compute a spectrum and store all inputs for ``estimate_acint`` in a ``Spectrum`` instance.
+
+    The spectrum amplitudes are computed as follows:
+
+    .. math::
+
+        C_k = \frac{F h}{N} \frac{1}{M}\sum_{m=1}^M \left|
+            \sum_{n=0}^{N-1} x^{(m)}_n \exp\left(-i \frac{2 \pi n k}{N}\right)
+        \right|^2
+
+    where:
+
+    - :math:`F` is the given prefactor,
+    - :math:`h` is the timestep,
+    - :math:`N` is the number of time steps in the input sequences,
+    - :math:`M` is the number of independent sequences,
+    - :math:`x^{(m)}_n` is the value of the :math:`m`-th sequence at time step :math:`n`,
+    - :math:`k` is the frequency index.
+
+    The sum over :math:`m` simply averages spectra obtained from different sequences.
+    The factor :math:`F h/N` normalizes the spectrum so that its zero-frequency limit
+    is an estimate of the autocorrelation integral.
 
     Parameters
     ----------
     sequences
-        The input sequences, array with shape ``(nindep, nstep)``,
-        of which each row is a time-dependent sequence.
+        The input sequences, which can be in two forms:
+
+        - An array with shape ``(nindep, nstep)`` or ``(nstep,)``.
+          In case of a 2D array, each row is a time-dependent sequence.
+          In case of a 1D array, a single sequence is used.
+        - An iterable whose items are arrays as described in the previous point.
+          This option is convenient when a single array does not fit in memory.
+
         All sequences are assumed to be statistically independent and have length ``nstep``.
         (Time correlations within one sequence are fine, obviously.)
-        You may also provide a single sequence,
-        in which case the shape of the array is ``(nstep,)``.
-        However, we recommend using multiple independent sequences to reduce uncertainties.
+        We recommend using multiple independent sequences to reduce uncertainties.
     prefactor
         A factor to be multiplied with the autocorrelation function
         to give it a physically meaningful unit.
@@ -101,8 +136,8 @@ def compute_spectrum(
     include_zero_freq
         When set to False, the DC component of the spectrum is discarded.
     nsplit
-        If larger than 1, the sequences are split into ``nsplit`` chuncks
-        and the spectrum of each chunck is computed separately, as if they are separate sequences.
+        If larger than 1, the sequences are split into ``nsplit`` chunks
+        and the spectrum of each chunk is computed separately, as if they are separate sequences.
         This reduces the resolution of the frequency axis and the variance of the spectrum.
         The function ``stacie.utils.split`` is used for this purpose.
 
@@ -112,19 +147,50 @@ def compute_spectrum(
         A ``Spectrum`` object holding all the inputs needed to estimate
         the integral of the autocorrelation function.
     """
-    # Handle single sequence case
-    if sequences.ndim == 1:
-        sequences = sequences.reshape(1, -1)
-    elif sequences.ndim != 2:
-        raise ValueError("Sequences must be a 1D or 2D array.")
+    # Handle single-array case
+    if isinstance(sequences, np.ndarray):
+        sequences = [sequences]
 
-    # Split the sequences into chunks for better statistics if requested.
-    if nsplit > 1:
-        sequences = split(sequences, nsplit)
+    # Process iterable of arrays
+    if isinstance(sequences, Iterable):
+        nindep = 0
+        nstep = None
+        amplitudes = 0
+        total = 0
+        total_sq = 0
+        for data in sequences:
+            array = np.asarray(data)
 
-    # Get basic parameters of the input sequences.
-    nindep, nstep = sequences.shape
+            # Handle single sequence case
+            if array.ndim == 1:
+                array = array.reshape(1, -1)
+            elif array.ndim != 2:
+                raise ValueError("Sequences must be a 1D or 2D array.")
+
+            # Split the array into chunks for better statistics if requested.
+            if nsplit > 1:
+                array = split(array, nsplit)
+
+            # Get basic parameters of the input sequences.
+            if nstep is None:
+                nstep = array.shape[1]
+            elif nstep != array.shape[1]:
+                raise ValueError("All sequences must have the same length.")
+            nindep += array.shape[0]
+
+            # Compute the spectrum.
+            # We already divide by nstep here to keep the order of magnitude under control.
+            amplitudes += (abs(np.fft.rfft(array, axis=1)) ** 2).sum(axis=0) / nstep
+
+            # Compute the variance of the input sequences.
+            total += array.sum() / nstep
+            total_sq += np.linalg.norm(array) ** 2 / nstep
+    else:
+        raise TypeError("The sequence argument must be an array or an iterable of arrays.")
+
+    # Frequency axis and scale of amplitudes
     freqs = np.fft.rfftfreq(nstep, d=timestep)
+    amplitudes *= prefactor * timestep / nindep
 
     # Number of "degrees of freedom" (contributions) to each amplitude
     ndofs = np.full(freqs.shape, 2 * nindep)
@@ -132,14 +198,18 @@ def compute_spectrum(
     if len(freqs) % 2 == 0:
         ndofs[-1] = nindep
 
-    # Compute the spectrum and scale it.
-    amplitudes = (abs(np.fft.rfft(sequences, axis=1)) ** 2).mean(axis=0)
-    amplitudes *= prefactor * timestep / nstep
-
     # Remove DC component, useful for inputs that oscillate about a non-zero average.
-    if not include_zero_freq:
+    # The variance is calculated consistently:
+    # - If the DC component is removed, the variance is calculated with respect to the mean.
+    # - Otherwise, the variance is calculated with respect to zero.
+    mean = total / nindep
+    if include_zero_freq:
+        variance = total_sq / nindep
+    else:
         ndofs = ndofs[1:]
         freqs = freqs[1:]
         amplitudes = amplitudes[1:]
+        variance = total_sq / nindep - mean**2
+        variance *= (nstep * nindep) / (nstep * nindep - 1)
 
-    return Spectrum(ndofs, prefactor, sequences.var(), timestep, nstep, freqs, amplitudes)
+    return Spectrum(prefactor, mean, variance, timestep, nstep, freqs, ndofs, amplitudes)

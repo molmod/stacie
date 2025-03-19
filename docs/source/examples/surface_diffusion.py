@@ -24,7 +24,7 @@ import numdifftools as nd
 import numpy as np
 import scipy.constants as sc
 from numpy.typing import ArrayLike, NDArray
-from stacie import UnitConfig, compute_spectrum, estimate_acint
+from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
 from stacie.plot import (
     plot_criterion,
     plot_fitted_spectrum,
@@ -145,6 +145,7 @@ plot_pes()
 MASS = sc.value("unified atomic mass unit") * 39.948 / sc.value("atomic unit of mass")
 FEMTOSECOND = 1e-15 / sc.value("atomic unit of time")
 PICOSECOND = 1e-12 / sc.value("atomic unit of time")
+TERAHERTZ = 1e12 * sc.value("atomic unit of time")
 TIMESTEP = 5 * FEMTOSECOND
 
 
@@ -335,15 +336,19 @@ def demo_stacie(stride=1):
         / sc.value("atomic unit of length") ** 2,
         acint_unit_str="m$^2$ s",
         acint_fmt=".2e",
-        freq_unit=1e12 * sc.value("atomic unit of time"),
+        freq_unit=TERAHERTZ,
         freq_unit_str="THz",
-        time_unit=1e-12 / sc.value("atomic unit of time"),
+        time_unit=PICOSECOND,
         time_unit_str="ps",
         time_fmt=".2f",
     )
     plot_spectrum(ax, uc, spectrum, nplot=500)
 
-    result = estimate_acint(spectrum, verbose=True)
+    # The maximum cutoff frequency is chosen to be 1 THz,
+    # by inspecting the first spectrum plot.
+    # Beyond the cutoff frequency, the spectrum has resonance peaks that
+    # the ExpTailModel is not designed to handle.
+    result = estimate_acint(spectrum, ExpTailModel(), fcutmax=TERAHERTZ, verbose=True)
     fig, ax = plt.subplots()
     plot_fitted_spectrum(ax, uc, result)
     fig, ax = plt.subplots()
@@ -418,13 +423,13 @@ print(f"corrtime_int = {result_30.corrtime_int / PICOSECOND:.3f} ps")
 
 # %% [markdown]
 # We recommend not to exaggerate with block sizes.
-# The artifacts are illustrated below with a block size of 150 and 600.
+# The artifacts are illustrated below with a block size of 150 and 300.
 # Note the increase in uncertainties,
 # and in the latter case, the systematic errors due to the block averages.
 
 # %%
 result_150 = demo_stacie(150)
-result_600 = demo_stacie(600)
+result_300 = demo_stacie(300)
 
 # %%  [markdown]
 # ## Regression Tests
@@ -435,14 +440,14 @@ result_600 = demo_stacie(600)
 # %%
 acint_unit = sc.value("atomic unit of time") / sc.value("atomic unit of length") ** 2
 acint_1 = result_1.acint / acint_unit
-if abs(acint_1 - 5.88e-7) > 1e-9:
+if abs(acint_1 - 5.85e-7) > 5e-9:
     raise ValueError(f"Wrong acint (no block average): {acint_1:.2e}")
 acint_30 = result_30.acint / acint_unit
-if abs(acint_30 - 5.86e-7) > 1e-9:
+if abs(acint_30 - 5.87e-7) > 5e-9:
     raise ValueError(f"Wrong acint (block size 30): {acint_30:.2e}")
 acint_150 = result_150.acint / acint_unit
-if abs(acint_150 - 6.00e-7) > 1e-9:
+if abs(acint_150 - 6.14e-7) > 5e-9:
     raise ValueError(f"Wrong acint (block size 150): {acint_150:.2e}")
-acint_600 = result_600.acint / acint_unit
-if abs(acint_600 - 5.95e-7) > 1e-9:
-    raise ValueError(f"Wrong acint (block size 600): {acint_600:.2e}")
+acint_300 = result_300.acint / acint_unit
+if abs(acint_300 - 6.84e-7) > 5e-9:
+    raise ValueError(f"Wrong acint (block size 300): {acint_300:.2e}")

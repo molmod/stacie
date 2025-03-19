@@ -14,7 +14,7 @@ $k_\text{B}$ is the Boltzmann constant,
 $T$ is the temperature,
 and $\hat{P}_\text{iso}$ is the instantaneous isotropic pressure.
 The time origin $t_0$ is arbitrary:
-the expectation value is computed over all possible time origins.
+the expected value is computed over all possible time origins.
 
 As will be shown below, one must take into account that the average pressure is not zero.
 For Stacie, there is no need to subtract the average pressure first.
@@ -42,7 +42,7 @@ With these requirements, the bulk viscosity can be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results
+from stacie import compute_spectrum, estimate_acint, plot_results, ExpTailModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
 pcomps = ...
@@ -58,7 +58,7 @@ spectrum = compute_spectrum(
     timestep=timestep,
     include_zero_freq=False,
 )
-result = estimate_acint(spectrum)
+result = estimate_acint(spectrum, ExpTailModel())
 print("Bulk viscosity", result.acint)
 print("Uncertainty of the bulk viscosity", result.acint_std)
 

@@ -16,7 +16,7 @@ $k_\text{B}$ is the Boltzmann constant,
 $T$ is the temperature,
 and $\hat{J}^\text{h}_\alpha$ is the instantaneous heat flux along one of the Cartesian directions.
 The time origin $t_0$ is arbitrary:
-the expectation value is computed over all possible time origins.
+the expected value is computed over all possible time origins.
 
 The derivation of this result can be found in
 Section 8.5 of "Theory of Simple Liquids"
@@ -41,7 +41,7 @@ With these requirements, the shear viscosity can be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results
+from stacie import compute_spectrum, estimate_acint, plot_results, ExpTailModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
 heatflux = ...
@@ -55,7 +55,7 @@ spectrum = compute_spectrum(
     prefactor=0.5 / (volume * temperature**2 * boltzmann_const),
     timestep=timestep,
 )
-result = estimate_acint(spectrum)
+result = estimate_acint(spectrum, ExpTailModel())
 print("Thermal conductivity", result.acint)
 print("Uncertainty of the thermal conductivity", result.acint_std)
 

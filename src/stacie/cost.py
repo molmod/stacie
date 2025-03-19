@@ -38,11 +38,11 @@ class LowFreqCost:
     freqs: NDArray[float] = attrs.field()
     """The frequencies for which the spectrum amplitudes are computed."""
 
-    amplitudes: NDArray[float] = attrs.field()
-    """The actual spectrum amplitudes at frequencies in ``self.freqs``."""
-
     ndofs: NDArray[int] = attrs.field()
     """The number of independent contributions to each spectrum amplitude."""
+
+    amplitudes: NDArray[float] = attrs.field()
+    """The actual spectrum amplitudes at frequencies in ``self.freqs``."""
 
     model: SpectrumModel = attrs.field()
     """The model to be fitted to the spectrum."""
@@ -105,8 +105,8 @@ def cost_low(
     deriv: int,
     timestep: float,
     freqs: NDArray[float],
-    amplitudes: NDArray[float],
     ndofs: NDArray[int],
+    amplitudes: NDArray[float],
     model: SpectrumModel,
     *,
     do_props: bool = False,
@@ -153,29 +153,37 @@ def cost_low(
       (if ``deriv==2``).
     """
     # Compute the model spectrum and its derivatives.
-    amplitudes_model = model.compute(freqs, timestep, pars, deriv)
-
-    # Log-likelihood computed with the scaled Chi-squared distribution.
-    # The Gamma distribution is used because the scale parameter is easily incorporated.
+    amplitudes_model = model.compute(timestep, freqs, pars, deriv)
     kappas = 0.5 * ndofs
     thetas = amplitudes_model[0] / kappas
-    ll_terms = logpdf_gamma(amplitudes, kappas, thetas, deriv)
-    ll = ll_terms[0].sum()
+    if (amplitudes_model[0] <= 0).any():
+        # Avoid warnings due to negative model amplitudes.
+        ll = -np.inf
+        props = {"cost_value": np.inf}
+        if deriv >= 1:
+            props["cost_grad"] = np.full_like(pars, np.nan)
+        if deriv >= 2:
+            props["cost_hess"] = np.full((len(pars), len(pars)), np.nan)
+    else:
+        # Log-likelihood computed with the scaled Chi-squared distribution.
+        # The Gamma distribution is used because the scale parameter is easily incorporated.
+        ll_terms = logpdf_gamma(amplitudes, kappas, thetas, deriv)
+        ll = ll_terms[0].sum()
 
-    props = {
-        "cost_value": -ll,
-    }
-    if deriv >= 1:
-        props["cost_grad"] = -np.dot(amplitudes_model[1], ll_terms[1] / kappas)
-    if deriv >= 2:
-        props["cost_hess"] = -(
-            np.einsum(
-                "ia,ja,a->ij", amplitudes_model[1], amplitudes_model[1], ll_terms[2] / kappas**2
+        props = {
+            "cost_value": -ll,
+        }
+        if deriv >= 1:
+            props["cost_grad"] = -np.dot(amplitudes_model[1], ll_terms[1] / kappas)
+        if deriv >= 2:
+            props["cost_hess"] = -(
+                np.einsum(
+                    "ia,ja,a->ij", amplitudes_model[1], amplitudes_model[1], ll_terms[2] / kappas**2
+                )
+                + np.einsum("ija,a->ij", amplitudes_model[2], ll_terms[1] / kappas)
             )
-            + np.einsum("ija,a->ij", amplitudes_model[2], ll_terms[1] / kappas)
-        )
-    if deriv >= 3:
-        raise ValueError("Third or higher derivatives are not supported.")
+        if deriv >= 3:
+            raise ValueError("Third or higher derivatives are not supported.")
 
     if do_props:
         props.update(

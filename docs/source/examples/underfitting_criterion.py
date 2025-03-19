@@ -107,7 +107,7 @@ def plot_underfitting():
 plot_underfitting()
 
 # %% [markdown]
-# The red dashed line show the expectation value of the variance
+# The red dashed line show the expected value of the variance
 # of the normalized residuals in case of linear regression.
 # As this example illustrates,
 # there is no simple way of selecting the amount of data by directly
@@ -195,7 +195,7 @@ def plot_cumulative_sums():
 plot_cumulative_sums()
 
 # %% [markdown]
-# The squared cumulative sums are much smaller than the expectation value.
+# The squared cumulative sums are much smaller than the expected value.
 # Regression residuals are anticorrelated, meaning that summed residuals
 # have a lower variance than a sum of independent random variables
 # with the same variance.

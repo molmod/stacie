@@ -22,7 +22,7 @@ import attrs
 import numpy as np
 from numpy.typing import NDArray
 
-__all__ = ("ExpTailModel", "SpectrumModel", "guess")
+__all__ = ("ChebyshevModel", "ExpTailModel", "PadeModel", "SpectrumModel", "guess")
 
 
 @attrs.define
@@ -32,6 +32,9 @@ class SpectrumModel:
     Subclasses must override the attribute ``name``
     and the methods ``bounds``, ``guess``, ``compute`` and ``derive_props``.
     """
+
+    scales: dict[str, float] = attrs.field(factory=dict, init=False)
+    """A dictionary with essential scale information for the parameters and the cost function."""
 
     @property
     def name(self):
@@ -59,31 +62,40 @@ class SpectrumModel:
             ]
         )
 
-    def get_scales_low(
+    def configure_scales(
         self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
-    ) -> dict[str, float]:
-        """Helper for the get_par_scales method."""
-        return {
+    ) -> NDArray[float]:
+        """Store essential scale information in the ``scales`` attribute.
+
+        Other methods may access this information,
+        so this method should be called before performing any computations.
+        """
+        self.scales = {
+            "freq_small": freqs[1],
+            "freq_scale": freqs[-1],
             "time_scale": 1 / freqs[-1],
             "amp_scale": np.median(abs(amplitudes[amplitudes != 0])),
         }
 
-    def get_par_scales(
-        self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
-    ) -> NDArray[float]:
+    @property
+    def par_scales() -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
         raise NotImplementedError
 
     def get_par_nonlinear(self) -> NDArray[bool]:
-        """Return a boolean mask for the nonlinear parameters."""
+        """Return a boolean mask for the nonlinear parameters.
+
+        The returned parameters cannot be solved with the solve_linear method.
+        Models are free to decide which parameters can be solved with linear regression.
+        For example, some non-linear parameters may be solved with a linear regression
+        after rewriting the regression problem in a different form.
+        """
         raise NotImplementedError
 
     def sample_nonlinear_pars(
         self,
         rng: np.random.Generator,
         budget: int,
-        freqs: NDArray[float],
-        par_scales: NDArray[float],
     ) -> NDArray[float]:
         """Return samples of the nonlinear parameters.
 
@@ -107,14 +119,12 @@ class SpectrumModel:
         raise NotImplementedError
 
     def compute(
-        self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
+        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """Compute the amplitudes of the spectrum model.
 
         Parameters
         ----------
-        freqs
-            The frequencies for which the model spectrum amplitudes are computed.
         timestep
             The time step of the sequences used to compute the spectrum.
             It may be used to convert the frequency to the dimensionless
@@ -123,6 +133,8 @@ class SpectrumModel:
             :math:`f` is the frequency,
             :math:`k` is the frequency index in the discrete Fourier transform,
             and :math:`N` is the number of samples in the input time series.
+        freqs
+            The frequencies for which the model spectrum amplitudes are computed.
         pars
             The parameters.
         deriv
@@ -140,15 +152,27 @@ class SpectrumModel:
         """
         raise NotImplementedError
 
-    def basis(
-        self, freqs: NDArray[float], timestep: float, nonlinear_pars: NDArray[float]
+    def solve_linear(
+        self,
+        timestep: float,
+        freqs: NDArray[float],
+        ndofs: NDArray[float],
+        amplitudes: NDArray[float],
+        nonlinear_pars: NDArray[float],
     ) -> NDArray[float]:
-        """Return the basis functions for the linear parameters.
+        """Use linear linear regression to solve a subset of the parameters.
+
+        The default implementation in the base class assumes that the linear parameters
+        are genuinly linear without rewriting the regression problem in a different form.
 
         Parameters
         ----------
         freqs
             The frequencies for which the model spectrum amplitudes are computed.
+        amplitudes
+            The amplitudes of the spectrum.
+        ndofs
+            The number of degrees of freedom at each frequency.
         timestep
             The time step of the sequences used to compute the spectrum.
         nonlinear_pars
@@ -156,13 +180,24 @@ class SpectrumModel:
 
         Returns
         -------
-        basis
-            The basis functions, a 2D array with shape ``(len(nonlinear_pars), len(freqs))``.
+        linear_pars
+            The solved linear parameters.
+        amplitudes_model
+            The model amplitudes computed with the solved parameters.
         """
         nonlinear_mask = self.get_par_nonlinear()
         pars = np.ones(self.npar)
         pars[nonlinear_mask] = nonlinear_pars
-        return self.compute(freqs, timestep, pars, 1)[1][~nonlinear_mask]
+        basis = self.compute(timestep, freqs, pars, 1)[1][~nonlinear_mask]
+        amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
+        linear_pars = np.linalg.lstsq(
+            (basis / amplitudes_std).T,
+            amplitudes / amplitudes_std,
+            # For compatibility with numpy < 2.0
+            rcond=-1,
+        )[0]
+        amplitudes_model = np.dot(linear_pars, basis)
+        return linear_pars, amplitudes_model
 
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float], pars_sensitivity: NDArray[float]
@@ -250,12 +285,12 @@ class ExpTailModel(SpectrumModel):
         """Return the number of parameters."""
         return 3
 
-    def get_par_scales(
-        self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
-    ) -> NDArray[float]:
+    @property
+    def par_scales(self) -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
-        sl = self.get_scales_low(timestep, freqs, amplitudes)
-        return np.array([sl["amp_scale"], sl["amp_scale"], sl["time_scale"]])
+        return np.array(
+            [self.scales["amp_scale"], self.scales["amp_scale"], self.scales["time_scale"]]
+        )
 
     def get_par_nonlinear(self) -> NDArray[bool]:
         """Return a boolean mask for the nonlinear parameters."""
@@ -265,16 +300,14 @@ class ExpTailModel(SpectrumModel):
         self,
         rng: np.random.Generator,
         budget: int,
-        freqs: NDArray[float],
-        par_scales: NDArray[float],
     ) -> NDArray[float]:
         """Return samples of the nonlinear parameters."""
-        corrtime_min = 0.1 / freqs[-1]
-        corrtime_max = 1 / freqs[1]
+        corrtime_min = 0.1 / self.scales["freq_scale"]
+        corrtime_max = 1 / self.scales["freq_small"]
         return np.exp(rng.uniform(np.log(corrtime_min), np.log(corrtime_max), (budget, 1)))
 
     def compute(
-        self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
+        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):
@@ -373,19 +406,17 @@ class ChebyshevModel(SpectrumModel):
         """Return the number of parameters."""
         return (self.degree + 2) // 2 if self.even else self.degree + 1
 
-    def get_par_scales(
-        self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
-    ) -> NDArray[float]:
+    @property
+    def par_scales(self) -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
-        sl = self.get_scales_low(timestep, freqs, amplitudes)
-        return np.full(self.npar, sl["amp_scale"])
+        return np.full(self.npar, self.scales["amp_scale"])
 
     def get_par_nonlinear(self) -> NDArray[bool]:
         """Return a boolean mask for the nonlinear parameters."""
         return np.zeros(self.npar, dtype=bool)
 
     def compute(
-        self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
+        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):
@@ -396,13 +427,14 @@ class ChebyshevModel(SpectrumModel):
             raise TypeError("Argument freqs must be a 1D array.")
 
         # Construct a basis of Chebyshev polynomials.
+        freq_scale = self.scales["freq_scale"]
         basis = [np.ones(len(freqs))]
         if self.degree > 0:
             if self.even:
-                basis.append(freqs / freqs[-1])
+                basis.append(freqs / freq_scale)
             else:
                 # Reverse the frequency axis, so all basis functions are 1 at freq 0.
-                basis.append(1 - 2 * freqs / freqs[-1])
+                basis.append(1 - 2 * freqs / freq_scale)
         for _ in range(2, self.degree + 1):
             basis.append(2 * basis[1] * basis[-1] - basis[-2])
         basis = np.array(basis)
@@ -416,7 +448,7 @@ class ChebyshevModel(SpectrumModel):
         if deriv >= 1:
             results.append(basis)
         if deriv >= 2:
-            results.append(np.zeros((1, 1, len(freqs))))
+            results.append(np.zeros((self.npar, self.npar, len(freqs))))
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
         return results
@@ -436,12 +468,165 @@ class ChebyshevModel(SpectrumModel):
         }
 
 
+@attrs.define
+class PadeModel(SpectrumModel):
+    """A rational function model for the spectrum, a.k.a. a Padé approximation."""
+
+    numer_degrees: list[int] = attrs.field(converter=list)
+    """The degrees of the mononomials in the numerator."""
+
+    @numer_degrees.validator
+    def _validate_num_degrees(self, attribute, value):
+        if not all(isinstance(degree, int) and degree >= 0 for degree in value):
+            raise ValueError("All numer_degrees must be non-negative, got {value}.")
+        if len(value) == 0:
+            raise ValueError("The list of numer_degrees must not be empty.")
+        if len(value) != len(set(value)):
+            raise ValueError("The list of numer_degrees must not contain duplicates.")
+
+    denom_degrees: list[int] = attrs.field(converter=list)
+    """The degrees of the mononomials in the denominator.
+
+    Note that the leading term is always 1, and there is no need to include
+    degree zero.
+    """
+
+    @denom_degrees.validator
+    def _validate_num_degrees(self, attribute, value):
+        if not all(isinstance(degree, int) and degree >= 1 for degree in value):
+            raise ValueError("All denom_degrees must be structky positive, got {value}.")
+        if len(value) == 0:
+            raise ValueError("The list of denom_degrees must not be empty.")
+        if len(value) != len(set(value)):
+            raise ValueError("The list of denom_degrees must not contain duplicates.")
+
+    @property
+    def name(self):
+        return f"pade({self.numer_degrees},{self.denom_degrees})"
+
+    def bounds(self) -> list[tuple[float, float]]:
+        """Return parameter bounds for the optimizer."""
+        return [(-np.inf, np.inf)] * len(self.numer_degrees) + [(0, np.inf)] * len(
+            self.denom_degrees
+        )
+
+    @property
+    def npar(self):
+        """Return the number of parameters."""
+        return len(self.numer_degrees) + len(self.denom_degrees)
+
+    @property
+    def par_scales(self) -> NDArray[float]:
+        """Return the scales of the parameters and the cost function."""
+        return np.concatenate(
+            [
+                np.full(len(self.numer_degrees), self.scales["amp_scale"]),
+                np.ones(len(self.denom_degrees)),
+            ]
+        )
+
+    def get_par_nonlinear(self) -> NDArray[bool]:
+        """Return a boolean mask for the nonlinear parameters."""
+        return np.zeros(self.npar, dtype=bool)
+
+    def compute(
+        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+    ) -> list[NDArray[float]]:
+        """See :py:meth:`SpectrumModel.compute`."""
+        if not isinstance(deriv, int):
+            raise TypeError("Argument deriv must be integer.")
+        if deriv < 0:
+            raise ValueError("Argument deriv must be zero or positive.")
+        if freqs.ndim != 1:
+            raise TypeError("Argument freqs must be a 1D array.")
+        npar_n = len(self.numer_degrees)
+        npar_d = len(self.denom_degrees)
+        if len(pars) != npar_n + npar_d:
+            raise ValueError("The number of parameters does not match the model.")
+
+        # Construct two bases of monomials.
+        x = freqs / self.scales["freq_scale"]
+        basis_n = np.power.outer(x, self.numer_degrees).T
+        basis_d = np.power.outer(x, self.denom_degrees).T
+        pars_n = pars[:npar_n]
+        pars_d = pars[npar_n:]
+
+        # Compute model amplitudes and derivatives.
+        num = np.dot(pars_n, basis_n)
+        denom = 1 + np.dot(pars_d, basis_d)
+        results = [num / denom]
+        if deriv >= 1:
+            block_n = basis_n / denom
+            block_d = -results[0] * basis_d / denom
+            results.append(np.concatenate([block_n, block_d]))
+        if deriv >= 2:
+            block_nn = np.zeros((npar_n, npar_n, len(freqs)))
+            block_nd = np.einsum("if,jf->ijf", block_n, -basis_d / denom)
+            block_dn = block_nd.transpose(1, 0, 2)
+            block_dd = np.einsum("f,if,jf->ijf", 2 * results[0], basis_d / denom, basis_d / denom)
+            results.append(
+                np.concatenate(
+                    [
+                        np.concatenate([block_nn, block_nd], axis=1),
+                        np.concatenate([block_dn, block_dd], axis=1),
+                    ]
+                )
+            )
+        if deriv >= 3:
+            raise ValueError("Third or higher derivatives are not supported.")
+        return results
+
+    def solve_linear(
+        self,
+        timestep: float,
+        freqs: NDArray[float],
+        ndofs: NDArray[float],
+        amplitudes: NDArray[float],
+        nonlinear_pars: NDArray[float],
+    ) -> NDArray[float]:
+        """Use linear linear regression to solve a subset of the parameters.
+
+        This is a specialized implementation that rewrites the regersion problem
+        in a different form to solve all parameters with a linear regression.
+        """
+        if len(nonlinear_pars) != 0:
+            raise ValueError("The number of nonlinear parameters must be exactly 0.")
+        x = freqs / freqs[-1]
+        basis_n = np.power.outer(x, self.numer_degrees).T
+        basis_d = np.power.outer(x, self.denom_degrees).T
+        amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
+        part_n = basis_n / amplitudes_std
+        part_d = -basis_d * (amplitudes / amplitudes_std)
+        design_matrix = np.concatenate([part_n, part_d]).T
+        expected_values = amplitudes / amplitudes_std
+        pars = np.linalg.lstsq(design_matrix, expected_values, rcond=-1)[0]
+        npar_n = len(self.numer_degrees)
+        pars_n = pars[:npar_n]
+        pars_d = pars[npar_n:]
+        amplitudes_model = np.dot(pars_n, basis_n) / (1 + np.dot(pars_d, basis_d))
+        return pars, amplitudes_model
+
+    def derive_props(
+        self, pars: NDArray[float], covar: NDArray[float], pars_sensitivity: NDArray[float]
+    ) -> dict[str, NDArray[float]]:
+        """Return additional properties derived from model-specific parameters."""
+        acint = pars[0]
+        acint_var = covar[0, 0]
+        return {
+            "model": self.name,
+            "acint": acint,
+            "acint_var": acint_var,
+            "acint_std": np.sqrt(acint_var) if acint_var >= 0 else np.inf,
+            "acint_sensitivity": pars_sensitivity[0],
+        }
+
+
 def guess(
     model: SpectrumModel,
     timestep: float,
     freqs: NDArray[float],
-    amplitudes: NDArray[float],
     ndofs: NDArray[float],
+    amplitudes: NDArray[float],
     par_scales: NDArray[float],
     rng: np.random.Generator,
     nonlinear_budget: int,
@@ -488,9 +673,7 @@ def guess(
         )[1]
 
     # Otherwise, we need to sample the nonlinear parameters and guess the linear parameters.
-    nonlinear_samples = model.sample_nonlinear_pars(
-        rng, nonlinear_budget**num_nonlinear_pars, freqs, par_scales
-    )
+    nonlinear_samples = model.sample_nonlinear_pars(rng, nonlinear_budget**num_nonlinear_pars)
     best = None
     for nonlinear_pars in nonlinear_samples:
         cost, pars = _guess_linear(
@@ -540,14 +723,9 @@ def _guess_linear(
         An initial guess of the parameters.
     """
     # Perform a weighted least squares fit to guess the linear parameters.
-    amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
-    basis = model.basis(freqs, timestep, nonlinear_pars)
-    linear_pars = np.linalg.lstsq(
-        (basis / amplitudes_std).T,
-        amplitudes / amplitudes_std,
-        # For compatibility with numpy < 2.0
-        rcond=-1,
-    )[0]
+    linear_pars, amplitudes_model = model.solve_linear(
+        timestep, freqs, ndofs, amplitudes, nonlinear_pars
+    )
 
     # Combine the linear and nonlinear parameters
     pars = np.zeros(model.npar)
@@ -561,8 +739,5 @@ def _guess_linear(
         raise RuntimeError("Invalid guess could not be fixed. This should never happen.")
 
     # Compute the cost
-    # model_amplitudes = np.dot(basis.T, pars[~nonlinear_mask])
-    model_amplitudes = np.dot(pars[~nonlinear_mask], basis)
-    cost = np.sum((amplitudes - model_amplitudes) ** 2)
-
+    cost = np.sum((amplitudes - amplitudes_model) ** 2)
     return cost, pars

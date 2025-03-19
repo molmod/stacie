@@ -11,6 +11,8 @@ nosetests.xml
 .hypothesis/
 .ruff_cache
 tests/outputs/
+tmp
+tools/*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

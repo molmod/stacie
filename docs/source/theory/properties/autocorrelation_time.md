@@ -105,7 +105,7 @@ With this data, the autocorrelation times are computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results
+from stacie import compute_spectrum, estimate_acint, plot_results, ExpTailModel
 
 # Load all the required inputs, the details of which will depend on your use case.
 sequences = ...
@@ -113,7 +113,7 @@ timestep = ...
 
 # Computation with Stacie.
 spectrum = compute_spectrum(sequences, timestep=timestep)
-result = estimate_acint(spectrum)
+result = estimate_acint(spectrum, ExpTailModel())
 print("Exponential autocorrelation time", result.corrtime_exp)
 print("Standard error of the exponential autocorrelation time", result.corrtime_exp_std)
 print("Integrated autocorrelation time", result.corrtime_int)

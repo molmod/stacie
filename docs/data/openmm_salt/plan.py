@@ -5,7 +5,7 @@ from stepup.reprep.api import convert_jupyter
 mkdir("output")
 static("bhmtf.py", "exploration.ipynb", "production.ipynb", "utils.py")
 convert_jupyter("exploration.ipynb", "output/exploration.html")
-for seed in range(20):
+for seed in range(100):
     convert_jupyter(
         "production.ipynb",
         f"output/prod{seed:04d}.html",

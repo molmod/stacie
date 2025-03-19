@@ -17,7 +17,7 @@ $T$ is the temperature,
 $D$ is the dimensionality of the system,
 and $\hat{J}^\text{c}_d$ is the instantaneous charge current along one of the Cartesian directions.
 The time origin $t_0$ is arbitrary:
-the expectation value is computed over all possible time origins.
+the expected value is computed over all possible time origins.
 
 The derivation of this result can be found in
 Appendix C.3.1 of "Understanding Molecular Simulation"
@@ -131,7 +131,7 @@ With these requirements, the shear viscosity can be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results
+from stacie import compute_spectrum, estimate_acint, plot_results, ChebyshevModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
 ionvels = ...
@@ -149,7 +149,7 @@ spectrum = compute_spectrum(
     prefactor=0.5 / (volume * temperature * boltzmann_const),
     timestep=timestep,
 )
-result = estimate_acint(spectrum)
+result = estimate_acint(spectrum, ChebyshevModel(2, even=True))
 print("Electrical conductivity", result.acint)
 print("Uncertainty of the electrical conductivity", result.acint_std)
 

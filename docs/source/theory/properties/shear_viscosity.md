@@ -14,7 +14,7 @@ $k_\text{B}$ is the Boltzmann constant,
 $T$ is the temperature,
 and $\hat{P}_{xy}$ is an instantaneous off-diagonal pressure tensor element.
 The time origin $t_0$ is arbitrary:
-the expectation value is computed over all possible time origins.
+the expected value is computed over all possible time origins.
 
 The derivation of this result can be found in several references, e.g.,
 Appendix C.3.2 of "Understanding Molecular Simulation"
@@ -193,7 +193,7 @@ $$
 
 By working out the autocorrelation functions of $\hat{P}'_1$ and $\hat{P}'_2$ one finds that,
 for the case of an isotropic liquid,
-they have the same expectation values if $\alpha=\frac{1}{\sqrt{3}}$.
+they have the same expected values if $\alpha=\frac{1}{\sqrt{3}}$.
 First expand the covariances:
 
 $$
@@ -230,7 +230,7 @@ $$
 $$
 
 Because the liquid is isotropic,
-permutations of Cartesian axes do not affect the expectations values,
+permutations of Cartesian axes do not affect the expected values,
 which greatly simplifies the expressions.
 
 $$
@@ -253,7 +253,7 @@ $$
         - \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
 $$
 
-These two expectation values are consistent when $\alpha^2 = 1/3$.
+These two expected values are consistent when $\alpha^2 = 1/3$.
 
 Using the same expansion technique,
 it is shown below that the average viscosity over the five components proposed here
@@ -386,7 +386,7 @@ With these requirements, the shear viscosity can be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results
+from stacie import compute_spectrum, estimate_acint, plot_results, ExpTailModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
 pcomps = ...
@@ -409,7 +409,7 @@ spectrum = compute_spectrum(
     prefactor=0.5 * volume / (temperature * boltzmann_const),
     timestep=timestep,
 )
-result = estimate_acint(spectrum)
+result = estimate_acint(spectrum, ExpTailModel())
 print("Shear viscosity", result.acint)
 print("Uncertainty of the shear viscosity", result.acint_std)
 

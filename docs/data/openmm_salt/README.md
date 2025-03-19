@@ -18,7 +18,7 @@ pip install stacie[docs,tests]
 Afterwards, you can run the OpenMM simulations as follows:
 
 ```bash
-OPENMM_CPU_THREADS=1 stepup
+OPENMM_CPU_THREADS=1 stepup -n 1.0
 ```
 
 Because StepUp already executes the workflow in parallel, multithreading in OpenMM is disabled.

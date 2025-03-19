@@ -25,7 +25,8 @@ from numpy.testing import assert_equal
 from stacie.spectrum import compute_spectrum
 
 
-def test_basics():
+@pytest.mark.parametrize("use_iter", [False, True])
+def test_basics(use_iter):
     sequences = np.array(
         [
             [0.66134257, 1.69596962, 2.08533685, 0.62396761, -0.21445517, 1.2226847],
@@ -34,7 +35,9 @@ def test_basics():
     )
     prefactor = 0.34
     timestep = 10.0
-    spectrum = compute_spectrum(sequences, prefactor=prefactor, timestep=timestep)
+    spectrum = compute_spectrum(
+        iter(sequences) if use_iter else sequences, prefactor=prefactor, timestep=timestep
+    )
     # Test simple properties.
     assert spectrum.nfreq == 4
     assert_equal(spectrum.ndofs, [2, 4, 4, 2])
@@ -112,3 +115,19 @@ def test_nsplit():
     assert spectrum.nstep == 4
     assert spectrum.nfreq == 3
     assert_equal(spectrum.ndofs, [2, 4, 4])
+
+
+def test_variance():
+    sequences = np.array(
+        [
+            [0.90969991, 0.09442405, 0.98258277, 0.43112388, 0.81369217, 0.5543517, 0.10178618],
+            [0.78626291, 0.9948804, 0.2698581, 0.77724192, 0.11130753, 0.51409317, 0.34561125],
+        ]
+    )
+    print(sequences.mean() ** 2)
+    s1 = compute_spectrum(sequences)
+    s2 = s1.without_zero_freq()
+    s3 = compute_spectrum(sequences, include_zero_freq=False)
+    assert s1.variance == pytest.approx((sequences**2).mean())
+    assert s2.variance == pytest.approx(np.var(sequences, ddof=1))
+    assert s3.variance == pytest.approx(np.var(sequences, ddof=1))

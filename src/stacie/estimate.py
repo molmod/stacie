@@ -27,8 +27,8 @@ from scipy.optimize import minimize
 
 from .conditioning import ConditionedCost
 from .cost import LowFreqCost
-from .cutoff import CutoffCriterion, underfitting_criterion
-from .model import ExpTailModel, SpectrumModel, guess
+from .cutoff import CutoffCriterion, halfhalf_criterion
+from .model import SpectrumModel, guess
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
 
@@ -45,15 +45,16 @@ class Result:
     nfit: int = attrs.field()
     """
     The number of low-frequency spectrum data points used to fit the model.
-    This value is the best among a series of tested cutoffs,
-    i.e. by minimizing the cutoff criterion.
+    This value represents the optimal cutoff, selected from a range of tested cutoffs,
+    by minimizing the given cutoff criterion.
     """
 
     history: dict[int, dict[str]] = attrs.field()
     """History of nfit optimization.
 
-    The key is ``nfit``, the number of frequencies fitted to.
-    Each value is a dictionary returned by :func:`fit_model_spectrum`.
+    The key is ``nfit``, which represents the number of frequencies fitted.
+    Each value is a dictionary returned by :func:`fit_model_spectrum`,
+    containing the intermediate results of the fitting process.
     """
 
     @property
@@ -92,13 +93,13 @@ class FCutWarning(Warning):
 
 def estimate_acint(
     spectrum: Spectrum,
+    model: SpectrumModel,
     *,
     fcutmax: float | None = None,
     maxscan: int = 100,
-    nfitmin: int = 10,
+    nfitmin: int | None = None,
     nfitmax_hard: int = 1000,
-    model: SpectrumModel | None = None,
-    cutoff_criterion: CutoffCriterion = underfitting_criterion,
+    cutoff_criterion: CutoffCriterion = halfhalf_criterion,
     rng: np.random.Generator | None = None,
     nonlinear_budget: int = 10,
     verbose: bool = False,
@@ -108,11 +109,12 @@ def estimate_acint(
     It is recommended to leave the keyword arguments to their default values,
     except for methodological testing.
 
-    This function fits a model to the low-frequency portion of the spectrum
-    and derives an estimate of the autocorrelation (and its uncertainty) from the fit.
-    The model is fitted to a part of the spectrum op to a cutoff frequency.
-    Multiple cutoffs are tested, each resulting in another number of spectrum amplitudes in the fit,
-    and the one that minimizes the ``cutoff_criterion`` is selected as the best solution.
+    This function fits a model to the low-frequency portion of the spectrum and
+    derives an estimate of the autocorrelation (and its uncertainty) from the fit.
+    The model is fitted to a part of the spectrum up to a cutoff frequency.
+    Multiple cutoff frequencies are tested,
+    each resulting in a different number of spectrum amplitudes in the fit.
+    The one that minimizes the ``cutoff_criterion`` is selected as the optimal solution.
 
     Parameters
     ----------
@@ -120,30 +122,30 @@ def estimate_acint(
         The power spectrum and related metadata,
         used as inputs for the estimation of the autocorrelation integral.
         This object can be prepared with the function: :py:func:`stacie.spectrum.compute_spectrum`.
-    fcutmax
-        The maximum cutoff on the frequency axis (units of frequency),
-        which corresponds to the largest value for ``nfit``.
-    maxscan
-        The maximum number of cutoffs to test.
-        If 1, then only the given ``fcutmax`` is used.
-    nfitmin
-        The minimal amount of frequency data points to use in the fit.
-    nfitmax_hard
-        The maximal amount of frequency data points to use in the fit.
-        This puts an upper bound on the computational cost of the fit.
-        If this upper limit is stricter than that of ``fcutmax``, a warning is raised.
     model
         The model used to fit the low-frequency part of the spectrum.
-        The default is an instance of :py:class:`stacie.model.ExpTailModel`.
+    fcutmax
+        The maximum cutoff on the frequency axis (in frequency units),
+        corresponding to the largest value for ``nfit``.
+    maxscan
+        The maximum number of cutoffs to test during the optimization.
+        If set to 1, only the given ``fcutmax`` is used, with no extra cutoff testing.
+    nfitmin
+        The minimum number of frequency data points to include in the fit.
+        If not provided, this is set to 10 times the number of model parameters as a default.
+    nfitmax_hard
+        The maximum number of frequency data points to include in the fit.
+        This imposes an upper bound on the computational cost of the fitting process.
+        If this upper limit is stricter than that of ``fcutmax``, a warning is raised.
     cutoff_criterion
-        The criterion function that is minimized to find the best cutoff
-        (and thus number of points included in the fit).
+        The criterion function that is minimized to find the best cutoff frequency and,
+        consequently, the optimal number of points included in the fit.
     rng
-        A random number generator for sampling gueses of the nonlinear parameters.
-        When not given, ``np.random.default_rng(42)`` is used.
+        A random number generator for sampling guesses of the nonlinear parameters.
+        If not provided, ``np.random.default_rng(42)`` is used.
         The seed is fixed by default for reproducibility.
     nonlinear_budget
-        The number of samples to use for the nonlinear parameters is
+        The number of samples used for the nonlinear parameters, calculated as
         ``nonlinear_budget ** num_nonlinear``.
     verbose
         Set this to ``True`` to print progress information of the frequency cutoff search
@@ -154,10 +156,10 @@ def estimate_acint(
     result
         The inputs, intermediate results and outputs or the algorithm.
     """
-    if model is None:
-        model = ExpTailModel()
     if rng is None:
         rng = np.random.default_rng(42)
+    if nfitmin is None:
+        nfitmin = 10 * model.npar
     history = {}
 
     if verbose and maxscan > 1:
@@ -217,22 +219,28 @@ def estimate_acint(
         nfits = [nfit]
         compute_criterion(0)
     else:
-        nfits = build_xgrid_exp([nfitmin, nfitmax], maxscan)
+        # Only fit to an even number of points, so the grid can be splitted into two equal halves.
+        nfits = [2 * i for i in build_xgrid_exp([nfitmin // 2, nfitmax // 2], maxscan)]
         rpi_opt(compute_criterion, [0, len(nfits) - 1], mode="min")
-        if any(np.isfinite(props["criterion"]) for props in history.values()):
-            nfit = min((record["criterion"], key) for key, record in history.items())[1]
+        candidates = [
+            (record["criterion"], key)
+            for key, record in history.items()
+            if np.isfinite(record["criterion"])
+        ]
+        if len(candidates) > 0:
+            nfit = min(candidates)[1]
             if nfit == nfits[0]:
                 warnings.warn(
                     "The lowest possible cutoff was selected. "
-                    "This indicates that the time series are too short, "
-                    "in which case the result is most likely biased.",
+                    "This indicates that the time series are too short. "
+                    "In this case, the result is most likely biased.",
                     FCutWarning,
                     stacklevel=2,
                 )
         else:
             warnings.warn(
                 "Could not find a suitable frequency cutoff. "
-                "The resuts for the smallest cutoff are selected.",
+                "The results for the smallest cutoff are selected.",
                 FCutWarning,
                 stacklevel=2,
             )
@@ -259,12 +267,12 @@ def fit_model_spectrum(
     Parameters
     ----------
     nfit
-        The number of low-frequency data points to use in the fit.
+        The number of low-frequency data points to include in the fit.
     cutoff_criterion
-        The criterion function that is minimized to find the best cutoff
-        (and thus number of points included in the fit).
+        The criterion function that is minimized to find the optimal cutoff
+        (and thus determine the number of points to include in the fit).
     rng
-        A random number generator for sampling gueses of the nonlinear parameters.
+        A random number generator for sampling guesses of the nonlinear parameters.
     nonlinear_budget
         The number of samples to use for the nonlinear parameters is
         ``nonlinear_budget ** num_nonlinear``
@@ -272,7 +280,7 @@ def fit_model_spectrum(
     Returns
     -------
     props
-        A dictionary with various intermediate results of the cost function calculation,
+        A dictionary containing various intermediate results of the cost function calculation,
         computed for the optimized parameters.
         See Notes for details.
 
@@ -299,6 +307,7 @@ def fit_model_spectrum(
     - ``sensitivity_simulation_time``: recommended simulation time based on the sensitivity analysis
     - ``sensitivity_block_time``: recommended block time based on the sensitivity analysis
     - ``thetas``: scale parameters for the gamma distribution
+    - ``cutoff_criterion``: name of the cutoff criterion used to determine the frequency cutoff
 
     The ExpTail model has the following additional properties:
 
@@ -309,21 +318,21 @@ def fit_model_spectrum(
     - ``exptail_block_time``: recommended block time based on the Exptail model
     """
     # Maximize likelihood
-    par_scales = model.get_par_scales(timestep, freqs[:nfit], amplitudes[:nfit])
+    model.configure_scales(timestep, freqs[:nfit], amplitudes[:nfit])
     pars_init = guess(
         model,
         timestep,
         freqs[:nfit],
-        amplitudes[:nfit],
         ndofs[:nfit],
-        par_scales,
+        amplitudes[:nfit],
+        model.par_scales,
         rng,
         nonlinear_budget,
     )
     if not model.valid(pars_init):
         raise AssertionError("Infeasible guess")
-    cost = LowFreqCost(timestep, freqs[:nfit], amplitudes[:nfit], ndofs[:nfit], model)
-    conditioned_cost = ConditionedCost(cost, par_scales, 1.0)
+    cost = LowFreqCost(timestep, freqs[:nfit], ndofs[:nfit], amplitudes[:nfit], model)
+    conditioned_cost = ConditionedCost(cost, model.par_scales, 1.0)
     opt = minimize(
         conditioned_cost.funcgrad,
         conditioned_cost.to_reduced(pars_init),
@@ -337,7 +346,12 @@ def fit_model_spectrum(
     props = cost.props(pars_opt, 2)
 
     # Compute the Hessian and its properties.
-    evals, evecs = np.linalg.eigh(props["cost_hess"])
+    if np.isfinite(props["cost_hess"]).all():
+        evals, evecs = np.linalg.eigh(props["cost_hess"])
+    else:
+        npar = len(pars_opt)
+        evals = np.full(npar, np.inf)
+        evecs = np.full((npar, npar), np.inf)
     props["cost_hess_evals"] = evals
     props["cost_hess_evecs"] = evecs
     if (evals > 0).all() and np.isfinite(evals).all():
@@ -349,6 +363,27 @@ def fit_model_spectrum(
     else:
         props["covar"] = np.full_like(props["cost_hess"], np.inf)
         props["pars_sensitivity"] = np.full((len(pars_opt), nfit), np.inf)
+
+    # Repeat the optimization for the first and the second half of the spectrum
+    # if the covariance is positive definite.
+    if np.isfinite(props["covar"]).all() and cutoff_criterion.half_opt:
+        for label, ifirst, ilast in [("half1", 0, nfit // 2), ("half2", nfit // 2, nfit)]:
+            cost = LowFreqCost(
+                timestep, freqs[ifirst:ilast], ndofs[ifirst:ilast], amplitudes[ifirst:ilast], model
+            )
+            conditioned_cost = ConditionedCost(cost, model.par_scales, 1.0)
+            opt = minimize(
+                conditioned_cost.funcgrad,
+                conditioned_cost.to_reduced(pars_opt),
+                jac=True,
+                hess=conditioned_cost.hess,
+                bounds=model.bounds(),
+                method="trust-constr",
+                options={"xtol": 1e-10, "gtol": 1e-10},
+            )
+            pars_opt_half = conditioned_cost.from_reduced(opt.x)
+            props[f"pars_{label}"] = pars_opt_half
+            props[f"cost_hess_{label}"] = cost(pars_opt_half, 2)[2]
 
     # Derive estimates from model parameters.
     props.update(model.derive_props(props["pars"], props["covar"], props["pars_sensitivity"]))
@@ -368,7 +403,8 @@ def fit_model_spectrum(
     props["freqs_rest"] = freqs[nfit:]
     props["amplitudes_rest"] = amplitudes[nfit:]
     props["kappas_rest"] = 0.5 * ndofs[nfit:]
-    props["criterion"] = cutoff_criterion(props)
+    props["cutoff_criterion"] = cutoff_criterion.__name__
+    props.update(cutoff_criterion(props))
 
     # Remove some intermediate properties to reduce the size of the Result object.
     del props["freqs"]

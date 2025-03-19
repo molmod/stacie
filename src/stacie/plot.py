@@ -77,7 +77,7 @@ def fixformat(s: str) -> str:
     def repl(match):
         factor = match.group(1)
         exp = str(int(match.group(2)))
-        if exp == 0:
+        if exp == "0":
             return factor
         return f"${factor}\\times 10^{{{exp}}}$"
 
@@ -263,23 +263,31 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the cutoff criterion as a function of cutoff frequency."""
     freqs = []
     criteria = []
+    expected = []
     for nfit, props in sorted(r.history.items()):
         freqs.append(r.spectrum.freqs[nfit - 1])
         criteria.append(props["criterion"])
+        expected.append(props.get("criterion_expected", np.nan))
     freqs = np.array(freqs)
     criteria = np.array(criteria)
+    expected = np.array(expected)
+    mask = np.isfinite(criteria)
+    criterion_min = criteria[mask].min()
+    criterion_scale = r.props.get("criterion_scale")
+    if criterion_scale is None and mask.any():
+        criterion_scale = np.median(criteria[mask]) - criterion_min
 
+    if np.isfinite(expected).any():
+        ax.plot(freqs / uc.freq_unit, expected, color="C1", lw=1, alpha=0.5, ls="--")
     ax.plot(freqs / uc.freq_unit, criteria, color="C1", lw=1)
     ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
     ax.axhline(0, **REF_PROPS)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
     ax.set_ylabel("Criterion")
-    ax.set_title("Cutoff criterion")
+    ax.set_title(f"Cutoff criterion ({r.props['cutoff_criterion'].split('_')[0]})")
     ax.set_xscale("log")
-    if np.isfinite(criteria).any():
-        criterion_scale = abs(criteria[0] - criteria.min())
-        if criterion_scale > 0:
-            ax.set_ylim(criteria[0] - 1.2 * criterion_scale, criteria[0] + 2 * criterion_scale)
+    if criterion_scale is not None:
+        ax.set_ylim(criterion_min - 0.2 * criterion_scale, criterion_min + 2.5 * criterion_scale)
 
 
 def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
