@@ -328,7 +328,7 @@ def halfhalf_criterion(props: dict[str, NDArray]) -> float:
     if not (np.isfinite(hess1).all() and np.isfinite(hess2).all()):
         return {"criterion": np.inf}
     evals1 = np.linalg.eigvalsh(hess1)
-    evals2 = np.linalg.eigvalsh(hess1)
+    evals2 = np.linalg.eigvalsh(hess2)
     if not ((evals1 > 0).all() and (evals2 > 0).all()):
         return {"criterion": np.inf}
 
