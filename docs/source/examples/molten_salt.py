@@ -216,19 +216,19 @@ analyze([path_nve_npz], "conductivity")
 # The analysis of the production trajectories follows the same approach
 # as the exploration trajectory, with two key differences:
 # - The trajectory files are loaded as input.
-# - For the diffusion constants, the degree of the Chebyshev polynomial is increased to 3.
+# - For the diffusion constants, the degree of the Chebyshev polynomial is increased to 2.
 
 # %%
 paths_nve_npz = glob("../../data/openmm_salt/output/prod????_nve_traj.npz")
 
 # %%
-diffusivity_na = analyze(paths_nve_npz, "na", 3)
+diffusivity_na = analyze(paths_nve_npz, "na", 2)
 
 # %%
-diffusivity_cl = analyze(paths_nve_npz, "cl", 3)
+diffusivity_cl = analyze(paths_nve_npz, "cl", 2)
 
 # %%
-conductivity = analyze(paths_nve_npz, "conductivity", 1)
+conductivity = analyze(paths_nve_npz, "conductivity", 2)
 
 # %% [markdown]
 #

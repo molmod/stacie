@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Tests for ``stacie.model``."""
+"""Tests for ``stacie.model``"""
 
 import numpy as np
 import pytest
@@ -25,6 +25,7 @@ from conftest import check_gradient, check_hessian
 from stacie.model import ChebyshevModel, ExpTailModel, PadeModel, guess
 
 FREQS = np.linspace(0, 0.5, 10)
+AMPLITUDES_REF = np.linspace(2, 1, 10)
 TIMESTEP = 1.2
 
 PARS_REF_EXP_TAIL = [
@@ -43,23 +44,25 @@ PARS_REF_EXP_TAIL = [
 def test_gradient_exptail(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpTailModel()
-    check_gradient(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    check_gradient(lambda pars, deriv=0: model.compute(TIMESTEP, FREQS, pars, deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_hessian_exptail(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpTailModel()
-    check_hessian(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    check_hessian(lambda pars, deriv=0: model.compute(TIMESTEP, FREQS, pars, deriv), pars_ref)
 
 
 def test_guess_exptail():
     model = ExpTailModel()
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     rng = np.random.default_rng(734)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
     ndofs = np.full(len(FREQS), 2)
-    par_scales = model.get_par_scales(TIMESTEP, FREQS, amplitudes)
-    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, par_scales, rng, 10)
+    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, model.par_scales, rng, 10)
     assert len(pars_init) == 3
     assert np.isfinite(pars_init).all()
 
@@ -83,23 +86,25 @@ PARS_REF_CHEBY = [
 def test_gradient_cheb(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ChebyshevModel(len(pars_ref) - 1)
-    check_gradient(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    check_gradient(lambda pars, deriv=0: model.compute(TIMESTEP, FREQS, pars, deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_CHEBY)
 def test_hessian_cheb(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ChebyshevModel(len(pars_ref) - 1)
-    check_hessian(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    check_hessian(lambda pars, deriv=0: model.compute(TIMESTEP, FREQS, pars, deriv), pars_ref)
 
 
 def test_guess_cheb():
     model = ChebyshevModel(2)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     rng = np.random.default_rng(123)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
     ndofs = np.full(len(FREQS), 2)
-    par_scales = model.get_par_scales(TIMESTEP, FREQS, amplitudes)
-    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, par_scales, rng, 10)
+    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, model.par_scales, rng, 10)
     assert len(pars_init) == 3
     assert np.isfinite(pars_init).all()
 
@@ -136,23 +141,25 @@ PARS_REF_EVEN_CHEBY = [
 def test_gradient_cheb_even(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ChebyshevModel(2 * len(pars_ref) - 2, even=True)
-    check_gradient(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    check_gradient(lambda pars, deriv=0: model.compute(TIMESTEP, FREQS, pars, deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EVEN_CHEBY)
 def test_hessian_cheb_even(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ChebyshevModel(2 * len(pars_ref) - 2, even=True)
-    check_hessian(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    check_hessian(lambda pars, deriv=0: model.compute(TIMESTEP, FREQS, pars, deriv), pars_ref)
 
 
 def test_guess_cheb_even():
     model = ChebyshevModel(4, even=True)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     rng = np.random.default_rng(123)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
     ndofs = np.full(len(FREQS), 2)
-    par_scales = model.get_par_scales(TIMESTEP, FREQS, amplitudes)
-    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, par_scales, rng, 10)
+    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, model.par_scales, rng, 10)
     assert len(pars_init) == 3
     assert np.isfinite(pars_init).all()
 
@@ -173,32 +180,35 @@ PARS_REF_PADE = [
 def test_gradient_pade(pars_ref):
     pars_ref = np.array(pars_ref)
     model = PadeModel([0, 1, 2], [2])
-    check_gradient(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    check_gradient(lambda pars, deriv=0: model.compute(TIMESTEP, FREQS, pars, deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_PADE)
 def test_hessian_pade(pars_ref):
     pars_ref = np.array(pars_ref)
     model = PadeModel([0, 1, 2], [2])
-    check_hessian(lambda pars, deriv=0: model.compute(FREQS, TIMESTEP, pars, deriv), pars_ref)
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    check_hessian(lambda pars, deriv=0: model.compute(TIMESTEP, FREQS, pars, deriv), pars_ref)
 
 
 def test_guess_pade():
     model = PadeModel([0, 2], [2])
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     rng = np.random.default_rng(123)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
     ndofs = np.full(len(FREQS), 2)
-    par_scales = model.get_par_scales(TIMESTEP, FREQS, amplitudes)
-    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, par_scales, rng, 10)
+    pars_init = guess(model, TIMESTEP, FREQS, ndofs, amplitudes, model.par_scales, rng, 10)
     assert len(pars_init) == 3
     assert np.isfinite(pars_init).all()
 
 
 def test_guess_pade_detailed():
+    freqs = np.linspace(0, 1.0, 10)
     model = PadeModel([0, 2], [2])
+    model.configure_scales(TIMESTEP, freqs, AMPLITUDES_REF)
     pars_ref = np.array([3.0, 1.5, 2.0])
-    freqs = np.linspace(0, 2.0, 15)
-    amplitudes_ref = model.compute(freqs, 1.0, pars_ref, 0)[0]
+    amplitudes_ref = model.compute(1.0, freqs, pars_ref, 0)[0]
     x = freqs / freqs[-1]
     assert amplitudes_ref == pytest.approx((3.0 + 1.5 * x**2) / (1.0 + 2.0 * x**2), rel=1e-10)
     ndofs = np.full(len(freqs), 20)

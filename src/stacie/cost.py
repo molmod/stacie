@@ -153,7 +153,7 @@ def cost_low(
       (if ``deriv==2``).
     """
     # Compute the model spectrum and its derivatives.
-    amplitudes_model = model.compute(freqs, timestep, pars, deriv)
+    amplitudes_model = model.compute(timestep, freqs, pars, deriv)
     kappas = 0.5 * ndofs
     thetas = amplitudes_model[0] / kappas
     if (amplitudes_model[0] <= 0).any():

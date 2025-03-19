@@ -27,9 +27,8 @@ the better the cutoff balances between over- and underfitting.
 Some function also add a field ``"criterion_expected"`` to the result,
 with the expected value of the criterion.
 
-Additionally, some functions include a field ``"criterion_high"``,
-which indicates the value of the criterion beyond which the spectrum would certainly be underfitted.
-This value is used to set the limits of the y-axis in the plot of the criterion.
+The functions may also include a field ``"criterion_scale"``.
+This is a suitable order of magnitude for the range of the y-axis, which is used for plotting
 """
 
 from collections.abc import Callable
@@ -45,6 +44,7 @@ __all__ = (
     "entropy_criterion",
     "expected_ufc",
     "general_ufc",
+    "halfapprox_criterion",
     "halfhalf_criterion",
     "sumsq_criterion",
     "underfitting_criterion",
@@ -54,6 +54,24 @@ __all__ = (
 CutoffCriterion = NewType("CutoffCriterion", Callable[[dict[str, NDArray]], float])
 
 
+def mark_criterion(*, half_opt: bool = False):
+    """Add metadata to a cutoff criterion function.
+
+    Parameters
+    ----------
+    half_opt
+        Whether the criterion requires an optimization of parameters
+        for the first or second half of the spectrum.
+    """
+
+    def decorator(criterion: CutoffCriterion) -> CutoffCriterion:
+        criterion.half_opt = half_opt
+        return criterion
+
+    return decorator
+
+
+@mark_criterion()
 def entropy_criterion(props: dict[str, np.ndarray]) -> float:
     r"""
     Compute the entropy criterion based on the negative log Wiener entropy (NLWE).
@@ -108,10 +126,11 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> float:
     return {
         "criterion": nlwe_empirical - nlwe_expected * np.log(nfreq),
         "criterion_expected": nlwe_expected * (1 - np.log(nfreq)),
-        "criterion_high": nlwe_expected,
+        "criterion_scale": 2 * nlwe_expected,
     }
 
 
+@mark_criterion()
 def underfitting_criterion(props: dict[str, NDArray]) -> float:
     """Quantify the degree of underfitting of a smooth spectrum model to noisy data.
 
@@ -132,7 +151,7 @@ def underfitting_criterion(props: dict[str, NDArray]) -> float:
     return {
         "criterion": general_ufc(residuals),
         "criterion_expected": expected_ufc(props["amplitudes_model"][1]),
-        "criterion_high": 0.0,
+        "criterion_scale": len(props["amplitudes"]),
     }
 
 
@@ -199,6 +218,7 @@ def expected_ufc(basis: NDArray[float]) -> float:
     return uvec_sqmodel.sum() / (nfreq + 1) - nfreq
 
 
+@mark_criterion()
 def sumsq_criterion(props: dict[str, np.ndarray]) -> float:
     """A cutoff criterion based on the statistics of the sum of squares of the residuals.
 
@@ -246,10 +266,11 @@ def sumsq_criterion(props: dict[str, np.ndarray]) -> float:
     return {
         "criterion": nlogprob - entropy - np.log(ndof),
         "criterion_expected": -np.log(ndof),
-        "criterion_high": 0.0,
+        "criterion_scale": 2.0,
     }
 
 
+@mark_criterion()
 def akaike_criterion(props: dict[str, NDArray]) -> float:
     """Compute the Akaike Information Criterion (AIC) for the whole spectrum: fitted + discarded.
 
@@ -282,6 +303,7 @@ def akaike_criterion(props: dict[str, NDArray]) -> float:
     return {"criterion": 2 * (npar_lowfreq + npar_rest) - 2 * (ll_lowfreq + ll_rest)}
 
 
+@mark_criterion(half_opt=True)
 def halfhalf_criterion(props: dict[str, NDArray]) -> float:
     """Likelihood that the same parameters fit both the first and second halves of the spectrum.
 
@@ -332,5 +354,89 @@ def halfhalf_criterion(props: dict[str, NDArray]) -> float:
     return {
         "criterion": nll,
         "criterion_expected": entropy,
-        "criterion_high": entropy + len(delta),
+        "criterion_scale": 2 * len(delta),
+    }
+
+
+@mark_criterion()
+def halfapprox_criterion(props: dict[str, NDArray]) -> float:
+    """Approximate the halfhalf criterion without requiring a reoptimization.
+
+    Parameters
+    ----------
+    props
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
+
+    Returns
+    -------
+    results
+        A dictionary with "criterion" and other fields.
+        (See module docstring for details.)
+    """
+    # Sanity check: we need positive definite hessians.
+    cost_hess_evals = props["cost_hess_evals"]
+    if np.any(cost_hess_evals <= 0) or not np.all(np.isfinite(cost_hess_evals)):
+        return {"criterion": np.inf}
+
+    # Compute the gradient of the cost function for the first and second half.
+    nfreq = len(props["freqs"])
+    sensitivity = props["cost_grad_sensitivity"]
+    residual = props["amplitudes"] - props["amplitudes_model"][0]
+    grad1 = np.dot(sensitivity[:, : nfreq // 2], residual[: nfreq // 2])
+    grad2 = np.dot(sensitivity[:, nfreq // 2 :], residual[nfreq // 2 :])
+
+    # Transform the difference in gradients to the eigenbasis of the covariance.
+    cost_hess_evecs = props["cost_hess_evecs"]
+    delta_grad = np.dot(cost_hess_evecs.T, grad1 - grad2)
+
+    # Approximate the difference in parameters to first-order,
+    # assuming that the Hessian is twice as flat when using half of the data.
+    delta_pars = 2 * delta_grad / cost_hess_evals
+
+    # Approximate the eigenvalues of the covaraince of delta_pars:
+    covar_evals_delta = 4 / cost_hess_evals
+    # The factor 4 is motivated as follows:
+    # - The covariance is twice as large because only half of the data is used.
+    # - The covariance of the difference is the sum of the covariances of the two fits.
+
+    # Compute the negative log likelihood of the difference in parameters.
+    nll = (
+        0.5 * (delta_pars**2 / covar_evals_delta).sum()
+        + 0.5 * np.log(2 * np.pi * covar_evals_delta).sum()
+    )
+
+    # Compute the expected value of the negative log likelihood, which is the entropy.
+    entropy = 0.5 * len(delta_pars) + 0.5 * np.log(2 * np.pi * covar_evals_delta).sum()
+
+    return {
+        "criterion": nll,
+        "criterion_expected": entropy,
+        "criterion_scale": 2 * len(delta_pars),
+    }
+
+
+@mark_criterion()
+def evidence_criterion(props: dict[str, NDArray]) -> float:
+    """Minus the logarithm of the evidence, in the MAP approximation, up to a constant.
+
+    Parameters
+    ----------
+    props
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
+
+    Returns
+    -------
+    results
+        A dictionary with "criterion" and other fields.
+        (See module docstring for details.)
+    """
+    # Sanity check: we need positive definite hessians.
+    cost_hess_evals = props["cost_hess_evals"]
+    if np.any(cost_hess_evals <= 0) or not np.all(np.isfinite(cost_hess_evals)):
+        return {"criterion": np.inf}
+
+    # calculate the evidence
+    return {
+        "criterion": -props["ll"] + 0.5 * np.log(2 * np.pi * cost_hess_evals).sum(),
+        "criterion_scale": 2 * len(cost_hess_evals),
     }

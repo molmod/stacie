@@ -112,7 +112,8 @@ def estimate_acint(
     This function fits a model to the low-frequency portion of the spectrum and
     derives an estimate of the autocorrelation (and its uncertainty) from the fit.
     The model is fitted to a part of the spectrum up to a cutoff frequency.
-    Multiple cutoff frequencies are tested, each resulting in a different number of spectrum amplitudes in the fit.
+    Multiple cutoff frequencies are tested,
+    each resulting in a different number of spectrum amplitudes in the fit.
     The one that minimizes the ``cutoff_criterion`` is selected as the optimal solution.
 
     Parameters
@@ -123,7 +124,6 @@ def estimate_acint(
         This object can be prepared with the function: :py:func:`stacie.spectrum.compute_spectrum`.
     model
         The model used to fit the low-frequency part of the spectrum.
-        The default is an instance of :py:class:`stacie.model.ChebyshevModel`.
     fcutmax
         The maximum cutoff on the frequency axis (in frequency units),
         corresponding to the largest value for ``nfit``.
@@ -318,21 +318,21 @@ def fit_model_spectrum(
     - ``exptail_block_time``: recommended block time based on the Exptail model
     """
     # Maximize likelihood
-    par_scales = model.get_par_scales(timestep, freqs[:nfit], amplitudes[:nfit])
+    model.configure_scales(timestep, freqs[:nfit], amplitudes[:nfit])
     pars_init = guess(
         model,
         timestep,
         freqs[:nfit],
         ndofs[:nfit],
         amplitudes[:nfit],
-        par_scales,
+        model.par_scales,
         rng,
         nonlinear_budget,
     )
     if not model.valid(pars_init):
         raise AssertionError("Infeasible guess")
     cost = LowFreqCost(timestep, freqs[:nfit], ndofs[:nfit], amplitudes[:nfit], model)
-    conditioned_cost = ConditionedCost(cost, par_scales, 1.0)
+    conditioned_cost = ConditionedCost(cost, model.par_scales, 1.0)
     opt = minimize(
         conditioned_cost.funcgrad,
         conditioned_cost.to_reduced(pars_init),
@@ -366,12 +366,12 @@ def fit_model_spectrum(
 
     # Repeat the optimization for the first and the second half of the spectrum
     # if the covariance is positive definite.
-    if np.isfinite(props["covar"]).all():
+    if np.isfinite(props["covar"]).all() and cutoff_criterion.half_opt:
         for label, ifirst, ilast in [("half1", 0, nfit // 2), ("half2", nfit // 2, nfit)]:
             cost = LowFreqCost(
                 timestep, freqs[ifirst:ilast], ndofs[ifirst:ilast], amplitudes[ifirst:ilast], model
             )
-            conditioned_cost = ConditionedCost(cost, par_scales, 1.0)
+            conditioned_cost = ConditionedCost(cost, model.par_scales, 1.0)
             opt = minimize(
                 conditioned_cost.funcgrad,
                 conditioned_cost.to_reduced(pars_opt),

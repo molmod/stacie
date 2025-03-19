@@ -145,6 +145,7 @@ plot_pes()
 MASS = sc.value("unified atomic mass unit") * 39.948 / sc.value("atomic unit of mass")
 FEMTOSECOND = 1e-15 / sc.value("atomic unit of time")
 PICOSECOND = 1e-12 / sc.value("atomic unit of time")
+TERAHERTZ = 1e12 * sc.value("atomic unit of time")
 TIMESTEP = 5 * FEMTOSECOND
 
 
@@ -335,15 +336,19 @@ def demo_stacie(stride=1):
         / sc.value("atomic unit of length") ** 2,
         acint_unit_str="m$^2$ s",
         acint_fmt=".2e",
-        freq_unit=1e12 * sc.value("atomic unit of time"),
+        freq_unit=TERAHERTZ,
         freq_unit_str="THz",
-        time_unit=1e-12 / sc.value("atomic unit of time"),
+        time_unit=PICOSECOND,
         time_unit_str="ps",
         time_fmt=".2f",
     )
     plot_spectrum(ax, uc, spectrum, nplot=500)
 
-    result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
+    # The maximum cutoff frequency is chosen to be 1 THz,
+    # by inspecting the first spectrum plot.
+    # Beyond the cutoff frequency, the spectrum has resonance peaks that
+    # the ExpTailModel is not designed to handle.
+    result = estimate_acint(spectrum, ExpTailModel(), fcutmax=TERAHERTZ, verbose=True)
     fig, ax = plt.subplots()
     plot_fitted_spectrum(ax, uc, result)
     fig, ax = plt.subplots()

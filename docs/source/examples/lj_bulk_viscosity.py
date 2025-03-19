@@ -5,7 +5,7 @@
 #
 # This example demonstrates how to compute the bulk viscosity
 # of a Lennard-Jones liquid near its triple point using LAMMPS.
-# It is based on the previous notebook [Shear viscosity of the Lennard-Jones liquid](lj_viscosity.py),
+# It is based on the previous notebook [Shear viscosity of the Lennard-Jones liquid](lj_shear_viscosity.py),
 # but skips the exploration phase to avoid repetition, focusing only on production simulations.
 # In this case, isotropic pressure is used to determine the bulk viscosity.
 

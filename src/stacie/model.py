@@ -33,6 +33,9 @@ class SpectrumModel:
     and the methods ``bounds``, ``guess``, ``compute`` and ``derive_props``.
     """
 
+    scales: dict[str, float] = attrs.field(factory=dict, init=False)
+    """A dictionary with essential scale information for the parameters and the cost function."""
+
     @property
     def name(self):
         raise NotImplementedError
@@ -59,18 +62,23 @@ class SpectrumModel:
             ]
         )
 
-    def get_scales_low(
+    def configure_scales(
         self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
-    ) -> dict[str, float]:
-        """Helper for the get_par_scales method."""
-        return {
+    ) -> NDArray[float]:
+        """Store essential scale information in the ``scales`` attribute.
+
+        Other methods may access this information,
+        so this method should be called before performing any computations.
+        """
+        self.scales = {
+            "freq_small": freqs[1],
+            "freq_scale": freqs[-1],
             "time_scale": 1 / freqs[-1],
             "amp_scale": np.median(abs(amplitudes[amplitudes != 0])),
         }
 
-    def get_par_scales(
-        self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
-    ) -> NDArray[float]:
+    @property
+    def par_scales() -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
         raise NotImplementedError
 
@@ -88,8 +96,6 @@ class SpectrumModel:
         self,
         rng: np.random.Generator,
         budget: int,
-        freqs: NDArray[float],
-        par_scales: NDArray[float],
     ) -> NDArray[float]:
         """Return samples of the nonlinear parameters.
 
@@ -113,14 +119,12 @@ class SpectrumModel:
         raise NotImplementedError
 
     def compute(
-        self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
+        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """Compute the amplitudes of the spectrum model.
 
         Parameters
         ----------
-        freqs
-            The frequencies for which the model spectrum amplitudes are computed.
         timestep
             The time step of the sequences used to compute the spectrum.
             It may be used to convert the frequency to the dimensionless
@@ -129,6 +133,8 @@ class SpectrumModel:
             :math:`f` is the frequency,
             :math:`k` is the frequency index in the discrete Fourier transform,
             and :math:`N` is the number of samples in the input time series.
+        freqs
+            The frequencies for which the model spectrum amplitudes are computed.
         pars
             The parameters.
         deriv
@@ -182,7 +188,7 @@ class SpectrumModel:
         nonlinear_mask = self.get_par_nonlinear()
         pars = np.ones(self.npar)
         pars[nonlinear_mask] = nonlinear_pars
-        basis = self.compute(freqs, timestep, pars, 1)[1][~nonlinear_mask]
+        basis = self.compute(timestep, freqs, pars, 1)[1][~nonlinear_mask]
         amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
         linear_pars = np.linalg.lstsq(
             (basis / amplitudes_std).T,
@@ -279,12 +285,12 @@ class ExpTailModel(SpectrumModel):
         """Return the number of parameters."""
         return 3
 
-    def get_par_scales(
-        self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
-    ) -> NDArray[float]:
+    @property
+    def par_scales(self) -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
-        sl = self.get_scales_low(timestep, freqs, amplitudes)
-        return np.array([sl["amp_scale"], sl["amp_scale"], sl["time_scale"]])
+        return np.array(
+            [self.scales["amp_scale"], self.scales["amp_scale"], self.scales["time_scale"]]
+        )
 
     def get_par_nonlinear(self) -> NDArray[bool]:
         """Return a boolean mask for the nonlinear parameters."""
@@ -294,16 +300,14 @@ class ExpTailModel(SpectrumModel):
         self,
         rng: np.random.Generator,
         budget: int,
-        freqs: NDArray[float],
-        par_scales: NDArray[float],
     ) -> NDArray[float]:
         """Return samples of the nonlinear parameters."""
-        corrtime_min = 0.1 / freqs[-1]
-        corrtime_max = 1 / freqs[1]
+        corrtime_min = 0.1 / self.scales["freq_scale"]
+        corrtime_max = 1 / self.scales["freq_small"]
         return np.exp(rng.uniform(np.log(corrtime_min), np.log(corrtime_max), (budget, 1)))
 
     def compute(
-        self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
+        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):
@@ -402,19 +406,17 @@ class ChebyshevModel(SpectrumModel):
         """Return the number of parameters."""
         return (self.degree + 2) // 2 if self.even else self.degree + 1
 
-    def get_par_scales(
-        self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
-    ) -> NDArray[float]:
+    @property
+    def par_scales(self) -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
-        sl = self.get_scales_low(timestep, freqs, amplitudes)
-        return np.full(self.npar, sl["amp_scale"])
+        return np.full(self.npar, self.scales["amp_scale"])
 
     def get_par_nonlinear(self) -> NDArray[bool]:
         """Return a boolean mask for the nonlinear parameters."""
         return np.zeros(self.npar, dtype=bool)
 
     def compute(
-        self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
+        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):
@@ -425,13 +427,14 @@ class ChebyshevModel(SpectrumModel):
             raise TypeError("Argument freqs must be a 1D array.")
 
         # Construct a basis of Chebyshev polynomials.
+        freq_scale = self.scales["freq_scale"]
         basis = [np.ones(len(freqs))]
         if self.degree > 0:
             if self.even:
-                basis.append(freqs / freqs[-1])
+                basis.append(freqs / freq_scale)
             else:
                 # Reverse the frequency axis, so all basis functions are 1 at freq 0.
-                basis.append(1 - 2 * freqs / freqs[-1])
+                basis.append(1 - 2 * freqs / freq_scale)
         for _ in range(2, self.degree + 1):
             basis.append(2 * basis[1] * basis[-1] - basis[-2])
         basis = np.array(basis)
@@ -512,14 +515,12 @@ class PadeModel(SpectrumModel):
         """Return the number of parameters."""
         return len(self.numer_degrees) + len(self.denom_degrees)
 
-    def get_par_scales(
-        self, timestep: float, freqs: NDArray[float], amplitudes: NDArray[float]
-    ) -> NDArray[float]:
+    @property
+    def par_scales(self) -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
-        sl = self.get_scales_low(timestep, freqs, amplitudes)
         return np.concatenate(
             [
-                np.full(len(self.numer_degrees), sl["amp_scale"]),
+                np.full(len(self.numer_degrees), self.scales["amp_scale"]),
                 np.ones(len(self.denom_degrees)),
             ]
         )
@@ -529,7 +530,7 @@ class PadeModel(SpectrumModel):
         return np.zeros(self.npar, dtype=bool)
 
     def compute(
-        self, freqs: NDArray[float], timestep: float, pars: NDArray[float], deriv: int = 0
+        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):
@@ -544,7 +545,7 @@ class PadeModel(SpectrumModel):
             raise ValueError("The number of parameters does not match the model.")
 
         # Construct two bases of monomials.
-        x = freqs / freqs[-1]
+        x = freqs / self.scales["freq_scale"]
         basis_n = np.power.outer(x, self.numer_degrees).T
         basis_d = np.power.outer(x, self.denom_degrees).T
         pars_n = pars[:npar_n]
@@ -672,9 +673,7 @@ def guess(
         )[1]
 
     # Otherwise, we need to sample the nonlinear parameters and guess the linear parameters.
-    nonlinear_samples = model.sample_nonlinear_pars(
-        rng, nonlinear_budget**num_nonlinear_pars, freqs, par_scales
-    )
+    nonlinear_samples = model.sample_nonlinear_pars(rng, nonlinear_budget**num_nonlinear_pars)
     best = None
     for nonlinear_pars in nonlinear_samples:
         cost, pars = _guess_linear(

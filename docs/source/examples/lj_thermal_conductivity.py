@@ -6,7 +6,7 @@
 # This example shows how to derive the thermal conductivity
 # using heat flux data from a LAMMPS simulation.
 # To keep the example simple, the production simulations from the
-# [Viscosity of the Lennard-Jones liquid](lj_viscosity.py) notebook are reused.
+# [Viscosity of the Lennard-Jones liquid](lj_shear_viscosity.py) notebook are reused.
 # The exploration phase is skipped and it is only checked *a posteriori* that the simulations
 # contain sufficient data.
 #

@@ -264,20 +264,18 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     freqs = []
     criteria = []
     expected = []
-    criterion_high = None
     for nfit, props in sorted(r.history.items()):
         freqs.append(r.spectrum.freqs[nfit - 1])
         criteria.append(props["criterion"])
         expected.append(props.get("criterion_expected", np.nan))
-        local_high = props.get("criterion_high")
-        if local_high is not None and (criterion_high is None or local_high > criterion_high):
-            criterion_high = local_high
     freqs = np.array(freqs)
     criteria = np.array(criteria)
     expected = np.array(expected)
     mask = np.isfinite(criteria)
-    if mask.any() and criterion_high is None:
-        criterion_high = np.median(criteria[mask])
+    criterion_min = criteria[mask].min()
+    criterion_scale = r.props.get("criterion_scale")
+    if criterion_scale is None and mask.any():
+        criterion_scale = np.median(criteria[mask]) - criterion_min
 
     if np.isfinite(expected).any():
         ax.plot(freqs / uc.freq_unit, expected, color="C1", lw=1, alpha=0.5, ls="--")
@@ -288,10 +286,8 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax.set_ylabel("Criterion")
     ax.set_title("Cutoff criterion")
     ax.set_xscale("log")
-    if criterion_high is not None:
-        criteria_low = criteria[mask].min()
-        delta = abs(criterion_high - criteria_low)
-        ax.set_ylim(criteria_low - 0.2 * delta, criterion_high + 0.5 * delta)
+    if criterion_scale is not None:
+        ax.set_ylim(criterion_min - 0.2 * criterion_scale, criterion_min + 2.5 * criterion_scale)
 
 
 def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
