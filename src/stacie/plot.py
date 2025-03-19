@@ -284,7 +284,7 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax.axhline(0, **REF_PROPS)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
     ax.set_ylabel("Criterion")
-    ax.set_title("Cutoff criterion")
+    ax.set_title(f"Cutoff criterion ({r.props['cutoff_criterion'].split('_')[0]})")
     ax.set_xscale("log")
     if criterion_scale is not None:
         ax.set_ylim(criterion_min - 0.2 * criterion_scale, criterion_min + 2.5 * criterion_scale)
