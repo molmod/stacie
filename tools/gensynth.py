@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """Generate synthetic signals and store their spectra as compressed messagepack files for testing.
 
 Four spectra are generated:
@@ -43,6 +42,7 @@ def generate_lorentzian(
     lterms
         List of (amplitude, time constant) tuples for Lorentzian terms.
         Use an empty list for white noise.
+
     Returns
     -------
         The generated spectrum.
