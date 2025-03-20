@@ -72,7 +72,7 @@ def mark_criterion(*, half_opt: bool = False):
 
 
 @mark_criterion()
-def entropy_criterion(props: dict[str, np.ndarray]) -> float:
+def entropy_criterion(props: dict[str, np.ndarray]) -> dict[str, float]:
     r"""
     Compute the entropy criterion based on the negative log Wiener entropy (NLWE).
     In this case, the NLWE is computed using the following formula:
@@ -131,7 +131,7 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> float:
 
 
 @mark_criterion()
-def underfitting_criterion(props: dict[str, NDArray]) -> float:
+def underfitting_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     """Quantify the degree of underfitting of a smooth spectrum model to noisy data.
 
     See documentation for more details.
@@ -219,7 +219,7 @@ def expected_ufc(basis: NDArray[float]) -> float:
 
 
 @mark_criterion()
-def sumsq_criterion(props: dict[str, np.ndarray]) -> float:
+def sumsq_criterion(props: dict[str, np.ndarray]) -> dict[str, float]:
     """A cutoff criterion based on the statistics of the sum of squares of the residuals.
 
     The sum of (normalized) squared residuals in a regression problem is known
@@ -271,7 +271,7 @@ def sumsq_criterion(props: dict[str, np.ndarray]) -> float:
 
 
 @mark_criterion()
-def akaike_criterion(props: dict[str, NDArray]) -> float:
+def akaike_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     """Compute the Akaike Information Criterion (AIC) for the whole spectrum: fitted + discarded.
 
     The model used for the AIC is the one used for the spectrum fitting
@@ -304,7 +304,7 @@ def akaike_criterion(props: dict[str, NDArray]) -> float:
 
 
 @mark_criterion(half_opt=True)
-def halfhalf_criterion(props: dict[str, NDArray]) -> float:
+def halfhalf_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     """Likelihood that the same parameters fit both the first and second halves of the spectrum.
 
     Parameters
@@ -359,7 +359,7 @@ def halfhalf_criterion(props: dict[str, NDArray]) -> float:
 
 
 @mark_criterion()
-def halfapprox_criterion(props: dict[str, NDArray]) -> float:
+def halfapprox_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     """Approximate the halfhalf criterion without requiring a reoptimization.
 
     Parameters
@@ -416,7 +416,7 @@ def halfapprox_criterion(props: dict[str, NDArray]) -> float:
 
 
 @mark_criterion()
-def evidence_criterion(props: dict[str, NDArray]) -> float:
+def evidence_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     """Minus the logarithm of the evidence, in the MAP approximation, up to a constant.
 
     Parameters
