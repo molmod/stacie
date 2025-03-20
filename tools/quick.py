@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Minimalistic quick example of using stacie."""
+"""A minimalistic example demonstrating quick use of Stacie."""
 
 import matplotlib as mpl
 import numpy as np
@@ -15,6 +15,8 @@ for _ in range(nstep):
     step = sequences[-1] * 0.9
     step += rng.normal(0, 0.1, nseq)
     sequences.append(step)
+
+# Bring the sequences into the right shape for the spectrum computation.
 sequences = np.array(sequences).T
 
 # Estimate the autocorrelation integral, print and plot the results.
