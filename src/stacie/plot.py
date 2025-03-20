@@ -271,11 +271,6 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     freqs = np.array(freqs)
     criteria = np.array(criteria)
     expected = np.array(expected)
-    mask = np.isfinite(criteria)
-    criterion_min = criteria[mask].min()
-    criterion_scale = r.props.get("criterion_scale")
-    if criterion_scale is None and mask.any():
-        criterion_scale = np.median(criteria[mask]) - criterion_min
 
     if np.isfinite(expected).any():
         ax.plot(freqs / uc.freq_unit, expected, color="C1", lw=1, alpha=0.5, ls="--")
@@ -286,7 +281,12 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax.set_ylabel("Criterion")
     ax.set_title(f"Cutoff criterion ({r.props['cutoff_criterion'].split('_')[0]})")
     ax.set_xscale("log")
-    if criterion_scale is not None:
+    mask = np.isfinite(criteria)
+    if mask.any():
+        criterion_min = criteria[mask].min()
+        criterion_scale = r.props.get("criterion_scale")
+        if criterion_scale is None and mask.any():
+            criterion_scale = np.median(criteria[mask]) - criterion_min
         ax.set_ylim(criterion_min - 0.2 * criterion_scale, criterion_min + 2.5 * criterion_scale)
 
 
