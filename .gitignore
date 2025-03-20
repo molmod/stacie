@@ -11,8 +11,6 @@ nosetests.xml
 .hypothesis/
 .ruff_cache
 tests/outputs/
-tests/inputs/
-docs/source/static/*.pdf
 tmp
 tools/*.pdf
 
