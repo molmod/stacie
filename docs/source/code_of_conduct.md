@@ -1,5 +1,5 @@
 # Code of Conduct
 
-CONCEPT:
-
-- State basic expectations of how to interact online.
+```{include} ../../CODE_OF_CONDUCT.md
+:start-line: 2
+```
