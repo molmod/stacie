@@ -6,22 +6,22 @@ import numpy as np
 
 from stacie import ChebyshevModel, compute_spectrum, estimate_acint, plot_results, summarize_results
 
-# Generate input sequences with a simple Markov process.
-nseq = 100
-sequences = [np.zeros(nseq)]
-nstep = 8192
-rng = np.random.default_rng(4)
-for _ in range(nstep):
-    step = sequences[-1] * 0.9
-    step += rng.normal(0, 0.1, nseq)
-    sequences.append(step)
+# Generate 32 input sequences with 4096 steps, using a simple Markov process.
+# The autocorrelation integral is 1.0
+# The integrated correlation time is 16.0
+nseq = 32
+nstep = 4096
+alpha = 31 / 33
+beta = np.sqrt(8 / 1089)
+rng = np.random.default_rng(0)
+sequences = np.zeros((nseq, nstep))
+for i in range(1, nstep):
+    sequences[:, i] = alpha * sequences[:, i - 1] + rng.normal(0, beta, nseq)
 
-# Bring the sequences into the right shape for the spectrum computation.
-sequences = np.array(sequences).T
 
 # Estimate the autocorrelation integral, print and plot the results.
 spectrum = compute_spectrum(sequences)
-result = estimate_acint(spectrum, ChebyshevModel(2), verbose=True)
+result = estimate_acint(spectrum, ChebyshevModel(2, even=True), verbose=True)
 print()
 print(summarize_results(result))
 mpl.rc_file("../docs/source/examples/matplotlibrc")

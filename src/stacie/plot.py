@@ -40,7 +40,7 @@ class UnitConfig:
     Note that values are *divided* by their units before plotting.
     """
 
-    acint_symbol: str = attrs.field(default=r"\eta", kw_only=True)
+    acint_symbol: str = attrs.field(default=r"\mathcal{I}", kw_only=True)
     """The symbol used for the autocorrelation integral."""
 
     acint_unit_str: str = attrs.field(default="A s", kw_only=True)
@@ -127,8 +127,8 @@ def plot_results(
                 plot_all_models(axs[0, 0], uc, r)
                 plot_criterion(axs[1, 0], uc, r)
                 plot_uncertainty(axs[0, 1], uc, r)
-                plot_residuals(axs[1, 1], uc, r)
-                plot_evals(axs[0, 2], uc, r)
+                plot_evals(axs[1, 1], uc, r)
+                plot_residuals(axs[0, 2], uc, r)
                 plot_sensitivity(axs[1, 2], uc, r)
                 pdf.savefig(fig)
                 plt.close(fig)
@@ -162,7 +162,7 @@ def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int | N
     _plot_ref_spectrum(ax, uc, s, nplot)
     ax.set_xlim(left=0)
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(f"Spectrum [{uc.acint_unit_str}]")
+    ax.set_ylabel(f"Amplitude [{uc.acint_unit_str}]")
     ax.set_title("Spectrum")
 
 
@@ -253,9 +253,9 @@ def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     nplot = min(2 * max(r.history), r.spectrum.nfreq)
     _plot_ref_spectrum(ax, uc, r.spectrum, nplot)
     # Print the number of fitted model spectra in the title to show how many models were tested.
-    ax.set_title(f"Model spectra ({len(r.history)} models)")
+    ax.set_title(f"Model spectra ({len(r.history)} fits)")
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(f"Model Spectrum [{uc.acint_unit_str}]")
+    ax.set_ylabel(f"Amplitude [{uc.acint_unit_str}]")
     ax.set_xscale("log")
 
 
@@ -278,7 +278,7 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
     ax.axhline(0, **REF_PROPS)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel("Criterion")
+    ax.set_ylabel("Criterion [1]")
     ax.set_title(f"Cutoff criterion ({r.props['cutoff_criterion'].split('_')[0]})")
     ax.set_xscale("log")
     mask = np.isfinite(criteria)
@@ -325,8 +325,9 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     if s.amplitudes_ref is not None:
         limit = s.amplitudes_ref[0]
         ax.axhline(limit / uc.acint_unit, **REF_PROPS)
+    ax.set_title(r"Autcorrelation integral $\pm2\sigma$", wrap=True)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(f"Autocorrelation integral [{uc.acint_unit_str}]")
+    ax.set_ylabel(f"${uc.acint_symbol}$ [{uc.acint_unit_str}]")
     ax.set_xscale("log")
 
 
@@ -343,8 +344,9 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     evals = np.array(evals)
 
     ax.plot(freqs / uc.freq_unit, evals, color="C4")
+    ax.set_title("Covariance eigenvalues")
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel("Covariance eigenvalues")
+    ax.set_ylabel(f"Eigenvalue [({uc.acint_unit_str})$^2$]")
     ax.set_yscale("log")
     ax.set_xscale("log")
 
@@ -360,14 +362,14 @@ def plot_residuals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         ax.axhline(0, ls="--", lw=1.0, color="k")
     ax.set_title("Normalized residuals")
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel("Residual [1]")
+    ax.set_ylabel(r"$(\hat{C}_k - \hat{C}_k^{\mathrm{model}})/\hat{\sigma}_k$ [1]")
 
 
 def plot_sensitivity(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the sensitivity of the autocorrelation integral estimate to spectrum amplitudes."""
     ax.plot(r.spectrum.freqs[: r.nfit] / uc.freq_unit, r.props["acint_sensitivity"], color="C5")
     ax.axhline(0, ls="--", lw=1.0, color="k")
-    ax.set_title("Sensitivity of the autocorrelation integral to spectrum amplitudes", wrap=True)
+    ax.set_title(f"Sensitivity of ${uc.acint_symbol}$ to spectrum", wrap=True)
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
     ax.set_ylabel("Sensitivity [1]")
 
