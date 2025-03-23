@@ -281,7 +281,6 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         ax.plot(freqs / uc.freq_unit, expected, color="C1", lw=1, alpha=0.5, ls="--")
     ax.plot(freqs / uc.freq_unit, criteria, color="C1", lw=1)
     ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
-    ax.axhline(0, **REF_PROPS)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
     ax.set_ylabel("Criterion [1]")
     ax.set_title(f"Cutoff criterion ({r.props['cutoff_criterion'].split('_')[0]})", wrap=True)

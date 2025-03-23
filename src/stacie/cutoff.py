@@ -126,7 +126,7 @@ def entropy_criterion(props: dict[str, np.ndarray]) -> dict[str, float]:
     return {
         "criterion": nlwe_empirical - nlwe_expected * np.log(nfreq),
         "criterion_expected": nlwe_expected * (1 - np.log(nfreq)),
-        "criterion_scale": 2 * nlwe_expected,
+        "criterion_scale": nlwe_expected,
     }
 
 
@@ -354,7 +354,7 @@ def halfhalf_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     return {
         "criterion": nll,
         "criterion_expected": entropy,
-        "criterion_scale": 2 * len(delta),
+        "criterion_scale": len(delta),
     }
 
 
@@ -411,7 +411,7 @@ def halfapprox_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     return {
         "criterion": nll,
         "criterion_expected": entropy,
-        "criterion_scale": 2 * len(delta_pars),
+        "criterion_scale": len(delta_pars),
     }
 
 
@@ -438,5 +438,5 @@ def evidence_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     # calculate the evidence
     return {
         "criterion": -props["ll"] + 0.5 * np.log(2 * np.pi * cost_hess_evals).sum(),
-        "criterion_scale": 2 * len(cost_hess_evals),
+        "criterion_scale": len(cost_hess_evals),
     }
