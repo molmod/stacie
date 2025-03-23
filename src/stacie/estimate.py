@@ -222,6 +222,8 @@ def estimate_acint(
         # Only fit to an even number of points, so the grid can be splitted into two equal halves.
         nfits = [2 * i for i in build_xgrid_exp([nfitmin // 2, nfitmax // 2], maxscan)]
         rpi_opt(compute_criterion, [0, len(nfits) - 1], mode="min")
+        if verbose:
+            print()
         candidates = [
             (record["criterion"], key)
             for key, record in history.items()

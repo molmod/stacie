@@ -67,7 +67,7 @@ class UnitConfig:
     time_fmt: str = attrs.field(default=".2e", kw_only=True)
     """The format string for a time value."""
 
-    sfac: float = attrs.field(default=2.0)
+    sfac: int = attrs.field(default=2)
     """The scale factor used for error bars (multiplier for sigma, standard error)."""
 
 
@@ -87,7 +87,11 @@ def fixformat(s: str) -> str:
 
 
 def plot_results(
-    path_pdf: str, rs: Result | list[Result], uc: UnitConfig | None = None, title: str | None = None
+    path_pdf: str,
+    rs: Result | list[Result],
+    uc: UnitConfig | None = None,
+    *,
+    figsize: tuple = (9, 6),
 ):
     """Generate a multi-page PDF with plots of the autocorrelation integral estimation.
 
@@ -104,6 +108,8 @@ def plot_results(
         All remaining ones are plotted in light grey.
     uc
         The configuration of the units used for plotting.
+    figsize
+        The figure size tuple for matplotlib
     """
     # Prepare results list
     if isinstance(rs, Result):
@@ -115,15 +121,13 @@ def plot_results(
 
     with PdfPages(path_pdf) as pdf:
         for r in rs:
-            fig, ax = plt.subplots(figsize=(9, 6))
+            fig, ax = plt.subplots(figsize=figsize)
             plot_fitted_spectrum(ax, uc, r)
-            if title is not None:
-                ax.set_title(title)
             pdf.savefig(fig)
             plt.close(fig)
 
             if len(r.history) > 1:
-                fig, axs = plt.subplots(2, 3, figsize=(9, 6))
+                fig, axs = plt.subplots(2, 3, figsize=figsize)
                 plot_all_models(axs[0, 0], uc, r)
                 plot_criterion(axs[1, 0], uc, r)
                 plot_uncertainty(axs[0, 1], uc, r)
@@ -135,12 +139,12 @@ def plot_results(
 
         if len(rs) > 1:
             if rs[0].spectrum.amplitudes_ref is not None:
-                fig, ax = plt.subplots(figsize=(9, 6))
+                fig, ax = plt.subplots(figsize=figsize)
                 plot_qq(ax, uc, rs)
                 pdf.savefig(fig)
                 plt.close(fig)
 
-            fig, ax = plt.subplots(figsize=(9, 6))
+            fig, ax = plt.subplots(figsize=figsize)
             plot_acint_estimates(ax, uc, rs)
             pdf.savefig(fig)
             plt.close(fig)
@@ -177,7 +181,7 @@ def _plot_ref_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: in
 
 
 FIT_LEFT_TITLE_TEMPLATE = (
-    "Spectrum model {model}\n"
+    "Spectrum model {model} $\\pm$ ${uc.sfac}\\sigma$\n"
     "${uc.acint_symbol}$ = {acint:{uc.acint_fmt}} ± {acint_std:{uc.acint_fmt}}"
     "{acint_unit_str}"
 )
@@ -211,7 +215,6 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         color="C2",
         alpha=0.3,
         lw=0,
-        label=rf"$\pm{int(uc.sfac)}\sigma$",
     )
     ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
     fields = {
@@ -223,6 +226,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         "corrtime_int": r.corrtime_int / uc.time_unit,
         "corrtime_int_std": r.corrtime_int_std / uc.time_unit,
         "time_unit_str": "" if uc.time_unit_str == "1" else " " + uc.time_unit_str,
+        "sfac": uc.sfac,
     }
     ax.set_title("")
     ax.set_title(fixformat(FIT_LEFT_TITLE_TEMPLATE.format(**fields)), loc="left")
@@ -239,7 +243,6 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         )
     else:
         ax.set_title("\n" + fixformat(FIT_RIGHT_TITLE_TEMPLATE.format(**fields)), loc="right")
-    ax.legend(loc="lower left")
 
 
 def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
@@ -255,7 +258,7 @@ def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     nplot = min(2 * max(r.history), r.spectrum.nfreq)
     _plot_ref_spectrum(ax, uc, r.spectrum, nplot)
     # Print the number of fitted model spectra in the title to show how many models were tested.
-    ax.set_title(f"Model spectra ({len(r.history)} fits)")
+    ax.set_title(f"Model spectra ({len(r.history)} fits)", wrap=True)
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
     ax.set_ylabel(f"Amplitude [{uc.acint_unit_str}]")
     ax.set_xscale("log")
@@ -281,7 +284,7 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax.axhline(0, **REF_PROPS)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
     ax.set_ylabel("Criterion [1]")
-    ax.set_title(f"Cutoff criterion ({r.props['cutoff_criterion'].split('_')[0]})")
+    ax.set_title(f"Cutoff criterion ({r.props['cutoff_criterion'].split('_')[0]})", wrap=True)
     ax.set_xscale("log")
     mask = np.isfinite(criteria)
     if mask.any():
@@ -314,7 +317,6 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         color="C3",
         alpha=0.3,
         lw=0,
-        label=rf"$\pm{int(uc.sfac)}\sigma$",
     )
     s = r.spectrum
     ax.errorbar(
@@ -328,11 +330,10 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     if s.amplitudes_ref is not None:
         limit = s.amplitudes_ref[0]
         ax.axhline(limit / uc.acint_unit, **REF_PROPS)
-    ax.set_title(r"Autocorrelation integral", wrap=True)
+    ax.set_title(f"AC integral $\\pm$ ${uc.sfac}\\sigma$", wrap=True)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
     ax.set_ylabel(f"${uc.acint_symbol}$ [{uc.acint_unit_str}]")
     ax.set_xscale("log")
-    ax.legend(loc="lower left")
 
 
 def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
@@ -348,7 +349,7 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     evals = np.array(evals)
 
     ax.plot(freqs / uc.freq_unit, evals, color="C4")
-    ax.set_title("Covariance eigenvalues")
+    ax.set_title("Covariance eigenvalues", wrap=True)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
     ax.set_ylabel(f"Eigenvalue [({uc.acint_unit_str})$^2$]")
     ax.set_yscale("log")
@@ -364,7 +365,7 @@ def plot_residuals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     with np.errstate(invalid="ignore"):
         ax.plot(r.spectrum.freqs[: r.nfit] / uc.freq_unit, residuals, color="C0")
         ax.axhline(0, ls="--", lw=1.0, color="k")
-    ax.set_title("Normalized residuals")
+    ax.set_title("Residuals", wrap=True)
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
     ax.set_ylabel(r"$(\hat{C}_k - \hat{C}_k^{\mathrm{model}})/\hat{\sigma}_k$ [1]")
 
@@ -373,7 +374,7 @@ def plot_sensitivity(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the sensitivity of the autocorrelation integral estimate to spectrum amplitudes."""
     ax.plot(r.spectrum.freqs[: r.nfit] / uc.freq_unit, r.props["acint_sensitivity"], color="C5")
     ax.axhline(0, ls="--", lw=1.0, color="k")
-    ax.set_title(f"Sensitivity of ${uc.acint_symbol}$ to spectrum", wrap=True)
+    ax.set_title(f"Sensitivity of ${uc.acint_symbol}$", wrap=True)
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
     ax.set_ylabel("Sensitivity [1]")
 
