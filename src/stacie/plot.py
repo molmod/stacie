@@ -211,6 +211,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         color="C2",
         alpha=0.3,
         lw=0,
+        label=rf"$\pm{int(uc.sfac)}\sigma$",
     )
     ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
     fields = {
@@ -238,6 +239,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         )
     else:
         ax.set_title("\n" + fixformat(FIT_RIGHT_TITLE_TEMPLATE.format(**fields)), loc="right")
+    ax.legend(loc="lower left")
 
 
 def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
@@ -312,6 +314,7 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         color="C3",
         alpha=0.3,
         lw=0,
+        label=rf"$\pm{int(uc.sfac)}\sigma$",
     )
     s = r.spectrum
     ax.errorbar(
@@ -325,10 +328,11 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     if s.amplitudes_ref is not None:
         limit = s.amplitudes_ref[0]
         ax.axhline(limit / uc.acint_unit, **REF_PROPS)
-    ax.set_title(r"Autcorrelation integral $\pm2\sigma$", wrap=True)
+    ax.set_title(r"Autocorrelation integral", wrap=True)
     ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
     ax.set_ylabel(f"${uc.acint_symbol}$ [{uc.acint_unit_str}]")
     ax.set_xscale("log")
+    ax.legend(loc="lower left")
 
 
 def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
