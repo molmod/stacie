@@ -366,7 +366,7 @@ def plot_residuals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         ax.axhline(0, ls="--", lw=1.0, color="k")
     ax.set_title("Residuals", wrap=True)
     ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(r"$(\hat{C}_k - \hat{C}_k^{\mathrm{model}})/\hat{\sigma}_k$ [1]")
+    ax.set_ylabel(r"$(\hat{I}_k - \hat{I}_k^{\mathrm{model}})/\hat{\sigma}_k$ [1]")
 
 
 def plot_sensitivity(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
