@@ -390,16 +390,6 @@ def fit_model_spectrum(
     # Derive estimates from model parameters.
     props.update(model.derive_props(props["pars"], props["covar"], props["pars_sensitivity"]))
 
-    # Give recommendations for the block size and simulation time.
-    props["sensitivity_block_time"] = 0.1 / freqs[nfit - 1]
-    sweights = props["acint_sensitivity"] ** 2
-    sweights_sum = sweights.sum()
-    if np.isfinite(sweights_sum) and sweights_sum > 0:
-        freq_relevant = np.dot(sweights, freqs[:nfit]) / sweights_sum
-        props["sensitivity_simulation_time"] = 10 / freq_relevant
-    else:
-        props["sensitivity_simulation_time"] = np.inf
-
     # Compute remaining properties and derive the cutoff criterion
     props["pars_init"] = pars_init
     props["freqs_rest"] = freqs[nfit:]
