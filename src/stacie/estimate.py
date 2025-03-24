@@ -189,11 +189,11 @@ def estimate_acint(
             rng,
             nonlinear_budget,
         )
-        evals = props["cost_hess_evals"]
         history[nfit] = props
-        criterion = (
-            props["criterion"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
-        )
+        evals = props["cost_hess_evals"]
+        if not (np.isfinite(evals).all() and (evals > 0).all()):
+            props["criterion"] = np.inf
+        criterion = props["criterion"]
         if verbose and maxscan > 1:
             lowest_criterion = scratch.get("lowest_criterion")
             best = lowest_criterion is None or criterion < lowest_criterion
