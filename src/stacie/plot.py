@@ -43,7 +43,7 @@ class UnitConfig:
     acint_symbol: str = attrs.field(default=r"\mathcal{I}", kw_only=True)
     """The symbol used for the autocorrelation integral."""
 
-    acint_unit_str: str = attrs.field(default="A s", kw_only=True)
+    acint_unit_str: str = attrs.field(default="", kw_only=True)
     """The text used for the autocorrelation integral unit."""
 
     acint_unit: float = attrs.field(default=1.0, kw_only=True)
@@ -52,13 +52,13 @@ class UnitConfig:
     acint_fmt: str = attrs.field(default=".2e", kw_only=True)
     """The format string for an autocorrelation integral."""
 
-    freq_unit_str: str = attrs.field(default="Hz", kw_only=True)
+    freq_unit_str: str = attrs.field(default="", kw_only=True)
     """The text used for the frequency unit."""
 
     freq_unit: float = attrs.field(default=1.0, kw_only=True)
     """The unit of a frequency."""
 
-    time_unit_str: str = attrs.field(default="s", kw_only=True)
+    time_unit_str: str = attrs.field(default="", kw_only=True)
     """The text used for a time unit."""
 
     time_unit: float = attrs.field(default=1.0, kw_only=True)
