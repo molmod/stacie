@@ -72,7 +72,7 @@ class UnitConfig:
 
 
 def fixformat(s: str) -> str:
-    """Replace standard exponential notation with prettier unicode formatting."""
+    """Replace standard scientific notation with prettier unicode formatting."""
 
     def repl(match):
         factor = match.group(1)
@@ -84,6 +84,23 @@ def fixformat(s: str) -> str:
     result = re.sub(r"\b([0-9.]+)e([0-9+-]+)\b", repl, s)
     result = re.sub(r"\binf\b", "∞", result)
     return re.sub(r"\bnan\b", "?", result)
+
+
+def axis_label(label: str, unit_str: str | None) -> str:
+    """Format the axis label with the unit string as `label [unit]`.
+
+    When the unit is ``"1"``, ``""`` or ``None``, the unit is omitted.
+
+    Parameters
+    ----------
+    label
+        The label text.
+    unit_str
+        The unit string.
+    """
+    if unit_str in ("1", "", None):
+        return label
+    return f"{label} [{unit_str}]"
 
 
 def plot_results(
@@ -165,8 +182,8 @@ def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int | N
     )
     _plot_ref_spectrum(ax, uc, s, nplot)
     ax.set_xlim(left=0)
-    ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(f"Amplitude [{uc.acint_unit_str}]")
+    ax.set_xlabel(axis_label("Frequency", uc.freq_unit_str))
+    ax.set_ylabel(axis_label("Amplitude", uc.acint_unit_str))
     ax.set_title("Spectrum")
 
 
@@ -259,8 +276,8 @@ def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     _plot_ref_spectrum(ax, uc, r.spectrum, nplot)
     # Print the number of fitted model spectra in the title to show how many models were tested.
     ax.set_title(f"Model spectra ({len(r.history)} fits)", wrap=True)
-    ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(f"Amplitude [{uc.acint_unit_str}]")
+    ax.set_xlabel(axis_label("Frequency", uc.freq_unit_str))
+    ax.set_ylabel(axis_label("Amplitude", uc.acint_unit_str))
     ax.set_xscale("log")
 
 
@@ -281,8 +298,8 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         ax.plot(freqs / uc.freq_unit, expected, color="C1", lw=1, alpha=0.5, ls="--")
     ax.plot(freqs / uc.freq_unit, criteria, color="C1", lw=1)
     ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
-    ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel("Criterion [1]")
+    ax.set_xlabel(axis_label("Cutoff frequency", uc.freq_unit_str))
+    ax.set_ylabel("Criterion")
     ax.set_title(f"Cutoff criterion ({r.props['cutoff_criterion'].split('_')[0]})", wrap=True)
     ax.set_xscale("log")
     mask = np.isfinite(criteria)
@@ -330,8 +347,8 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         limit = s.amplitudes_ref[0]
         ax.axhline(limit / uc.acint_unit, **REF_PROPS)
     ax.set_title(f"AC integral $\\pm$ ${uc.sfac}\\sigma$", wrap=True)
-    ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(f"${uc.acint_symbol}$ [{uc.acint_unit_str}]")
+    ax.set_xlabel(axis_label("Cutoff frequency", uc.freq_unit_str))
+    ax.set_ylabel(axis_label(uc.acint_symbol, uc.acint_unit_str))
     ax.set_xscale("log")
 
 
@@ -349,8 +366,8 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
 
     ax.plot(freqs / uc.freq_unit, evals, color="C4")
     ax.set_title("Covariance eigenvalues", wrap=True)
-    ax.set_xlabel(f"Cutoff frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(f"Eigenvalue [({uc.acint_unit_str})$^2$]")
+    ax.set_xlabel(axis_label("Cutoff frequency", uc.freq_unit_str))
+    ax.set_ylabel("Eigenvalue")
     ax.set_yscale("log")
     ax.set_xscale("log")
 
@@ -365,8 +382,8 @@ def plot_residuals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         ax.plot(r.spectrum.freqs[: r.nfit] / uc.freq_unit, residuals, color="C0")
         ax.axhline(0, ls="--", lw=1.0, color="k")
     ax.set_title("Residuals", wrap=True)
-    ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel(r"$(\hat{I}_k - \hat{I}_k^{\mathrm{model}})/\hat{\sigma}_k$ [1]")
+    ax.set_xlabel(axis_label("Frequency", uc.freq_unit_str))
+    ax.set_ylabel(r"$(\hat{I}_k - \hat{I}_k^{\mathrm{model}})/\hat{\sigma}_k$")
 
 
 def plot_sensitivity(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
@@ -374,8 +391,8 @@ def plot_sensitivity(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax.plot(r.spectrum.freqs[: r.nfit] / uc.freq_unit, r.props["acint_sensitivity"], color="C5")
     ax.axhline(0, ls="--", lw=1.0, color="k")
     ax.set_title(f"Sensitivity of ${uc.acint_symbol}$", wrap=True)
-    ax.set_xlabel(f"Frequency [{uc.freq_unit_str}]")
-    ax.set_ylabel("Sensitivity [1]")
+    ax.set_xlabel(axis_label("Frequency", uc.freq_unit_str))
+    ax.set_ylabel("Sensitivity")
 
 
 def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
@@ -391,8 +408,8 @@ def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
     distance = abs(quantiles - normed_errors).mean()
     ax.scatter(quantiles, normed_errors, c="C0", s=3)
     ax.plot([-2, 2], [-2, 2], **REF_PROPS)
-    ax.set_xlabel("Normal quantiles [1]")
-    ax.set_ylabel("Sorted normalized errors [1]")
+    ax.set_xlabel("Normal quantiles")
+    ax.set_ylabel("Sorted normalized errors")
     ax.set_title(f"QQ Plot (Wasserstein Distance = {distance:.4f})")
 
 
@@ -444,5 +461,5 @@ def plot_acint_estimates(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):
             linespacing=1.5,
         )
     ax.set_xlabel("Rank")
-    ax.set_ylabel(f"Mean and uncertainty [{uc.acint_unit_str}]")
+    ax.set_ylabel(axis_label("Mean and uncertainty", uc.acint_unit_str))
     ax.set_title("Autocorrelation Integral")
