@@ -71,7 +71,13 @@ def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep
     )
 
     # Estimate the viscosity from the spectrum.
-    result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
+    result = estimate_acint(
+        spectrum,
+        ExpTailModel(),
+        verbose=True,
+        # cutoff_criterion=halfhalf_criterion,
+        # nfitmax_hard=100
+    )
 
     # Plot some basic analysis figures.
     plt.close(f"{name}_criterion")

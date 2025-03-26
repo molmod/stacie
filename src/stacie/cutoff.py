@@ -416,20 +416,19 @@ def halfapprox_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     if not ((evals > 0).all() and np.isfinite(evals).all()):
         return {"criterion": np.inf}
     delta = np.dot(evecs.T, x1 - x2)
-    trend = np.dot(evecs.T, x1 + x2)
+    # trend = np.dot(evecs.T, x1 + x2)
 
     # Compute the negative log likelihood of the difference in parameters.
     nll = (
-        0.5 * (delta**2 / evals).sum()
-        + 0.5 * np.log(2 * np.pi * evals).sum()
+        0.5 * (delta**2 / evals).sum() + 0.5 * np.log(2 * np.pi * evals).sum()
         # TODO: the need for the following term suggests that the fit did not converge well.
         # conditioning?
-        + 0.5 * (trend**2 / evals).sum()
-        + 0.5 * np.log(2 * np.pi * evals).sum()
+        # + 0.5 * (trend**2 / evals).sum()
+        # + 0.5 * np.log(2 * np.pi * evals).sum()
     )
 
     # Compute the expected value of the negative log likelihood, which is the entropy.
-    entropy = 2 * (0.5 * len(delta) + 0.5 * np.log(2 * np.pi * evals).sum())
+    entropy = 0.5 * len(delta) + 0.5 * np.log(2 * np.pi * evals).sum()
 
     return {
         "criterion": nll,
