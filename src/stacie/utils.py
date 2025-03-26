@@ -115,7 +115,7 @@ def robust_posinv(matrix: ArrayLike) -> tuple[NDArray, NDArray, NDArray, NDArray
         raise ValueError("Matrix must not contain NaN or inf.")
     matrix = 0.5 * (matrix + matrix.T)
     if np.diag(matrix).min() <= 0:
-        raise ValueError("Matrix must be positive definite has is nonpositive diagonal elements.")
+        raise ValueError("Matrix must be positive definite but has nonpositive diagonal elements.")
     scales = np.sqrt(np.diag(matrix))
     scaled_matrix = (matrix / scales[:, None]) / scales
     evals, evecs = np.linalg.eigh(scaled_matrix)
