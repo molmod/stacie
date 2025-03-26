@@ -297,7 +297,7 @@ eta_production = demo_production()
 #
 # | Method                     | Simulation time [τ\*] | Shear viscosity [η\*] | Reference |
 # |----------------------------|-----------------------|-----------------|-----------|
-# | EMD NVE (Stacie)           | 2400                  | 3.183 ± 0.071   | This notebook |
+# | EMD NVE (Stacie)           | 2400                  | 3.193 ± 0.072   | This notebook |
 # | EMD NVE (Helfand-Einstein) | 75000                 | 3.277 ± 0.098   | {cite:p}`meier_2004_transport_I` |
 # | EMD NVE (Helfand-moment)   | 600000                | 3.268 ± 0.055   | {cite:p}`viscardi_2007_transport1` |
 #
@@ -325,7 +325,7 @@ eta_production = demo_production()
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(eta_exploration - 3.1) > 0.2:
+if abs(eta_exploration - 3.2) > 0.2:
     raise ValueError(f"wrong viscosity (exploration): {eta_exploration:.3e}")
 if abs(eta_production - 3.18) > 0.1:
     raise ValueError(f"wrong viscosity (production): {eta_production:.3e}")

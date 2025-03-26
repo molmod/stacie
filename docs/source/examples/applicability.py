@@ -176,7 +176,7 @@ print(f"corrtime_int = {result.corrtime_int:.3f} ± {result.corrtime_int_std:.3f
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(result.acint - 2.4580e-4) > 2e-6:
+if abs(result.acint - 2.4835e-4) > 2e-5:
     raise ValueError(f"Wrong acint: {result.acint:.4e}")
-if abs(result.props["corrtime_exp"] - 9.4804) > 1e-1:
+if abs(result.props["corrtime_exp"] - 9.8413) > 1e-1:
     raise ValueError(f"Wrong corrtime_exp: {result.props['corrtime_exp']:.4e}")

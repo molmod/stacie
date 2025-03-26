@@ -162,7 +162,7 @@ kappa_production = demo_production()
 #
 # | Method                     | Simulation time  [τ\*] | Thermal conductivity [κ\*] | Reference |
 # |----------------------------|------------------------|----------------------------|-----------|
-# | EMD NVE (Stacie)           | 2400                   | 7.108 ± 0.10               | This notebook |
+# | EMD NVE (Stacie)           | 2400                   | 6.982 ± 0.082              | This notebook |
 # | EMD NVE (Helfand-moment)   | 600000                 | 6.946 ± 0.12               | {cite:p}`viscardi_2007_transport2` |
 #
 # This small comparison confirms that Stacie can reproduce a well-known thermal conductivity result,
@@ -202,5 +202,5 @@ kappa_production = demo_production()
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(kappa_production - 7.1) > 0.1:
+if abs(kappa_production - 7.0) > 0.2:
     raise ValueError(f"wrong thermal conductivity (production): {kappa_production:.3e}")

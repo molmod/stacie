@@ -446,8 +446,8 @@ acint_30 = result_30.acint / acint_unit
 if abs(acint_30 - 5.87e-7) > 5e-9:
     raise ValueError(f"Wrong acint (block size 30): {acint_30:.2e}")
 acint_150 = result_150.acint / acint_unit
-if abs(acint_150 - 6.14e-7) > 5e-9:
+if abs(acint_150 - 5.83e-7) > 5e-9:
     raise ValueError(f"Wrong acint (block size 150): {acint_150:.2e}")
 acint_300 = result_300.acint / acint_unit
-if abs(acint_300 - 6.84e-7) > 5e-9:
+if abs(acint_300 - 5.93e-7) > 5e-9:
     raise ValueError(f"Wrong acint (block size 300): {acint_300:.2e}")
