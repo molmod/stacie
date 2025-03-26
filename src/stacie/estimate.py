@@ -27,7 +27,7 @@ from scipy.optimize import minimize
 
 from .conditioning import ConditionedCost
 from .cost import LowFreqCost
-from .cutoff import CutoffCriterion, halfhalf_criterion
+from .cutoff import CutoffCriterion, halfapprox_criterion
 from .model import SpectrumModel, guess
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
@@ -99,7 +99,7 @@ def estimate_acint(
     maxscan: int = 100,
     nfitmin: int | None = None,
     nfitmax_hard: int = 1000,
-    cutoff_criterion: CutoffCriterion = halfhalf_criterion,
+    cutoff_criterion: CutoffCriterion = halfapprox_criterion,
     rng: np.random.Generator | None = None,
     nonlinear_budget: int = 10,
     verbose: bool = False,
@@ -189,11 +189,11 @@ def estimate_acint(
             rng,
             nonlinear_budget,
         )
-        evals = props["cost_hess_evals"]
         history[nfit] = props
-        criterion = (
-            props["criterion"] if (np.isfinite(evals).all() and (evals > 0).all()) else np.inf
-        )
+        evals = props["cost_hess_evals"]
+        if not (np.isfinite(evals).all() and (evals > 0).all()):
+            props["criterion"] = np.inf
+        criterion = props["criterion"]
         if verbose and maxscan > 1:
             lowest_criterion = scratch.get("lowest_criterion")
             best = lowest_criterion is None or criterion < lowest_criterion
