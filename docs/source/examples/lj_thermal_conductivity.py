@@ -71,13 +71,7 @@ def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep
     )
 
     # Estimate the viscosity from the spectrum.
-    result = estimate_acint(
-        spectrum,
-        ExpTailModel(),
-        verbose=True,
-        # cutoff_criterion=halfhalf_criterion,
-        # nfitmax_hard=100
-    )
+    result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
 
     # Plot some basic analysis figures.
     plt.close(f"{name}_criterion")
@@ -210,5 +204,3 @@ kappa_production = demo_production()
 # %%
 if abs(kappa_production - 7.1) > 0.1:
     raise ValueError(f"wrong thermal conductivity (production): {kappa_production:.3e}")
-
-# %%

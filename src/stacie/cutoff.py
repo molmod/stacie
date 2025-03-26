@@ -421,8 +421,9 @@ def halfapprox_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     # Compute the negative log likelihood of the difference in parameters.
     nll = (
         0.5 * (delta**2 / evals).sum() + 0.5 * np.log(2 * np.pi * evals).sum()
-        # TODO: the need for the following term suggests that the fit did not converge well.
-        # conditioning?
+        # The following terms are not needed for the criterion, but may be useful for debugging.
+        # They are sensitive to potential convergence issues in the optimization.
+        # When uncommented, also add a factor 2 to the entropy.
         # + 0.5 * (trend**2 / evals).sum()
         # + 0.5 * np.log(2 * np.pi * evals).sum()
     )

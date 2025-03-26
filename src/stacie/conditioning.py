@@ -60,7 +60,6 @@ class ConditionedCost:
         if deriv < 0:
             raise ValueError("Argument deriv must be zero or positive.")
         pars_orig = pars * self.par_scales
-        # print(pars_orig)
         results_orig = self.cost(pars_orig, deriv)
         results = [results_orig[0] / self.cost_scale]
         if deriv == 0:
@@ -123,6 +122,3 @@ class ConditionedCost:
     def hess(self, pars: NDArray[float]) -> NDArray[float]:
         """Compute the Hessian matrix of the cost function."""
         return self(pars, 2)[2]
-        # result = self(pars, 2)[2]
-        # print(np.linalg.eigvalsh(result))
-        # return result
