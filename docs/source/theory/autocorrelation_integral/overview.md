@@ -59,8 +59,10 @@ as the limit of a mean-square displacement {cite:p}`hansen_2013_theory`:
 
 $$
     \mathcal{I} =
-        \lim_{\Delta_t \rightarrow \infty} \frac{F}{\Delta_t}
-        \mean\Bigl[\bigl|\hat{y}(t_0 + \Delta_t) - \hat{y}(t_0)\bigr|^2\Bigr]
+        F \lim_{\Delta_t \rightarrow \infty} \frac{\mathrm{d}}{\mathrm{d}\Delta_t}
+        \Bigl\langle
+            \bigl|\hat{y}(t_0 + \Delta_t) - \hat{y}(t_0)\bigr|^2
+        \Bigr\rangle
 $$
 
 where $y$ is the antiderivative of $x$:
