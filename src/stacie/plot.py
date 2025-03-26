@@ -89,7 +89,7 @@ def fixformat(s: str) -> str:
 def axis_label(label: str, unit_str: str | None) -> str:
     """Format the axis label with the unit string as `label [unit]`.
 
-    When the unit is ``"1"``, ``""`` or ``None``, the unit is omitted.
+    When the unit is ``""`` or ``None``, the unit is omitted.
 
     Parameters
     ----------
@@ -98,7 +98,7 @@ def axis_label(label: str, unit_str: str | None) -> str:
     unit_str
         The unit string.
     """
-    if unit_str in ("1", "", None):
+    if unit_str in ("", None):
         return label
     return f"{label} [{unit_str}]"
 
