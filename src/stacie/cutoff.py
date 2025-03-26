@@ -434,7 +434,7 @@ def halfapprox_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     return {
         "criterion": nll,
         "criterion_expected": entropy,
-        "criterion_scale": len(delta_pars),
+        "criterion_scale": len(delta),
     }
 
 
