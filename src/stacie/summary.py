@@ -62,7 +62,6 @@ GENERAL_TEMPLATE = """\
 SPECTRUM SETTINGS
     Time step:                     {timestep:{uc.time_fmt}} {uc.time_unit_str}
     Maximum degrees of freedom:    {maxdof}
-    Prefactor:                     {prefactor:{uc.acint_fmt}} {uc.acint_unit_str}
 
 MAIN RESULTS
     Autocorrelation integral:      {acint:{uc.acint_fmt}} ± {acint_std:{uc.acint_fmt}} \
