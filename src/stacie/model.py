@@ -278,7 +278,7 @@ class ExpTailModel(SpectrumModel):
 
     def bounds(self) -> list[tuple[float, float]]:
         """Return parameter bounds for the optimizer."""
-        return [(0, np.inf), (0, np.inf), (0, np.inf)]
+        return [(-np.inf, np.inf), (-np.inf, np.inf), (0, np.inf)]
 
     @property
     def npar(self):
