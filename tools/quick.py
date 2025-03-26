@@ -6,11 +6,11 @@ import numpy as np
 
 from stacie import ChebyshevModel, compute_spectrum, estimate_acint, plot_results, summarize_results
 
-# Generate 32 input sequences with 4096 steps, using a simple Markov process.
+# Generate 64 input sequences with 8192 steps, using a simple Markov process.
 # The autocorrelation integral is 1.0
 # The integrated correlation time is 16.0
-nseq = 32
-nstep = 4096
+nseq = 64
+nstep = 8192
 alpha = 31 / 33
 beta = np.sqrt(8 / 1089)
 rng = np.random.default_rng(0)

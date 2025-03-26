@@ -31,6 +31,7 @@ from .cutoff import CutoffCriterion, halfapprox_criterion
 from .model import SpectrumModel, guess
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
+from .utils import robust_dot, robust_posinv
 
 __all__ = ("FCutWarning", "Result", "estimate_acint", "fit_model_spectrum")
 
@@ -297,7 +298,9 @@ def fit_model_spectrum(
     - ``cost_grad``: cost Gradient vector (if ``deriv>=1``)
     - ``cost_grad_sensitivity``: sensitivity of the cost gradient to the amplitudes
     - ``cost_hess``: cost Hessian matrix (if ``deriv==2``)
-    - ``cost_hess_rescaled_evals``: Hessian eigenvalues
+    - ``cost_hess_scales``: Hessian rescaling vector, see ``robust_posinv``.
+    - ``cost_hess_rescaled_evals``: Rescaled Hessian eigenvalues
+    - ``cost_hess_rescaled_evecs``: Rescaled hessian eigenvectors
     - ``covar``: covariance matrix of the parameters
     - ``criterion``: value of the criterion whose minimizer determines the frequency cutoff
     - ``ll``: log likelihood
@@ -347,26 +350,24 @@ def fit_model_spectrum(
     props = cost.props(pars_opt, 2)
 
     # Compute the Hessian and its properties.
-    if np.isfinite(props["cost_hess"]).all():
-        hess_rescaled = props["cost_hess"].copy()
-        hess_scales = np.sqrt(np.diag(hess_rescaled))
-        hess_rescaled /= np.outer(hess_scales, hess_scales)
-        evals, evecs = np.linalg.eigh(hess_rescaled)
-    else:
+    try:
+        hess_scales, evals, evecs, covar = robust_posinv(props["cost_hess"])
+    except ValueError:
         npar = len(pars_opt)
+        hess_scales = np.full(npar, np.inf)
         evals = np.full(npar, np.inf)
         evecs = np.full((npar, npar), np.inf)
+        covar = np.full((npar, npar), np.inf)
+    props["cost_hess_scales"] = hess_scales
     props["cost_hess_rescaled_evals"] = evals
     props["cost_hess_rescaled_evecs"] = evecs
-    if (evals > 0).all() and np.isfinite(evals).all():
-        half = evecs / np.sqrt(evals)
-        covar_rescaled = np.dot(half, half.T)
-        props["covar"] = covar_rescaled / np.outer(hess_scales, hess_scales)
-        props["pars_sensitivity"] = -np.dot(
-            evecs, np.dot(evecs.T, props["cost_grad_sensitivity"]) / evals.reshape(-1, 1)
+    props["covar"] = covar
+    if np.isfinite(evals).any():
+        # robust -dot(inv(hessian), cost_grad_sensitivity)
+        props["pars_sensitivity"] = -robust_dot(
+            1 / hess_scales, 1 / evals, evecs, props["cost_grad_sensitivity"]
         )
     else:
-        props["covar"] = np.full_like(props["cost_hess"], np.inf)
         props["pars_sensitivity"] = np.full((len(pars_opt), nfit), np.inf)
 
     # Repeat the optimization for the first and the second half of the spectrum

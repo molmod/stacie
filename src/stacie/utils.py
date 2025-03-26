@@ -23,7 +23,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-__all__ = ("block_average", "split")
+__all__ = ("block_average", "robust_dot", "robust_posinv", "split")
 
 
 def split(sequences: ArrayLike, nsplit: int) -> NDArray:
@@ -83,3 +83,73 @@ def block_average(sequences: ArrayLike, size: int) -> NDArray:
         sequences.shape = (1, -1)
     length = sequences.shape[1] // size
     return sequences[:, : length * size].reshape(-1, length, size).mean(axis=2)
+
+
+def robust_posinv(matrix: ArrayLike) -> tuple[NDArray, NDArray, NDArray, NDArray]:
+    """Compute the eigenvalues, eigenvectors and inverse of a positive definite symmetric matrix.
+
+    This function is a robust version of ``numpy.linalg.eigh`` and ``numpy.linalg.inv``
+    that can handle large variations in order of magnitude of the diagonal elements.
+    If the matrix is not positive definite, a ``ValueError`` is raised.
+
+    Parameters
+    ----------
+    matrix
+        Input matrix to be diagonalized.
+
+    Returns
+    -------
+    scales
+        The scales used to precondition the matrix.
+    evals
+        The eigenvalues of the preconditioned matrix.
+    evecs
+        The eigenvectors of the preconditioned matrix.
+    inverse
+        The inverse of the original.
+    """
+    matrix = np.asarray(matrix)
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError("Input matrix must be a square matrix.")
+    if not np.isfinite(matrix).all():
+        raise ValueError("Matrix must not contain NaN or inf.")
+    matrix = 0.5 * (matrix + matrix.T)
+    if np.diag(matrix).min() <= 0:
+        raise ValueError("Matrix must be positive definite has is nonpositive diagonal elements.")
+    scales = np.sqrt(np.diag(matrix))
+    scaled_matrix = (matrix / scales[:, None]) / scales
+    evals, evecs = np.linalg.eigh(scaled_matrix)
+    if evals.min() <= 0:
+        raise ValueError("Matrix is not positive definite.")
+    half = evecs / np.sqrt(evals)
+    scaled_inverse = np.dot(half, half.T)
+    inverse = (scaled_inverse / scales[:, None]) / scales
+    return scales, evals, evecs, inverse
+
+
+def robust_dot(scales, evals, evecs, other):
+    """Compute the dot product of a robustly diagonalized matrix with another matrix.
+
+    - The first three arguments are the output of ``robust_posinv``.
+    - To multiply with the inverse, just use element-wise inversion of ``scales`` and ``evals``.
+
+    Parameters
+    ----------
+    scales
+        The scales used to precondition the matrix.
+    evals
+        The eigenvalues of the preconditioned matrix.
+    evecs
+        The eigenvectors of the preconditioned matrix.
+    other
+        The other matrix to be multiplied. 1D or 2D arrays are accepted.
+
+    Returns
+    -------
+    result
+        The result of the dot product.
+    """
+    if other.ndim == 2:
+        scales = scales[:, None]
+        evals = evals[:, None]
+    return np.dot(evecs, np.dot(evecs.T, other * scales) * evals) * scales
