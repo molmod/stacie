@@ -190,7 +190,7 @@ def estimate_acint(
             nonlinear_budget,
         )
         history[nfit] = props
-        evals = props["cost_hess_evals"]
+        evals = props["cost_hess_rescaled_evals"]
         if not (np.isfinite(evals).all() and (evals > 0).all()):
             props["criterion"] = np.inf
         criterion = props["criterion"]
@@ -297,8 +297,7 @@ def fit_model_spectrum(
     - ``cost_grad``: cost Gradient vector (if ``deriv>=1``)
     - ``cost_grad_sensitivity``: sensitivity of the cost gradient to the amplitudes
     - ``cost_hess``: cost Hessian matrix (if ``deriv==2``)
-    - ``cost_hess_evals``: Hessian eigenvalues
-    - ``cost_hess_evecs``: Hessian eigenvectors
+    - ``cost_hess_rescaled_evals``: Hessian eigenvalues
     - ``covar``: covariance matrix of the parameters
     - ``criterion``: value of the criterion whose minimizer determines the frequency cutoff
     - ``ll``: log likelihood
@@ -349,16 +348,20 @@ def fit_model_spectrum(
 
     # Compute the Hessian and its properties.
     if np.isfinite(props["cost_hess"]).all():
-        evals, evecs = np.linalg.eigh(props["cost_hess"])
+        hess_rescaled = props["cost_hess"].copy()
+        hess_scales = np.sqrt(np.diag(hess_rescaled))
+        hess_rescaled /= np.outer(hess_scales, hess_scales)
+        evals, evecs = np.linalg.eigh(hess_rescaled)
     else:
         npar = len(pars_opt)
         evals = np.full(npar, np.inf)
         evecs = np.full((npar, npar), np.inf)
-    props["cost_hess_evals"] = evals
-    props["cost_hess_evecs"] = evecs
+    props["cost_hess_rescaled_evals"] = evals
+    props["cost_hess_rescaled_evecs"] = evecs
     if (evals > 0).all() and np.isfinite(evals).all():
         half = evecs / np.sqrt(evals)
-        props["covar"] = np.dot(half, half.T)
+        covar_rescaled = np.dot(half, half.T)
+        props["covar"] = covar_rescaled / np.outer(hess_scales, hess_scales)
         props["pars_sensitivity"] = -np.dot(
             evecs, np.dot(evecs.T, props["cost_grad_sensitivity"]) / evals.reshape(-1, 1)
         )

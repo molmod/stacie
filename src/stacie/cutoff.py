@@ -319,8 +319,8 @@ def halfhalf_criterion(props: dict[str, NDArray]) -> dict[str, float]:
         (See module docstring for details.)
     """
     # Sanity check: we need positive definite hessians.
-    cost_hess_evals = props["cost_hess_evals"]
-    if np.any(cost_hess_evals <= 0) or not np.all(np.isfinite(cost_hess_evals)):
+    rescaled_evals = props["cost_hess_rescaled_evals"]
+    if np.any(rescaled_evals <= 0) or not np.all(np.isfinite(rescaled_evals)):
         return {"criterion": np.inf}
     # Idem for the Hessians of the fits to the two halves.
     hess1 = props["cost_hess_half1"]
@@ -374,9 +374,6 @@ def halfapprox_criterion(props: dict[str, NDArray]) -> dict[str, float]:
         (See module docstring for details.)
     """
     # Sanity checks
-    # cost_hess_evals = props["cost_hess_evals"]
-    # if np.any(cost_hess_evals <= 0) or not np.all(np.isfinite(cost_hess_evals)):
-    #     return {"criterion": np.inf}
     npoint = len(props["amplitudes"])
     if npoint % 2 != 0:
         raise ValueError(f"The number of points in the regression must be even, got {npoint}.")
@@ -435,31 +432,4 @@ def halfapprox_criterion(props: dict[str, NDArray]) -> dict[str, float]:
         "criterion": nll,
         "criterion_expected": entropy,
         "criterion_scale": len(delta),
-    }
-
-
-@mark_criterion()
-def evidence_criterion(props: dict[str, NDArray]) -> dict[str, float]:
-    """Minus the logarithm of the evidence, in the MAP approximation, up to a constant.
-
-    Parameters
-    ----------
-    props
-        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
-
-    Returns
-    -------
-    results
-        A dictionary with "criterion" and other fields.
-        (See module docstring for details.)
-    """
-    # Sanity check: we need positive definite hessians.
-    cost_hess_evals = props["cost_hess_evals"]
-    if np.any(cost_hess_evals <= 0) or not np.all(np.isfinite(cost_hess_evals)):
-        return {"criterion": np.inf}
-
-    # calculate the evidence
-    return {
-        "criterion": -props["ll"] + 0.5 * np.log(2 * np.pi * cost_hess_evals).sum(),
-        "criterion_scale": len(cost_hess_evals),
     }
