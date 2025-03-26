@@ -43,8 +43,6 @@ def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
             acint_std=r.acint_std / uc.acint_unit,
             corrtime_int=r.corrtime_int / uc.time_unit,
             corrtime_int_std=r.corrtime_int_std / uc.time_unit,
-            sensitivity_simulation_time=r.props["sensitivity_simulation_time"] / uc.time_unit,
-            sensitivity_block_time=r.props["sensitivity_block_time"] / uc.time_unit,
             npar=len(r.props["pars"]),
             maxdof=r.spectrum.ndofs.max(),
         )
@@ -64,17 +62,12 @@ GENERAL_TEMPLATE = """\
 SPECTRUM SETTINGS
     Time step:                     {timestep:{uc.time_fmt}} {uc.time_unit_str}
     Maximum degrees of freedom:    {maxdof}
-    Prefactor:                     {prefactor:{uc.acint_fmt}} {uc.acint_unit_str}
 
 MAIN RESULTS
     Autocorrelation integral:      {acint:{uc.acint_fmt}} ± {acint_std:{uc.acint_fmt}} \
 {uc.acint_unit_str}
     Integrated correlation time:   {corrtime_int:{uc.time_fmt}} ± {corrtime_int_std:{uc.time_fmt}} \
 {uc.time_unit_str}
-
-RECOMMENDED SIMULATION SETTINGS (SENSITIVITY ANALYSIS)
-    Simulation time:               {sensitivity_simulation_time:{uc.time_fmt}} {uc.time_unit_str}
-    Block time:                    {sensitivity_block_time:{uc.time_fmt}} {uc.time_unit_str}
 
 MODEL {model} | CUTOFF CRITERION {cutoff_criterion}
     Number of parameters:          {npar}

@@ -222,6 +222,8 @@ def estimate_acint(
         # Only fit to an even number of points, so the grid can be splitted into two equal halves.
         nfits = [2 * i for i in build_xgrid_exp([nfitmin // 2, nfitmax // 2], maxscan)]
         rpi_opt(compute_criterion, [0, len(nfits) - 1], mode="min")
+        if verbose:
+            print()
         candidates = [
             (record["criterion"], key)
             for key, record in history.items()
@@ -387,16 +389,6 @@ def fit_model_spectrum(
 
     # Derive estimates from model parameters.
     props.update(model.derive_props(props["pars"], props["covar"], props["pars_sensitivity"]))
-
-    # Give recommendations for the block size and simulation time.
-    props["sensitivity_block_time"] = 0.1 / freqs[nfit - 1]
-    sweights = props["acint_sensitivity"] ** 2
-    sweights_sum = sweights.sum()
-    if np.isfinite(sweights_sum) and sweights_sum > 0:
-        freq_relevant = np.dot(sweights, freqs[:nfit]) / sweights_sum
-        props["sensitivity_simulation_time"] = 10 / freq_relevant
-    else:
-        props["sensitivity_simulation_time"] = np.inf
 
     # Compute remaining properties and derive the cutoff criterion
     props["pars_init"] = pars_init
