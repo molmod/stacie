@@ -204,3 +204,5 @@ kappa_production = demo_production()
 # %%
 if abs(kappa_production - 7.1) > 0.1:
     raise ValueError(f"wrong thermal conductivity (production): {kappa_production:.3e}")
+
+# %%

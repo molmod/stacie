@@ -373,45 +373,68 @@ def halfapprox_criterion(props: dict[str, NDArray]) -> dict[str, float]:
         A dictionary with "criterion" and other fields.
         (See module docstring for details.)
     """
-    # Sanity check: we need positive definite hessians.
-    cost_hess_evals = props["cost_hess_evals"]
-    if np.any(cost_hess_evals <= 0) or not np.all(np.isfinite(cost_hess_evals)):
+    # Sanity checks
+    # cost_hess_evals = props["cost_hess_evals"]
+    # if np.any(cost_hess_evals <= 0) or not np.all(np.isfinite(cost_hess_evals)):
+    #     return {"criterion": np.inf}
+    npoint = len(props["amplitudes"])
+    if npoint % 2 != 0:
+        raise ValueError(f"The number of points in the regression must be even, got {npoint}.")
+    nhalf = npoint // 2
+
+    # Construct a linear regression approximation with normally distributed errors,
+    # of the original non-linear problem with Gamma-distributed errors.
+    design_matrix = props["amplitudes_model"][1].T
+    expected_values = props["amplitudes"] - props["amplitudes_model"][0]
+    # Transform equations to a basis with standard normal errors.
+    data_covar_diag = props["thetas"] ** 2 * props["kappas"]
+    data_std_diag = np.sqrt(data_covar_diag)
+    design_matrix = design_matrix / data_std_diag.reshape(-1, 1)
+    expected_values = expected_values / data_std_diag
+
+    # Precondition the basis.
+    u, s, vt = np.linalg.svd(design_matrix, full_matrices=False)
+    # Solve the preconditioned problem for the first and second half with SVD.
+    u1, s1, vt1 = np.linalg.svd(u[:nhalf], full_matrices=False)
+    u2, s2, vt2 = np.linalg.svd(u[nhalf:], full_matrices=False)
+    # Solutions of the preconditioned problem
+    px1 = np.dot(vt1.T, np.dot(u1.T, expected_values[:nhalf]) / s1)
+    px2 = np.dot(vt2.T, np.dot(u2.T, expected_values[nhalf:]) / s2)
+    # Covariance matrices of the preconditioned problem
+    pc1 = np.einsum("ji,j,jk", vt1, s1**-2, vt1)
+    pc2 = np.einsum("ji,j,jk", vt2, s2**-2, vt2)
+
+    # Transform back to the original parameter space.
+    x1 = np.dot(vt.T, px1 / s)
+    x2 = np.dot(vt.T, px2 / s)
+    c1 = np.einsum("ai,a,ab,b,bj", vt, 1 / s, pc1, 1 / s, vt)
+    c2 = np.einsum("ai,a,ab,b,bj", vt, 1 / s, pc2, 1 / s, vt)
+
+    # Compute the difference between the two parameter vectors in the
+    # basis of the covariance matrix of the difference
+    evals, evecs = np.linalg.eigh(c1 + c2)
+    if not ((evals > 0).all() and np.isfinite(evals).all()):
         return {"criterion": np.inf}
-
-    # Compute the gradient of the cost function for the first and second half.
-    nfreq = len(props["freqs"])
-    sensitivity = props["cost_grad_sensitivity"]
-    residual = props["amplitudes"] - props["amplitudes_model"][0]
-    grad1 = np.dot(sensitivity[:, : nfreq // 2], residual[: nfreq // 2])
-    grad2 = np.dot(sensitivity[:, nfreq // 2 :], residual[nfreq // 2 :])
-
-    # Transform the difference in gradients to the eigenbasis of the covariance.
-    cost_hess_evecs = props["cost_hess_evecs"]
-    delta_grad = np.dot(cost_hess_evecs.T, grad1 - grad2)
-
-    # Approximate the difference in parameters to first-order,
-    # assuming that the Hessian is twice as flat when using half of the data.
-    delta_pars = 2 * delta_grad / cost_hess_evals
-
-    # Approximate the eigenvalues of the covaraince of delta_pars:
-    covar_evals_delta = 4 / cost_hess_evals
-    # The factor 4 is motivated as follows:
-    # - The covariance is twice as large because only half of the data is used.
-    # - The covariance of the difference is the sum of the covariances of the two fits.
+    delta = np.dot(evecs.T, x1 - x2)
+    trend = np.dot(evecs.T, x1 + x2)
 
     # Compute the negative log likelihood of the difference in parameters.
     nll = (
-        0.5 * (delta_pars**2 / covar_evals_delta).sum()
-        + 0.5 * np.log(2 * np.pi * covar_evals_delta).sum()
+        0.5 * (delta**2 / evals).sum()
+        + 0.5 * np.log(2 * np.pi * evals).sum()
+        # TODO: the need for the following term suggests that the fit did not converge well.
+        # conditioning?
+        + 0.5 * (trend**2 / evals).sum()
+        + 0.5 * np.log(2 * np.pi * evals).sum()
     )
 
     # Compute the expected value of the negative log likelihood, which is the entropy.
-    entropy = 0.5 * len(delta_pars) + 0.5 * np.log(2 * np.pi * covar_evals_delta).sum()
+    entropy = 2 * (0.5 * len(delta) + 0.5 * np.log(2 * np.pi * evals).sum())
 
     return {
         "criterion": nll,
         "criterion_expected": entropy,
-        "criterion_scale": 2 * len(delta_pars),
+        "criterion_scale": 2 * len(delta),
     }
 
 

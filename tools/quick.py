@@ -21,7 +21,7 @@ sequences = np.array(sequences).T
 
 # Estimate the autocorrelation integral, print and plot the results.
 spectrum = compute_spectrum(sequences)
-result = estimate_acint(spectrum, ChebyshevModel(2), verbose=True)
+result = estimate_acint(spectrum, ChebyshevModel(2, even=True), verbose=True)
 print()
 print(summarize_results(result))
 mpl.rc_file("../docs/source/examples/matplotlibrc")

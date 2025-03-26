@@ -122,3 +122,6 @@ class ConditionedCost:
     def hess(self, pars: NDArray[float]) -> NDArray[float]:
         """Compute the Hessian matrix of the cost function."""
         return self(pars, 2)[2]
+        # result = self(pars, 2)[2]
+        # print(np.linalg.eigvalsh(result))
+        # return result
