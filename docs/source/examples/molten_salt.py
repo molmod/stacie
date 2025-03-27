@@ -273,7 +273,7 @@ density = estimate_density(paths_npt_npz)
 #
 # | Method          | Simulated time [ps] | Density [g/cm<sup>3</sup>] | Na$^+$ diffusivity [10<sup>-9</sup>m<sup>2</sup>/s] | Cl$^-$ diffusivity [10<sup>-9</sup>m<sup>2</sup>/s] | Conductivity [S/m] | Reference |
 # |-----------------|---------------------|----------------------------|-----------------------------------------------------|-----------------------------------------------------|--------------------|-----------|
-# | NpT+NVE (BGMTF) | 6 ns                | 1.453 ± 0.004              | 8.373 ± 0.010                                       | 7.708 ± 0.009                                       | 330 ± 5            | This notebook |
+# | NpT+NVE (BGMTF) | 6 ns                | 1.453 ± 0.004              | 8.354 ± 0.010                                       | 7.687 ± 0.009                                       | 340 ± 6            | This notebook |
 # | NpT+NVT (BHMTF) | 1 ns (D), 6 ns (σ)  | 1.456                      | 8.8 ± 0.4                                           | 8.2 ± 0.5                                           | 348 ± 7            | {cite:p}`wang_2020_comparison` |
 # | NpT+NVT (BHMTF) | > 5 ns              | 1.444                      | 9.36                                                | 8.14                                                | ≈ 310 (from plot)  | {cite:p}`wang_2014_molecular` |
 # | Experiment      | N.A.                | 1.542 ± 0.006              | 9.0 ± 0.5                                           | 6.50 ± 0.14                                         | 366 ± 3            | {cite:p}`janz_1968_molten` {cite:p}`bockris_1961_self` |

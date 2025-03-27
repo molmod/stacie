@@ -56,19 +56,19 @@ class UnitConfig:
     """The text used for the frequency unit."""
 
     freq_unit: float = attrs.field(default=1.0, kw_only=True)
-    """The unit of a frequency."""
+    """The unit of frequency."""
 
     time_unit_str: str = attrs.field(default="", kw_only=True)
-    """The text used for a time unit."""
+    """The text used for the time unit."""
 
     time_unit: float = attrs.field(default=1.0, kw_only=True)
-    """The unit of a frequency."""
+    """The unit of time."""
 
     time_fmt: str = attrs.field(default=".2e", kw_only=True)
     """The format string for a time value."""
 
     sfac: int = attrs.field(default=2)
-    """The scale factor used for error bars (multiplier for sigma, standard error)."""
+    """The integer scale factor used for error bars (multiplier for sigma, standard error)."""
 
 
 def fixformat(s: str) -> str:
@@ -358,14 +358,14 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     evals = []
     for nfit, props in sorted(r.history.items()):
         freqs.append(r.spectrum.freqs[nfit - 1])
-        evals.append(1 / props["cost_hess_evals"])
+        evals.append(props["cost_hess_rescaled_evals"])
         if nfit == r.nfit:
             ax.plot([freqs[-1]], [evals[-1]], color="k", marker="o", ms=2, zorder=2.5)
     freqs = np.array(freqs)
     evals = np.array(evals)
 
     ax.plot(freqs / uc.freq_unit, evals, color="C4")
-    ax.set_title("Covariance eigenvalues", wrap=True)
+    ax.set_title("Conditioned Hessian eigenvalues", wrap=True)
     ax.set_xlabel(axis_label("Cutoff frequency", uc.freq_unit_str))
     ax.set_ylabel("Eigenvalue")
     ax.set_yscale("log")
