@@ -38,7 +38,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.special import digamma, gammaln
 
-from .utils import robust_posinv
+from .utils import PostiveDefiniteError, robust_posinv
 
 __all__ = (
     "CutoffCriterion",
@@ -205,6 +205,7 @@ def expected_ufc(basis: NDArray[float]) -> float:
         The expected value of the underfitting criterion
         (averaged over all possible residuals orthogonal to the basis functions).
     """
+    # Construct the orthonormal basis of derivatives of the model w.r.t. parameters.
     nbasis, nfreq = basis.shape
     basis /= np.linalg.norm(basis, axis=1).reshape(-1, 1)
     basis = np.linalg.svd(basis, full_matrices=False)[2]
@@ -324,12 +325,15 @@ def halfhalf_criterion(props: dict[str, NDArray], precondition: bool = True) -> 
     # Sanity check: we need positive definite hessians.
     rescaled_evals = props["cost_hess_rescaled_evals"]
     if np.any(rescaled_evals <= 0) or not np.all(np.isfinite(rescaled_evals)):
-        return {"criterion": np.inf}
+        return {
+            "criterion": np.inf,
+            "criterion_error": "Hessian of full fit is not positive definite.",
+        }
     # Idem for the Hessians of the fits to the two halves.
     hess1 = props["cost_hess_half1"]
     hess2 = props["cost_hess_half2"]
     if not (np.isfinite(hess1).all() and np.isfinite(hess2).all()):
-        return {"criterion": np.inf}
+        return {"criterion": np.inf, "criterion_error": "Hessians of half fits are not finite."}
 
     # Condition the hessians with the hess_scales of the full fit.
     hess_scales = props["cost_hess_scales"] if precondition else np.ones(len(hess1))
@@ -339,18 +343,28 @@ def halfhalf_criterion(props: dict[str, NDArray], precondition: bool = True) -> 
     evals1 = np.linalg.eigvalsh(hess1)
     evals2 = np.linalg.eigvalsh(hess2)
     if not ((evals1 > 0).all() and (evals2 > 0).all()):
-        return {"criterion": np.inf}
+        return {
+            "criterion": np.inf,
+            "criterion_error": "Hessians of half fits are not positive definite.",
+        }
 
-    # Compute the difference in parameters and the expected covariance of this difference.
+    # Compute the difference in parameters and the expected covariance of this difference
+    # in rescaled coordinates.
     delta = (props["pars_half1"] - props["pars_half2"]) * hess_scales
     covar = np.linalg.inv(hess1) + np.linalg.inv(hess2)
     if not np.isfinite(covar).all():
-        return {"criterion": np.inf}
+        return {
+            "criterion": np.inf,
+            "criterion_error": "Covariance of parameter difference is not finite.",
+        }
     evals, evecs = np.linalg.eigh(covar)
     # Again, the covariance of the difference must be positive definite.
     # This is unlikely to fail, but may occasionally happen due to rounding errors.
     if not ((evals > 0).all() and np.isfinite(evals).all()):
-        return {"criterion": np.inf}
+        return {
+            "criterion": np.inf,
+            "criterion_error": "Covariance of parameter difference is not positive definite.",
+        }
     # Transform to the eigenbasis of the covariance.
     delta = np.dot(evecs.T, delta)
 
@@ -372,7 +386,9 @@ def halfhalf_criterion(props: dict[str, NDArray], precondition: bool = True) -> 
 
 
 @mark_criterion()
-def halfapprox_criterion(props: dict[str, NDArray], precondition: bool = True) -> dict[str, float]:
+def halfapprox_criterion(
+    props: dict[str, NDArray], precondition: bool = True, convergence_check: bool = False
+) -> dict[str, float]:
     """Approximate the halfhalf criterion without requiring a reoptimization.
 
     Parameters
@@ -382,6 +398,10 @@ def halfapprox_criterion(props: dict[str, NDArray], precondition: bool = True) -
     precondition
         Set to False to disable preconditioning of the covariance eigendecomposition.
         This is only used for testing.
+    convergence_check
+        Add an empirical penalty term to the criterion that is sensitive to poor convergence
+        of the fit to the whole spectrum.
+        This is only useful for debugging.
 
     Returns
     -------
@@ -427,32 +447,80 @@ def halfapprox_criterion(props: dict[str, NDArray], precondition: bool = True) -
     if precondition:
         try:
             scales, evals, evecs, _ = robust_posinv(c1 + c2)
-        except ValueError:
-            return {"criterion": np.inf}
+        except PostiveDefiniteError:
+            return {
+                "criterion": np.inf,
+                "criterion_error": "Covariance of parameter difference is not positive definite.",
+            }
     else:
+        if not (np.isfinite(c1).all() and np.isfinite(c2).all()):
+            return {
+                "criterion": np.inf,
+                "criterion_error": "Covariance of parameter difference is not finite.",
+            }
         evals, evecs = np.linalg.eigh(c1 + c2)
+        if evals.min() <= 0:
+            return {
+                "criterion": np.inf,
+                "criterion_error": "Covariance of parameter difference is not positive definite.",
+            }
         scales = np.ones(len(evals))
     delta = np.dot(evecs.T, (x1 - x2) / scales)
-    # trend = np.dot(evecs.T, (x1 + x2) / scales)
 
     # Compute the negative log likelihood of the difference in parameters.
     nll = (
         0.5 * (delta**2 / evals).sum()
         + 0.5 * np.log(2 * np.pi * evals).sum()
         + np.log(scales).sum()
-        # The following terms are not needed for the criterion, but may be useful for debugging.
-        # They are sensitive to potential convergence issues in the optimization.
-        # When uncommented, also add a factor 2 to the entropy.
-        # + 0.5 * (trend**2 / evals).sum()
-        # + 0.5 * np.log(2 * np.pi * evals).sum()
-        # + np.log(scales).sum()
     )
 
     # Compute the expected value of the negative log likelihood, which is the entropy.
     entropy = 0.5 * len(delta) + 0.5 * np.log(2 * np.pi * evals).sum() + np.log(scales).sum()
 
+    if convergence_check:
+        # The following terms are not needed for the criterion, but may be useful for debugging.
+        # They are sensitive to potential convergence issues in the optimization.
+        trend = np.dot(evecs.T, (x1 + x2) / scales)
+        nll += (
+            0.5 * (trend**2 / evals).sum()
+            + 0.5 * np.log(2 * np.pi * evals).sum()
+            + np.log(scales).sum()
+        )
+        entropy *= 2
+
     return {
         "criterion": nll,
         "criterion_expected": entropy,
         "criterion_scale": len(delta),
+    }
+
+
+@mark_criterion()
+def evidence_criterion(props: dict[str, NDArray]) -> dict[str, float]:
+    """Minus the logarithm of the evidence, in the MAP approximation, up to a constant.
+
+    Parameters
+    ----------
+    props
+        The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
+
+    Returns
+    -------
+    results
+        A dictionary with "criterion" and other fields.
+        (See module docstring for details.)
+    """
+    # Sanity check: we need positive definite hessians.
+    evals = props["cost_hess_rescaled_evals"]
+    scales = props["cost_hess_scales"]
+    if np.any(evals <= 0) or not np.all(np.isfinite(evals)):
+        return {
+            "criterion": np.inf,
+            "criterion_error": "Hessian of full fit is not positive definite.",
+        }
+
+    # calculate the evidence
+    return {
+        "criterion": -props["ll"] + 0.5 * np.log(2 * np.pi * evals).sum() + np.log(scales).sum(),
+        "criterion_scale": len(evals),
     }

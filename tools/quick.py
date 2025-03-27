@@ -18,7 +18,6 @@ sequences = np.zeros((nseq, nstep))
 for i in range(1, nstep):
     sequences[:, i] = alpha * sequences[:, i - 1] + rng.normal(0, beta, nseq)
 
-
 # Estimate the autocorrelation integral, print and plot the results.
 spectrum = compute_spectrum(sequences)
 result = estimate_acint(spectrum, ChebyshevModel(2, even=True), verbose=True)

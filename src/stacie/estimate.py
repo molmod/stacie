@@ -31,7 +31,7 @@ from .cutoff import CutoffCriterion, halfapprox_criterion
 from .model import SpectrumModel, guess
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
-from .utils import robust_dot, robust_posinv
+from .utils import PostiveDefiniteError, robust_dot, robust_posinv
 
 __all__ = ("FCutWarning", "Result", "estimate_acint", "fit_model_spectrum")
 
@@ -131,6 +131,8 @@ def estimate_acint(
     maxscan
         The maximum number of cutoffs to test during the optimization.
         If set to 1, only the given ``fcutmax`` is used, with no extra cutoff testing.
+        A nearly logarithmic grid of ``nfit`` integers is generated otherwise with size ``maxscan``
+        and the minimization of the cutoff_criterion will only try ``nfit`` values from this grid.
     nfitmin
         The minimum number of frequency data points to include in the fit.
         If not provided, this is set to 10 times the number of model parameters as a default.
@@ -166,6 +168,7 @@ def estimate_acint(
     if verbose and maxscan > 1:
         print("CUTOFF FREQUENCY SEARCH")
         print("   nfit   criterion  incumbent")
+        # The scratch dictionary is used to print the incumbent minimum.
         scratch = {}
 
     def compute_criterion(ifit: int):
@@ -192,15 +195,25 @@ def estimate_acint(
         )
         history[nfit] = props
         evals = props["cost_hess_rescaled_evals"]
-        if not (np.isfinite(evals).all() and (evals > 0).all()):
-            props["criterion"] = np.inf
         criterion = props["criterion"]
+        if not (np.isinf(criterion) or (np.isfinite(evals).all() and (evals > 0).all())):
+            # Make the criterion infinite if the Hessian is not positive definite,
+            # and the criterion did not flag it yet.
+            props["criterion"] = np.inf
+            criterion = np.inf
+            props["criterion_error"] = "Hessian of full fit is not positive definite."
         if verbose and maxscan > 1:
             lowest_criterion = scratch.get("lowest_criterion")
             best = lowest_criterion is None or criterion < lowest_criterion
             if best:
                 scratch["lowest_criterion"] = criterion
-            print(f"{nfit:7d}  {criterion:10.1f}  {'<---' if best else ''}")
+            line = f"{nfit:7d}  {criterion:10.1f}"
+            if best:
+                line += "  <---"
+            criterion_error = props.get("criterion_error")
+            if criterion_error is not None:
+                line += f"  ({criterion_error})"
+            print(line)
         return criterion
 
     nfitmax = len(spectrum.freqs) if fcutmax is None else int(spectrum.freqs.searchsorted(fcutmax))
@@ -221,6 +234,7 @@ def estimate_acint(
         compute_criterion(0)
     else:
         # Only fit to an even number of points, so the grid can be splitted into two equal halves.
+        # This is required for the halfhalf and halfapprox criteria.
         nfits = [2 * i for i in build_xgrid_exp([nfitmin // 2, nfitmax // 2], maxscan)]
         rpi_opt(compute_criterion, [0, len(nfits) - 1], mode="min")
         if verbose:
@@ -261,7 +275,7 @@ def fit_model_spectrum(
     cutoff_criterion: CutoffCriterion,
     rng: np.random.Generator,
     nonlinear_budget: int,
-) -> dict[str, NDArray]:
+) -> dict[str, NDArray | float]:
     """Optimize the parameter of a model for a given spectrum.
 
     The parameters are the attributes of the :py:class:`stacie.cost.LowFreqCost` class,
@@ -334,7 +348,7 @@ def fit_model_spectrum(
         nonlinear_budget,
     )
     if not model.valid(pars_init):
-        raise AssertionError("Infeasible guess")
+        raise AssertionError(f"Infeasible guess: {pars_init = }")
     cost = LowFreqCost(timestep, freqs[:nfit], ndofs[:nfit], amplitudes[:nfit], model)
     conditioned_cost = ConditionedCost(cost, model.par_scales, 1.0)
     opt = minimize(
@@ -352,23 +366,21 @@ def fit_model_spectrum(
     # Compute the Hessian and its properties.
     try:
         hess_scales, evals, evecs, covar = robust_posinv(props["cost_hess"])
-    except ValueError:
+        par_sensitivity = -robust_dot(
+            1 / hess_scales, 1 / evals, evecs, props["cost_grad_sensitivity"]
+        )
+    except PostiveDefiniteError:
         npar = len(pars_opt)
         hess_scales = np.full(npar, np.inf)
         evals = np.full(npar, np.inf)
         evecs = np.full((npar, npar), np.inf)
         covar = np.full((npar, npar), np.inf)
+        par_sensitivity = np.full(npar, np.inf)
     props["cost_hess_scales"] = hess_scales
     props["cost_hess_rescaled_evals"] = evals
     props["cost_hess_rescaled_evecs"] = evecs
     props["covar"] = covar
-    if np.isfinite(evals).any():
-        # robust -dot(inv(hessian), cost_grad_sensitivity)
-        props["pars_sensitivity"] = -robust_dot(
-            1 / hess_scales, 1 / evals, evecs, props["cost_grad_sensitivity"]
-        )
-    else:
-        props["pars_sensitivity"] = np.full((len(pars_opt), nfit), np.inf)
+    props["pars_sensitivity"] = par_sensitivity
 
     # Repeat the optimization for the first and the second half of the spectrum
     # if the covariance is positive definite.

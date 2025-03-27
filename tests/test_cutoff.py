@@ -21,7 +21,14 @@
 import numpy as np
 import pytest
 
-from stacie.cutoff import expected_ufc, general_ufc, halfapprox_criterion, halfhalf_criterion
+from stacie.cutoff import (
+    evidence_criterion,
+    expected_ufc,
+    general_ufc,
+    halfapprox_criterion,
+    halfhalf_criterion,
+)
+from stacie.utils import robust_posinv
 
 
 def test_ufc_expectation_value():
@@ -58,7 +65,8 @@ def test_halfhalf_preconditioned():
     assert result1["criterion_expected"] == pytest.approx(result2["criterion_expected"], rel=1e-5)
 
 
-def test_halfapprox_preconditioned():
+@pytest.mark.parametrize("convergence_check", [True, False])
+def test_halfapprox_preconditioned(convergence_check):
     npoint = 40
     npar = 4
     rng = np.random.default_rng(42)
@@ -71,7 +79,31 @@ def test_halfapprox_preconditioned():
         "thetas": rng.uniform(3, 5, npoint),
         "kappas": np.full(npoint, 10),
     }
-    result1 = halfapprox_criterion(props)
-    result2 = halfapprox_criterion(props, precondition=False)
+    result1 = halfapprox_criterion(props, convergence_check=convergence_check)
+    result2 = halfapprox_criterion(props, convergence_check=convergence_check, precondition=False)
     assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)
     assert result1["criterion_expected"] == pytest.approx(result2["criterion_expected"], rel=1e-5)
+
+
+def test_evidence_criterion_scales():
+    npar = 4
+    rng = np.random.default_rng(42)
+    basis = rng.standard_normal((npar, npar))
+    hess = np.dot(basis, basis.T)
+    evals1 = np.linalg.eigvalsh(hess)
+    scales2, evals2 = robust_posinv(hess)[:2]
+    result1 = evidence_criterion(
+        {
+            "ll": -5,
+            "cost_hess_rescaled_evals": evals1,
+            "cost_hess_scales": np.ones(npar),
+        }
+    )
+    result2 = evidence_criterion(
+        {
+            "ll": -5,
+            "cost_hess_rescaled_evals": evals2,
+            "cost_hess_scales": scales2,
+        }
+    )
+    assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)

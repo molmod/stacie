@@ -56,19 +56,19 @@ class UnitConfig:
     """The text used for the frequency unit."""
 
     freq_unit: float = attrs.field(default=1.0, kw_only=True)
-    """The unit of a frequency."""
+    """The unit of frequency."""
 
     time_unit_str: str = attrs.field(default="", kw_only=True)
-    """The text used for a time unit."""
+    """The text used for the time unit."""
 
     time_unit: float = attrs.field(default=1.0, kw_only=True)
-    """The unit of a time."""
+    """The unit of time."""
 
     time_fmt: str = attrs.field(default=".2e", kw_only=True)
     """The format string for a time value."""
 
     sfac: int = attrs.field(default=2)
-    """The scale factor used for error bars (multiplier for sigma, standard error)."""
+    """The integer scale factor used for error bars (multiplier for sigma, standard error)."""
 
 
 def fixformat(s: str) -> str:
