@@ -21,7 +21,7 @@
 import numpy as np
 import pytest
 
-from stacie.cutoff import halfhalf_criterion
+from stacie.cutoff import cv2_criterion
 from stacie.estimate import fit_model_spectrum
 from stacie.model import ChebyshevModel, ExpTailModel, PadeModel
 
@@ -52,7 +52,7 @@ def test_half_fits(model, pars_ref):
         ndofs,
         len(freqs),
         model,
-        halfhalf_criterion,
+        cv2_criterion,
         np.random.default_rng(42),
         10,
     )
@@ -88,7 +88,7 @@ def test_half_fits_different(model, pars_ref1, pars_ref2):
         ndofs,
         len(freqs),
         model,
-        halfhalf_criterion,
+        cv2_criterion,
         np.random.default_rng(42),
         10,
     )

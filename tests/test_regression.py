@@ -28,7 +28,7 @@ from collections.abc import Callable
 import pytest
 from path import Path
 
-from stacie.cutoff import halfapprox_criterion, halfhalf_criterion, underfitting_criterion
+from stacie.cutoff import cv2_criterion, cv2l_criterion, underfitting_criterion
 from stacie.estimate import Result, estimate_acint
 from stacie.model import ChebyshevModel, ExpTailModel, SpectrumModel
 from stacie.msgpack import dump, load
@@ -47,7 +47,7 @@ CASES = [
     ("double", ExpTailModel(), 0.02),
     ("double", ChebyshevModel(2, even=True), 0.02),
 ]
-CRITERIA = [halfapprox_criterion, halfhalf_criterion, underfitting_criterion]
+CRITERIA = [cv2l_criterion, cv2_criterion, underfitting_criterion]
 
 
 def output_test_result(prefix: str, res: Result | list[Result]):

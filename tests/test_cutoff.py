@@ -22,11 +22,11 @@ import numpy as np
 import pytest
 
 from stacie.cutoff import (
+    cv2_criterion,
+    cv2l_criterion,
     evidence_criterion,
     expected_ufc,
     general_ufc,
-    halfapprox_criterion,
-    halfhalf_criterion,
 )
 from stacie.utils import robust_posinv
 
@@ -46,7 +46,7 @@ def test_ufc_expectation_value():
     assert exp == pytest.approx(np.mean(ufcs), rel=1e-1)
 
 
-def test_halfhalf_preconditioned():
+def test_cv2_preconditioned():
     npar = 4
     rng = np.random.default_rng(42)
     basis1 = rng.standard_normal((npar, npar))
@@ -59,14 +59,14 @@ def test_halfhalf_preconditioned():
         "pars_half1": rng.standard_normal(npar),
         "pars_half2": rng.standard_normal(npar),
     }
-    result1 = halfhalf_criterion(props)
-    result2 = halfhalf_criterion(props, precondition=False)
+    result1 = cv2_criterion(props)
+    result2 = cv2_criterion(props, precondition=False)
     assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)
     assert result1["criterion_expected"] == pytest.approx(result2["criterion_expected"], rel=1e-5)
 
 
 @pytest.mark.parametrize("convergence_check", [True, False])
-def test_halfapprox_preconditioned(convergence_check):
+def test_cv2l_preconditioned(convergence_check):
     npoint = 40
     npar = 4
     rng = np.random.default_rng(42)
@@ -79,8 +79,8 @@ def test_halfapprox_preconditioned(convergence_check):
         "thetas": rng.uniform(3, 5, npoint),
         "kappas": np.full(npoint, 10),
     }
-    result1 = halfapprox_criterion(props, convergence_check=convergence_check)
-    result2 = halfapprox_criterion(props, convergence_check=convergence_check, precondition=False)
+    result1 = cv2l_criterion(props, convergence_check=convergence_check)
+    result2 = cv2l_criterion(props, convergence_check=convergence_check, precondition=False)
     assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)
     assert result1["criterion_expected"] == pytest.approx(result2["criterion_expected"], rel=1e-5)
 
