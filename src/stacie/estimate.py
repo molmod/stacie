@@ -27,7 +27,7 @@ from scipy.optimize import minimize
 
 from .conditioning import ConditionedCost
 from .cost import LowFreqCost
-from .cutoff import CutoffCriterion, halfapprox_criterion
+from .cutoff import CutoffCriterion, cv2l_criterion
 from .model import SpectrumModel, guess
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
@@ -100,7 +100,7 @@ def estimate_acint(
     maxscan: int = 100,
     nfitmin: int | None = None,
     nfitmax_hard: int = 1000,
-    cutoff_criterion: CutoffCriterion = halfapprox_criterion,
+    cutoff_criterion: CutoffCriterion = cv2l_criterion,
     rng: np.random.Generator | None = None,
     nonlinear_budget: int = 10,
     verbose: bool = False,
@@ -234,7 +234,7 @@ def estimate_acint(
         compute_criterion(0)
     else:
         # Only fit to an even number of points, so the grid can be splitted into two equal halves.
-        # This is required for the halfhalf and halfapprox criteria.
+        # This is required for the cv2 and cv2l criteria.
         nfits = [2 * i for i in build_xgrid_exp([nfitmin // 2, nfitmax // 2], maxscan)]
         rpi_opt(compute_criterion, [0, len(nfits) - 1], mode="min")
         if verbose:

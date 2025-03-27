@@ -43,11 +43,11 @@ from .utils import PositiveDefiniteError, robust_posinv
 __all__ = (
     "CutoffCriterion",
     "akaike_criterion",
+    "cv2_criterion",
+    "cv2l_criterion",
     "entropy_criterion",
     "expected_ufc",
     "general_ufc",
-    "halfapprox_criterion",
-    "halfhalf_criterion",
     "sumsq_criterion",
     "underfitting_criterion",
 )
@@ -305,8 +305,12 @@ def akaike_criterion(props: dict[str, NDArray]) -> dict[str, float]:
 
 
 @mark_criterion(half_opt=True)
-def halfhalf_criterion(props: dict[str, NDArray], precondition: bool = True) -> dict[str, float]:
+def cv2_criterion(props: dict[str, NDArray], precondition: bool = True) -> dict[str, float]:
     """Likelihood that the same parameters fit both the first and second halves of the spectrum.
+
+    This is a form of cross-validation by fitting the same parameters to two halves of the spectrum.
+    The "risk" of a generalization error is gauged by the negative log likelihood
+    of the difference between the two fitted parameter vectors.
 
     Parameters
     ----------
@@ -386,10 +390,10 @@ def halfhalf_criterion(props: dict[str, NDArray], precondition: bool = True) -> 
 
 
 @mark_criterion()
-def halfapprox_criterion(
+def cv2l_criterion(
     props: dict[str, NDArray], precondition: bool = True, convergence_check: bool = False
 ) -> dict[str, float]:
-    """Approximate the halfhalf criterion without requiring a reoptimization.
+    """Linearly approximate cv2_criterion without requiring a reoptimization.
 
     Parameters
     ----------
