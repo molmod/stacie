@@ -23,7 +23,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-__all__ = ("PostiveDefiniteError", "block_average", "robust_dot", "robust_posinv", "split")
+__all__ = ("PositiveDefiniteError", "block_average", "robust_dot", "robust_posinv", "split")
 
 
 def split(sequences: ArrayLike, nsplit: int) -> NDArray:
@@ -85,7 +85,7 @@ def block_average(sequences: ArrayLike, size: int) -> NDArray:
     return sequences[:, : length * size].reshape(-1, length, size).mean(axis=2)
 
 
-class PostiveDefiniteError(ValueError):
+class PositiveDefiniteError(ValueError):
     """Raised when a matrix is not positive definite."""
 
 
@@ -114,19 +114,19 @@ def robust_posinv(matrix: ArrayLike) -> tuple[NDArray, NDArray, NDArray, NDArray
     """
     matrix = np.asarray(matrix)
     if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
-        raise PostiveDefiniteError("Input matrix must be a square matrix.")
+        raise PositiveDefiniteError("Input matrix must be a square matrix.")
     if not np.isfinite(matrix).all():
-        raise PostiveDefiniteError("Matrix must not contain NaN or inf.")
+        raise PositiveDefiniteError("Matrix must not contain NaN or inf.")
     matrix = 0.5 * (matrix + matrix.T)
     if np.diag(matrix).min() <= 0:
-        raise PostiveDefiniteError(
+        raise PositiveDefiniteError(
             "Matrix must be positive definite but has nonpositive diagonal elements."
         )
     scales = np.sqrt(np.diag(matrix))
     scaled_matrix = (matrix / scales[:, None]) / scales
     evals, evecs = np.linalg.eigh(scaled_matrix)
     if evals.min() <= 0:
-        raise PostiveDefiniteError("Matrix is not positive definite.")
+        raise PositiveDefiniteError("Matrix is not positive definite.")
     # Construct matrix square root of inverse first, to guarantee that the result is symmetric.
     half = evecs / np.sqrt(evals)
     scaled_inverse = np.dot(half, half.T)

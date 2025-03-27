@@ -31,7 +31,7 @@ from .cutoff import CutoffCriterion, halfapprox_criterion
 from .model import SpectrumModel, guess
 from .rpi import build_xgrid_exp, rpi_opt
 from .spectrum import Spectrum
-from .utils import PostiveDefiniteError, robust_dot, robust_posinv
+from .utils import PositiveDefiniteError, robust_dot, robust_posinv
 
 __all__ = ("FCutWarning", "Result", "estimate_acint", "fit_model_spectrum")
 
@@ -369,7 +369,7 @@ def fit_model_spectrum(
         par_sensitivity = -robust_dot(
             1 / hess_scales, 1 / evals, evecs, props["cost_grad_sensitivity"]
         )
-    except PostiveDefiniteError:
+    except PositiveDefiniteError:
         npar = len(pars_opt)
         hess_scales = np.full(npar, np.inf)
         evals = np.full(npar, np.inf)

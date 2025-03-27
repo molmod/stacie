@@ -38,7 +38,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.special import digamma, gammaln
 
-from .utils import PostiveDefiniteError, robust_posinv
+from .utils import PositiveDefiniteError, robust_posinv
 
 __all__ = (
     "CutoffCriterion",
@@ -447,7 +447,7 @@ def halfapprox_criterion(
     if precondition:
         try:
             scales, evals, evecs, _ = robust_posinv(c1 + c2)
-        except PostiveDefiniteError:
+        except PositiveDefiniteError:
             return {
                 "criterion": np.inf,
                 "criterion_error": "Covariance of parameter difference is not positive definite.",
