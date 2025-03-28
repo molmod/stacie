@@ -217,6 +217,7 @@ def estimate_acint(
         return criterion
 
     nfitmax = len(spectrum.freqs) if fcutmax is None else int(spectrum.freqs.searchsorted(fcutmax))
+    nfitmax -= nfitmax % 2
     if nfitmax > nfitmax_hard:
         nfitmax = nfitmax_hard
         warnings.warn(
