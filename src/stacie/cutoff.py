@@ -531,6 +531,6 @@ def evidence_criterion(props: dict[str, NDArray]) -> dict[str, float]:
     entropy = (kappas + np.log(thetas) + gammaln(kappas) + (1 - kappas) * digamma(kappas)).sum()
     return {
         "criterion": minus_evidence - entropy,
-        "critertion_expected": 0,
+        "criterion_expected": 0,
         "criterion_scale": len(evals),
     }
