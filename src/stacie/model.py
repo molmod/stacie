@@ -73,6 +73,7 @@ class SpectrumModel:
         self.scales = {
             "freq_small": freqs[1],
             "freq_scale": freqs[-1],
+            "timestep": timestep,
             "time_scale": 1 / freqs[-1],
             "amp_scale": np.median(abs(amplitudes[amplitudes != 0])),
         }
@@ -119,20 +120,12 @@ class SpectrumModel:
         raise NotImplementedError
 
     def compute(
-        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """Compute the amplitudes of the spectrum model.
 
         Parameters
         ----------
-        timestep
-            The time step of the sequences used to compute the spectrum.
-            It may be used to convert the frequency to the dimensionless
-            normalized frequency :math:`2\\pi h f=2\\pi k/N`,
-            where :math:`h` is the timestep,
-            :math:`f` is the frequency,
-            :math:`k` is the frequency index in the discrete Fourier transform,
-            and :math:`N` is the number of samples in the input time series.
         freqs
             The frequencies for which the model spectrum amplitudes are computed.
         pars
@@ -154,7 +147,6 @@ class SpectrumModel:
 
     def solve_linear(
         self,
-        timestep: float,
         freqs: NDArray[float],
         ndofs: NDArray[float],
         amplitudes: NDArray[float],
@@ -173,8 +165,6 @@ class SpectrumModel:
             The amplitudes of the spectrum.
         ndofs
             The number of degrees of freedom at each frequency.
-        timestep
-            The time step of the sequences used to compute the spectrum.
         nonlinear_pars
             The values of the nonlinear parameters for which the basis functions are computed.
 
@@ -188,7 +178,7 @@ class SpectrumModel:
         nonlinear_mask = self.get_par_nonlinear()
         pars = np.ones(self.npar)
         pars[nonlinear_mask] = nonlinear_pars
-        basis = self.compute(timestep, freqs, pars, 1)[1][~nonlinear_mask]
+        basis = self.compute(freqs, pars, 1)[1][~nonlinear_mask]
         amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
         linear_pars = np.linalg.lstsq(
             (basis / amplitudes_std).T,
@@ -307,7 +297,7 @@ class ExpTailModel(SpectrumModel):
         return np.exp(rng.uniform(np.log(corrtime_min), np.log(corrtime_max), (budget, 1)))
 
     def compute(
-        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):
@@ -317,6 +307,7 @@ class ExpTailModel(SpectrumModel):
         if freqs.ndim != 1:
             raise TypeError("Argument freqs must be a 1D array.")
         acint_short, acint_tail, corrtime = pars
+        timestep = self.scales["timestep"]
         r = np.exp(-timestep / corrtime)
         cs = np.cos(2 * np.pi * timestep * freqs)
         denom = r**2 - 2 * r * cs + 1
@@ -416,7 +407,7 @@ class ChebyshevModel(SpectrumModel):
         return np.zeros(self.npar, dtype=bool)
 
     def compute(
-        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):
@@ -530,7 +521,7 @@ class PadeModel(SpectrumModel):
         return np.zeros(self.npar, dtype=bool)
 
     def compute(
-        self, timestep: float, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):
@@ -578,7 +569,6 @@ class PadeModel(SpectrumModel):
 
     def solve_linear(
         self,
-        timestep: float,
         freqs: NDArray[float],
         ndofs: NDArray[float],
         amplitudes: NDArray[float],
@@ -623,7 +613,6 @@ class PadeModel(SpectrumModel):
 
 def guess(
     model: SpectrumModel,
-    timestep: float,
     freqs: NDArray[float],
     ndofs: NDArray[float],
     amplitudes: NDArray[float],
@@ -643,8 +632,6 @@ def guess(
         The amplitudes of the spectrum.
     ndofs
         The number of degrees of freedom at each frequency.
-    timestep
-        The time step of the sequences used to compute the spectrum.
     par_scales
         The scales of the parameters and the cost function, obtained from the model.
     rng
@@ -668,16 +655,14 @@ def guess(
 
     # If there are no nonlinear parameters, we can directly guess the linear parameters.
     if num_nonlinear_pars == 0:
-        return _guess_linear(
-            model, [], nonlinear_mask, timestep, freqs, amplitudes, ndofs, par_scales
-        )[1]
+        return _guess_linear(model, [], nonlinear_mask, freqs, amplitudes, ndofs, par_scales)[1]
 
     # Otherwise, we need to sample the nonlinear parameters and guess the linear parameters.
     nonlinear_samples = model.sample_nonlinear_pars(rng, nonlinear_budget**num_nonlinear_pars)
     best = None
     for nonlinear_pars in nonlinear_samples:
         cost, pars = _guess_linear(
-            model, nonlinear_pars, nonlinear_mask, timestep, freqs, amplitudes, ndofs, par_scales
+            model, nonlinear_pars, nonlinear_mask, freqs, amplitudes, ndofs, par_scales
         )
         if best is None or best[0] > cost:
             best = cost, pars
@@ -688,7 +673,6 @@ def _guess_linear(
     model: SpectrumModel,
     nonlinear_pars: NDArray[float],
     nonlinear_mask: NDArray[bool],
-    timestep: float,
     freqs: NDArray[float],
     amplitudes: NDArray[float],
     ndofs: NDArray[float],
@@ -704,8 +688,6 @@ def _guess_linear(
         The values of the nonlinear parameters.
     nonlinear_mask
         A boolean mask for the nonlinear parameters.
-    timestep
-        The time step of the sequences used to compute the spectrum.
     freqs
         The frequencies for which the model spectrum amplitudes are computed.
     amplitudes
@@ -723,9 +705,7 @@ def _guess_linear(
         An initial guess of the parameters.
     """
     # Perform a weighted least squares fit to guess the linear parameters.
-    linear_pars, amplitudes_model = model.solve_linear(
-        timestep, freqs, ndofs, amplitudes, nonlinear_pars
-    )
+    linear_pars, amplitudes_model = model.solve_linear(freqs, ndofs, amplitudes, nonlinear_pars)
 
     # Combine the linear and nonlinear parameters
     pars = np.zeros(model.npar)
