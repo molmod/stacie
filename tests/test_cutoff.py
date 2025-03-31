@@ -97,8 +97,6 @@ def test_evidence_criterion_scales():
             "ll": -5,
             "cost_hess_rescaled_evals": evals1,
             "cost_hess_scales": np.ones(npar),
-            "kappas": np.ones(1),
-            "thetas": np.ones(1),
             "entropy": 1.5,
         }
     )
@@ -107,8 +105,6 @@ def test_evidence_criterion_scales():
             "ll": -5,
             "cost_hess_rescaled_evals": evals2,
             "cost_hess_scales": scales2,
-            "kappas": np.ones(1),
-            "thetas": np.ones(1),
             "entropy": 1.5,
         }
     )
