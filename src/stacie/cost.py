@@ -21,11 +21,11 @@
 import attrs
 import numpy as np
 from numpy.typing import NDArray
-from scipy.special import gammaln
+from scipy.special import digamma, gammaln
 
 from .model import SpectrumModel
 
-__all__ = ("LowFreqCost",)
+__all__ = ("LowFreqCost", "entropy_gamma", "logpdf_gamma")
 
 
 @attrs.define
@@ -190,6 +190,7 @@ def cost_low(
                 "thetas": thetas,
                 "amplitudes_model": amplitudes_model,
                 "ll": ll,
+                "entropy": entropy_gamma(kappas, thetas[0])[0].sum() if np.isfinite(ll) else np.inf,
             }
         )
         if deriv >= 2:
@@ -228,6 +229,36 @@ def logpdf_gamma(x: NDArray[float], kappa: NDArray[float], theta: NDArray[float]
         results.append((ratio - kappa) / theta)
     if deriv >= 2:
         results.append((kappa - 2 * ratio) / theta**2)
+    if deriv >= 3:
+        raise ValueError("Third or higher derivatives are not supported.")
+    return results
+
+
+def entropy_gamma(kappa: NDArray[float], theta: NDArray[float], deriv: int = 1):
+    """Compute the entropy of the Gamma distribution.
+
+    Parameters
+    ----------
+    kappa
+        The shape parameter.
+    theta
+        The scale parameter.
+    deriv
+        The order of the derivatives toward theta to compute: 0, 1 or 2.
+
+    Returns
+    -------
+    results
+        A list of results (function value and requested derivatives.)
+        All elements have the same shape as the ``kappa`` and ``theta`` arrays.
+    """
+    kappa = np.asarray(kappa)
+    theta = np.asarray(theta)
+    results = [kappa + np.log(theta) + gammaln(kappa) + (1 - kappa) * digamma(kappa)]
+    if deriv >= 1:
+        results.append(1 / theta)
+    if deriv >= 2:
+        results.append(-1 / theta**2)
     if deriv >= 3:
         raise ValueError("Third or higher derivatives are not supported.")
     return results
