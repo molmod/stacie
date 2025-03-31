@@ -22,8 +22,9 @@ import numdifftools as nd
 import numpy as np
 import pytest
 from conftest import check_curv, check_deriv, check_gradient, check_hessian
+from scipy import stats
 
-from stacie.cost import LowFreqCost, logpdf_gamma
+from stacie.cost import LowFreqCost, entropy_gamma, logpdf_gamma
 from stacie.model import ExpTailModel
 
 LOGPDF_GAMMA_CASES = [
@@ -42,6 +43,30 @@ def test_logpdf_gamma_deriv1(x, kappa, theta_ref):
 @pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_logpdf_gamma_deriv2(x, kappa, theta_ref):
     check_curv(lambda theta, deriv=0: logpdf_gamma(x, kappa, theta, deriv), theta_ref)
+
+
+@pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
+def test_entropy_gamma_deriv1(x, kappa, theta_ref):
+    check_deriv(lambda theta, deriv=0: entropy_gamma(kappa, theta, deriv), theta_ref)
+
+
+@pytest.mark.parametrize(("x", "kappa", "theta_ref"), LOGPDF_GAMMA_CASES)
+def test_entropy_gamma_deriv2(x, kappa, theta_ref):
+    check_curv(lambda theta, deriv=0: entropy_gamma(kappa, theta, deriv), theta_ref)
+
+
+def test_entropy():
+    """Check that the entropy matches the expectation value of -log(p)."""
+    kappa = 2.5
+    theta = 6.0
+    entropy = entropy_gamma(kappa, theta)[0]
+    rng = np.random.default_rng(1234)
+    x = stats.gamma.rvs(kappa, scale=theta, size=10000, random_state=rng)
+    logpdf1 = stats.gamma.logpdf(x, kappa, scale=theta)
+    logpdf2 = logpdf_gamma(x, kappa, theta)[0]
+    assert logpdf1 == pytest.approx(logpdf2, rel=1e-8)
+    check = -np.mean(logpdf1)
+    assert entropy == pytest.approx(check, rel=1e-2)
 
 
 @pytest.fixture

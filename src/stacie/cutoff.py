@@ -524,13 +524,14 @@ def evidence_criterion(props: dict[str, NDArray]) -> dict[str, float]:
         }
 
     # calculate the evidence
-    minus_evidence = -props["ll"]
-    minus_evidence -= 0.5 * np.log(2 * np.pi * evals).sum() + np.log(scales).sum()
-    kappas = props["kappas"]
-    thetas = props["thetas"]
-    entropy = (kappas + np.log(thetas) + gammaln(kappas) + (1 - kappas) * digamma(kappas)).sum()
+    evidence = (
+        props["ll"]
+        + 0.5 * np.log(2 * np.pi * evals).sum()
+        + np.log(scales).sum()
+        + props["entropy"]
+    )
     return {
-        "criterion": minus_evidence - entropy,
+        "criterion": -evidence,
         "criterion_expected": 0,
         "criterion_scale": len(evals),
     }

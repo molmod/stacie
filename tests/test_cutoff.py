@@ -99,6 +99,7 @@ def test_evidence_criterion_scales():
             "cost_hess_scales": np.ones(npar),
             "kappas": np.ones(1),
             "thetas": np.ones(1),
+            "entropy": 1.5,
         }
     )
     result2 = evidence_criterion(
@@ -108,6 +109,7 @@ def test_evidence_criterion_scales():
             "cost_hess_scales": scales2,
             "kappas": np.ones(1),
             "thetas": np.ones(1),
+            "entropy": 1.5,
         }
     )
     assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)
