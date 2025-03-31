@@ -42,7 +42,7 @@ def test_half_fits(model, pars_ref):
     """
     freqs = np.linspace(0, 0.5, 60)
     model.configure_scales(1.0, freqs, np.ones_like(freqs))
-    amplitudes_ref = model.compute(1.0, freqs, pars_ref)[0]
+    amplitudes_ref = model.compute(freqs, pars_ref)[0]
     ndofs = np.ones(len(freqs), dtype=int)
     ndofs[1:-1] = 2
     props = fit_model_spectrum(
@@ -76,8 +76,8 @@ def test_half_fits_different(model, pars_ref1, pars_ref2):
     """
     freqs = np.linspace(0, 0.5, 60)
     model.configure_scales(1.0, freqs, np.ones_like(freqs))
-    amplitudes_ref1 = model.compute(1.0, freqs, pars_ref1)[0]
-    amplitudes_ref2 = model.compute(1.0, freqs, pars_ref2)[0]
+    amplitudes_ref1 = model.compute(freqs, pars_ref1)[0]
+    amplitudes_ref2 = model.compute(freqs, pars_ref2)[0]
     amplitudes_ref = np.concatenate([amplitudes_ref1[:30], amplitudes_ref2[30:]])
     ndofs = np.ones(len(freqs), dtype=int)
     ndofs[1:-1] = 2

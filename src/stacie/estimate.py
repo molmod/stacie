@@ -340,7 +340,6 @@ def fit_model_spectrum(
     model.configure_scales(timestep, freqs[:nfit], amplitudes[:nfit])
     pars_init = guess(
         model,
-        timestep,
         freqs[:nfit],
         ndofs[:nfit],
         amplitudes[:nfit],
@@ -350,7 +349,7 @@ def fit_model_spectrum(
     )
     if not model.valid(pars_init):
         raise AssertionError(f"Infeasible guess: {pars_init = }")
-    cost = LowFreqCost(timestep, freqs[:nfit], ndofs[:nfit], amplitudes[:nfit], model)
+    cost = LowFreqCost(freqs[:nfit], ndofs[:nfit], amplitudes[:nfit], model)
     conditioned_cost = ConditionedCost(cost, model.par_scales, 1.0)
     opt = minimize(
         conditioned_cost.funcgrad,
@@ -388,7 +387,7 @@ def fit_model_spectrum(
     if np.isfinite(props["covar"]).all() and cutoff_criterion.half_opt:
         for label, ifirst, ilast in [("half1", 0, nfit // 2), ("half2", nfit // 2, nfit)]:
             cost = LowFreqCost(
-                timestep, freqs[ifirst:ilast], ndofs[ifirst:ilast], amplitudes[ifirst:ilast], model
+                freqs[ifirst:ilast], ndofs[ifirst:ilast], amplitudes[ifirst:ilast], model
             )
             conditioned_cost = ConditionedCost(cost, model.par_scales, 1.0)
             opt = minimize(

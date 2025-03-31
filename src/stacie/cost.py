@@ -32,9 +32,6 @@ __all__ = ("LowFreqCost",)
 class LowFreqCost:
     """Cost function to fit a model to the low-frequency part of the spectrum."""
 
-    timestep: float = attrs.field()
-    """The timestep of the sequences used to compute the spectrum."""
-
     freqs: NDArray[float] = attrs.field()
     """The frequencies for which the spectrum amplitudes are computed."""
 
@@ -103,7 +100,6 @@ class LowFreqCost:
 def cost_low(
     pars: NDArray[float],
     deriv: int,
-    timestep: float,
     freqs: NDArray[float],
     ndofs: NDArray[int],
     amplitudes: NDArray[float],
@@ -142,7 +138,6 @@ def cost_low(
     If ``do_props=True``, the dictionary also contains the following items:
 
     - ``pars``: the given parameters.
-    - ``timestep``: the given time step.
     - ``freqs``: the given frequencies.
     - ``amplitudes``: the given frequencies.
     - ``kappas``: shape parameters for the gamma distribution.
@@ -153,7 +148,7 @@ def cost_low(
       (if ``deriv==2``).
     """
     # Compute the model spectrum and its derivatives.
-    amplitudes_model = model.compute(timestep, freqs, pars, deriv)
+    amplitudes_model = model.compute(freqs, pars, deriv)
     kappas = 0.5 * ndofs
     thetas = amplitudes_model[0] / kappas
     if (amplitudes_model[0] <= 0).any():
@@ -189,7 +184,6 @@ def cost_low(
         props.update(
             {
                 "pars": pars,
-                "timestep": timestep,
                 "freqs": freqs,
                 "amplitudes": amplitudes,
                 "kappas": kappas,

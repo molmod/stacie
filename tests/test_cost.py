@@ -46,12 +46,12 @@ def test_logpdf_gamma_deriv2(x, kappa, theta_ref):
 
 @pytest.fixture
 def mycost():
-    timestep = 1.3
-    freqs = np.linspace(0, 0.5 / timestep, 10)
+    freqs = np.linspace(0, 4.0, 10)
     model = ExpTailModel()
+    model.configure_scales(1.0, freqs, np.ones_like(freqs))
     amplitudes = np.array([1.5, 1.4, 1.1, 0.9, 0.8, 1.0, 0.9, 0.9, 0.8, 1.1])
     ndofs = np.array([5, 10, 10, 10, 10, 10, 10, 10, 10, 5])
-    return LowFreqCost(timestep, freqs, ndofs, amplitudes, model)
+    return LowFreqCost(freqs, ndofs, amplitudes, model)
 
 
 PARS_REF_EXP_TAIL = [
