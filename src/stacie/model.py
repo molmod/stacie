@@ -21,16 +21,21 @@
 import attrs
 import numpy as np
 from numpy.typing import NDArray
+from scipy.optimize import brentq
 
-__all__ = ("ChebyshevModel", "ExpTailModel", "PadeModel", "SpectrumModel", "guess")
+__all__ = ("ExpTailModel", "PadeModel", "PolynomialModel", "SpectrumModel", "guess")
 
 
 @attrs.define
 class SpectrumModel:
     """Abstract base class for spectrum models.
 
-    Subclasses must override the attribute ``name``
-    and the methods ``bounds``, ``guess``, ``compute`` and ``derive_props``.
+    Subclasses must override all methods that raise ``NotImplementedError``.
+
+    The first parameter must have a property that is used when constructing an initial guess:
+    When the first parameter increases, the model should increase everywhere,
+    and must allow for an arbitrary increase of the spectrum at all points.
+    This is used to repair initial guesses that result in a partially negative spectrum.
     """
 
     scales: dict[str, float] = attrs.field(factory=dict, init=False)
@@ -150,6 +155,7 @@ class SpectrumModel:
         freqs: NDArray[float],
         ndofs: NDArray[float],
         amplitudes: NDArray[float],
+        weights: NDArray[float],
         nonlinear_pars: NDArray[float],
     ) -> NDArray[float]:
         """Use linear linear regression to solve a subset of the parameters.
@@ -165,6 +171,8 @@ class SpectrumModel:
             The amplitudes of the spectrum.
         ndofs
             The number of degrees of freedom at each frequency.
+        weights
+            Fitting weights, in range [0, 1], to use for each grid point.
         nonlinear_pars
             The values of the nonlinear parameters for which the basis functions are computed.
 
@@ -180,17 +188,23 @@ class SpectrumModel:
         pars[nonlinear_mask] = nonlinear_pars
         basis = self.compute(freqs, pars, 1)[1][~nonlinear_mask]
         amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
+        rescaling = np.sqrt(weights) / amplitudes_std
         linear_pars = np.linalg.lstsq(
-            (basis / amplitudes_std).T,
-            amplitudes / amplitudes_std,
+            (basis * rescaling).T,
+            amplitudes * rescaling,
             # For compatibility with numpy < 2.0
             rcond=-1,
         )[0]
         amplitudes_model = np.dot(linear_pars, basis)
         return linear_pars, amplitudes_model
 
+    @property
+    def acint_lico(self):
+        """Coefficients of the linear combination of parameters giving the AC integral."""
+        raise NotImplementedError
+
     def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float], pars_sensitivity: NDArray[float]
+        self, pars: NDArray[float], covar: NDArray[float]
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters.
 
@@ -200,23 +214,14 @@ class SpectrumModel:
             The parameters.
         covar
             The covariance matrix of the parameters.
-        pars_sensitivity
-            The sensitivity of the parameters to the empirical spectrum.
-            This is an array with shape ``(len(pars), len(freqs))``.
 
         Returns
         -------
         props
             A dictionary with additional properties,
             whose calculation requires model-specific knowledge.
-            This includes:
-
-            - The estimate of the autocorrelation integral, its variance and standard deviation.
-            - The estimate of the exponential correlation time, its variance and standard deviation.
-              (Set to ``np.nan`` if not applicable.)
-            - The sensitivity of the autocorrelation integral to the empirical spectrum.
         """
-        raise NotImplementedError
+        return {}
 
 
 @attrs.define
@@ -347,20 +352,18 @@ class ExpTailModel(SpectrumModel):
             raise ValueError("Third or higher derivatives are not supported.")
         return results
 
+    @property
+    def acint_lico(self):
+        """Coefficients of the linear combination of parameters giving the AC integral."""
+        return np.array([1.0, 1.0, 0.0])
+
     def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float], pars_sensitivity: NDArray[float]
+        self, pars: NDArray[float], covar: NDArray[float]
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters."""
-        acint = pars[:2].sum()
-        acint_var = covar[:2, :2].sum()
         corrtime = pars[2]
         corrtime_var = covar[2, 2]
         return {
-            "model": self.name,
-            "acint": acint,
-            "acint_var": acint_var,
-            "acint_std": np.sqrt(acint_var) if acint_var >= 0 else np.inf,
-            "acint_sensitivity": pars_sensitivity[:2].sum(axis=0),
             "corrtime_exp": corrtime,
             "corrtime_exp_var": corrtime_var,
             "corrtime_exp_std": (np.sqrt(corrtime_var) if corrtime_var >= 0 else np.inf),
@@ -370,15 +373,15 @@ class ExpTailModel(SpectrumModel):
 
 
 @attrs.define
-class ChebyshevModel(SpectrumModel):
-    """A linear combination of Chebyshev polynomials."""
+class PolynomialModel(SpectrumModel):
+    """A linear combination of simple mononomials."""
 
     degree: int = attrs.field(converter=int, validator=attrs.validators.ge(0))
-    """The highest degree of the polynomials included in the model.
+    """The highest degree of the mononomials included in the model.
 
-    If even is ``True``, only even polynomials are included.
+    If even is ``True``, only even mononomials are included.
     For example, if degree is 3 and even is ``True``,
-    the model includes the polynomials :math:`T_0`, :math:`T_2`.
+    the model includes the polynomials :math:`1`, :math:`f^2`.
     """
 
     even: bool = attrs.field(converter=bool, default=False)
@@ -386,7 +389,7 @@ class ChebyshevModel(SpectrumModel):
 
     @property
     def name(self):
-        return f"evencheb({self.degree})" if self.even else f"cheb({self.degree})"
+        return f"evenpoly({self.degree})" if self.even else f"poly({self.degree})"
 
     def bounds(self) -> list[tuple[float, float]]:
         """Return parameter bounds for the optimizer."""
@@ -400,7 +403,14 @@ class ChebyshevModel(SpectrumModel):
     @property
     def par_scales(self) -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
-        return np.full(self.npar, self.scales["amp_scale"])
+        par_scales = [self.scales["amp_scale"]]
+        current = par_scales[0]
+        for power in range(1, self.degree + 1):
+            current /= self.scales["freq_scale"]
+            if self.even and power % 2 == 1:
+                continue
+            par_scales.append(current)
+        return np.array(par_scales)
 
     def get_par_nonlinear(self) -> NDArray[bool]:
         """Return a boolean mask for the nonlinear parameters."""
@@ -417,22 +427,15 @@ class ChebyshevModel(SpectrumModel):
         if freqs.ndim != 1:
             raise TypeError("Argument freqs must be a 1D array.")
 
-        # Construct a basis of Chebyshev polynomials.
-        freq_scale = self.scales["freq_scale"]
+        # Construct a basis of simple monomials.
         basis = [np.ones(len(freqs))]
-        if self.degree > 0:
-            if self.even:
-                basis.append(freqs / freq_scale)
-            else:
-                # Reverse the frequency axis, so all basis functions are 1 at freq 0.
-                basis.append(1 - 2 * freqs / freq_scale)
-        for _ in range(2, self.degree + 1):
-            basis.append(2 * basis[1] * basis[-1] - basis[-2])
+        current = basis[0].copy()
+        for power in range(1, self.degree + 1):
+            current *= freqs
+            if self.even and power % 2 == 1:
+                continue
+            basis.append(current.copy())
         basis = np.array(basis)
-        if self.even:
-            basis = basis[::2]
-            # Flip the signs of every other basis function, say they are all 1 at freq 0.
-            basis *= 1 - 2 * (np.arange(len(basis)).reshape(-1, 1) % 2)
 
         # Compute model amplitudes and derivatives.
         results = [np.dot(pars, basis)]
@@ -444,19 +447,12 @@ class ChebyshevModel(SpectrumModel):
             raise ValueError("Third or higher derivatives are not supported.")
         return results
 
-    def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float], pars_sensitivity: NDArray[float]
-    ) -> dict[str, NDArray[float]]:
-        """Return additional properties derived from model-specific parameters."""
-        acint = pars.sum()
-        acint_var = covar.sum()
-        return {
-            "model": self.name,
-            "acint": acint,
-            "acint_var": acint_var,
-            "acint_std": np.sqrt(acint_var) if acint_var >= 0 else np.inf,
-            "acint_sensitivity": pars_sensitivity.sum(axis=0),
-        }
+    @property
+    def acint_lico(self):
+        """Coefficients of the linear combination of parameters giving the AC integral."""
+        result = np.zeros(self.npar)
+        result[0] = 1.0
+        return result
 
 
 @attrs.define
@@ -572,6 +568,7 @@ class PadeModel(SpectrumModel):
         freqs: NDArray[float],
         ndofs: NDArray[float],
         amplitudes: NDArray[float],
+        weights: NDArray[float],
         nonlinear_pars: NDArray[float],
     ) -> NDArray[float]:
         """Use linear linear regression to solve a subset of the parameters.
@@ -585,10 +582,11 @@ class PadeModel(SpectrumModel):
         basis_n = np.power.outer(x, self.numer_degrees).T
         basis_d = np.power.outer(x, self.denom_degrees).T
         amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
-        part_n = basis_n / amplitudes_std
-        part_d = -basis_d * (amplitudes / amplitudes_std)
+        rescaling = np.sqrt(weights) / amplitudes_std
+        expected_values = amplitudes * rescaling
+        part_n = basis_n * rescaling
+        part_d = -basis_d * expected_values
         design_matrix = np.concatenate([part_n, part_d]).T
-        expected_values = amplitudes / amplitudes_std
         pars = np.linalg.lstsq(design_matrix, expected_values, rcond=-1)[0]
         npar_n = len(self.numer_degrees)
         pars_n = pars[:npar_n]
@@ -596,27 +594,20 @@ class PadeModel(SpectrumModel):
         amplitudes_model = np.dot(pars_n, basis_n) / (1 + np.dot(pars_d, basis_d))
         return pars, amplitudes_model
 
-    def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float], pars_sensitivity: NDArray[float]
-    ) -> dict[str, NDArray[float]]:
-        """Return additional properties derived from model-specific parameters."""
-        acint = pars[0]
-        acint_var = covar[0, 0]
-        return {
-            "model": self.name,
-            "acint": acint,
-            "acint_var": acint_var,
-            "acint_std": np.sqrt(acint_var) if acint_var >= 0 else np.inf,
-            "acint_sensitivity": pars_sensitivity[0],
-        }
+    @property
+    def acint_lico(self):
+        """Coefficients of the linear combination of parameters giving the AC integral."""
+        result = np.zeros(self.npar)
+        result[0] = 1.0
+        return result
 
 
 def guess(
-    model: SpectrumModel,
     freqs: NDArray[float],
     ndofs: NDArray[float],
     amplitudes: NDArray[float],
-    par_scales: NDArray[float],
+    weights: NDArray[float],
+    model: SpectrumModel,
     rng: np.random.Generator,
     nonlinear_budget: int,
 ):
@@ -624,16 +615,16 @@ def guess(
 
     Parameters
     ----------
-    model
-        The model for which the parameters are guessed.
     freqs
         The frequencies for which the model spectrum amplitudes are computed.
-    amplitudes
-        The amplitudes of the spectrum.
     ndofs
         The number of degrees of freedom at each frequency.
-    par_scales
-        The scales of the parameters and the cost function, obtained from the model.
+    amplitudes
+        The amplitudes of the spectrum.
+    weights
+        Fitting weights, in range [0, 1], to use for each grid point.
+    model
+        The model for which the parameters are guessed.
     rng
         The random number generator.
     nonlinear_budget
@@ -655,14 +646,14 @@ def guess(
 
     # If there are no nonlinear parameters, we can directly guess the linear parameters.
     if num_nonlinear_pars == 0:
-        return _guess_linear(model, [], nonlinear_mask, freqs, amplitudes, ndofs, par_scales)[1]
+        return _guess_linear(freqs, ndofs, amplitudes, weights, model, [], nonlinear_mask)[1]
 
     # Otherwise, we need to sample the nonlinear parameters and guess the linear parameters.
     nonlinear_samples = model.sample_nonlinear_pars(rng, nonlinear_budget**num_nonlinear_pars)
     best = None
     for nonlinear_pars in nonlinear_samples:
         cost, pars = _guess_linear(
-            model, nonlinear_pars, nonlinear_mask, freqs, amplitudes, ndofs, par_scales
+            freqs, ndofs, amplitudes, weights, model, nonlinear_pars, nonlinear_mask
         )
         if best is None or best[0] > cost:
             best = cost, pars
@@ -670,32 +661,32 @@ def guess(
 
 
 def _guess_linear(
+    freqs: NDArray[float],
+    ndofs: NDArray[float],
+    amplitudes: NDArray[float],
+    weights: NDArray[float],
     model: SpectrumModel,
     nonlinear_pars: NDArray[float],
     nonlinear_mask: NDArray[bool],
-    freqs: NDArray[float],
-    amplitudes: NDArray[float],
-    ndofs: NDArray[float],
-    par_scales: NDArray[float],
 ) -> tuple[float, NDArray[float]]:
     """Guess initial values of the linear parameters for a model.
 
     Parameters
     ----------
+    freqs
+        The frequencies for which the model spectrum amplitudes are computed.
+    ndofs
+        The number of degrees of freedom at each frequency.
+    amplitudes
+        The amplitudes of the spectrum.
+    weights
+        Fitting weights, in range [0, 1], to use for each grid point.
     model
         The model for which the parameters are guessed.
     nonlinear_pars
         The values of the nonlinear parameters.
     nonlinear_mask
         A boolean mask for the nonlinear parameters.
-    freqs
-        The frequencies for which the model spectrum amplitudes are computed.
-    amplitudes
-        The amplitudes of the spectrum.
-    ndofs
-        The number of degrees of freedom at each frequency.
-    par_scales
-        The scales of the parameters and the cost function, obtained from the model.
 
     Returns
     -------
@@ -705,7 +696,9 @@ def _guess_linear(
         An initial guess of the parameters.
     """
     # Perform a weighted least squares fit to guess the linear parameters.
-    linear_pars, amplitudes_model = model.solve_linear(freqs, ndofs, amplitudes, nonlinear_pars)
+    linear_pars, amplitudes_model = model.solve_linear(
+        freqs, ndofs, amplitudes, weights, nonlinear_pars
+    )
 
     # Combine the linear and nonlinear parameters
     pars = np.zeros(model.npar)
@@ -714,10 +707,52 @@ def _guess_linear(
 
     # Fix invalid guesses
     invalid_mask = model.which_invalid(pars)
+    par_scales = model.par_scales
     pars[invalid_mask] = par_scales[invalid_mask]
     if not model.valid(pars):
         raise RuntimeError("Invalid guess could not be fixed. This should never happen.")
 
+    # If the model has zero or negative values,
+    # increase the value of the constant term to fix the guess.
+    def negerr(x):
+        """Returns a negative value if the spectrum is less than 1e-3 of ``amp_scale``.
+
+        Parameters
+        ----------
+        x
+            A correction to the first element of the parameter vector.
+        """
+        mod_pars = pars.copy()
+        mod_pars[0] += x
+        return model.compute(freqs, mod_pars)[0].min() - model.scales["amp_scale"] * 1e-3
+
+    if negerr(0) < 0.0:
+        bracket = _find_bracket(negerr, 0, par_scales[0])
+        xopt = brentq(negerr, bracket[0], bracket[1])
+        pars[0] += xopt
+        amplitudes_model = model.compute(freqs, pars)[0]
+
     # Compute the cost
-    cost = np.sum((amplitudes - amplitudes_model) ** 2)
+    delta = amplitudes - amplitudes_model
+    cost = np.einsum("i,i,i", delta, delta, weights)
     return cost, pars
+
+
+def _find_bracket(f, x0, x1):
+    """Fit a bracket with a sign change.
+
+    This function assumes that a sign change is present either in [x0, x1]
+    or outside the bracket on the side of x1.
+    """
+    f0 = f(x0)
+    f1 = f(x1)
+    for _ in range(100):
+        if np.sign(f0) != np.sign(f1):
+            break
+        x2 = x1 + (x1 - x0) * 2
+        f2 = f(x2)
+        x0, x1 = x1, x2
+        f0, f1 = f1, f2
+    else:
+        raise RuntimeError("Failed to find a bracket with a sign change.")
+    return x0, x1

@@ -21,15 +21,15 @@
 from __future__ import annotations
 
 from .estimate import estimate_acint
-from .model import ChebyshevModel, ExpTailModel, PadeModel
+from .model import ExpTailModel, PadeModel, PolynomialModel
 from .plot import UnitConfig, plot_results
 from .spectrum import compute_spectrum
 from .summary import summarize_results
 
 __all__ = (
-    "ChebyshevModel",
     "ExpTailModel",
     "PadeModel",
+    "PolynomialModel",
     "UnitConfig",
     "__version__",
     "__version_tuple__",

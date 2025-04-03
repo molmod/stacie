@@ -22,7 +22,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
-from stacie.utils import block_average, robust_dot, robust_posinv, split
+from stacie.utils import block_average, mixture_stats, robust_dot, robust_posinv, split
 
 
 def test_split_sequences():
@@ -104,3 +104,20 @@ def test_robust_dot_simple(shape):
     result = robust_dot(1 / scales, 1 / evals, evecs, other)
     assert result.shape == shape
     assert result == pytest.approx(np.dot(inv, other))
+
+
+def test_mixture_stats():
+    means = np.array([[1, 2], [3, 4]])
+    covars = np.array([[[1.2, 2.5], [3.1, 1.1]], [[7.3, 8.1], [2.2, 3.1]]])
+    weights = np.array([2.0, 8.0])
+    mean1, covar1 = mixture_stats(means, covars, weights)
+    assert mean1 == pytest.approx([2.6, 3.6])
+    assert covar1 == pytest.approx(
+        0.2 * covars[0]
+        + 0.8 * covars[1]
+        + 0.2 * np.outer(means[0] - mean1, means[0] - mean1)
+        + 0.8 * np.outer(means[1] - mean1, means[1] - mean1)
+    )
+    mean2, covar2 = mixture_stats(means, np.einsum("ijj->ij", covars), weights)
+    assert mean2 == pytest.approx(mean1)
+    assert covar2 == pytest.approx(np.diag(covar1))

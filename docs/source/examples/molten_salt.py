@@ -35,14 +35,14 @@ from glob import glob
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from stacie import UnitConfig, compute_spectrum, estimate_acint, summarize_results
-from stacie.plot import (
-    plot_fitted_spectrum,
-    plot_criterion,
-    plot_spectrum,
-    plot_sensitivity,
+from stacie import (
+    PolynomialModel,
+    UnitConfig,
+    compute_spectrum,
+    estimate_acint,
+    summarize_results,
 )
-from stacie.model import ChebyshevModel
+from stacie.plot import plot_fitted_spectrum, plot_extras
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -51,7 +51,7 @@ mpl.rc_file("matplotlibrc")
 # ## Reusable Code for the Analysis
 #
 # The `analyze` function takes a few parameters to apply the same analysis with Stacie
-# to different inputs, and with a different degree for the Chebyshev polynomial.
+# to different inputs, and with a different degree for the polynomial.
 
 # %%
 BOLTZMANN_CONSTANT = 1.380649e-23  # J/K
@@ -70,7 +70,7 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
         - 'cl': Computes the self-diffusivity of chloride ions.
         - 'conductivity': Computes the ionic conductivity.
     degree
-        The degree of the Chebyshev polynomial to fit to the spectrum, by default 1.
+        The degree of the polynomial to fit to the spectrum, by default 1.
 
     Returns
     -------
@@ -145,7 +145,7 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
         else 0.5,
         include_zero_freq=False,
     )
-    result = estimate_acint(spectrum, ChebyshevModel(degree), verbose=True)
+    result = estimate_acint(spectrum, PolynomialModel(degree), verbose=True)
 
     # Configure units for output
     uc = UnitConfig(
@@ -159,18 +159,14 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
         freq_unit_str="THz",
     )
 
-    plt.close(transport_property)
-    _, axs = plt.subplots(1, 2, num=transport_property, figsize=(7.5, 3.0))
-
     # Plot some basic analysis figures.
-    plot_spectrum(axs[0], uc, spectrum)
-    plot_criterion(axs[1], uc, result)
-    _, ax = plt.subplots(num=f"{transport_property}_fitted")
+    prefix = f"{transport_property}_{len(paths_npz)}"
+    plt.close(f"{prefix}_spectrum")
+    _, ax = plt.subplots(num=f"{prefix}_fitted")
     plot_fitted_spectrum(ax, uc, result)
-
-    # Plot the sensitivity of acint to the empirical amplitudes
-    _, ax = plt.subplots(num=f"{transport_property}_sensitivity")
-    plot_sensitivity(ax, uc, result)
+    plt.close(f"{prefix}_extras")
+    _, axs = plt.subplots(2, 2, num=f"{prefix}_extras")
+    plot_extras(axs, uc, result)
 
     # Print the recommended block size and simulation time.
     print()
@@ -216,7 +212,7 @@ analyze([path_nve_npz], "conductivity")
 # The analysis of the production trajectories follows the same approach
 # as the exploration trajectory, with two key differences:
 # - The trajectory files are loaded as input.
-# - For the diffusion constants, the degree of the Chebyshev polynomial is increased to 2.
+# - For the diffusion constants, the degree of the polynomial is increased to 2.
 
 # %%
 paths_nve_npz = glob("../../data/openmm_salt/output/prod????_nve_traj.npz")

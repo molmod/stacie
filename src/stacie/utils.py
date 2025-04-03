@@ -23,7 +23,14 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-__all__ = ("PositiveDefiniteError", "block_average", "robust_dot", "robust_posinv", "split")
+__all__ = (
+    "PositiveDefiniteError",
+    "block_average",
+    "mixture_stats",
+    "robust_dot",
+    "robust_posinv",
+    "split",
+)
 
 
 def split(sequences: ArrayLike, nsplit: int) -> NDArray:
@@ -114,19 +121,18 @@ def robust_posinv(matrix: ArrayLike) -> tuple[NDArray, NDArray, NDArray, NDArray
     """
     matrix = np.asarray(matrix)
     if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
-        raise PositiveDefiniteError("Input matrix must be a square matrix.")
+        raise PositiveDefiniteError("matrix is not square.")
     if not np.isfinite(matrix).all():
-        raise PositiveDefiniteError("Matrix must not contain NaN or inf.")
+        raise PositiveDefiniteError("matrix contains NaN or inf.")
     matrix = 0.5 * (matrix + matrix.T)
-    if np.diag(matrix).min() <= 0:
-        raise PositiveDefiniteError(
-            "Matrix must be positive definite but has nonpositive diagonal elements."
-        )
+    diag = np.diag(matrix)
+    if diag.min() <= 0:
+        raise PositiveDefiniteError(f"matrix has nonpositive diagonal elements: {diag=}.")
     scales = np.sqrt(np.diag(matrix))
     scaled_matrix = (matrix / scales[:, None]) / scales
     evals, evecs = np.linalg.eigh(scaled_matrix)
     if evals.min() <= 0:
-        raise PositiveDefiniteError("Matrix is not positive definite.")
+        raise PositiveDefiniteError(f"matrix has non-positive eigenvalues: {evals=}")
     # Construct matrix square root of inverse first, to guarantee that the result is symmetric.
     half = evecs / np.sqrt(evals)
     scaled_inverse = np.dot(half, half.T)
@@ -160,3 +166,67 @@ def robust_dot(scales, evals, evecs, other):
         scales = scales[:, None]
         evals = evals[:, None]
     return np.dot(evecs, np.dot(evecs.T, other * scales) * evals) * scales
+
+
+def mixture_stats(means: ArrayLike, covars: ArrayLike, weights: ArrayLike):
+    """Compute the statistics of the (Gaussian) mixture distribution.
+
+    Parameters
+    ----------
+    means
+        The means of the mixture components.
+        Weighted averages are taken over the first index.
+        Shape is ``(ncomp, nfeature)`` or ``(ncomp,)``.
+        If the shape is ``(ncomp,)``, the means are interpreted as scalars.
+        If the shape is ``(ncomp, nfeature)``, the means are interpreted as vectors.
+    covars
+        The covariances of the mixture components.
+        If the shape matches that of the ``means`` argument,
+        this array is interpreted as a diagonal covariance matrix.
+        If the shape is ``(ncomp, nfeature, nfeature)``,
+        this array is interpreted as full covariance matrices.
+    weights
+        The weights of the mixture components.
+        Shape is ``(ncomp,)``.
+        The weights are normalized to sum to 1.
+
+    Returns
+    -------
+    mean
+        The mean of the mixture distribution.
+        Shape is ``(nfeature,)``.
+    covar
+        If the input covariance matrix is diagonal, the output covariance matrix
+        is also diagonal and has shape ``(nfeature,)``.
+        If the input covariance matrix is full, the output covariance matrix
+        is also full and has shape ``(nfeature, nfeature)``.
+    """
+    means = np.asarray(means)
+    covars = np.asarray(covars)
+    weights = np.asarray(weights)
+    if means.ndim < 1:
+        raise ValueError("means must be at least a 1D array.")
+    if means.ndim == 1:
+        means = means.reshape(-1, 1)
+    ncomp, nfeature = means.shape
+    if covars.ndim < 1:
+        raise ValueError("covars must be at least a 1D array.")
+    if covars.ndim == 1:
+        covars = covars.reshape(-1, 1)
+    if weights.shape != (ncomp,):
+        raise ValueError("weights must be a 1D vector with ncomp elements.")
+    weights = weights / weights.sum()
+    mean = np.dot(weights, means)
+    deltas = means - mean
+    if covars.shape == means.shape:
+        covar = np.dot(weights, covars)
+        covar += np.einsum("i,ij,ij->j", weights, deltas, deltas)
+        return mean, covar
+    if covars.shape == (ncomp, nfeature, nfeature):
+        covar = np.einsum("i,ijk->jk", weights, covars)
+        covar += np.einsum("i,ij,ik->jk", weights, deltas, deltas)
+        return mean, covar
+    raise ValueError(
+        f"Unsupported shape for covars: {covars.shape}. "
+        f"Expected ({ncomp},), {means.shape}, or ({ncomp}, {nfeature}, {nfeature})."
+    )

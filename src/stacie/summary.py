@@ -35,8 +35,8 @@ def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
         text = GENERAL_TEMPLATE.format(
             r=r,
             uc=uc,
-            model=r.props["model"],
-            cutoff_criterion=r.props["cutoff_criterion"],
+            model=r.model.name,
+            cutoff_criterion=r.cutoff_criterion.name,
             timestep=r.spectrum.timestep / uc.time_unit,
             prefactor=r.spectrum.prefactor / uc.acint_unit,
             acint=r.acint / uc.acint_unit,
@@ -71,7 +71,8 @@ MAIN RESULTS
 
 MODEL {model} | CUTOFF CRITERION {cutoff_criterion}
     Number of parameters:          {npar}
-    Number of points fitted to:    {r.nfit}
+    Used points:                   {r.ncut}
+    Effective points:              {r.neff:.1f}
 """
 
 EXP_TAIL_TEMPLATE = """\

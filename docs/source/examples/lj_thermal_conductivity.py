@@ -40,7 +40,7 @@ from stacie import (
     summarize_results,
     ExpTailModel,
 )
-from stacie.plot import plot_fitted_spectrum, plot_criterion
+from stacie.plot import plot_fitted_spectrum, plot_extras
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -74,12 +74,12 @@ def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep
     result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
 
     # Plot some basic analysis figures.
-    plt.close(f"{name}_criterion")
-    _, ax = plt.subplots(num=f"{name}_criterion")
-    plot_criterion(ax, uc, result)
     plt.close(f"{name}_spectrum")
     _, ax = plt.subplots(num=f"{name}_spectrum")
     plot_fitted_spectrum(ax, uc, result)
+    plt.close(f"{name}_extras")
+    _, axs = plt.subplots(2, 2, num=f"{name}_extras")
+    plot_extras(axs, uc, result)
 
     # Print the recommended block size and simulation time.
     print()

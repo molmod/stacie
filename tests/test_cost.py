@@ -18,7 +18,6 @@
 # --
 """Tests for ``stacie.cost``."""
 
-import numdifftools as nd
 import numpy as np
 import pytest
 from conftest import check_curv, check_deriv, check_gradient, check_hessian
@@ -76,12 +75,13 @@ def mycost():
     model.configure_scales(1.0, freqs, np.ones_like(freqs))
     amplitudes = np.array([1.5, 1.4, 1.1, 0.9, 0.8, 1.0, 0.9, 0.9, 0.8, 1.1])
     ndofs = np.array([5, 10, 10, 10, 10, 10, 10, 10, 10, 5])
-    return LowFreqCost(freqs, ndofs, amplitudes, model)
+    weights = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5])
+    return LowFreqCost(freqs, ndofs, amplitudes, weights, model)
 
 
 PARS_REF_EXP_TAIL = [
     [1.2, 0.9, 2.2],
-    [3.0, 0.1, 2.5],
+    [3.0, 0.5, 2.5],
     [0.1, 4.0, 2.7],
     [108.0, 77.7, 1.8],
 ]
@@ -95,28 +95,3 @@ def test_gradient_exptail(mycost, pars_ref):
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_hessian_exptail(mycost, pars_ref):
     check_hessian(mycost, pars_ref)
-
-
-@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
-def test_cost_grad_sensitivity(mycost, pars_ref):
-    """Test the sensitivity with a finite difference approximation."""
-    amplitudes0 = mycost.amplitudes.copy()
-    sensitivity = mycost.props(pars_ref, deriv=2)["cost_grad_sensitivity"]
-
-    def cost_grad(amplitudes):
-        mycost.amplitudes = amplitudes
-        return mycost(pars_ref, deriv=1)[1]
-
-    num_sensitivity, info = nd.Gradient(cost_grad, full_output=True)(amplitudes0)
-    error = np.clip(info.error_estimate, 1e-15, np.inf)
-    assert sensitivity / error == pytest.approx(num_sensitivity / error, abs=100)
-
-
-@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
-def test_cost_sensitivity(mycost, pars_ref):
-    """Test that the gradient of the cost can be reconstructed from the sensitivity."""
-    props = mycost.props(pars_ref, deriv=2)
-    grad2 = np.dot(
-        props["cost_grad_sensitivity"], props["amplitudes"] - props["amplitudes_model"][0]
-    )
-    assert props["cost_grad"] == pytest.approx(grad2)

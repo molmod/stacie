@@ -25,11 +25,7 @@ import numpy as np
 import scipy.constants as sc
 from numpy.typing import ArrayLike, NDArray
 from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
-from stacie.plot import (
-    plot_criterion,
-    plot_fitted_spectrum,
-    plot_spectrum,
-)
+from stacie.plot import plot_extras, plot_fitted_spectrum
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -117,7 +113,8 @@ print(nd.Gradient(lambda coords: potential_energy_force(coords)[0])([1, 2]))
 
 # %%
 def plot_pes():
-    fig, ax = plt.subplots()
+    plt.close("pes")
+    _, ax = plt.subplots(num="pes")
     xs = np.linspace(-30, 30, 201)
     ys = np.linspace(-30, 30, 201)
     coords = np.array(np.meshgrid(xs, ys)).transpose(1, 2, 0)
@@ -243,7 +240,8 @@ def demo_energy_conservation():
     """
     nstep = 100
     traj = integrate(np.zeros(2), np.full(2, 1e-4), nstep)
-    fig, ax = plt.subplots()
+    plt.close("energy")
+    _, ax = plt.subplots(num="energy")
     times = np.arange(traj.nstep) * traj.timestep
     ax.plot(times, traj.potential_energies, label="potential")
     ax.plot(times, traj.potential_energies + traj.kinetic_energies, label="total")
@@ -271,7 +269,8 @@ demo_energy_conservation()
 def demo_chaos():
     vels = np.array([[1e-3, 1e-4], [1.00000001e-3, 1e-4]])
     traj = integrate(np.zeros((2, 2)), vels, 2500)
-    fig, ax = plt.subplots()
+    plt.close("chaos")
+    _, ax = plt.subplots(num="chaos")
     ax.plot(traj.coords[:, 0, 0], traj.coords[:, 0, 1], color="C1")
     ax.plot(traj.coords[:, 1, 0], traj.coords[:, 1, 1], color="C3", ls=":")
     ax.set_aspect("equal", "box")
@@ -279,7 +278,8 @@ def demo_chaos():
     ax.set_ylabel("y [a$_0$]")
     ax.set_title("Two Trajectories")
 
-    fig, ax = plt.subplots()
+    plt.close("chaos_dist")
+    _, ax = plt.subplots(num="chaos_dist")
     times = np.arange(traj.nstep) * traj.timestep
     ax.semilogy(times, np.linalg.norm(traj.coords[:, 0] - traj.coords[:, 1], axis=-1))
     ax.set_xlabel("Time [a.u. of time]")
@@ -318,7 +318,8 @@ def demo_stacie(stride=1):
     vels *= 9.7e-4 / np.linalg.norm(vels, axis=1).reshape(-1, 1)
     traj = integrate(np.zeros((natom, 2)), vels, nstep, stride)
 
-    fig, ax = plt.subplots()
+    plt.close(f"trajs_{stride}")
+    _, ax = plt.subplots(num=f"trajs_{stride}")
     for i in range(natom):
         ax.plot(traj.coords[:, i, 0], traj.coords[:, i, 1])
     ax.set_aspect("equal", "box")
@@ -330,8 +331,8 @@ def demo_stacie(stride=1):
         traj.vels.transpose(1, 2, 0).reshape(2 * natom, traj.nstep),
         timestep=traj.timestep,
     )
-    fig, ax = plt.subplots()
     uc = UnitConfig(
+        acint_symbol="D",
         acint_unit=sc.value("atomic unit of time")
         / sc.value("atomic unit of length") ** 2,
         acint_unit_str="m$^2$ s",
@@ -342,17 +343,20 @@ def demo_stacie(stride=1):
         time_unit_str="ps",
         time_fmt=".2f",
     )
-    plot_spectrum(ax, uc, spectrum, nplot=500)
 
     # The maximum cutoff frequency is chosen to be 1 THz,
     # by inspecting the first spectrum plot.
     # Beyond the cutoff frequency, the spectrum has resonance peaks that
     # the ExpTailModel is not designed to handle.
     result = estimate_acint(spectrum, ExpTailModel(), fcutmax=TERAHERTZ, verbose=True)
-    fig, ax = plt.subplots()
+
+    # Plotting
+    plt.close(f"spectrum_{stride}")
+    _, ax = plt.subplots(num=f"spectrum_{stride}")
     plot_fitted_spectrum(ax, uc, result)
-    fig, ax = plt.subplots()
-    plot_criterion(ax, uc, result)
+    plt.close(f"extras_{stride}")
+    _, axs = plt.subplots(2, 2, num=f"extras_{stride}")
+    plot_extras(axs, uc, result)
     return result
 
 

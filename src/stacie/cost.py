@@ -41,6 +41,9 @@ class LowFreqCost:
     amplitudes: NDArray[float] = attrs.field()
     """The actual spectrum amplitudes at frequencies in ``self.freqs``."""
 
+    weights: NDArray[float] = attrs.field()
+    """The fitting weights for each grid point."""
+
     model: SpectrumModel = attrs.field()
     """The model to be fitted to the spectrum."""
 
@@ -103,6 +106,7 @@ def cost_low(
     freqs: NDArray[float],
     ndofs: NDArray[int],
     amplitudes: NDArray[float],
+    weights: NDArray[float],
     model: SpectrumModel,
     *,
     do_props: bool = False,
@@ -137,20 +141,13 @@ def cost_low(
 
     If ``do_props=True``, the dictionary also contains the following items:
 
-    - ``pars``: the given parameters.
-    - ``freqs``: the given frequencies.
-    - ``amplitudes``: the given frequencies.
-    - ``kappas``: shape parameters for the gamma distribution.
-    - ``thetas``: scale parameters for the gamma distribution.
-    - ``amplitudes``: the given frequencies.
     - ``ll``: the log likelihood.
-    - ``cost_grad_sensitivity``: the sensitivity of the cost gradient to the amplitudes
-      (if ``deriv==2``).
+    - ``entropy``: the sum of entropies of the Gamma distributions at each frequency.
     """
     # Compute the model spectrum and its derivatives.
     amplitudes_model = model.compute(freqs, pars, deriv)
     kappas = 0.5 * ndofs
-    thetas = amplitudes_model[0] / kappas
+    thetas = [am / kappas for am in amplitudes_model]
     if (amplitudes_model[0] <= 0).any():
         # Avoid warnings due to negative model amplitudes.
         ll = -np.inf
@@ -162,41 +159,29 @@ def cost_low(
     else:
         # Log-likelihood computed with the scaled Chi-squared distribution.
         # The Gamma distribution is used because the scale parameter is easily incorporated.
-        ll_terms = logpdf_gamma(amplitudes, kappas, thetas, deriv)
-        ll = ll_terms[0].sum()
+        ll_terms = logpdf_gamma(amplitudes, kappas, thetas[0], deriv)
+        ll = np.dot(ll_terms[0], weights)
 
         props = {
             "cost_value": -ll,
         }
         if deriv >= 1:
-            props["cost_grad"] = -np.dot(amplitudes_model[1], ll_terms[1] / kappas)
+            props["cost_grad"] = -np.einsum("pi,i,i", thetas[1], ll_terms[1], weights)
         if deriv >= 2:
             props["cost_hess"] = -(
-                np.einsum(
-                    "ia,ja,a->ij", amplitudes_model[1], amplitudes_model[1], ll_terms[2] / kappas**2
-                )
-                + np.einsum("ija,a->ij", amplitudes_model[2], ll_terms[1] / kappas)
+                np.einsum("pi,qi,i,i->pq", thetas[1], thetas[1], ll_terms[2], weights)
+                + np.einsum("pqi,i,i->pq", thetas[2], ll_terms[1], weights)
             )
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
 
     if do_props:
-        props.update(
-            {
-                "pars": pars,
-                "freqs": freqs,
-                "amplitudes": amplitudes,
-                "kappas": kappas,
-                "thetas": thetas,
-                "amplitudes_model": amplitudes_model,
-                "ll": ll,
-                "entropy": entropy_gamma(kappas, thetas[0])[0].sum() if np.isfinite(ll) else np.inf,
-            }
-        )
-        if deriv >= 2:
-            # Mix derivative of the cost with respect to
-            # (i) the model parameters and (ii) the empiricl spectrum.
-            props["cost_grad_sensitivity"] = -(amplitudes_model[1] / thetas**2 / kappas)
+        if np.isfinite(ll):
+            en_terms = entropy_gamma(kappas, thetas[0])[0]
+            entropy = np.dot(en_terms, weights)
+        else:
+            entropy = np.inf
+        props.update({"ll": ll, "entropy": entropy})
 
     return props
 

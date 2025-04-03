@@ -3,49 +3,39 @@
 Stacie supports two models for fitting the low-frequency part of the power spectrum.
 In both models, the value at zero frequency corresponds to the autocorrelation integral.
 
-1. The Chebyshev model is the most general: it consists of a linear combination of
-   Chebyshev polynomials adjusted to the domain of the frequency grid.
+1. The polynomial model is the most general: it consists of a linear combination of
+   simple mononomials of the frequency.
    One can specify the polynomial degree and typically a low degree works fine:
 
     - Degree 0 is suitable for a white noise spectrum.
     - Degree 1 can be used to extract useful information of a very noisy spectrum.
-    - Degree 2 or 3 are only applicable to spectra with low statistical uncertainty,
+    - Degree 2 is only applicable to spectra with low statistical uncertainty,
       e.g. averaged over 100 inputs.
+    - An even polynomial with degree 2 is suitable for spectra with a peak at zero frequency.
 
     The main advantage of this model is its broad applicability,
-    as it does not require prior knowledge of the functional form of the spectra.
+    as it requires little prior knowledge of the functional form of the spectra.
 
 2. The Exponential Tail model is designed for autocorrelation functions that decay exponentially.
    Its primary advantage is that, in addition to the integrated correlation time,
    it also provides an estimate of the exponential correlation time.
 
-## 1. Chebyshev Model
+## 1. Polynomial Model
 
-The Chebyshev model is defined as
-
-$$
-    C^\text{cheb}_k \approx \sum_{n=0}^N a_n T_n\left(1-\frac{2f}{f_\text{cut}}\right)
-$$
-
-where $N$ is the polynomial degree and $T_n$ are the
-[Chebyshev polynomials](https://en.wikipedia.org/wiki/Chebyshev_polynomials).
-The parameter $f_\text{cut}$ is the cutoff frequency
-used to select the low-frequency part of the spectrum,
-i.e. the highest frequency included in the fit.
-With this form, the sum of all the coefficients corresponds
-to the integral of the autocorrelation function.
-
-Stacie also supports a variant of the Chebyshev model, where all basis functions are even
-functions of frequency, and only monomials of even degree are included.
-This variant of the model can be written as:
+The polynomial model is defined as
 
 $$
-    C^\text{evencheb}_k \approx \sum_{n=0}^N a_n (-1)^n T_{2n}\left(\frac{f}{f_\text{cut}}\right)
+    C^\text{poly}_k \approx \sum_{n=0}^N a_n f_k^n
 $$
 
-The factor $(-1)^n$ is included to ensure that all basis functions
-are one at zero frequency, such that the sum of all the coefficients corresponds
-to the integral of the autocorrelation function.
+where $N$ is the polynomial degree.
+With this form, :math:`a_n` corresponds to the integral of the autocorrelation function.
+
+Stacie also supports even polynomials:
+
+$$
+    C^\text{evenpoly}_k \approx \sum_{n=0}^{\lfloor N/2 \rfloor} a_n f_k^{2n}
+$$
 
 ## 2. Exponential Tail Model
 

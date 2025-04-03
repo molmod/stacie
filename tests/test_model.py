@@ -22,10 +22,11 @@ import numpy as np
 import pytest
 from conftest import check_gradient, check_hessian
 
-from stacie.model import ChebyshevModel, ExpTailModel, PadeModel, guess
+from stacie.model import ExpTailModel, PadeModel, PolynomialModel, guess
 
 FREQS = np.linspace(0, 0.5, 10)
 AMPLITUDES_REF = np.linspace(2, 1, 10)
+WEIGHTS = 1 - FREQS**2
 TIMESTEP = 1.2
 
 PARS_REF_EXP_TAIL = [
@@ -62,18 +63,18 @@ def test_guess_exptail():
     rng = np.random.default_rng(734)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
     ndofs = np.full(len(FREQS), 2)
-    pars_init = guess(model, FREQS, ndofs, amplitudes, model.par_scales, rng, 10)
+    pars_init = guess(FREQS, ndofs, amplitudes, WEIGHTS, model, rng, 10)
     assert len(pars_init) == 3
     assert np.isfinite(pars_init).all()
 
 
 @pytest.mark.parametrize("degree", [0, 1, 2, 3, 4])
-def test_cheb_npar(degree):
-    model = ChebyshevModel(degree)
+def test_poly_npar(degree):
+    model = PolynomialModel(degree)
     assert model.npar == degree + 1
 
 
-PARS_REF_CHEBY = [
+PARS_REF_POLY = [
     [-12.0, 3.4, 78.3],
     [9.0, 8.1],
     [-0.1, 0.02, -0.7, 0.3],
@@ -82,29 +83,29 @@ PARS_REF_CHEBY = [
 ]
 
 
-@pytest.mark.parametrize("pars_ref", PARS_REF_CHEBY)
-def test_gradient_cheb(pars_ref):
+@pytest.mark.parametrize("pars_ref", PARS_REF_POLY)
+def test_gradient_poly(pars_ref):
     pars_ref = np.array(pars_ref)
-    model = ChebyshevModel(len(pars_ref) - 1)
+    model = PolynomialModel(len(pars_ref) - 1)
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     check_gradient(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
 
 
-@pytest.mark.parametrize("pars_ref", PARS_REF_CHEBY)
-def test_hessian_cheb(pars_ref):
+@pytest.mark.parametrize("pars_ref", PARS_REF_POLY)
+def test_hessian_poly(pars_ref):
     pars_ref = np.array(pars_ref)
-    model = ChebyshevModel(len(pars_ref) - 1)
+    model = PolynomialModel(len(pars_ref) - 1)
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     check_hessian(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
 
 
-def test_guess_cheb():
-    model = ChebyshevModel(2)
+def test_guess_poly():
+    model = PolynomialModel(2)
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     rng = np.random.default_rng(123)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
     ndofs = np.full(len(FREQS), 2)
-    pars_init = guess(model, FREQS, ndofs, amplitudes, model.par_scales, rng, 10)
+    pars_init = guess(FREQS, ndofs, amplitudes, WEIGHTS, model, rng, 10)
     assert len(pars_init) == 3
     assert np.isfinite(pars_init).all()
 
@@ -122,12 +123,12 @@ def test_guess_cheb():
         (7, 4),
     ],
 )
-def test_even_cheb_npar(degree, npar):
-    model = ChebyshevModel(degree, even=True)
+def test_even_poly_npar(degree, npar):
+    model = PolynomialModel(degree, even=True)
     assert model.npar == npar
 
 
-PARS_REF_EVEN_CHEBY = [
+PARS_REF_EVEN_POLY = [
     [1.5],
     [0.0],
     [0.0, 0.0],
@@ -137,29 +138,29 @@ PARS_REF_EVEN_CHEBY = [
 ]
 
 
-@pytest.mark.parametrize("pars_ref", PARS_REF_EVEN_CHEBY)
-def test_gradient_cheb_even(pars_ref):
+@pytest.mark.parametrize("pars_ref", PARS_REF_EVEN_POLY)
+def test_gradient_poly_even(pars_ref):
     pars_ref = np.array(pars_ref)
-    model = ChebyshevModel(2 * len(pars_ref) - 2, even=True)
+    model = PolynomialModel(2 * len(pars_ref) - 2, even=True)
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     check_gradient(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
 
 
-@pytest.mark.parametrize("pars_ref", PARS_REF_EVEN_CHEBY)
-def test_hessian_cheb_even(pars_ref):
+@pytest.mark.parametrize("pars_ref", PARS_REF_EVEN_POLY)
+def test_hessian_poly_even(pars_ref):
     pars_ref = np.array(pars_ref)
-    model = ChebyshevModel(2 * len(pars_ref) - 2, even=True)
+    model = PolynomialModel(2 * len(pars_ref) - 2, even=True)
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     check_hessian(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
 
 
-def test_guess_cheb_even():
-    model = ChebyshevModel(4, even=True)
+def test_guess_poly_even():
+    model = PolynomialModel(4, even=True)
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     rng = np.random.default_rng(123)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
     ndofs = np.full(len(FREQS), 2)
-    pars_init = guess(model, FREQS, ndofs, amplitudes, model.par_scales, rng, 10)
+    pars_init = guess(FREQS, ndofs, amplitudes, WEIGHTS, model, rng, 10)
     assert len(pars_init) == 3
     assert np.isfinite(pars_init).all()
 
@@ -198,7 +199,7 @@ def test_guess_pade():
     rng = np.random.default_rng(123)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
     ndofs = np.full(len(FREQS), 2)
-    pars_init = guess(model, FREQS, ndofs, amplitudes, model.par_scales, rng, 10)
+    pars_init = guess(FREQS, ndofs, amplitudes, WEIGHTS, model, rng, 10)
     assert len(pars_init) == 3
     assert np.isfinite(pars_init).all()
 
@@ -212,10 +213,9 @@ def test_guess_pade_detailed():
     x = freqs / freqs[-1]
     assert amplitudes_ref == pytest.approx((3.0 + 1.5 * x**2) / (1.0 + 2.0 * x**2), rel=1e-10)
     ndofs = np.full(len(freqs), 20)
-    pars_init_low, amplitudes_low = model.solve_linear(freqs, ndofs, amplitudes_ref, [])
+    pars_init_low, amplitudes_low = model.solve_linear(freqs, ndofs, amplitudes_ref, WEIGHTS, [])
     assert pars_init_low == pytest.approx(pars_ref, rel=1e-10)
     assert amplitudes_low == pytest.approx(amplitudes_ref, rel=1e-10)
-    par_scales = np.ones(3)
     rng = np.random.default_rng(123)
-    pars_init = guess(model, freqs, ndofs, amplitudes_ref, par_scales, rng, 10)
+    pars_init = guess(freqs, ndofs, amplitudes_ref, WEIGHTS, model, rng, 10)
     assert pars_ref == pytest.approx(pars_init, rel=1e-10)

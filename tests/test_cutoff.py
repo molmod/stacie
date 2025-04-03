@@ -22,90 +22,97 @@ import numpy as np
 import pytest
 
 from stacie.cutoff import (
-    cv2_criterion,
-    cv2l_criterion,
-    evidence_criterion,
-    expected_ufc,
-    general_ufc,
+    CV2LCriterion,
+    linear_weighted_regression,
 )
-from stacie.utils import robust_posinv
+from stacie.model import PolynomialModel
+from stacie.spectrum import compute_spectrum
 
 
-def test_ufc_expectation_value():
+def test_cv2l_preconditioned():
+    nstep = 400
     rng = np.random.default_rng(42)
-    nfreq = 30
-    basis = rng.standard_normal((4, nfreq))
-    exp = expected_ufc(basis)
-
-    ufcs = []
-    for _ in range(10000):
-        data = rng.standard_normal(nfreq)
-        data -= np.linalg.lstsq(basis.T, data, rcond=None)[0] @ basis
-        ufc = general_ufc(data)
-        ufcs.append(ufc)
-    assert exp == pytest.approx(np.mean(ufcs), rel=1e-1)
-
-
-def test_cv2_preconditioned():
-    npar = 4
-    rng = np.random.default_rng(42)
-    basis1 = rng.standard_normal((npar, npar))
-    basis2 = rng.standard_normal((npar, npar))
-    props = {
-        "cost_hess_rescaled_evals": np.ones(npar),
-        "cost_hess_half1": np.dot(basis1, basis1.T),
-        "cost_hess_half2": np.dot(basis2, basis2.T),
-        "cost_hess_scales": rng.uniform(2, 5, npar),
-        "pars_half1": rng.standard_normal(npar),
-        "pars_half2": rng.standard_normal(npar),
-    }
-    result1 = cv2_criterion(props)
-    result2 = cv2_criterion(props, precondition=False)
+    spectrum = compute_spectrum(rng.standard_normal((10, nstep)))
+    model = PolynomialModel(1)
+    pars = np.array([0.1, 0.2])
+    fcut = spectrum.freqs[nstep // 4]
+    ncut = nstep // 3
+    props = {"fcut": fcut, "ncut": ncut, "pars": pars, "switch_exponent": 20.0}
+    result1 = CV2LCriterion()(spectrum, model, props)
+    result2 = CV2LCriterion(precondition=False)(spectrum, model, props)
     assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)
-    assert result1["criterion_expected"] == pytest.approx(result2["criterion_expected"], rel=1e-5)
 
 
-@pytest.mark.parametrize("convergence_check", [True, False])
-def test_cv2l_preconditioned(convergence_check):
-    npoint = 40
+def test_linear_weighted_regression_lc():
+    neq = 10
     npar = 4
+    nw = 2
     rng = np.random.default_rng(42)
-    props = {
-        "amplitudes": rng.uniform(3, 5, npoint),
-        "amplitudes_model": [
-            rng.uniform(3, 5, npoint),
-            rng.uniform(3, 5, (npar, npoint)),
-        ],
-        "thetas": rng.uniform(3, 5, npoint),
-        "kappas": np.full(npoint, 10),
-    }
-    result1 = cv2l_criterion(props, convergence_check=convergence_check)
-    result2 = cv2l_criterion(props, convergence_check=convergence_check, precondition=False)
-    assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)
-    assert result1["criterion_expected"] == pytest.approx(result2["criterion_expected"], rel=1e-5)
+    dm = rng.standard_normal((neq, npar))
+    ev = rng.standard_normal(neq)
+    ws = rng.uniform(0, 1, (nw, neq))
+
+    # Without linear combination
+    xs1, cs1 = linear_weighted_regression(dm, ev, ws)
+    assert xs1.shape == (nw, npar)
+    assert cs1.shape == (nw, npar, nw, npar)
+    assert cs1[0, :, 0] == pytest.approx(cs1[0, :, 0].T)
+    assert cs1[1, :, 1] == pytest.approx(cs1[1, :, 1].T)
+    assert cs1[1, :, 0] == pytest.approx(cs1[0, :, 1].T)
+    xd = xs1[0] - xs1[1]
+    cd = cs1[0, :, 0] + cs1[1, :, 1] - (cs1[0, :, 1] + cs1[1, :, 0])
+    assert np.all(np.isfinite(xd))
+    assert np.all(np.isfinite(cd))
+
+    # With linear combination
+    lc = np.array([[1.0, -1.0]])
+    xs2, cs2 = linear_weighted_regression(dm, ev, ws, lc)
+    assert xs2.shape == (1, npar)
+    assert cs2.shape == (1, npar, 1, npar)
+    assert xs2[0] == pytest.approx(xd)
+    assert cs2[0, :, 0] == pytest.approx(cd)
 
 
-def test_evidence_criterion_scales():
+def test_linear_weighted_regression_uncorrelated():
+    neq = 10
     npar = 4
-    rng = np.random.default_rng(42)
-    basis = rng.standard_normal((npar, npar))
-    hess = np.dot(basis, basis.T)
-    evals1 = np.linalg.eigvalsh(hess)
-    scales2, evals2 = robust_posinv(hess)[:2]
-    result1 = evidence_criterion(
-        {
-            "ll": -5,
-            "cost_hess_rescaled_evals": evals1,
-            "cost_hess_scales": np.ones(npar),
-            "entropy": 1.5,
-        }
+    nw = 2
+    rng = np.random.default_rng(123)
+    dm = rng.standard_normal((neq, npar))
+    ev = rng.standard_normal(neq)
+    ws = np.ones((nw, neq))
+    ws[0, 5:] = 0
+    ws[1, :5] = 0
+    xs, cs = linear_weighted_regression(dm, ev, ws)
+    assert xs[0] == pytest.approx(np.linalg.lstsq(dm[:5], ev[:5], rcond=None)[0], rel=1e-5)
+    assert xs[1] == pytest.approx(np.linalg.lstsq(dm[5:], ev[5:], rcond=None)[0], rel=1e-5)
+    assert cs[0, :, 1] == pytest.approx(np.zeros((npar, npar)), abs=1e-5)
+    assert cs[1, :, 0] == pytest.approx(np.zeros((npar, npar)), abs=1e-5)
+
+
+def test_linear_weighted_regression_example():
+    neq = 50
+    npar = 2
+    nw = 2
+    rng = np.random.default_rng(0)
+    t = np.linspace(-1, 1, neq)
+    dm = np.vstack((np.ones(neq), t)).T
+    ref = 5 * t**2
+    ws = np.array([(1 + t) / 2, (1 - t) / 2])
+
+    all_xs = []
+    cs_mean = 0
+    nrep = 10000
+    for _ in range(nrep):
+        ev = rng.standard_normal(neq) + ref
+        xs, cs = linear_weighted_regression(dm, ev, ws)
+        all_xs.append(xs)
+        cs_mean += cs
+    all_xs = np.array(all_xs)
+    cs_mean /= nrep
+    assert all_xs.shape == (nrep, nw, npar)
+    assert cs_mean[0, :, 0] == pytest.approx(np.cov(all_xs[:, 0, :], rowvar=False), abs=2e-3)
+    assert cs_mean[1, :, 1] == pytest.approx(np.cov(all_xs[:, 1, :], rowvar=False), abs=2e-3)
+    assert cs_mean.reshape((nw * npar, nw * npar)) == pytest.approx(
+        np.cov(all_xs[:, 0, :], all_xs[:, 1, :], rowvar=False), abs=2e-3
     )
-    result2 = evidence_criterion(
-        {
-            "ll": -5,
-            "cost_hess_rescaled_evals": evals2,
-            "cost_hess_scales": scales2,
-            "entropy": 1.5,
-        }
-    )
-    assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)

@@ -25,6 +25,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
+from numpy.typing import NDArray
 from scipy import stats
 
 from .estimate import Result
@@ -108,7 +109,7 @@ def plot_results(
     rs: Result | list[Result],
     uc: UnitConfig | None = None,
     *,
-    figsize: tuple = (9, 6),
+    figsize: tuple = (10, 5.625),
 ):
     """Generate a multi-page PDF with plots of the autocorrelation integral estimation.
 
@@ -144,13 +145,8 @@ def plot_results(
             plt.close(fig)
 
             if len(r.history) > 1:
-                fig, axs = plt.subplots(2, 3, figsize=figsize)
-                plot_all_models(axs[0, 0], uc, r)
-                plot_criterion(axs[1, 0], uc, r)
-                plot_uncertainty(axs[0, 1], uc, r)
-                plot_evals(axs[1, 1], uc, r)
-                plot_residuals(axs[0, 2], uc, r)
-                plot_sensitivity(axs[1, 2], uc, r)
+                fig, axs = plt.subplots(2, 2, figsize=figsize)
+                plot_extras(axs, uc, r)
                 pdf.savefig(fig)
                 plt.close(fig)
 
@@ -172,13 +168,12 @@ REF_PROPS = {"ls": "--", "color": "k", "alpha": 0.5}
 
 def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int | None = None):
     """Plot the empirical spectrum."""
-    if nplot is None:
+    if nplot is None or nplot > s.nfreq:
         nplot = s.nfreq
     ax.plot(
         s.freqs[:nplot] / uc.freq_unit,
         s.amplitudes[:nplot] / uc.acint_unit,
-        color="C0",
-        lw=1,
+        "C0.",
     )
     _plot_ref_spectrum(ax, uc, s, nplot)
     ax.set_xlim(left=0)
@@ -218,25 +213,49 @@ FIT_RIGHT_TITLE_TEMPLATE_EXP = (
 
 def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the fitted model spectrum."""
-    nplot = 2 * r.nfit
-    plot_spectrum(ax, uc, r.spectrum, nplot)
-    kappas = 0.5 * r.spectrum.ndofs[: r.nfit]
-    mean = r.props["thetas"] * kappas
-    std = r.props["thetas"] * np.sqrt(kappas)
-    freqs = r.spectrum.freqs[: r.nfit]
+    freqs = r.spectrum.freqs[: r.ncut]
+    # Show fitting weight on top of the spectrum
+    ax2 = ax.twinx()
+    ax2.plot(freqs / uc.freq_unit, r.props["weights"], color="C3", ls="--")
+    ax2.set_ylabel("Fitting weight", color="C3")
+    ax2.set_ylim(0, 1.02)
+    ax2.spines["right"].set_color("red")
+    ax2.spines["right"].set_visible(True)
+    ax2.tick_params(axis="y", colors="red")
+
+    # The empirical spectrum.
+    plot_spectrum(ax, uc, r.spectrum, 2 * r.ncut)
+
+    # Model spectrum.
+    kappas = 0.5 * r.spectrum.ndofs[: r.ncut]
+    mean = r.props["amplitudes_model"][0]
+    std_fit = np.sqrt(
+        np.einsum(
+            "ij,ik,jk->k",
+            r.props["covar"],
+            r.props["amplitudes_model"][1],
+            r.props["amplitudes_model"][1],
+        )
+    )
+    std_model = mean / np.sqrt(kappas)
     ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2")
+    ax.plot(freqs / uc.freq_unit, (mean - uc.sfac * std_fit) / uc.acint_unit, color="C2", ls="--")
+    ax.plot(freqs / uc.freq_unit, (mean + uc.sfac * std_fit) / uc.acint_unit, color="C2", ls="--")
     ax.fill_between(
         freqs / uc.freq_unit,
-        (mean - uc.sfac * std) / uc.acint_unit,
-        (mean + uc.sfac * std) / uc.acint_unit,
+        (mean - uc.sfac * std_model) / uc.acint_unit,
+        (mean + uc.sfac * std_model) / uc.acint_unit,
         color="C2",
         alpha=0.3,
         lw=0,
     )
-    ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
+    ax.axvline(r.fcut / uc.freq_unit, ymax=0.1, color="k")
+    ax.set_ylim(bottom=0)
+
+    # Info in title
     fields = {
         "uc": uc,
-        "model": r.props["model"],
+        "model": r.model.name,
         "acint": r.acint / uc.acint_unit,
         "acint_std": r.acint_std / uc.acint_unit,
         "acint_unit_str": "" if uc.acint_unit_str == "1" else " " + uc.acint_unit_str,
@@ -262,137 +281,117 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         ax.set_title("\n" + fixformat(FIT_RIGHT_TITLE_TEMPLATE.format(**fields)), loc="right")
 
 
-def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
-    """Plot all fitted model spectra (for all tested cutoffs)."""
-    for nfit, props in r.history.items():
-        kappas = 0.5 * r.spectrum.ndofs[:nfit]
-        mean = props["thetas"] * kappas
-        freqs = r.spectrum.freqs[:nfit]
-        if nfit == r.nfit:
-            ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="k", lw=2, zorder=2.5)
-        else:
-            ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2", lw=1, alpha=0.5)
-    nplot = min(2 * max(r.history), r.spectrum.nfreq)
-    _plot_ref_spectrum(ax, uc, r.spectrum, nplot)
-    # Print the number of fitted model spectra in the title to show how many models were tested.
-    ax.set_title(f"Model spectra ({len(r.history)} fits)", wrap=True)
-    ax.set_xlabel(axis_label("Frequency", uc.freq_unit_str))
-    ax.set_ylabel(axis_label("Amplitude", uc.acint_unit_str))
-    ax.set_xscale("log")
+def plot_extras(axs: NDArray[mpl.axes.Axes], uc: UnitConfig, r: Result):
+    plot_criterion(axs[0, 0], uc, r)
+    plot_uncertainty(axs[0, 1], uc, r)
+    plot_spectrum(axs[1, 0], uc, r.spectrum, nplot=8 * r.ncut)
+    plot_evals(axs[1, 1], uc, r)
 
 
 def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the cutoff criterion as a function of cutoff frequency."""
-    freqs = []
-    criteria = []
-    expected = []
-    for nfit, props in sorted(r.history.items()):
-        freqs.append(r.spectrum.freqs[nfit - 1])
-        criteria.append(props["criterion"])
-        expected.append(props.get("criterion_expected", np.nan))
-    freqs = np.array(freqs)
-    criteria = np.array(criteria)
-    expected = np.array(expected)
-
-    if np.isfinite(expected).any():
-        ax.plot(freqs / uc.freq_unit, expected, color="C1", lw=1, alpha=0.5, ls="--")
-    ax.plot(freqs / uc.freq_unit, criteria, color="C1", lw=1)
-    ax.axvline(r.spectrum.freqs[r.nfit - 1] / uc.freq_unit, ymax=0.1, color="k")
+    fcuts = np.array([props["fcut"] for props in r.history])
+    criteria = np.array([props["criterion"] for props in r.history])
+    probs = np.exp(-criteria)
+    probs /= probs.max()
+    ax.plot(fcuts / uc.freq_unit, probs, color="C1", lw=1)
     ax.set_xlabel(axis_label("Cutoff frequency", uc.freq_unit_str))
-    ax.set_ylabel("Criterion")
-    ax.set_title(f"Cutoff criterion ({r.props['cutoff_criterion'].split('_')[0]})", wrap=True)
-    ax.set_xscale("log")
-    mask = np.isfinite(criteria)
-    if mask.any():
-        criterion_min = criteria[mask].min()
-        criterion_scale = r.props.get("criterion_scale")
-        if criterion_scale is None and mask.any():
-            criterion_scale = np.median(criteria[mask]) - criterion_min
-        ax.set_ylim(criterion_min - 0.2 * criterion_scale, criterion_min + 2.5 * criterion_scale)
+    ax.set_ylabel("Relative probability")
+    ax.set_title("Cutoff criterion " + r.cutoff_criterion.name, wrap=True)
 
 
 def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the autocorrelation integral and uncertainty as a function fo cutoff frequency."""
-    freqs = []
+    fcuts = []
     acints = []
     acint_stds = []
-    s = r.spectrum
-    for nfit, props in sorted(r.history.items()):
-        freqs.append(r.spectrum.freqs[nfit - 1])
+    for props in r.history:
+        fcuts.append(props["fcut"])
         acints.append(props["acint"])
         acint_stds.append(props["acint_std"])
-    freqs = np.array(freqs)
+    fcuts = np.array(fcuts)
     acints = np.array(acints)
     acint_stds = np.array(acint_stds)
 
-    ax.plot(freqs / uc.freq_unit, acints / uc.acint_unit, "C3")
+    ax.plot(fcuts / uc.freq_unit, acints / uc.acint_unit, "C3")
     ax.fill_between(
-        freqs / uc.freq_unit,
+        fcuts / uc.freq_unit,
         (acints - uc.sfac * acint_stds) / uc.acint_unit,
         (acints + uc.sfac * acint_stds) / uc.acint_unit,
         color="C3",
         alpha=0.3,
         lw=0,
     )
-    s = r.spectrum
-    ax.errorbar(
-        [r.spectrum.freqs[r.nfit - 1] / uc.freq_unit],
-        [r.acint / uc.acint_unit],
-        [r.acint_std * uc.sfac / uc.acint_unit],
+    fcut_weights = np.array([props["fcut_weight"] for props in r.history])
+    fcut_weights /= fcut_weights.max()
+    mask = fcut_weights > 0.01
+    ax.scatter(
+        fcuts[mask] / uc.freq_unit,
+        acints[mask] / uc.acint_unit,
+        s=30,
+        c=fcut_weights[mask],
         marker="o",
-        ms=2,
-        color="k",
+        linewidth=0,
+        cmap="Greys",
+        vmin=0,
+        vmax=1,
     )
-    if s.amplitudes_ref is not None:
-        limit = s.amplitudes_ref[0]
+    if r.spectrum.amplitudes_ref is not None:
+        limit = r.spectrum.amplitudes_ref[0]
         ax.axhline(limit / uc.acint_unit, **REF_PROPS)
     ax.set_title(f"AC integral $\\pm$ ${uc.sfac}\\sigma$", wrap=True)
     ax.set_xlabel(axis_label("Cutoff frequency", uc.freq_unit_str))
-    ax.set_ylabel(axis_label(uc.acint_symbol, uc.acint_unit_str))
-    ax.set_xscale("log")
+    ax.set_ylabel(axis_label(f"${uc.acint_symbol}$", uc.acint_unit_str))
 
 
 def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the eigenvalues of the Hessian as a function of the cutoff frequency."""
-    freqs = []
-    evals = []
-    for nfit, props in sorted(r.history.items()):
-        freqs.append(r.spectrum.freqs[nfit - 1])
-        evals.append(props["cost_hess_rescaled_evals"])
-        if nfit == r.nfit:
-            ax.plot([freqs[-1]], [evals[-1]], color="k", marker="o", ms=2, zorder=2.5)
-    freqs = np.array(freqs)
-    evals = np.array(evals)
+    fcuts = np.array([props["fcut"] for props in r.history])
+    all_evals = np.array([props["cost_hess_rescaled_evals"] for props in r.history])
+    fcut_weights = np.array([props["fcut_weight"] for props in r.history])
+    fcut_weights /= fcut_weights.max()
 
-    ax.plot(freqs / uc.freq_unit, evals, color="C4")
-    ax.set_title("Conditioned Hessian eigenvalues", wrap=True)
+    ax.plot(fcuts / uc.freq_unit, all_evals, color="C4")
+    mask = fcut_weights > 0.01
+    for evals in all_evals.T:
+        ax.scatter(
+            fcuts[mask] / uc.freq_unit,
+            evals[mask],
+            s=30,
+            c=fcut_weights[mask],
+            marker="o",
+            linewidth=0,
+            cmap="Greys",
+            vmin=0,
+            vmax=1,
+        )
+    ax.set_title("Conditioned Hessian", wrap=True)
     ax.set_xlabel(axis_label("Cutoff frequency", uc.freq_unit_str))
     ax.set_ylabel("Eigenvalue")
     ax.set_yscale("log")
-    ax.set_xscale("log")
 
 
-def plot_residuals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
-    """Plot the normalized residuals between the model and empirical spectra."""
-    amplitudes = r.spectrum.amplitudes[: r.nfit]
-    kappas = 0.5 * r.spectrum.ndofs[: r.nfit]
-    thetas = r.props["thetas"]
-    residuals = (amplitudes / thetas - kappas) / np.sqrt(kappas)
-    with np.errstate(invalid="ignore"):
-        ax.plot(r.spectrum.freqs[: r.nfit] / uc.freq_unit, residuals, color="C0")
-        ax.axhline(0, ls="--", lw=1.0, color="k")
-    ax.set_title("Residuals", wrap=True)
+def plot_all_models(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    """Plot all fitted model spectra (for all tested cutoffs)."""
+    fcut_weights = np.array([props["fcut_weight"] for props in r.history])
+    fcut_weights /= fcut_weights.max()
+    nplot = 0
+    for i, props in enumerate(r.history):
+        ncut = props["ncut"]
+        nplot = max(nplot, ncut)
+        mean = props["amplitudes_model"][0]
+        freqs = r.spectrum.freqs[:ncut]
+        if fcut_weights[i] > 0.01:
+            plot_kwargs = {"alpha": fcut_weights[i], "zorder": 2.5, "color": "C2"}
+        else:
+            plot_kwargs = {"alpha": 0.1, "zorder": 0.5, "color": "k"}
+        ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, **plot_kwargs)
+    _plot_ref_spectrum(ax, uc, r.spectrum, nplot)
+    # Print the number of fitted model spectra in the title to show how many models were tested.
+    ax.set_title(f"Model spectra ({len(r.history)} fits)", wrap=True)
     ax.set_xlabel(axis_label("Frequency", uc.freq_unit_str))
-    ax.set_ylabel(r"$(\hat{I}_k - \hat{I}_k^{\mathrm{model}})/\hat{\sigma}_k$")
-
-
-def plot_sensitivity(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
-    """Plot the sensitivity of the autocorrelation integral estimate to spectrum amplitudes."""
-    ax.plot(r.spectrum.freqs[: r.nfit] / uc.freq_unit, r.props["acint_sensitivity"], color="C5")
-    ax.axhline(0, ls="--", lw=1.0, color="k")
-    ax.set_title(f"Sensitivity of ${uc.acint_symbol}$", wrap=True)
-    ax.set_xlabel(axis_label("Frequency", uc.freq_unit_str))
-    ax.set_ylabel("Sensitivity")
+    ax.set_ylabel(axis_label("Amplitude", uc.acint_unit_str))
+    ax.set_ylim(bottom=0)
 
 
 def plot_qq(ax: mpl.axes.Axes, uc: UnitConfig, rs: list[Result]):

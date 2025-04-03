@@ -47,7 +47,8 @@ spectrum_model = a_short + a_tail * (1 - r) ** 2 / (1 - 2 * r * cos + r**2)
 
 # %%
 def plot_model():
-    fig, ax = plt.subplots()
+    plt.close("model")
+    _, ax = plt.subplots(num="model")
     ax.plot(freqs, spectrum_model, color="k", label="model")
     ax.axhline(a_short + a_tail, alpha=0.5, color="C0", label="a_short + a_tail")
     ax.axhline(

@@ -28,9 +28,9 @@ from collections.abc import Callable
 import pytest
 from path import Path
 
-from stacie.cutoff import cv2_criterion, cv2l_criterion, underfitting_criterion
+from stacie.cutoff import CV2LCriterion, CV3LCriterion
 from stacie.estimate import Result, estimate_acint
-from stacie.model import ChebyshevModel, ExpTailModel, SpectrumModel
+from stacie.model import ExpTailModel, PolynomialModel, SpectrumModel
 from stacie.msgpack import dump, load
 from stacie.plot import plot_results
 from stacie.spectrum import Spectrum
@@ -38,16 +38,16 @@ from stacie.summary import summarize_results
 
 # Combinations of test spectra and suitable models, with a manual cutoff frequency.
 CASES = [
-    ("white", ChebyshevModel(0), 0.1),
-    ("white", ChebyshevModel(2), 0.1),
-    ("broad", ChebyshevModel(0), 0.01),
-    ("broad", ChebyshevModel(2), 0.1),
+    ("white", PolynomialModel(0), 0.1),
+    ("white", PolynomialModel(2), 0.1),
+    ("broad", PolynomialModel(0), 0.01),
+    ("broad", PolynomialModel(2), 0.1),
     ("pure", ExpTailModel(), 0.02),
-    ("pure", ChebyshevModel(2, even=True), 0.02),
+    ("pure", PolynomialModel(2, even=True), 0.02),
     ("double", ExpTailModel(), 0.02),
-    ("double", ChebyshevModel(2, even=True), 0.02),
+    ("double", PolynomialModel(2, even=True), 0.02),
 ]
-CRITERIA = [cv2l_criterion, cv2_criterion, underfitting_criterion]
+CRITERIA = [CV2LCriterion(), CV3LCriterion(cond=1e6)]
 
 
 def output_test_result(prefix: str, res: Result | list[Result]):
@@ -77,62 +77,37 @@ def register_result(regtest, res: Result):
                 f"± {res.props['corrtime_exp_std']:.5e}"
             )
         print(f"corrtime int = {res.corrtime_int:.5e} ± {res.corrtime_int_std:.5e}")
-        print(f"log(lh) = {res.props['ll']:.5e}")
         print("---")
 
 
-@pytest.mark.parametrize(("name", "model", "fcutmax"), CASES)
+@pytest.mark.parametrize(("name", "model", "fcut_max"), CASES)
 @pytest.mark.parametrize("criterion", CRITERIA)
 @pytest.mark.parametrize("full", [True, False])
 @pytest.mark.filterwarnings("ignore::stacie.estimate.FCutWarning")
 def test_case_scan(
-    regtest, name: str, model: SpectrumModel, fcutmax: float, criterion: Callable, full: bool
+    regtest, name: str, model: SpectrumModel, fcut_max: float, criterion: Callable, full: bool
 ):
     spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
     if name == "broad":
         spectrum = spectrum.without_zero_freq()
-    result = estimate_acint(
-        spectrum,
-        model,
-        fcutmax=None if full else fcutmax * 2,
-        nfitmax_hard=10000,
-        maxscan=10,
-        cutoff_criterion=criterion,
-    )
+    result = estimate_acint(spectrum, model, fcut_max=fcut_max, cutoff_criterion=criterion)
     register_result(regtest, result)
-    prefix = f"scan_{name}_{model.name}_{criterion.__name__}"
+    prefix = f"scan_{name}_{model.name}_{criterion.name}"
     output_test_result(prefix, result)
 
 
-@pytest.mark.parametrize(("name", "model", "fcutmax"), CASES)
-def test_case_noscan(regtest, name: str, model: SpectrumModel, fcutmax: float):
-    spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
-    result = estimate_acint(
-        spectrum,
-        model,
-        fcutmax=fcutmax,
-        maxscan=1,
-    )
-    register_result(regtest, result)
-    prefix = f"noscan_{name}_{model.name}"
-    output_test_result(prefix, result)
-
-
-@pytest.mark.parametrize("scan", [True, False])
-def test_plot_multi(scan: bool):
+def test_plot_multi():
     cases = [
-        ("white", ChebyshevModel(2), 0.1),
-        ("broad", ChebyshevModel(2), 0.1),
+        ("white", PolynomialModel(2), 0.1),
+        ("broad", PolynomialModel(2), 0.1),
     ]
     results = [
         estimate_acint(
             load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum),
             model,
-            fcutmax=2 * fcutmax if scan else fcutmax,
-            maxscan=10 if scan else 1,
-            nfitmax_hard=10000,
+            fcut_max=fcut_max,
+            cutoff_criterion=CV2LCriterion(),
         )
-        for name, model, fcutmax in cases
+        for name, model, fcut_max in cases
     ]
-    prefix = "multin_" + ("scan" if scan else "noscan")
-    output_test_result(prefix, results)
+    output_test_result("multi", results)

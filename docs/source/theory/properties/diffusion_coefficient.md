@@ -41,7 +41,7 @@ The diffusion coefficient can then be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results, ChebyshevModel, UnitConfig
+from stacie import compute_spectrum, estimate_acint, plot_results, PolynomialModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
 velocities = ...
@@ -58,7 +58,7 @@ spectrum = compute_spectrum(
     timestep=timestep,
     include_zero_freq=False,
 )
-result = estimate_acint(spectrum, ChebyshevModel(2, even=True))
+result = estimate_acint(spectrum, PolynomialModel(2, even=True))
 print("Diffusion coefficient", result.acint)
 print("Uncertainty of the diffusion coefficient", result.acint_std)
 
