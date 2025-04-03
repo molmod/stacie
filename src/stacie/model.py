@@ -374,12 +374,12 @@ class ExpTailModel(SpectrumModel):
 
 @attrs.define
 class PolynomialModel(SpectrumModel):
-    """A linear combination of simple mononomials."""
+    """A linear combination of simple monomials."""
 
     degree: int = attrs.field(converter=int, validator=attrs.validators.ge(0))
-    """The highest degree of the mononomials included in the model.
+    """The highest degree of the monomials included in the model.
 
-    If even is ``True``, only even mononomials are included.
+    If even is ``True``, only even monomials are included.
     For example, if degree is 3 and even is ``True``,
     the model includes the polynomials :math:`1`, :math:`f^2`.
     """
@@ -460,7 +460,7 @@ class PadeModel(SpectrumModel):
     """A rational function model for the spectrum, a.k.a. a Padé approximation."""
 
     numer_degrees: list[int] = attrs.field(converter=list)
-    """The degrees of the mononomials in the numerator."""
+    """The degrees of the monomials in the numerator."""
 
     @numer_degrees.validator
     def _validate_num_degrees(self, attribute, value):
@@ -472,7 +472,7 @@ class PadeModel(SpectrumModel):
             raise ValueError("The list of numer_degrees must not contain duplicates.")
 
     denom_degrees: list[int] = attrs.field(converter=list)
-    """The degrees of the mononomials in the denominator.
+    """The degrees of the monomials in the denominator.
 
     Note that the leading term is always 1, and there is no need to include
     degree zero.
