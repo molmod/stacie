@@ -28,7 +28,6 @@ from .utils import PositiveDefiniteError, robust_posinv
 
 __all__ = (
     "CV2LCriterion",
-    "CV3LCriterion",
     "CutoffCriterion",
     "integral_to_cutoff",
     "linear_weighted_regression",
@@ -216,126 +215,6 @@ class CV2LCriterion(CutoffCriterion):
             + np.log(scales).sum()
         )
 
-        return {"criterion": nll}
-
-
-@attrs.define
-class CV3LCriterion(CutoffCriterion):
-    """Criterion based on the difference between fits to three parts of the spectrum.
-
-    The goal of this criterion is to eliminate bias by also checking the validity of the
-    model past the cutoff frequency.
-    """
-
-    fcut_factor: float = attrs.field(default=1.2)
-    """The factor by which the cutoff frequency is multiplied.
-
-    By using slightly higher cutoff frequencies in the criterion,
-    it tests to what extent the model can extrapolate (to higher frequencies).
-    This lowers the risk of biased fits at the expensive a higher variance.
-    """
-
-    cond: float = attrs.field(default=1e4)
-    """The threshold for the condition number of the preconditioned covariance matrix.
-
-    Due to the preconditioning, the condition number should be close to 1.0.
-    If not, the linear dependence of the parameters is too strong, making the fit unreliable.
-    In this case, "inf" is returned as the criterion.
-    """
-
-    @property
-    def name(self) -> str:
-        """The name of the criterion."""
-        return "cv3l"
-
-    def __call__(
-        self,
-        spectrum: Spectrum,
-        model: SpectrumModel,
-        props: dict[str, NDArray],
-    ) -> dict[str, float]:
-        """The disparity between fits to two different parts of the spectrum.
-
-        Parameters
-        ----------
-        spectrum
-            The spectrum object containing the input data.
-        model
-            The model to be fitted to the spectrum.
-        props
-            The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
-
-        Returns
-        -------
-        results
-            A dictionary with "criterion" and other fields.
-            (See module docstring for details.)
-        """
-        # Compute the three weights
-        fcut = props["fcut"]
-        freqs = spectrum.freqs
-        switch_exponent = props["switch_exponent"]
-        weights1 = switch_func(freqs, self.fcut_factor * fcut / 3, switch_exponent)
-        weights2 = switch_func(freqs, 2 * self.fcut_factor * fcut / 3, switch_exponent)
-        weights3 = switch_func(freqs, self.fcut_factor * fcut, switch_exponent)
-        ncut = (weights3 > 1e-3).sum()
-        if ncut == len(freqs):
-            return {
-                "criterion": np.inf,
-                "msg": "cv3l: Insufficient data after cutoff.",
-            }
-        weights3 -= weights2
-        weights2 -= weights1
-        freqs = freqs[:ncut]
-        weights1 = weights1[:ncut]
-        weights2 = weights2[:ncut]
-        weights3 = weights3[:ncut]
-        amplitudes_model = model.compute(freqs, props["pars"], 1)
-
-        # Construct a linear regression approximation with normally distributed errors,
-        # of the original non-linear problem with Gamma-distributed errors.
-        design_matrix = amplitudes_model[1].T
-        expected_values = spectrum.amplitudes[:ncut] - amplitudes_model[0]
-        # Transform equations to a basis with standard normal errors.
-        kappas = spectrum.ndofs[:ncut] / 2
-        data_std = amplitudes_model[0] / np.sqrt(kappas)
-        design_matrix = design_matrix / data_std.reshape(-1, 1)
-        expected_values = expected_values / data_std
-
-        xs, cs = linear_weighted_regression(
-            design_matrix,
-            expected_values,
-            np.array([weights1, weights2, weights3]),
-            np.array([[1, -1, 0], [0, 1, -1]]),
-        )
-        npar = model.npar
-        xd = xs.reshape(
-            2 * npar,
-        )
-        cd = cs.reshape(2 * npar, 2 * npar)
-
-        # Compute the difference between the two parameter vectors in the
-        # basis of the covariance matrix of the difference
-        try:
-            scales, evals, evecs, _ = robust_posinv(cd)
-        except PositiveDefiniteError as exc:
-            return {
-                "criterion": np.inf,
-                "msg": f"cv3l: Covariance {exc.args[0]}",
-            }
-        if evals.max() > self.cond * evals.min():
-            return {
-                "criterion": np.inf,
-                "msg": f"cv3l: Linear dependencies in basis. {evals=}",
-            }
-
-        # Compute the negative log likelihood of the difference in parameters.
-        delta = np.dot(evecs.T, xd / scales)
-        nll = (
-            0.5 * (delta**2 / evals).sum()
-            + 0.5 * np.log(2 * np.pi * evals).sum()
-            + np.log(scales).sum()
-        )
         return {"criterion": nll}
 
 

@@ -28,7 +28,7 @@ from collections.abc import Callable
 import pytest
 from path import Path
 
-from stacie.cutoff import CV2LCriterion, CV3LCriterion
+from stacie.cutoff import CV2LCriterion
 from stacie.estimate import Result, estimate_acint
 from stacie.model import ExpTailModel, PolynomialModel, SpectrumModel
 from stacie.msgpack import dump, load
@@ -47,7 +47,7 @@ CASES = [
     ("double", ExpTailModel(), 0.02),
     ("double", PolynomialModel(2, even=True), 0.02),
 ]
-CRITERIA = [CV2LCriterion(), CV3LCriterion(cond=1e6)]
+CRITERIA = [CV2LCriterion()]
 
 
 def output_test_result(prefix: str, res: Result | list[Result]):
