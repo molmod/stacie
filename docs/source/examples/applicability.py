@@ -49,11 +49,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
-from stacie.plot import (
-    plot_criterion,
-    plot_fitted_spectrum,
-    plot_spectrum,
-)
+from stacie.plot import plot_extras, plot_fitted_spectrum, plot_spectrum
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -104,7 +100,8 @@ trajectory = generate()
 # %%
 def plot_traj(nplot=500):
     """Show the first 500 steps of the first 10 solutions."""
-    fig, ax = plt.subplots()
+    plt.close("traj")
+    _, ax = plt.subplots(num="traj")
     times = np.arange(nplot) * TIMESTEP
     ax.plot(times, trajectory[:nplot, 0, :10])
     ax.set_xlabel("Time [1]")
@@ -131,7 +128,8 @@ spectrum = compute_spectrum(
     prefactor=1 / (NSTEP * TIMESTEP * NSYS),
     include_zero_freq=False,
 )
-fig, ax = plt.subplots()
+plt.close("spectrum")
+_, ax = plt.subplots(num="spectrum")
 plot_spectrum(ax, uc, spectrum, nplot=500)
 
 # %% [markdown]
@@ -142,10 +140,12 @@ plot_spectrum(ax, uc, spectrum, nplot=500)
 
 # %%
 result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
-fig, ax = plt.subplots()
+plt.close("fitted")
+fig, ax = plt.subplots(num="fitted")
 plot_fitted_spectrum(ax, uc, result)
-fig, ax = plt.subplots()
-plot_criterion(ax, uc, result)
+plt.close("extras")
+fig, axs = plt.subplots(2, 2, num="extras")
+plot_extras(axs, uc, result)
 
 # %% [markdown]
 # Due to the symmetry of the oscillator, the mean of the solutions should be zero.

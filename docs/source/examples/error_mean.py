@@ -28,13 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import quad
 from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
-from stacie.plot import (
-    plot_criterion,
-    plot_fitted_spectrum,
-    plot_residuals,
-    plot_spectrum,
-    plot_uncertainty,
-)
+from stacie.plot import plot_extras, plot_fitted_spectrum, plot_spectrum
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -82,7 +76,8 @@ def logprob(r):
 
 
 def plot_potential_dist():
-    fig, (ax1, ax2) = plt.subplots(2, 1)
+    plt.close("boltzmann")
+    _, (ax1, ax2) = plt.subplots(2, 1, num="boltzmann", sharex=True)
     rgrid = np.linspace(0.5 * R0, 2 * R0, 100)
     ax2.sharex(ax1)
     ax1.plot(rgrid, -logprob(rgrid) / BETA)
@@ -142,7 +137,8 @@ print(f"Monte Carlo E[r] ≈ {mean_mc:.5f} > {R0:.5f}")
 # Plot the beginning of a few sequences.
 # The atomic unit of length is the Bohr radius, $\mathrm{a}_0$.
 def plot_chains():
-    fig, ax = plt.subplots()
+    plt.close("chains")
+    _, ax = plt.subplots(num="chains")
     ax.plot(sequences[0][:500])
     ax.plot(sequences[1][:500])
     ax.plot(sequences[2][:500])
@@ -191,7 +187,8 @@ uc = UnitConfig(
     freq_unit_str="1",
     time_unit_str="1",
 )
-fig, ax = plt.subplots()
+plt.close("spectrum")
+_, ax = plt.subplots(num="spectrum")
 plot_spectrum(ax, uc, spectrum, 180)
 
 # %% [markdown]
@@ -218,25 +215,17 @@ print(f"Uncertainty of the error of mean = {error_of_error_mc:.5f}")
 
 # %%
 # Plot of the empirical and fitted model spectrum.
-fig, ax = plt.subplots()
+plt.close("fitted")
+_, ax = plt.subplots(num="fitted")
 plot_fitted_spectrum(ax, uc, result)
 
 # %%
-# Plot of the underfitting criterion minimization
+# Plot additional intermediate results
 # as a function of the frequency cutoff.
-fig, ax = plt.subplots()
-plot_criterion(ax, uc, result)
+plt.close("extras")
+_, axs = plt.subplots(2, 2, num="extras")
+plot_extras(axs, uc, result)
 
-# %%
-# Plot of the normalized residuals.
-fig, ax = plt.subplots()
-plot_residuals(ax, uc, result)
-
-# %%
-# Plot of the error of the mean and its uncertainty
-# as a function of the frequency cutoff.
-fig, ax = plt.subplots()
-plot_uncertainty(ax, uc, result)
 
 # %% [markdown]
 # ## Precise Mean With Numerical Quadrature

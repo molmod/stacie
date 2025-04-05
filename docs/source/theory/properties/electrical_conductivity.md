@@ -131,7 +131,7 @@ With these requirements, the shear viscosity can be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results, ChebyshevModel, UnitConfig
+from stacie import compute_spectrum, estimate_acint, plot_results, PolynomialModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
 ionvels = ...
@@ -149,7 +149,7 @@ spectrum = compute_spectrum(
     prefactor=0.5 / (volume * temperature * boltzmann_const),
     timestep=timestep,
 )
-result = estimate_acint(spectrum, ChebyshevModel(2, even=True))
+result = estimate_acint(spectrum, PolynomialModel(2, even=True))
 print("Electrical conductivity", result.acint)
 print("Uncertainty of the electrical conductivity", result.acint_std)
 

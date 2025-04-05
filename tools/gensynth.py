@@ -13,11 +13,11 @@ The ground truth of the spectrum is stored in `spectrum.amplitudes_ref`.
 The expected value of the autocorrelation integral is always 1.
 """
 
+import attrs
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
-from stacie.msgpack import dump
 from stacie.plot import UnitConfig, plot_spectrum
 from stacie.spectrum import Spectrum, compute_spectrum
 from stacie.synthetic import generate
@@ -58,7 +58,7 @@ def generate_lorentzian(
     sequences = generate(psd, 1.0, nseq, nstep, rng)
     spectrum = compute_spectrum(sequences)
     spectrum.amplitudes_ref = psd
-    dump("../tests/inputs/spectrum_" + name + ".nmpk.xz", spectrum)
+    np.savez_compressed("../tests/inputs/spectrum_" + name, **attrs.asdict(spectrum))
 
     mpl.rc_file("../docs/source/examples/matplotlibrc")
     fig, ax = plt.subplots()
