@@ -25,13 +25,13 @@ These test cases explore a few corner cases and verify that Stacie behaves as ex
 
 from collections.abc import Callable
 
+import numpy as np
 import pytest
 from path import Path
 
 from stacie.cutoff import CV2LCriterion
 from stacie.estimate import Result, estimate_acint
 from stacie.model import ExpTailModel, PolynomialModel, SpectrumModel
-from stacie.msgpack import dump, load
 from stacie.plot import plot_results
 from stacie.spectrum import Spectrum
 from stacie.summary import summarize_results
@@ -57,8 +57,6 @@ def output_test_result(prefix: str, res: Result | list[Result]):
     plot_results(dn_out / f"{prefix}.pdf", res)
     with open(dn_out / f"{prefix}.txt", "w") as fh:
         fh.write(summarize_results(res))
-    path_zip = dn_out / f"{prefix}.nmpk.xz"
-    dump(path_zip, res)
 
 
 def register_result(regtest, res: Result):
@@ -87,7 +85,7 @@ def register_result(regtest, res: Result):
 def test_case_scan(
     regtest, name: str, model: SpectrumModel, fcut_max: float, criterion: Callable, full: bool
 ):
-    spectrum = load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum)
+    spectrum = Spectrum(**np.load(f"tests/inputs/spectrum_{name}.npz"))
     if name == "broad":
         spectrum = spectrum.without_zero_freq()
     result = estimate_acint(spectrum, model, fcut_max=fcut_max, cutoff_criterion=criterion)
@@ -103,7 +101,7 @@ def test_plot_multi():
     ]
     results = [
         estimate_acint(
-            load(f"tests/inputs/spectrum_{name}.nmpk.xz", Spectrum),
+            Spectrum(**np.load(f"tests/inputs/spectrum_{name}.npz")),
             model,
             fcut_max=fcut_max,
             cutoff_criterion=CV2LCriterion(),
