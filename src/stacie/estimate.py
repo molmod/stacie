@@ -107,12 +107,13 @@ def estimate_acint(
     model: SpectrumModel,
     *,
     neff_min: int | None = None,
+    neff_max: int | None = 1000,
+    fcut_min: float | None = None,
     fcut_max: float | None = None,
     fcut_spacing: float = 0.5,
     switch_exponent: float = 20.0,
     cutoff_criterion: CutoffCriterion | None = None,
     rng: np.random.Generator | None = None,
-    neff_max: int = 1000,
     nonlinear_budget: int = 10,
     criterion_high: float = 100,
     verbose: bool = False,
@@ -149,6 +150,13 @@ def estimate_acint(
         The minimum effective number of frequency data points to include in the fit.
         (The effective number of points is the sum of weights in the smooth cutoff.)
         If not provided, this is set to 10 times the number of model parameters as a default.
+    neff_max
+        The maximum number of effective points to include in the fit.
+        This parameter limits the total computational cost.
+        Set to None to disable this stopping criterion.
+    fcut_min
+        The minimum cutoff frequency to use.
+        If given, this parameter can only increase the minimal cutoff derived from ``neff_min``.
     fcut_max
         If given, cutoffs beyond this maximum are not considered.
     fcut_spacing
@@ -165,10 +173,6 @@ def estimate_acint(
         A random number generator for sampling guesses of the nonlinear parameters.
         If not provided, ``np.random.default_rng(42)`` is used.
         The seed is fixed by default for reproducibility.
-    neff_max
-        The maximum number of effective points to include in the fit.
-        This parameter is intended to limit the total computational cost.
-        When this maximum is reached, a warning is raised and the loop is interrupted.
     nonlinear_budget
         The number of samples used for the nonlinear parameters, calculated as
         ``nonlinear_budget ** num_nonlinear``.
@@ -209,7 +213,8 @@ def estimate_acint(
         print(line)
 
     deltaf = spectrum.freqs[1] - spectrum.freqs[0]
-    fcut_min = integral_to_cutoff(neff_min, switch_exponent) * deltaf - spectrum.freqs[0]
+    fcut_min0 = integral_to_cutoff(neff_min, switch_exponent) * deltaf - spectrum.freqs[0]
+    fcut_min = fcut_min0 if fcut_min is None else max(fcut_min0, fcut_min)
     fcut_ratio = np.exp(fcut_spacing / switch_exponent)
     history = []
     best_criterion = None
@@ -248,18 +253,11 @@ def estimate_acint(
                 if verbose:
                     print(f"Cutoff criterion exceed minimum + {criterion_high}.")
                 break
-            stop_message = model.stopping_condition(fcut, props["pars"], props["covar"])
-            if stop_message is not None:
-                if verbose:
-                    print(stop_message)
-                break
-        if props["neff"] > neff_max:
+        if neff_max is not None and props["neff"] > neff_max:
             if verbose:
                 print(f"Reached the maximum number of effective points ({neff_max}).")
             break
         icut += 1
-    else:
-        warnings.warn("The maximum number of fits was exceeded.", RuntimeWarning, stacklevel=2)
     if verbose:
         print()
 

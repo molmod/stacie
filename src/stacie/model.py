@@ -210,27 +210,6 @@ class SpectrumModel:
         amplitudes_model = np.dot(linear_pars, basis)
         return linear_pars, amplitudes_model
 
-    def stopping_condition(
-        self, fcut: float, pars: NDArray[float], covar: NDArray[float]
-    ) -> str | None:
-        """Model-specific stopping condition for the frequency scan, if any.
-
-        Parameters
-        ----------
-        fcut
-            The cutoff frequency used to fit the parameters.
-        pars
-            The parameters.
-        covar
-            The covariance matrix of the parameters.
-
-        Returns
-        -------
-        condition
-            A string with the stopping condition, or ``None`` if no condition is defined.
-        """
-        return None
-
     @property
     def acint_lico(self):
         """Coefficients of the linear combination of parameters giving the AC integral."""
@@ -298,20 +277,6 @@ class ExpTailModel(SpectrumModel):
     - :math:`\tau_\text{exp}`:
       The correlation time of the exponential tail
       {cite:p}`sokal_1997_monte`.
-    """
-
-    stop_sfac: float | None = attrs.field(default=2.0)
-    """A safety margin in the computation of the characteristic frequency of the ETM model,
-
-    This is used in the model-specific stopping condition for the frequency scan.
-    Set to ``None`` to disable the stopping condition.
-    """
-
-    stop_ffac: float | None = attrs.field(default=10.0)
-    """A safety factor for cutoff frequency threshold of the ETM model.
-
-    This is used in the model-specific stopping condition for the frequency scan.
-    Set to ``None`` to disable the stopping condition.
     """
 
     @property
@@ -401,23 +366,6 @@ class ExpTailModel(SpectrumModel):
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
         return results
-
-    def stopping_condition(
-        self, fcut: float, pars: NDArray[float], covar: NDArray[float]
-    ) -> str | None:
-        """Model-specific stopping condition for the frequency scan, if any."""
-        if self.stop_sfac is None or self.stop_ffac is None:
-            return None
-        if not (np.isfinite(pars).all() and np.isfinite(covar).all()):
-            return None
-        corretime_exp_margin = pars[2] + self.stop_sfac * np.sqrt(covar[2, 2])
-        fcut_threshold = self.stop_ffac / (2 * np.pi * corretime_exp_margin)
-        if fcut > fcut_threshold:
-            return (
-                f"The cutoff frequency exceeds {fcut_threshold}, "
-                "which is sufficient for the ExpTailModel."
-            )
-        return None
 
     @property
     def acint_lico(self):
