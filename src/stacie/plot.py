@@ -218,7 +218,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax2 = ax.twinx()
     ax2.plot(freqs / uc.freq_unit, r.props["weights"], color="C3", ls="--")
     ax2.set_ylabel("Fitting weight", color="C3")
-    ax2.set_ylim(0, 1.02)
+    ax2.set_ylim(-0.02, 1.02)
     ax2.spines["right"].set_color("red")
     ax2.spines["right"].set_visible(True)
     ax2.tick_params(axis="y", colors="red")
@@ -250,7 +250,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         lw=0,
     )
     ax.axvline(r.fcut / uc.freq_unit, ymax=0.1, color="k")
-    ax.set_ylim(bottom=0)
+    ax.set_ylim(0, r.spectrum.amplitudes[: r.ncut].max() / uc.acint_unit * 1.1)
 
     # Info in title
     fields = {

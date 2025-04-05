@@ -106,7 +106,7 @@ def estimate_acint(
     spectrum: Spectrum,
     model: SpectrumModel,
     *,
-    nfit_min: int | None = None,
+    neff_min: int | None = None,
     fcut_max: float | None = None,
     fcut_spacing: float = 0.5,
     switch_exponent: float = 20.0,
@@ -145,7 +145,7 @@ def estimate_acint(
         This object can be prepared with the function: :py:func:`stacie.spectrum.compute_spectrum`.
     model
         The model used to fit the low-frequency part of the spectrum.
-    nfit_min
+    neff_min
         The minimum effective number of frequency data points to include in the fit.
         (The effective number of points is the sum of weights in the smooth cutoff.)
         If not provided, this is set to 10 times the number of model parameters as a default.
@@ -186,8 +186,8 @@ def estimate_acint(
     """
     if rng is None:
         rng = np.random.default_rng(42)
-    if nfit_min is None:
-        nfit_min = 10 * model.npar
+    if neff_min is None:
+        neff_min = 10 * model.npar
     if cutoff_criterion is None:
         cutoff_criterion = CV2LCriterion()
     if spectrum.ndofs.max() < 16:
@@ -209,7 +209,7 @@ def estimate_acint(
         print(line)
 
     deltaf = spectrum.freqs[1] - spectrum.freqs[0]
-    fcut_min = integral_to_cutoff(nfit_min, switch_exponent) * deltaf - spectrum.freqs[0]
+    fcut_min = integral_to_cutoff(neff_min, switch_exponent) * deltaf - spectrum.freqs[0]
     fcut_ratio = np.exp(fcut_spacing / switch_exponent)
     history = []
     best_criterion = None
