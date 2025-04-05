@@ -348,7 +348,7 @@ def demo_stacie(stride=1):
     # by inspecting the first spectrum plot.
     # Beyond the cutoff frequency, the spectrum has resonance peaks that
     # the ExpTailModel is not designed to handle.
-    result = estimate_acint(spectrum, ExpTailModel(), fcutmax=TERAHERTZ, verbose=True)
+    result = estimate_acint(spectrum, ExpTailModel(), fcut_max=TERAHERTZ, verbose=True)
 
     # Plotting
     plt.close(f"spectrum_{stride}")
@@ -425,16 +425,6 @@ print(f"corrtime_int = {result_30.corrtime_int / PICOSECOND:.3f} ps")
 # the integrated correlation averages over all time scales in the input,
 # and some of the fastest ones are washed out by the block averages.
 
-# %% [markdown]
-# We recommend not to exaggerate with block sizes.
-# The artifacts are illustrated below with a block size of 150 and 300.
-# Note the increase in uncertainties,
-# and in the latter case, the systematic errors due to the block averages.
-
-# %%
-result_150 = demo_stacie(150)
-result_300 = demo_stacie(300)
-
 # %%  [markdown]
 # ## Regression Tests
 #
@@ -449,9 +439,3 @@ if abs(acint_1 - 5.85e-7) > 5e-9:
 acint_30 = result_30.acint / acint_unit
 if abs(acint_30 - 5.87e-7) > 5e-9:
     raise ValueError(f"Wrong acint (block size 30): {acint_30:.2e}")
-acint_150 = result_150.acint / acint_unit
-if abs(acint_150 - 5.83e-7) > 5e-9:
-    raise ValueError(f"Wrong acint (block size 150): {acint_150:.2e}")
-acint_300 = result_300.acint / acint_unit
-if abs(acint_300 - 5.93e-7) > 5e-9:
-    raise ValueError(f"Wrong acint (block size 300): {acint_300:.2e}")

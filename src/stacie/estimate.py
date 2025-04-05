@@ -112,7 +112,7 @@ def estimate_acint(
     switch_exponent: float = 20.0,
     cutoff_criterion: CutoffCriterion | None = None,
     rng: np.random.Generator | None = None,
-    fcut_budget: int = 500,
+    neff_max: int = 1000,
     nonlinear_budget: int = 10,
     criterion_high: float = 100,
     verbose: bool = False,
@@ -165,8 +165,9 @@ def estimate_acint(
         A random number generator for sampling guesses of the nonlinear parameters.
         If not provided, ``np.random.default_rng(42)`` is used.
         The seed is fixed by default for reproducibility.
-    fcut_budget
-        The maximum number of times a model is fitted to the spectrum with a different cutoff.
+    neff_max
+        The maximum number of effective points to include in the fit.
+        This parameter is intended to limit the total computational cost.
         When this maximum is reached, a warning is raised and the loop is interrupted.
     nonlinear_budget
         The number of samples used for the nonlinear parameters, calculated as
@@ -215,11 +216,16 @@ def estimate_acint(
     if verbose:
         print("CUTOFF FREQUENCY SCAN")
         print("     neff    criterion")
-    for icut in range(fcut_budget):
+    icut = 0
+    while True:
         fcut = fcut_min * fcut_ratio**icut
         if fcut_max is not None and fcut > fcut_max:
+            if verbose:
+                print(f"Reached the maximum cutoff frequency ({fcut_max}).")
             break
         if fcut > spectrum.freqs[-1]:
+            if verbose:
+                print(f"Reached end of spectrum ({spectrum.freqs[-1]}).")
             break
         # Compute the criterion for the current cutoff frequency.
         props = fit_model_spectrum(
@@ -231,7 +237,6 @@ def estimate_acint(
             rng,
             nonlinear_budget,
         )
-        fcut_budget -= 1
         if verbose:
             log(props)
         if np.isfinite(props["criterion"]):
@@ -240,7 +245,19 @@ def estimate_acint(
             if best_criterion is None or criterion < best_criterion:
                 best_criterion = criterion
             elif criterion > best_criterion + criterion_high:
+                if verbose:
+                    print(f"Cutoff criterion exceed minimum + {criterion_high}.")
                 break
+            stop_message = model.stopping_condition(fcut, props["pars"], props["covar"])
+            if stop_message is not None:
+                if verbose:
+                    print(stop_message)
+                break
+        if props["neff"] > neff_max:
+            if verbose:
+                print(f"Reached the maximum number of effective points ({neff_max}).")
+            break
+        icut += 1
     else:
         warnings.warn("The maximum number of fits was exceeded.", RuntimeWarning, stacklevel=2)
     if verbose:
@@ -281,6 +298,7 @@ def estimate_acint(
         "acint_var": acint_var,
         "acint_std": np.sqrt(acint_var),
         "amplitudes_model": model.compute(freqs, pars, deriv=1),
+        "switch_exponent": switch_exponent,
     }
     props.update(model.derive_props(props["pars"], props["covar"]))
 
