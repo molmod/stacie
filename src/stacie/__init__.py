@@ -18,8 +18,6 @@
 # --
 """The Stacie package."""
 
-from __future__ import annotations
-
 from .estimate import estimate_acint
 from .model import ExpTailModel, PadeModel, PolynomialModel
 from .plot import UnitConfig, plot_results

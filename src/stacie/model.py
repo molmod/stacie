@@ -20,7 +20,7 @@
 
 import attrs
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 from scipy.optimize import brentq
 
 __all__ = ("ExpTailModel", "PadeModel", "PolynomialModel", "SpectrumModel", "guess")
@@ -165,7 +165,7 @@ class SpectrumModel:
         ndofs: NDArray[float],
         amplitudes: NDArray[float],
         weights: NDArray[float],
-        nonlinear_pars: ArrayLike,
+        nonlinear_pars: NDArray[float],
     ) -> NDArray[float]:
         """Use linear linear regression to solve a subset of the parameters.
 

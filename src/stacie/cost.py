@@ -20,7 +20,7 @@
 
 import attrs
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 from scipy.special import digamma, gammaln
 
 from .model import SpectrumModel
@@ -47,7 +47,7 @@ class LowFreqCost:
     model: SpectrumModel = attrs.field()
     """The model to be fitted to the spectrum."""
 
-    def __call__(self, pars: ArrayLike, deriv: int = 0) -> float:
+    def __call__(self, pars: NDArray[float], deriv: int = 0) -> float:
         """Evaluate the cost function and its derivatives.
 
         Parameters

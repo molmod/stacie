@@ -18,10 +18,8 @@
 # --
 """Utilities for preparing inputs."""
 
-from __future__ import annotations
-
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 __all__ = (
     "PositiveDefiniteError",
@@ -33,7 +31,7 @@ __all__ = (
 )
 
 
-def split(sequences: ArrayLike, nsplit: int) -> NDArray:
+def split(sequences: NDArray[float], nsplit: int) -> NDArray:
     """Split input sequences into shorter parts of equal length.
 
     This reduces the resolution of the frequency axis of the spectrum,
@@ -62,7 +60,7 @@ def split(sequences: ArrayLike, nsplit: int) -> NDArray:
     return sequences[:, : length * nsplit].reshape(-1, length)
 
 
-def block_average(sequences: ArrayLike, size: int) -> NDArray:
+def block_average(sequences: NDArray[float], size: int) -> NDArray:
     r"""Reduce input sequences by taking block averages.
 
     This reduces the maximum frequency of the frequency axis of the spectrum,
@@ -96,7 +94,7 @@ class PositiveDefiniteError(ValueError):
     """Raised when a matrix is not positive definite."""
 
 
-def robust_posinv(matrix: ArrayLike) -> tuple[NDArray, NDArray, NDArray, NDArray]:
+def robust_posinv(matrix: NDArray[float]) -> tuple[NDArray, NDArray, NDArray, NDArray]:
     """Compute the eigenvalues, eigenvectors and inverse of a positive definite symmetric matrix.
 
     This function is a robust version of ``numpy.linalg.eigh`` and ``numpy.linalg.inv``
@@ -168,7 +166,7 @@ def robust_dot(scales, evals, evecs, other):
     return np.dot(evecs, np.dot(evecs.T, other * scales) * evals) * scales
 
 
-def mixture_stats(means: ArrayLike, covars: ArrayLike, weights: ArrayLike):
+def mixture_stats(means: NDArray[float], covars: NDArray[float], weights: NDArray[float]):
     """Compute the statistics of the (Gaussian) mixture distribution.
 
     Parameters
