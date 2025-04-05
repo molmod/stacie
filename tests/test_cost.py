@@ -87,6 +87,24 @@ PARS_REF_EXP_TAIL = [
 ]
 
 
+def test_vectorize_exptail(mycost):
+    """Check that the model is vectorized."""
+    results = mycost(PARS_REF_EXP_TAIL, 2)
+    assert len(results) == 3
+    nvec = len(PARS_REF_EXP_TAIL)
+    assert results[0].shape == (nvec,)
+    assert results[1].shape == (nvec, 3)
+    assert results[2].shape == (nvec, 3, 3)
+    for i, one_pars_ref in enumerate(PARS_REF_EXP_TAIL):
+        one_results = mycost(one_pars_ref, 2)
+        assert one_results[0].shape == ()
+        assert one_results[1].shape == (3,)
+        assert one_results[2].shape == (3, 3)
+        assert (one_results[0] == results[0][i]).all()
+        assert (one_results[1] == results[1][i]).all()
+        assert (one_results[2] == results[2][i]).all()
+
+
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
 def test_gradient_exptail(mycost, pars_ref):
     check_gradient(mycost, pars_ref)

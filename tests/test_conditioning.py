@@ -32,18 +32,38 @@ def function(x, deriv: int = 0):
     ----------
     x
         The input vector.
+        For vectorized calculations, use N-dimensional inputs of which the last axis
+        corresponds to the parameter index.
     deriv
         The order of the derivative to compute. Default is 0.
     This is just a simple function to test conditioning implementation.
     """
-    results = [float(np.prod(x))]
+    results = [np.prod(x, axis=-1)]
     if deriv >= 1:
-        results.append(results[0] / x)
+        results.append(np.einsum("...,...i->...i", results[0], 1 / x))
     if deriv >= 2:
-        hess = np.outer(results[1], 1 / x)
-        np.fill_diagonal(hess, 0)
+        hess = np.einsum("...i,...j->...ij", results[1], 1 / x)
+        for i in range(x.shape[-1]):
+            hess[..., i, i] = 0
         results.append(hess)
     return results
+
+
+def test_vectorize_function():
+    """Check that the function can be vectorized."""
+    x0 = np.array([[1.0, 2.0, 4.0], [1.0, 3.0, 4.0]])
+    results = function(x0, 2)
+    assert results[0].shape == (2,)
+    assert results[1].shape == (2, 3)
+    assert results[2].shape == (2, 3, 3)
+    for i, one_x0 in enumerate(x0):
+        one_results = function(one_x0, 2)
+        assert one_results[0].shape == ()
+        assert one_results[1].shape == (3,)
+        assert one_results[2].shape == (3, 3)
+        assert np.all(results[0][i] == one_results[0])
+        assert np.all(results[1][i] == one_results[1])
+        assert np.all(results[2][i] == one_results[2])
 
 
 def test_function_deriv1():
@@ -54,6 +74,25 @@ def test_function_deriv1():
 def test_function_deriv2():
     x0 = np.array([1.0, 2.0, 3.0, 4.0])
     check_hessian(function, x0)
+
+
+def test_vectorize_conditioned_cost():
+    """Check that the conditioned cost can be vectorized."""
+    par_scales = np.array([5.0, 2.3, 7.0])
+    cost = ConditionedCost(function, par_scales, 5.0)
+    x0 = np.array([[1.0, 2.0, 3.0], [1.0, 3.0, 4.0]])
+    results = cost(x0, 2)
+    assert results[0].shape == (2,)
+    assert results[1].shape == (2, 3)
+    assert results[2].shape == (2, 3, 3)
+    for i, one_x0 in enumerate(x0):
+        one_results = cost(one_x0, 2)
+        assert one_results[0].shape == ()
+        assert one_results[1].shape == (3,)
+        assert one_results[2].shape == (3, 3)
+        assert np.all(results[0][i] == one_results[0])
+        assert np.all(results[1][i] == one_results[1])
+        assert np.all(results[2][i] == one_results[2])
 
 
 def test_conditioned_cost():

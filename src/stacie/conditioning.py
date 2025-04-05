@@ -47,6 +47,8 @@ class ConditionedCost:
         ----------
         pars
             The parameters to evaluate the cost function at, in the original space.
+            For vectorized calculations, use N-dimensional inputs of which the last axis
+            corresponds to the parameters.
         deriv
             The order of the derivative to compute.
 
@@ -54,6 +56,8 @@ class ConditionedCost:
         -------
         results
             The cost function value and its derivatives.
+            In vectorized calculations, the last axis of the gradient
+            and the last two of the Hessian correspond to the parameters.
         """
         if not isinstance(deriv, int):
             raise TypeError("Argument deriv must be integer.")

@@ -416,7 +416,7 @@ def fit_model_spectrum(
     )
     pars_opt = conditioned_cost.from_reduced(opt.x)
     props["pars"] = pars_opt
-    props.update(cost.props(pars_opt, 2))
+    props["cost_value"], props["cost_grad"], props["cost_hess"] = cost(pars_opt, 2)
 
     # Compute the Hessian and its properties.
     try:

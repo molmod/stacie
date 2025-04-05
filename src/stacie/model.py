@@ -20,7 +20,7 @@
 
 import attrs
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 from scipy.optimize import brentq
 
 __all__ = ("ExpTailModel", "PadeModel", "PolynomialModel", "SpectrumModel", "guess")
@@ -54,9 +54,13 @@ class SpectrumModel:
         """Return the number of parameters."""
         raise NotImplementedError
 
-    def valid(self, pars) -> bool:
+    def valid(self, pars: NDArray[float]) -> bool:
         """Return ``True`` when the parameters are within the feasible region."""
-        return all(pmin < par < pmax for (pmin, pmax), par in zip(self.bounds(), pars, strict=True))
+        result = np.ones(pars.shape[:-1], dtype=bool)
+        for i, (pmin, pmax) in enumerate(self.bounds()):
+            result &= pmin < pars[..., i]
+            result &= pars[..., i] < pmax
+        return result
 
     def which_invalid(self, pars) -> NDArray[bool]:
         """Return a boolean mask for the parameters outside the feasible region."""
@@ -134,7 +138,8 @@ class SpectrumModel:
         freqs
             The frequencies for which the model spectrum amplitudes are computed.
         pars
-            The parameters.
+            The parameter vector.
+            For vectorized calculations, the last axis corresponds to the parameter index.
         deriv
             The maximum order of derivatives to compute: 0, 1 or 2.
 
@@ -144,9 +149,13 @@ class SpectrumModel:
             A results list, index corresponds to order of derivative.
             The shape of the arrays in the results list is as follows:
 
-            - For ``deriv=0``, the shape is ``(len(freqs),)``.
-            - For ``deriv=1``, the shape is ``(len(pars), len(freqs))``.
-            - For ``deriv=2``, the shape is ``(len(pars), len(pars), len(freqs))``
+            - For ``deriv=0``, the shape is ``(*vec_shape, len(freqs))``.
+            - For ``deriv=1``, the shape is ``(*vec_shape, len(pars), len(freqs))``.
+            - For ``deriv=2``, the shape is ``(*vec_shape, len(pars), len(pars), len(freqs))``
+
+            If some derivatives are independent of the parameters,
+            broadcasting rules may be used to reduce the memory footprint.
+            This means that ``vec_shape`` may be replaced by a tuple of ones with the same length.
         """
         raise NotImplementedError
 
@@ -156,12 +165,12 @@ class SpectrumModel:
         ndofs: NDArray[float],
         amplitudes: NDArray[float],
         weights: NDArray[float],
-        nonlinear_pars: NDArray[float],
+        nonlinear_pars: ArrayLike,
     ) -> NDArray[float]:
         """Use linear linear regression to solve a subset of the parameters.
 
         The default implementation in the base class assumes that the linear parameters
-        are genuinly linear without rewriting the regression problem in a different form.
+        are genuinely linear without rewriting the regression problem in a different form.
 
         Parameters
         ----------
@@ -183,6 +192,9 @@ class SpectrumModel:
         amplitudes_model
             The model amplitudes computed with the solved parameters.
         """
+        nonlinear_pars = np.asarray(nonlinear_pars)
+        if nonlinear_pars.ndim != 1:
+            raise ValueError("The nonlinear parameters must be a 1D array.")
         nonlinear_mask = self.get_par_nonlinear()
         pars = np.ones(self.npar)
         pars[nonlinear_mask] = nonlinear_pars
@@ -340,49 +352,52 @@ class ExpTailModel(SpectrumModel):
         self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
+        # Sanity checks
         if not isinstance(deriv, int):
             raise TypeError("Argument deriv must be integer.")
         if deriv < 0:
             raise ValueError("Argument deriv must be zero or positive.")
         if freqs.ndim != 1:
             raise TypeError("Argument freqs must be a 1D array.")
-        acint_short, acint_tail, corrtime = pars
+
+        # Prepare inputs
+        vec_shape = pars.shape[:-1]
+        par_shape = pars.shape[-1:]
+        acint_short = pars[..., 0][..., None]
+        acint_tail = pars[..., 1][..., None]
+        corrtime = pars[..., 2][..., None]
+
+        # Model function value
         timestep = self.scales["timestep"]
         r = np.exp(-timestep / corrtime)
         cs = np.cos(2 * np.pi * timestep * freqs)
         denom = r**2 - 2 * r * cs + 1
         tail_model = (1 - r) ** 2 / denom
         results = [acint_short + acint_tail * tail_model]
+
+        # Model derivatives
         if deriv >= 1:
             tail_model_diff_r = -2 * (cs - 1) * (r**2 - 1) / denom**2
             r_diff_ct = r * timestep / corrtime**2
             tail_model_diff_ct = tail_model_diff_r * r_diff_ct
-            results.append(
-                np.array([np.ones(len(freqs)), tail_model, acint_tail * tail_model_diff_ct])
-            )
+            model_grad = np.ones(vec_shape + par_shape + freqs.shape)
+            model_grad[..., 1, :] = tail_model
+            model_grad[..., 2, :] = acint_tail * tail_model_diff_ct
+            results.append(model_grad)
+
+        # Second derivatives
         if deriv >= 2:
             tail_model_diff_r_r = 4 * (cs - 1) * (r**3 - 3 * r + 2 * cs) / denom**3
             r_diff_ct_ct = (1 - 2 * corrtime / timestep) * r * (timestep / corrtime**2) ** 2
             tail_model_diff_ct_ct = (
                 tail_model_diff_r_r * r_diff_ct**2 + tail_model_diff_r * r_diff_ct_ct
             )
-            results.append(
-                np.array(
-                    [
-                        [np.zeros(len(freqs)), np.zeros(len(freqs)), np.zeros(len(freqs))],
-                        [
-                            np.zeros(len(freqs)),
-                            np.zeros(len(freqs)),
-                            tail_model_diff_ct,
-                        ],
-                        [
-                            np.zeros(len(freqs)),
-                            tail_model_diff_ct,
-                            acint_tail * tail_model_diff_ct_ct,
-                        ],
-                    ]
-                )
-            )
+            model_hess = np.zeros(vec_shape + par_shape + par_shape + freqs.shape)
+            model_hess[..., 1, 2, :] = tail_model_diff_ct
+            model_hess[..., 2, 1, :] = tail_model_diff_ct
+            model_hess[..., 2, 2, :] = acint_tail * tail_model_diff_ct_ct
+            results.append(model_hess)
+
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
         return results
@@ -480,7 +495,7 @@ class PolynomialModel(SpectrumModel):
             raise TypeError("Argument freqs must be a 1D array.")
 
         # Construct a basis of simple monomials.
-        basis = [np.ones(len(freqs))]
+        basis = [np.ones(freqs.shape)]
         current = basis[0].copy()
         for power in range(1, self.degree + 1):
             current *= freqs
@@ -490,11 +505,13 @@ class PolynomialModel(SpectrumModel):
         basis = np.array(basis)
 
         # Compute model amplitudes and derivatives.
-        results = [np.dot(pars, basis)]
+        vec_shape = (1,) * (pars.ndim - 1)
+        par_shape = pars.shape[-1:]
+        results = [np.einsum("...p,pf->...f", pars, basis)]
         if deriv >= 1:
-            results.append(basis)
+            results.append(basis.reshape(vec_shape + par_shape + freqs.shape))
         if deriv >= 2:
-            results.append(np.zeros((self.npar, self.npar, len(freqs))))
+            results.append(np.zeros(vec_shape + par_shape + par_shape + freqs.shape))
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
         return results
@@ -580,37 +597,52 @@ class PadeModel(SpectrumModel):
             raise TypeError("Argument freqs must be a 1D array.")
         npar_n = len(self.numer_degrees)
         npar_d = len(self.denom_degrees)
-        if len(pars) != npar_n + npar_d:
+        pars = np.asarray(pars)
+        if pars.shape[-1] != npar_n + npar_d:
             raise ValueError("The number of parameters does not match the model.")
 
         # Construct two bases of monomials.
         x = freqs / self.scales["freq_scale"]
         basis_n = np.power.outer(x, self.numer_degrees).T
         basis_d = np.power.outer(x, self.denom_degrees).T
-        pars_n = pars[:npar_n]
-        pars_d = pars[npar_n:]
+        pars_n = pars[..., :npar_n]
+        pars_d = pars[..., npar_n:]
 
         # Compute model amplitudes and derivatives.
-        num = np.dot(pars_n, basis_n)
-        denom = 1 + np.dot(pars_d, basis_d)
+        num = np.einsum("...p,pf->...f", pars_n, basis_n)
+        denom = 1 + np.einsum("...p,pf->...f", pars_d, basis_d)
         results = [num / denom]
+        vec_shape = pars.shape[:-1]
         if deriv >= 1:
-            block_n = basis_n / denom
-            block_d = -results[0] * basis_d / denom
-            results.append(np.concatenate([block_n, block_d]))
-        if deriv >= 2:
-            block_nn = np.zeros((npar_n, npar_n, len(freqs)))
-            block_nd = np.einsum("if,jf->ijf", block_n, -basis_d / denom)
-            block_dn = block_nd.transpose(1, 0, 2)
-            block_dd = np.einsum("f,if,jf->ijf", 2 * results[0], basis_d / denom, basis_d / denom)
-            results.append(
-                np.concatenate(
-                    [
-                        np.concatenate([block_nn, block_nd], axis=1),
-                        np.concatenate([block_dn, block_dd], axis=1),
-                    ]
-                )
+            model_grad = np.empty((*vec_shape, npar_n + npar_d, *freqs.shape))
+            np.einsum("pf,...f->...pf", basis_n, 1 / denom, out=model_grad[..., :npar_n, :])
+            block_n = model_grad[..., :npar_n, :]
+            np.einsum(
+                "pf,...f->...pf", basis_d, -results[0] / denom, out=model_grad[..., npar_n:, :]
             )
+            results.append(model_grad)
+        if deriv >= 2:
+            model_hess = np.zeros((*vec_shape, npar_n + npar_d, npar_n + npar_d, *freqs.shape))
+            np.einsum(
+                "...pf,...f,qf->...pqf",
+                block_n,
+                1 / denom,
+                -basis_d,
+                out=model_hess[..., :npar_n, npar_n:, :],
+            )
+            np.einsum(
+                "...pqf->...qpf",
+                model_hess[..., :npar_n, npar_n:, :],
+                out=model_hess[..., npar_n:, :npar_n, :],
+            )
+            np.einsum(
+                "...f,pf,qf->...pqf",
+                2 * results[0] / denom**2,
+                basis_d,
+                basis_d,
+                out=model_hess[..., npar_n:, npar_n:, :],
+            )
+            results.append(model_hess)
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
         return results

@@ -20,7 +20,7 @@
 
 import attrs
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 from scipy.special import digamma, gammaln
 
 from .model import SpectrumModel
@@ -47,7 +47,7 @@ class LowFreqCost:
     model: SpectrumModel = attrs.field()
     """The model to be fitted to the spectrum."""
 
-    def __call__(self, pars: NDArray[float], deriv: int = 0) -> float:
+    def __call__(self, pars: ArrayLike, deriv: int = 0) -> float:
         """Evaluate the cost function and its derivatives.
 
         Parameters
@@ -62,128 +62,55 @@ class LowFreqCost:
         results
             A list with the cost function and the requested derivatives.
         """
-        if not self.model.valid(pars):
-            if deriv == 0:
-                return [np.inf]
-            if deriv == 1:
-                return [np.inf, np.full_like(pars, np.nan)]
-            if deriv == 2:
-                return [np.inf, np.full_like(pars, np.nan), np.full((len(pars), len(pars)), np.nan)]
-            raise ValueError("Third or higher derivatives are not supported.")
-        props = cost_low(pars, deriv, *attrs.astuple(self, recurse=False))
-        if deriv == 0:
-            return [props["cost_value"]]
-        if deriv == 1:
-            return [props["cost_value"], props["cost_grad"]]
-        if deriv == 2:
-            return [props["cost_value"], props["cost_grad"], props["cost_hess"]]
-        raise ValueError("Third or higher derivatives are not supported.")
-
-    def props(self, pars: NDArray[float], deriv: int = 0) -> dict[str, NDArray[float]]:
-        """Compute properties of the fit for the given parameters.
-
-        Parameters
-        ----------
-        pars
-            Parameter vector passed on to ``self.model``.
-        deriv
-            The maximum order of derivatives to compute: 0, 1 or 2.
-
-        Returns
-        -------
-        props
-            Dictionary with properties.
-            See :py:func:`cost_low` for details.
-        """
-        if not self.model.valid(pars):
-            raise ValueError("Invalid parameters")
-        return cost_low(pars, deriv, *attrs.astuple(self, recurse=False), do_props=True)
-
-
-def cost_low(
-    pars: NDArray[float],
-    deriv: int,
-    freqs: NDArray[float],
-    ndofs: NDArray[int],
-    amplitudes: NDArray[float],
-    weights: NDArray[float],
-    model: SpectrumModel,
-    *,
-    do_props: bool = False,
-) -> dict[str, NDArray]:
-    """Low-level implementation of the cost function.
-
-    Only ``pars`` and ``deriv`` parameters are documented below.
-    For all other parameters, see attributes of the :class:`LowFreqCost` class.
-
-    Parameters
-    ----------
-    pars
-        The parameter vector for which the loss function must be computed.
-    deriv
-        The order of derivatives of the cost function to include.
-    do_props
-        Whether to include additional properties in the output.
-
-    Returns
-    -------
-    props
-        A dictionary with various intermediate results of the loss function calculations.
-        See notes for details.
-
-    Notes
-    -----
-    The returned dictionary contains the following items:
-
-    - ``cost_value``: the cost function value.
-    - ``cost_grad``: the cost Gradient vector (if ``deriv>=1``).
-    - ``cost_hess``: the cost Hessian matrix (if ``deriv==2``).
-
-    If ``do_props=True``, the dictionary also contains the following items:
-
-    - ``ll``: the log likelihood.
-    - ``entropy``: the sum of entropies of the Gamma distributions at each frequency.
-    """
-    # Compute the model spectrum and its derivatives.
-    amplitudes_model = model.compute(freqs, pars, deriv)
-    kappas = 0.5 * ndofs
-    thetas = [am / kappas for am in amplitudes_model]
-    if (amplitudes_model[0] <= 0).any():
-        # Avoid warnings due to negative model amplitudes.
-        ll = -np.inf
-        props = {"cost_value": np.inf}
+        # Prepare result arrays, with inf and nan by default.
+        # These will be overwritten if the model is valid.
+        pars = np.asarray(pars)
+        vec_shape = pars.shape[:-1]
+        par_shape = pars.shape[-1:]
+        results = [np.full(vec_shape, np.inf)]
         if deriv >= 1:
-            props["cost_grad"] = np.full_like(pars, np.nan)
+            results.append(np.full(vec_shape + par_shape, np.nan))
         if deriv >= 2:
-            props["cost_hess"] = np.full((len(pars), len(pars)), np.nan)
-    else:
-        # Log-likelihood computed with the scaled Chi-squared distribution.
-        # The Gamma distribution is used because the scale parameter is easily incorporated.
-        ll_terms = logpdf_gamma(amplitudes, kappas, thetas[0], deriv)
-        ll = np.dot(ll_terms[0], weights)
-
-        props = {
-            "cost_value": -ll,
-        }
-        if deriv >= 1:
-            props["cost_grad"] = -np.einsum("pi,i,i", thetas[1], ll_terms[1], weights)
-        if deriv >= 2:
-            props["cost_hess"] = -(
-                np.einsum("pi,qi,i,i->pq", thetas[1], thetas[1], ll_terms[2], weights)
-                + np.einsum("pqi,i,i->pq", thetas[2], ll_terms[1], weights)
-            )
+            results.append(np.full(vec_shape + par_shape + par_shape, np.nan))
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
 
-    if do_props:
-        if np.isfinite(ll):
-            en_terms = entropy_gamma(kappas, thetas[0])[0]
-            entropy = np.dot(en_terms, weights)
-        else:
-            entropy = np.inf
-        props.update({"ll": ll, "entropy": entropy})
+        mask = self.model.valid(pars)
+        if not mask.any():
+            return results
 
-    return props
+        # Compute the model spectrum and its derivatives.
+        amplitudes_model = self.model.compute(
+            self.freqs, pars if mask.ndim == 0 else pars[mask], deriv
+        )
+        kappas = 0.5 * self.ndofs
+
+        # Only continue with parameters for which the model does not become negative.
+        pos_mask = (amplitudes_model[0] > 0).all(axis=-1)
+        if not pos_mask.any():
+            return results
+        if mask.ndim > 0:
+            amplitudes_model = [am[pos_mask] for am in amplitudes_model]
+            mask[mask] = pos_mask
+        del pos_mask
+
+        # Log-likelihood computed with the scaled Chi-squared distribution.
+        # The Gamma distribution is used because the scale parameter is easily incorporated.
+        thetas = [am / kappas for am in amplitudes_model]
+        ll_terms = logpdf_gamma(self.amplitudes, kappas, thetas[0], deriv)
+        results[0][mask] = -np.einsum("...i,i->...", ll_terms[0], self.weights)
+        if deriv >= 1:
+            results[1][mask] = -np.einsum(
+                "...pi,...i,i->...p", thetas[1], ll_terms[1], self.weights
+            )
+        if deriv >= 2:
+            results[2] = -(
+                np.einsum(
+                    "...pi,...qi,...i,i->...pq", thetas[1], thetas[1], ll_terms[2], self.weights
+                )
+                + np.einsum("...pqi,...i,i->...pq", thetas[2], ll_terms[1], self.weights)
+            )
+        return results
 
 
 def logpdf_gamma(x: NDArray[float], kappa: NDArray[float], theta: NDArray[float], deriv: int = 1):
@@ -193,10 +120,13 @@ def logpdf_gamma(x: NDArray[float], kappa: NDArray[float], theta: NDArray[float]
     ----------
     x
         The argument of the PDF (random variable).
+        Array with shape ``(nfreq,)``.
     kappa
         The shape parameter.
+        Array with shape ``(nfreq,)``.
     theta
         The scale parameter.
+        Array with shape ``(..., nfreq,)``.
     deriv
         The order of the derivatives toward theta to compute: 0, 1 or 2.
 
@@ -204,7 +134,7 @@ def logpdf_gamma(x: NDArray[float], kappa: NDArray[float], theta: NDArray[float]
     -------
     results
         A list of results (function value and requested derivatives.)
-        All elements have the same shape as the ``kappa`` and ``theta`` arrays.
+        All elements have the same shape as the ``theta`` array.
     """
     kappa = np.asarray(kappa)
     theta = np.asarray(theta)
