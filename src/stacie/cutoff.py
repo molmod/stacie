@@ -125,23 +125,7 @@ class CV2LCriterion(CutoffCriterion):
         model: SpectrumModel,
         props: dict[str, NDArray],
     ) -> dict[str, float]:
-        """The disparity between fits to two different parts of the spectrum.
-
-        Parameters
-        ----------
-        spectrum
-            The spectrum object containing the input data.
-        model
-            The model to be fitted to the spectrum.
-        props
-            The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
-
-        Returns
-        -------
-        results
-            A dictionary with "criterion" and other fields.
-            (See module docstring for details.)
-        """
+        """The disparity between fits to two different parts of the spectrum."""
         # Compute weights for the two halves and the model
         fcut = props["fcut"]
         switch_exponent = props["switch_exponent"]
