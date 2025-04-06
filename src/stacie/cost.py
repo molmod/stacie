@@ -86,7 +86,8 @@ class LowFreqCost:
         kappas = 0.5 * self.ndofs
 
         # Only continue with parameters for which the model does not become negative.
-        pos_mask = (amplitudes_model[0] > 0).all(axis=-1)
+        # Small positive values are also excluded to avoid underlfows.
+        pos_mask = (amplitudes_model[0] > 1e-30).all(axis=-1)
         if not pos_mask.any():
             return results
         if mask.ndim > 0:

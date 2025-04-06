@@ -19,15 +19,15 @@
 """The Stacie package."""
 
 from .estimate import estimate_acint
-from .model import ExpTailModel, PadeModel, PolynomialModel
+from .model import ExpPolyModel, ExpTailModel, PadeModel
 from .plot import UnitConfig, plot_results
 from .spectrum import compute_spectrum
 from .summary import summarize_results
 
 __all__ = (
+    "ExpPolyModel",
     "ExpTailModel",
     "PadeModel",
-    "PolynomialModel",
     "UnitConfig",
     "__version__",
     "__version_tuple__",
@@ -36,10 +36,3 @@ __all__ = (
     "plot_results",
     "summarize_results",
 )
-
-
-try:
-    from ._version import __version__, __version_tuple__
-except ImportError:
-    __version__ = "0.0.0a-dev"
-    __version_tuple__ = (0, 0, 0, "a-dev")

@@ -31,21 +31,21 @@ from path import Path
 
 from stacie.cutoff import CV2LCriterion
 from stacie.estimate import Result, estimate_acint
-from stacie.model import ExpTailModel, PolynomialModel, SpectrumModel
+from stacie.model import ExpPolyModel, ExpTailModel, SpectrumModel
 from stacie.plot import plot_results
 from stacie.spectrum import Spectrum
 from stacie.summary import summarize_results
 
 # Combinations of test spectra and suitable models, with a manual cutoff frequency.
 CASES = [
-    ("white", PolynomialModel(0), 0.1),
-    ("white", PolynomialModel(2), 0.1),
-    ("broad", PolynomialModel(0), 0.01),
-    ("broad", PolynomialModel(2), 0.1),
+    ("white", ExpPolyModel([0]), 0.1),
+    ("white", ExpPolyModel([0, 1, 2]), 0.1),
+    ("broad", ExpPolyModel([0]), 0.01),
+    ("broad", ExpPolyModel([0, 1, 2]), 0.1),
     ("pure", ExpTailModel(), 0.02),
-    ("pure", PolynomialModel(2, even=True), 0.02),
+    ("pure", ExpPolyModel([0, 2]), 0.02),
     ("double", ExpTailModel(), 0.02),
-    ("double", PolynomialModel(2, even=True), 0.02),
+    ("double", ExpPolyModel([0, 2]), 0.02),
 ]
 CRITERIA = [CV2LCriterion()]
 
@@ -81,7 +81,6 @@ def register_result(regtest, res: Result):
 @pytest.mark.parametrize(("name", "model", "fcut_max"), CASES)
 @pytest.mark.parametrize("criterion", CRITERIA)
 @pytest.mark.parametrize("full", [True, False])
-@pytest.mark.filterwarnings("ignore::stacie.estimate.FCutWarning")
 def test_case_scan(
     regtest, name: str, model: SpectrumModel, fcut_max: float, criterion: Callable, full: bool
 ):
@@ -96,8 +95,8 @@ def test_case_scan(
 
 def test_plot_multi():
     cases = [
-        ("white", PolynomialModel(2), 0.1),
-        ("broad", PolynomialModel(2), 0.1),
+        ("white", ExpPolyModel([0, 2]), 0.1),
+        ("broad", ExpPolyModel([0, 2]), 0.1),
     ]
     results = [
         estimate_acint(

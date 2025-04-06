@@ -25,7 +25,7 @@ from stacie.cutoff import (
     CV2LCriterion,
     linear_weighted_regression,
 )
-from stacie.model import PolynomialModel
+from stacie.model import ExpPolyModel
 from stacie.spectrum import compute_spectrum
 
 
@@ -33,7 +33,7 @@ def test_cv2l_preconditioned():
     nstep = 400
     rng = np.random.default_rng(42)
     spectrum = compute_spectrum(rng.standard_normal((10, nstep)))
-    model = PolynomialModel(1)
+    model = ExpPolyModel([0, 1])
     pars = np.array([0.1, 0.2])
     fcut = spectrum.freqs[nstep // 4]
     ncut = nstep // 3

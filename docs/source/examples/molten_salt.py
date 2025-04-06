@@ -36,7 +36,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from stacie import (
-    PolynomialModel,
+    ExpPolyModel,
     UnitConfig,
     compute_spectrum,
     estimate_acint,
@@ -57,7 +57,7 @@ mpl.rc_file("matplotlibrc")
 BOLTZMANN_CONSTANT = 1.380649e-23  # J/K
 
 
-def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> float:
+def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -> float:
     """Analyze MD trajectories to compute the self-diffusivity or ionic conductivity.
 
     Parameters
@@ -145,7 +145,7 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
         else 0.5,
         include_zero_freq=False,
     )
-    result = estimate_acint(spectrum, PolynomialModel(degree), verbose=True)
+    result = estimate_acint(spectrum, ExpPolyModel(degrees), verbose=True)
 
     # Configure units for output
     uc = UnitConfig(
@@ -192,13 +192,13 @@ def analyze(paths_npz: list[str], transport_property: str, degree: int = 1) -> f
 path_nve_npz = "../../data/openmm_salt/output/exploration_nve_traj.npz"
 
 # %%
-analyze([path_nve_npz], "na")
+analyze([path_nve_npz], "na", [0, 1])
 
 # %%
-analyze([path_nve_npz], "cl")
+analyze([path_nve_npz], "cl", [0, 1])
 
 # %%
-analyze([path_nve_npz], "conductivity")
+analyze([path_nve_npz], "conductivity", [0, 1])
 
 # %% [markdown]
 # As a compromise between the three recommendations, we choose a block size of 20 fs
@@ -218,13 +218,13 @@ analyze([path_nve_npz], "conductivity")
 paths_nve_npz = glob("../../data/openmm_salt/output/prod????_nve_traj.npz")
 
 # %%
-diffusivity_na = analyze(paths_nve_npz, "na", 2)
+diffusivity_na = analyze(paths_nve_npz, "na", [0, 1, 2])
 
 # %%
-diffusivity_cl = analyze(paths_nve_npz, "cl", 2)
+diffusivity_cl = analyze(paths_nve_npz, "cl", [0, 1, 2])
 
 # %%
-conductivity = analyze(paths_nve_npz, "conductivity", 2)
+conductivity = analyze(paths_nve_npz, "conductivity", [0, 1, 2])
 
 # %% [markdown]
 #

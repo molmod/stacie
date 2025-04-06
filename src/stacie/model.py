@@ -20,10 +20,11 @@
 
 import attrs
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 from scipy.optimize import brentq
+from scipy.special import polygamma
 
-__all__ = ("ExpTailModel", "PadeModel", "PolynomialModel", "SpectrumModel", "guess")
+__all__ = ("ExpPolyModel", "ExpTailModel", "PadeModel", "SpectrumModel", "guess")
 
 
 @attrs.define
@@ -210,9 +211,25 @@ class SpectrumModel:
         amplitudes_model = np.dot(linear_pars, basis)
         return linear_pars, amplitudes_model
 
-    @property
-    def acint_lico(self):
-        """Coefficients of the linear combination of parameters giving the AC integral."""
+    def derive_acint(
+        self, pars: NDArray[float], covar: NDArray[float] | None = None
+    ) -> float | tuple[float, float]:
+        """Derive the autocorrelation integral from the parameters.
+
+        Parameters
+        ----------
+        pars
+            The model parameters.
+        covar
+            The covariance matrix of the parameters, optional.
+
+        Returns
+        -------
+        acint
+            The autocorrelation integral.
+        acint_var
+            The variance of the autocorrelation integral, optional.
+        """
         raise NotImplementedError
 
     def derive_props(
@@ -367,10 +384,15 @@ class ExpTailModel(SpectrumModel):
             raise ValueError("Third or higher derivatives are not supported.")
         return results
 
-    @property
-    def acint_lico(self):
-        """Coefficients of the linear combination of parameters giving the AC integral."""
-        return np.array([1.0, 1.0, 0.0])
+    def derive_acint(
+        self, pars: NDArray[float], covar: NDArray[float] | None = None
+    ) -> float | tuple[float, float]:
+        """Derive the autocorrelation integral from the parameters."""
+        acint = pars[:2].sum()
+        if covar is None:
+            return acint
+        acint_var = covar[:2, :2].sum()
+        return acint, acint_var
 
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
@@ -387,24 +409,38 @@ class ExpTailModel(SpectrumModel):
         }
 
 
+def _convert_degrees(value: ArrayLike) -> NDArray[int]:
+    """Convert the input to an array of integers."""
+    value = np.asarray(value, dtype=int)
+    if value.ndim == 0:
+        return value[None]
+    if value.ndim > 1:
+        raise ValueError("Input must be a scalar or a 1D array.")
+    value.sort()
+    return value
+
+
+def _validate_degrees(obj, attribute, value: NDArray[int]) -> None:
+    """Validate the degrees of the polynomial."""
+    if not np.all(value >= 0):
+        raise ValueError("All degrees must be non-negative.")
+    if len(value) == 0:
+        raise ValueError("The list of degrees must not be empty.")
+    if len(value) != len(set(value)):
+        raise ValueError("The list of degrees must not contain duplicates.")
+
+
 @attrs.define
-class PolynomialModel(SpectrumModel):
-    """A linear combination of simple monomials."""
+class ExpPolyModel(SpectrumModel):
+    """Exponential function of a linear combination of simple monomials."""
 
-    degree: int = attrs.field(converter=int, validator=attrs.validators.ge(0))
-    """The highest degree of the monomials included in the model.
-
-    If even is ``True``, only even monomials are included.
-    For example, if degree is 3 and even is ``True``,
-    the model includes the polynomials :math:`1`, :math:`f^2`.
-    """
-
-    even: bool = attrs.field(converter=bool, default=False)
-    """If ``True``, only even polynomials are included. If ``False``, all terms are included."""
+    degrees: NDArray[int] = attrs.field(converter=_convert_degrees, validator=_validate_degrees)
+    """The degree of the monomials."""
 
     @property
     def name(self):
-        return f"evenpoly({self.degree})" if self.even else f"poly({self.degree})"
+        degrees_str = ", ".join(map(str, self.degrees))
+        return f"exppoly({degrees_str})"
 
     def bounds(self) -> list[tuple[float, float]]:
         """Return parameter bounds for the optimizer."""
@@ -413,19 +449,12 @@ class PolynomialModel(SpectrumModel):
     @property
     def npar(self):
         """Return the number of parameters."""
-        return (self.degree + 2) // 2 if self.even else self.degree + 1
+        return len(self.degrees)
 
     @property
     def par_scales(self) -> NDArray[float]:
         """Return the scales of the parameters and the cost function."""
-        par_scales = [self.scales["amp_scale"]]
-        current = par_scales[0]
-        for power in range(1, self.degree + 1):
-            current /= self.scales["freq_scale"]
-            if self.even and power % 2 == 1:
-                continue
-            par_scales.append(current)
-        return np.array(par_scales)
+        return self.scales["freq_scale"] ** -self.degrees
 
     def get_par_nonlinear(self) -> NDArray[bool]:
         """Return a boolean mask for the nonlinear parameters."""
@@ -443,33 +472,52 @@ class PolynomialModel(SpectrumModel):
             raise TypeError("Argument freqs must be a 1D array.")
 
         # Construct a basis of simple monomials.
-        basis = [np.ones(freqs.shape)]
-        current = basis[0].copy()
-        for power in range(1, self.degree + 1):
-            current *= freqs
-            if self.even and power % 2 == 1:
-                continue
-            basis.append(current.copy())
-        basis = np.array(basis)
+        basis = np.power.outer(freqs, self.degrees).T
 
         # Compute model amplitudes and derivatives.
-        vec_shape = (1,) * (pars.ndim - 1)
-        par_shape = pars.shape[-1:]
-        results = [np.einsum("...p,pf->...f", pars, basis)]
+        func = np.exp(np.einsum("...p,pf->...f", pars, basis))
+        results = [func]
         if deriv >= 1:
-            results.append(basis.reshape(vec_shape + par_shape + freqs.shape))
+            results.append(np.einsum("...f,pf->...pf", func, basis))
         if deriv >= 2:
-            results.append(np.zeros(vec_shape + par_shape + par_shape + freqs.shape))
+            results.append(np.einsum("...f,pf,qf->...pqf", func, basis, basis))
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
         return results
 
-    @property
-    def acint_lico(self):
-        """Coefficients of the linear combination of parameters giving the AC integral."""
-        result = np.zeros(self.npar)
-        result[0] = 1.0
-        return result
+    def solve_linear(
+        self,
+        freqs: NDArray[float],
+        ndofs: NDArray[float],
+        amplitudes: NDArray[float],
+        weights: NDArray[float],
+        nonlinear_pars: NDArray[float],
+    ) -> NDArray[float]:
+        """Use linear linear regression to solve a subset of the parameters.
+
+        This is a specialized implementation that rewrites the problem
+        in a different form to solve all parameters with a linear regression.
+        """
+        if len(nonlinear_pars) != 0:
+            raise ValueError("The number of nonlinear parameters must be exactly 0.")
+        log_amplitudes = np.log(amplitudes)
+        log_amplitudes_std = polygamma(1, 0.5 * ndofs)
+        rescaling = np.sqrt(weights) / log_amplitudes_std
+        expected_values = log_amplitudes * rescaling
+        design_matrix = np.power.outer(freqs, self.degrees) * rescaling[:, None]
+        pars = np.linalg.lstsq(design_matrix, expected_values, rcond=-1)[0]
+        amplitudes_model = np.exp(np.dot(design_matrix, pars))
+        return pars, amplitudes_model
+
+    def derive_acint(
+        self, pars: NDArray[float], covar: NDArray[float] | None = None
+    ) -> float | tuple[float, float]:
+        """Derive the autocorrelation integral from the parameters."""
+        acint = np.exp(pars[0])
+        if covar is None:
+            return acint
+        acint_var = np.exp(2 * pars[0]) * covar[0, 0]
+        return acint, acint_var
 
 
 @attrs.define
@@ -605,7 +653,7 @@ class PadeModel(SpectrumModel):
     ) -> NDArray[float]:
         """Use linear linear regression to solve a subset of the parameters.
 
-        This is a specialized implementation that rewrites the regersion problem
+        This is a specialized implementation that rewrites the problem
         in a different form to solve all parameters with a linear regression.
         """
         if len(nonlinear_pars) != 0:
@@ -626,12 +674,15 @@ class PadeModel(SpectrumModel):
         amplitudes_model = np.dot(pars_n, basis_n) / (1 + np.dot(pars_d, basis_d))
         return pars, amplitudes_model
 
-    @property
-    def acint_lico(self):
-        """Coefficients of the linear combination of parameters giving the AC integral."""
-        result = np.zeros(self.npar)
-        result[0] = 1.0
-        return result
+    def derive_acint(
+        self, pars: NDArray[float], covar: NDArray[float] | None = None
+    ) -> float | tuple[float, float]:
+        """Derive the autocorrelation integral from the parameters."""
+        acint = pars[0]
+        if covar is None:
+            return acint
+        acint_var = covar[0, 0]
+        return acint, acint_var
 
 
 def guess(

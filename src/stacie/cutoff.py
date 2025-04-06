@@ -92,15 +92,7 @@ class CutoffCriterion:
 class CV2LCriterion(CutoffCriterion):
     """Criterion based on the difference between fits to two halves of the spectrum."""
 
-    fcut_factor: float = attrs.field(default=1.2)
-    """The factor by which the cutoff frequency is multiplied.
-
-    By using slightly higher cutoff frequencies in the criterion,
-    it tests to what extent the model can extrapolate (to higher frequencies).
-    This lowers the risk of biased fits at the expensive a higher variance.
-    """
-
-    cond: float = attrs.field(default=1e4)
+    cond: float = attrs.field(default=1e6)
     """The threshold for the condition number of the preconditioned covariance matrix.
 
     Due to the preconditioning, the condition number should be close to 1.0.
@@ -130,8 +122,8 @@ class CV2LCriterion(CutoffCriterion):
         fcut = props["fcut"]
         switch_exponent = props["switch_exponent"]
         freqs = spectrum.freqs
-        weights1 = switch_func(freqs, 0.5 * self.fcut_factor * fcut, switch_exponent)
-        weights2 = switch_func(freqs, self.fcut_factor * fcut, switch_exponent) - weights1
+        weights1 = switch_func(freqs, 0.5 * fcut, switch_exponent)
+        weights2 = switch_func(freqs, fcut, switch_exponent) - weights1
         ncut = (weights2 > 1e-3).sum()
         if ncut == len(freqs):
             return {

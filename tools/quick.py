@@ -5,7 +5,7 @@ import matplotlib as mpl
 import numpy as np
 
 from stacie import (
-    PolynomialModel,
+    ExpPolyModel,
     compute_spectrum,
     estimate_acint,
     plot_results,
@@ -26,7 +26,7 @@ for i in range(1, nstep):
 
 # Estimate the autocorrelation integral, print and plot the results.
 spectrum = compute_spectrum(sequences)
-result = estimate_acint(spectrum, PolynomialModel(2, even=True), verbose=True)
+result = estimate_acint(spectrum, ExpPolyModel([0, 2]), verbose=True)
 print(summarize_results(result))
 mpl.rc_file("../docs/source/examples/matplotlibrc")
 plot_results("quick.pdf", result)

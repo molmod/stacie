@@ -32,7 +32,7 @@ from .model import SpectrumModel, guess
 from .spectrum import Spectrum
 from .utils import PositiveDefiniteError, mixture_stats, robust_posinv
 
-__all__ = ("FCutWarning", "Result", "estimate_acint", "fit_model_spectrum")
+__all__ = ("Result", "estimate_acint", "fit_model_spectrum")
 
 
 @attrs.define
@@ -98,10 +98,6 @@ class Result:
         return self.props["acint_std"] / (2 * self.spectrum.prefactor * self.spectrum.variance)
 
 
-class FCutWarning(Warning):
-    """Raised when there is an issue with the frequency cutoff."""
-
-
 def estimate_acint(
     spectrum: Spectrum,
     model: SpectrumModel,
@@ -111,7 +107,7 @@ def estimate_acint(
     fcut_min: float | None = None,
     fcut_max: float | None = None,
     fcut_spacing: float = 0.5,
-    switch_exponent: float = 20.0,
+    switch_exponent: float = 8.0,
     cutoff_criterion: CutoffCriterion | None = None,
     rng: np.random.Generator | None = None,
     nonlinear_budget: int = 10,
@@ -168,7 +164,8 @@ def estimate_acint(
     cutoff_criterion
         The criterion function that is minimized to find the best cutoff frequency and,
         consequently, the optimal number of points included in the fit.
-        If not given, the default is an instance of :py:class:`stacie.cutoff.CV2LCriterion`.
+        If not given, the default is an instance of
+        :py:class:`stacie.cutoff.CV2LCriterion`.
     rng
         A random number generator for sampling guesses of the nonlinear parameters.
         If not provided, ``np.random.default_rng(42)`` is used.
@@ -198,9 +195,9 @@ def estimate_acint(
         warnings.warn(
             f"The number of degrees of freedom ({spectrum.ndofs.max()}) is too small. "
             "The results are most likely biased. "
-            "Averaging spectra over at least 8 to increase the degrees of freedom.",
-            FCutWarning,
-            stacklevel=2,
+            "Average spectra over at least 8 inputs to increase the degrees of freedom.",
+            UserWarning,
+            stacklevel=3,
         )
 
     def log(props):
@@ -283,8 +280,7 @@ def estimate_acint(
     all_pars = np.array([props["pars"] for props in history])
     all_covars = np.array([props["covar"] for props in history])
     pars, covar = mixture_stats(all_pars, all_covars, fcut_weights)
-    acint_lico = model.acint_lico
-    acint_var = np.dot(acint_lico, np.dot(covar, acint_lico))
+    acint, acint_var = model.derive_acint(pars, covar)
 
     props = {
         "fcut": np.dot(fcut_weights, [props["fcut"] for props in history]),
@@ -292,7 +288,7 @@ def estimate_acint(
         "weights": weights,
         "pars": pars,
         "covar": covar,
-        "acint": np.dot(pars, acint_lico),
+        "acint": acint,
         "acint_var": acint_var,
         "acint_std": np.sqrt(acint_var),
         "amplitudes_model": model.compute(freqs, pars, deriv=1),
@@ -395,10 +391,16 @@ def fit_model_spectrum(
         "neff": weights.sum(),
         "pars_init": pars_init,
     }
-    cost = LowFreqCost(freqs, ndofs, amplitudes, weights, model)
-    if not (model.valid(pars_init) and np.isfinite(cost(pars_init, 0)[0])):
+    if not model.valid(pars_init):
         props["criterion"] = np.inf
-        props["msg"] = "init: Invalid guess"
+        props["msg"] = "init: Invalid initial parameters"
+        return props
+
+    # Construct cost function and further validate initial guess
+    cost = LowFreqCost(freqs, ndofs, amplitudes, weights, model)
+    if not np.isfinite(cost(pars_init, 0)[0]):
+        props["criterion"] = np.inf
+        props["msg"] = "init: Infinite cost for initial parameters"
         return props
 
     # Optimize the parameters
@@ -429,10 +431,10 @@ def fit_model_spectrum(
     props["covar"] = covar
 
     # Derive estimates from model parameters.
-    acint_lico = model.acint_lico
-    props["acint"] = np.dot(pars_opt, acint_lico)
-    props["acint_var"] = np.dot(acint_lico, np.dot(covar, acint_lico))
-    props["acint_std"] = np.sqrt(props["acint_var"])
+    acint, acint_var = model.derive_acint(pars_opt, covar)
+    props["acint"] = acint
+    props["acint_var"] = acint_var
+    props["acint_std"] = np.sqrt(acint_var)
     props.update(model.derive_props(props["pars"], props["covar"]))
 
     # Add remaining properties and derive the cutoff criterion

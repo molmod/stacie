@@ -79,7 +79,6 @@ Source = "https://github.com/molmod/stacie/"
 addopts = "-n auto -W error"
 
 [tool.setuptools_scm]
-write_to = "src/stacie/_version.py"
 version_scheme = "post-release"
 local_scheme = "no-local-version"
 

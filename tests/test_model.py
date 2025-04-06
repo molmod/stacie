@@ -22,7 +22,7 @@ import numpy as np
 import pytest
 from conftest import check_gradient, check_hessian
 
-from stacie.model import ExpTailModel, PadeModel, PolynomialModel, guess
+from stacie.model import ExpPolyModel, ExpTailModel, PadeModel, guess
 
 NFREQ = 10
 FREQS = np.linspace(0, 0.5, NFREQ)
@@ -99,10 +99,8 @@ def test_guess_exptail():
     assert np.isfinite(pars_init).all()
 
 
-@pytest.mark.parametrize("degree", [0, 1, 2, 3, 4])
-def test_poly_npar(degree):
-    model = PolynomialModel(degree)
-    assert model.npar == degree + 1
+def test_exppoly_npar():
+    assert ExpPolyModel([0, 2, 4]).npar == 3
 
 
 PARS_REF_POLY = [
@@ -115,90 +113,29 @@ PARS_REF_POLY = [
 
 
 @pytest.mark.parametrize("npar", [2, 3])
-def test_vectorize_poly(npar: int):
+def test_vectorize_exppoly(npar: int):
     pars_ref = [p for p in PARS_REF_POLY if len(p) == npar]
-    check_vectorize_model(PolynomialModel(npar - 1), pars_ref, broadcast=True)
+    check_vectorize_model(ExpPolyModel(list(range(npar))), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_POLY)
-def test_gradient_poly(pars_ref):
+def test_gradient_exppoly(pars_ref):
     pars_ref = np.array(pars_ref)
-    model = PolynomialModel(len(pars_ref) - 1)
+    model = ExpPolyModel(list(range(len(pars_ref))))
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     check_gradient(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_POLY)
-def test_hessian_poly(pars_ref):
+def test_hessian_exppoly(pars_ref):
     pars_ref = np.array(pars_ref)
-    model = PolynomialModel(len(pars_ref) - 1)
+    model = ExpPolyModel(list(range(len(pars_ref))))
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     check_hessian(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
 
 
-def test_guess_poly():
-    model = PolynomialModel(2)
-    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    rng = np.random.default_rng(123)
-    amplitudes = rng.normal(size=len(FREQS)) ** 2
-    ndofs = np.full(len(FREQS), 2)
-    pars_init = guess(FREQS, ndofs, amplitudes, WEIGHTS, model, rng, 10)
-    assert len(pars_init) == 3
-    assert np.isfinite(pars_init).all()
-
-
-@pytest.mark.parametrize(
-    ("degree", "npar"),
-    [
-        (0, 1),
-        (1, 1),
-        (2, 2),
-        (3, 2),
-        (4, 3),
-        (5, 3),
-        (6, 4),
-        (7, 4),
-    ],
-)
-def test_even_poly_npar(degree, npar):
-    model = PolynomialModel(degree, even=True)
-    assert model.npar == npar
-
-
-PARS_REF_EVEN_POLY = [
-    [1.5],
-    [0.0],
-    [0.0, 0.0],
-    [2.31, 3.71],
-    [0.0, 0.0, 0.0],
-    [-2.0, 0.4, -8.3],
-]
-
-
-@pytest.mark.parametrize("npar", [2, 3])
-def test_vectorize_poly_even(npar: int):
-    pars_ref = [p for p in PARS_REF_POLY if len(p) == npar]
-    check_vectorize_model(PolynomialModel(2 * (npar - 1), even=True), pars_ref, broadcast=True)
-
-
-@pytest.mark.parametrize("pars_ref", PARS_REF_EVEN_POLY)
-def test_gradient_poly_even(pars_ref):
-    pars_ref = np.array(pars_ref)
-    model = PolynomialModel(2 * len(pars_ref) - 2, even=True)
-    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_gradient(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
-
-
-@pytest.mark.parametrize("pars_ref", PARS_REF_EVEN_POLY)
-def test_hessian_poly_even(pars_ref):
-    pars_ref = np.array(pars_ref)
-    model = PolynomialModel(2 * len(pars_ref) - 2, even=True)
-    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_hessian(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
-
-
-def test_guess_poly_even():
-    model = PolynomialModel(4, even=True)
+def test_guess_exppoly():
+    model = ExpPolyModel([0, 1, 2])
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     rng = np.random.default_rng(123)
     amplitudes = rng.normal(size=len(FREQS)) ** 2
