@@ -18,8 +18,6 @@
 # --
 """Algorithm to estimate the autocorrelation integral."""
 
-import warnings
-
 import attrs
 import numpy as np
 from numpy.typing import NDArray
@@ -191,14 +189,6 @@ def estimate_acint(
         neff_min = 10 * model.npar
     if cutoff_criterion is None:
         cutoff_criterion = CV2LCriterion()
-    if spectrum.ndofs.max() < 16:
-        warnings.warn(
-            f"The number of degrees of freedom ({spectrum.ndofs.max()}) is too small. "
-            "The results are most likely biased. "
-            "Average spectra over at least 8 inputs to increase the degrees of freedom.",
-            UserWarning,
-            stacklevel=3,
-        )
 
     def log(props):
         neff = props["neff"]
