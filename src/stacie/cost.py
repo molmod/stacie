@@ -83,7 +83,7 @@ class LowFreqCost:
         amplitudes_model = self.model.compute(
             self.freqs, pars if mask.ndim == 0 else pars[mask], deriv
         )
-        kappas = 0.5 * self.ndofs
+        alphas = 0.5 * self.ndofs
 
         # Only continue with parameters for which the model does not become negative.
         # Small positive values are also excluded to avoid underflows.
@@ -97,8 +97,8 @@ class LowFreqCost:
 
         # Log-likelihood computed with the scaled Chi-squared distribution.
         # The Gamma distribution is used because the scale parameter is easily incorporated.
-        thetas = [am / kappas for am in amplitudes_model]
-        ll_terms = logpdf_gamma(self.amplitudes, kappas, thetas[0], deriv)
+        thetas = [am / alphas for am in amplitudes_model]
+        ll_terms = logpdf_gamma(self.amplitudes, alphas, thetas[0], deriv)
         results[0][mask] = -np.einsum("...i,i->...", ll_terms[0], self.weights)
         if deriv >= 1:
             results[1][mask] = -np.einsum(
@@ -114,7 +114,7 @@ class LowFreqCost:
         return results
 
 
-def logpdf_gamma(x: NDArray[float], kappa: NDArray[float], theta: NDArray[float], deriv: int = 1):
+def logpdf_gamma(x: NDArray[float], alpha: NDArray[float], theta: NDArray[float], deriv: int = 1):
     """Compute the logarithm of the probability density function of the Gamma distribution.
 
     Parameters
@@ -122,7 +122,7 @@ def logpdf_gamma(x: NDArray[float], kappa: NDArray[float], theta: NDArray[float]
     x
         The argument of the PDF (random variable).
         Array with shape ``(nfreq,)``.
-    kappa
+    alpha
         The shape parameter.
         Array with shape ``(nfreq,)``.
     theta
@@ -137,25 +137,25 @@ def logpdf_gamma(x: NDArray[float], kappa: NDArray[float], theta: NDArray[float]
         A list of results (function value and requested derivatives.)
         All elements have the same shape as the ``theta`` array.
     """
-    kappa = np.asarray(kappa)
+    alpha = np.asarray(alpha)
     theta = np.asarray(theta)
     ratio = np.asarray(x) / theta
-    results = [-gammaln(kappa) - np.log(theta) + (kappa - 1) * np.log(ratio) - ratio]
+    results = [-gammaln(alpha) - np.log(theta) + (alpha - 1) * np.log(ratio) - ratio]
     if deriv >= 1:
-        results.append((ratio - kappa) / theta)
+        results.append((ratio - alpha) / theta)
     if deriv >= 2:
-        results.append((kappa - 2 * ratio) / theta**2)
+        results.append((alpha - 2 * ratio) / theta**2)
     if deriv >= 3:
         raise ValueError("Third or higher derivatives are not supported.")
     return results
 
 
-def entropy_gamma(kappa: NDArray[float], theta: NDArray[float], deriv: int = 1):
+def entropy_gamma(alpha: NDArray[float], theta: NDArray[float], deriv: int = 1):
     """Compute the entropy of the Gamma distribution.
 
     Parameters
     ----------
-    kappa
+    alpha
         The shape parameter.
     theta
         The scale parameter.
@@ -166,11 +166,11 @@ def entropy_gamma(kappa: NDArray[float], theta: NDArray[float], deriv: int = 1):
     -------
     results
         A list of results (function value and requested derivatives.)
-        All elements have the same shape as the ``kappa`` and ``theta`` arrays.
+        All elements have the same shape as the ``alpha`` and ``theta`` arrays.
     """
-    kappa = np.asarray(kappa)
+    alpha = np.asarray(alpha)
     theta = np.asarray(theta)
-    results = [kappa + np.log(theta) + gammaln(kappa) + (1 - kappa) * digamma(kappa)]
+    results = [alpha + np.log(theta) + gammaln(alpha) + (1 - alpha) * digamma(alpha)]
     if deriv >= 1:
         results.append(1 / theta)
     if deriv >= 2:

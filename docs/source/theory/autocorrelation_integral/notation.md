@@ -41,11 +41,11 @@ The following notation is used throughout Stacie's documentation.
     - $\var[\cdot]$ is the variance operator.
     - $\cov[\cdot,\cdot]$ is the covariance operator.
 
-- The Gamma distribution with shape $\kappa$ and scale $\theta$ is denoted as:
+- The Gamma distribution with shape $\alpha$ and scale $\theta$ is denoted as:
 
     $$
-        p_{\gdist(\kappa,\theta)} (x)
-        = \frac{1}{\theta^\kappa \Gamma(\kappa)} x^{k - 1} e^{-x/\theta}
+        p_{\gdist(\alpha,\theta)} (x)
+        = \frac{1}{\theta^\alpha \Gamma(\alpha)} x^{k - 1} e^{-x/\theta}
     $$
 
 - The Chi-squared distribution with $\nu$ degrees of freedom is a special case of the Gamma distribution:

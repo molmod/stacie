@@ -141,7 +141,7 @@ def demo_production():
     )
 
 
-kappa_production = demo_production()
+alpha_production = demo_production()
 
 # %% [markdown]
 # Compared to the viscosity analysis, the timescales of the heat flux tensor fluctuations
@@ -202,5 +202,5 @@ kappa_production = demo_production()
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(kappa_production - 7.0) > 0.2:
-    raise ValueError(f"wrong thermal conductivity (production): {kappa_production:.3e}")
+if abs(alpha_production - 7.0) > 0.2:
+    raise ValueError(f"wrong thermal conductivity (production): {alpha_production:.3e}")

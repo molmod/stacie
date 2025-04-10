@@ -245,19 +245,19 @@ The log likelihood of the model $C^\text{model}_k(\mathbf{b})$ with parameter ve
 
 $$
     \ln\mathcal{L}(\mathbf{b})
-    &=\sum_{k\in K} \ln p_{\gdist(\kappa_k,\theta_k)}(\hat{C}_k)
+    &=\sum_{k\in K} \ln p_{\gdist(\alpha_k,\theta_k)}(\hat{C}_k)
     \\
     &=\sum_{k\in K}
-      -\ln \Gamma(\kappa_k)
+      -\ln \Gamma(\alpha_k)
       - \ln\bigl(\theta_k(\mathbf{b})\bigr)
-      + (\kappa_k - 1)\ln\left(\frac{\hat{C}_k}{\theta_k(\mathbf{b})}\right)
+      + (\alpha_k - 1)\ln\left(\frac{\hat{C}_k}{\theta_k(\mathbf{b})}\right)
       - \frac{\hat{C}_k}{\theta_k(\mathbf{b})}
 $$
 
 with
 
 $$
-    \kappa_k &= \frac{\nu_k}{2}
+    \alpha_k &= \frac{\nu_k}{2}
     \\
     \theta_k(\mathbf{b}) &= \frac{2 C^\text{model}_k(\mathbf{b})}{\nu_k}
 $$

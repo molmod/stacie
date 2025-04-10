@@ -4,7 +4,7 @@ The thermal conductivity of a system is related to the autocorrelation
 of the heat flux as follows:
 
 $$
-    \kappa = \frac{1}{2 V k_\text{B} T^2}
+    \alpha = \frac{1}{2 V k_\text{B} T^2}
         \frac{1}{3}\sum_{\alpha=x, y, z}
         \int_{-\infty}^{+\infty}
         \cov[\hat{J}^\text{h}_\alpha(t_0) \,,\, \hat{J}^\text{h}_\alpha(t_0 + \Delta_t)]

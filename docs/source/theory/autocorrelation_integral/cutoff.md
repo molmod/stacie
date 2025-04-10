@@ -56,9 +56,9 @@ In the case of spectra, the residuals in the notation from the
 $$
   \hat{Y}_i &= \hat{C}_i
   \\
-  \hat{\mu}_i &= \kappa_i\,\hat{\theta}_i
+  \hat{\mu}_i &= \alpha_i\,\hat{\theta}_i
   \\
-  \hat{\sigma}_i &= \sqrt{\kappa_i}\,\hat{\theta}_i
+  \hat{\sigma}_i &= \sqrt{\alpha_i}\,\hat{\theta}_i
 $$
 
 The parameter $\hat{\theta}_i$ is the scale of the Gamma distribution at each frequency,
@@ -170,19 +170,19 @@ Finding the optimal cutoff is thus reduced to a model selection problem.
 
 In the case of the frequency cutoff,
 the dummy parameter corresponds to the scale parameter of the Gamma distribution.
-Assuming that $\kappa_k > 1$, the probability for this point is maximized by:
+Assuming that $\alpha_k > 1$, the probability for this point is maximized by:
 
 $$
-    \hat{\theta}_k = \frac{\hat{C}_k}{\kappa_k - 1}.
+    \hat{\theta}_k = \frac{\hat{C}_k}{\alpha_k - 1}.
 $$
 
 The log likelihood for such a point becomes:
 
 $$
     \ln \mathcal{L}_k^\text{cut} =
-        -\ln\Gamma(\kappa_k)
-        - \ln\left(\frac{\hat{C}_k}{\kappa_k - 1}\right)
-        + (\kappa_k - 1) \Bigl(\ln(\kappa_k - 1) - 1\Bigr)
+        -\ln\Gamma(\alpha_k)
+        - \ln\left(\frac{\hat{C}_k}{\alpha_k - 1}\right)
+        + (\alpha_k - 1) \Bigl(\ln(\alpha_k - 1) - 1\Bigr)
 $$
 
 To obtain the total log likelihood, $\ln\mathcal{L}^\text{total}$,

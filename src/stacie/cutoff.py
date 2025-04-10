@@ -140,8 +140,8 @@ class CV2LCriterion(CutoffCriterion):
         design_matrix = amplitudes_model[1].T
         expected_values = spectrum.amplitudes[:ncut] - amplitudes_model[0]
         # Transform equations to a basis with standard normal errors.
-        kappas = spectrum.ndofs[:ncut] / 2
-        data_std = amplitudes_model[0] / np.sqrt(kappas)
+        alphas = spectrum.ndofs[:ncut] / 2
+        data_std = amplitudes_model[0] / np.sqrt(alphas)
         design_matrix = design_matrix / data_std.reshape(-1, 1)
         expected_values = expected_values / data_std
 

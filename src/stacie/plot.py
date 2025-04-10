@@ -227,7 +227,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     plot_spectrum(ax, uc, r.spectrum, 2 * r.ncut)
 
     # Model spectrum.
-    kappas = 0.5 * r.spectrum.ndofs[: r.ncut]
+    alphas = 0.5 * r.spectrum.ndofs[: r.ncut]
     mean = r.props["amplitudes_model"][0]
     std_fit = np.sqrt(
         np.einsum(
@@ -237,7 +237,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
             r.props["amplitudes_model"][1],
         )
     )
-    std_model = mean / np.sqrt(kappas)
+    std_model = mean / np.sqrt(alphas)
     ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2")
     ax.plot(freqs / uc.freq_unit, (mean - uc.sfac * std_fit) / uc.acint_unit, color="C2", ls="--")
     ax.plot(freqs / uc.freq_unit, (mean + uc.sfac * std_fit) / uc.acint_unit, color="C2", ls="--")

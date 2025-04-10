@@ -18,7 +18,7 @@ These properties are sometimes referred to as diagonal transport coefficients {c
 
 - [Diffusion coefficient](diffusion_coefficient.md), $D$
 - [Electrical conductivity](electrical_conductivity.md), $\sigma$
-- [Thermal conductivity](thermal_conductivity.md), $\kappa$
+- [Thermal conductivity](thermal_conductivity.md), $\alpha$
 - [Shear viscosity](shear_viscosity.md), $\eta$
 - [Bulk viscosity](bulk_viscosity.md), $\eta_b$
 
