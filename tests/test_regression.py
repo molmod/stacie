@@ -42,9 +42,9 @@ CASES = [
     ("white", ExpPolyModel([0, 1, 2]), 0.1),
     ("broad", ExpPolyModel([0]), 0.01),
     ("broad", ExpPolyModel([0, 1, 2]), 0.1),
-    ("pure", ExpTailModel(), 0.02),
+    ("pure", ExpTailModel(), 0.1),
     ("pure", ExpPolyModel([0, 2]), 0.02),
-    ("double", ExpTailModel(), 0.02),
+    ("double", ExpTailModel(), 0.1),
     ("double", ExpPolyModel([0, 2]), 0.02),
 ]
 CRITERIA = [CV2LCriterion()]
@@ -87,7 +87,7 @@ def test_case_scan(
     spectrum = Spectrum(**np.load(f"tests/inputs/spectrum_{name}.npz"))
     if name == "broad":
         spectrum = spectrum.without_zero_freq()
-    result = estimate_acint(spectrum, model, fcut_max=fcut_max, cutoff_criterion=criterion)
+    result = estimate_acint(spectrum, model, fcut_max=2 * fcut_max, cutoff_criterion=criterion)
     register_result(regtest, result)
     prefix = f"scan_{name}_{model.name}_{criterion.name}"
     output_test_result(prefix, result)

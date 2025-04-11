@@ -12,11 +12,11 @@ from stacie import (
     summarize_results,
 )
 
-# Generate 64 input sequences with 8192 steps, using a simple Markov process.
+# Generate 64 input sequences with 16384 steps, using a simple Markov process.
 # The autocorrelation integral is 1.0
 # The integrated correlation time is 16.0
 nseq = 64
-nstep = 8192
+nstep = 16384
 alpha = 31 / 33
 beta = np.sqrt(8 / 1089)
 rng = np.random.default_rng(0)

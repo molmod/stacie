@@ -122,9 +122,11 @@ class CV2LCriterion(CutoffCriterion):
         fcut = props["fcut"]
         switch_exponent = props["switch_exponent"]
         freqs = spectrum.freqs
+        weights = switch_func(freqs, fcut, switch_exponent)
         weights1 = switch_func(freqs, 0.5 * fcut, switch_exponent)
-        weights2 = switch_func(freqs, fcut, switch_exponent) - weights1
-        ncut = (weights2 > 1e-3).sum()
+        weights2 = weights - weights1
+        ncut = (weights > 1e-3).sum()
+        del weights
         if ncut == len(freqs):
             return {
                 "criterion": np.inf,
@@ -135,12 +137,12 @@ class CV2LCriterion(CutoffCriterion):
         weights2 = weights2[:ncut]
         amplitudes_model = model.compute(freqs, props["pars"], 1)
 
-        # Construct a linear regression approximation with normally distributed errors,
-        # of the original non-linear problem with Gamma-distributed errors.
+        # Construct a linear regression for the residual on the logarithm of the spectrum.
         design_matrix = amplitudes_model[1].T
         expected_values = spectrum.amplitudes[:ncut] - amplitudes_model[0]
-        # Transform equations to a basis with standard normal errors.
-        alphas = spectrum.ndofs[:ncut] / 2
+
+        # Transform equations to have unit variance on the expected values.
+        alphas = 0.5 * spectrum.ndofs[:ncut]
         data_std = amplitudes_model[0] / np.sqrt(alphas)
         design_matrix = design_matrix / data_std.reshape(-1, 1)
         expected_values = expected_values / data_std
