@@ -71,7 +71,6 @@ MAIN RESULTS
 
 MODEL {model} | CUTOFF CRITERION {cutoff_criterion}
     Number of parameters:          {npar}
-    Used points:                   {r.ncut}
     Effective points:              {r.neff:.1f}
 """
 
