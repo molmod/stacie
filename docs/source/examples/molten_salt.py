@@ -35,13 +35,7 @@ from glob import glob
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from stacie import (
-    ExpPolyModel,
-    UnitConfig,
-    compute_spectrum,
-    estimate_acint,
-    summarize_results,
-)
+from stacie import ExpPolyModel, UnitConfig, compute_spectrum, estimate_acint
 from stacie.plot import plot_fitted_spectrum, plot_extras
 
 # %%
@@ -136,17 +130,6 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
             velocities = np.diff(positions, axis=1) / timestep
             yield velocities
 
-    # Perform the analysis with Stacie
-    spectrum = compute_spectrum(
-        iter_sequences(),
-        timestep=timestep,
-        prefactor=0.5 / (volume * temperature * BOLTZMANN_CONSTANT)
-        if transport_property == "conductivity"
-        else 0.5,
-        include_zero_freq=False,
-    )
-    result = estimate_acint(spectrum, ExpPolyModel(degrees), verbose=True)
-
     # Configure units for output
     uc = UnitConfig(
         acint_symbol=r"\sigma" if transport_property == "conductivity" else "D",
@@ -159,6 +142,17 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
         freq_unit_str="THz",
     )
 
+    # Perform the analysis with Stacie
+    spectrum = compute_spectrum(
+        iter_sequences(),
+        timestep=timestep,
+        prefactor=0.5 / (volume * temperature * BOLTZMANN_CONSTANT)
+        if transport_property == "conductivity"
+        else 0.5,
+        include_zero_freq=False,
+    )
+    result = estimate_acint(spectrum, ExpPolyModel(degrees), verbose=True, uc=uc)
+
     # Plot some basic analysis figures.
     prefix = f"{transport_property}_{len(paths_npz)}"
     plt.close(f"{prefix}_spectrum")
@@ -167,10 +161,6 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
     plt.close(f"{prefix}_extras")
     _, axs = plt.subplots(2, 2, num=f"{prefix}_extras")
     plot_extras(axs, uc, result)
-
-    # Print the recommended block size and simulation time.
-    print()
-    print(summarize_results(result, uc))
 
     # Return the diffusivity
     return result.acint

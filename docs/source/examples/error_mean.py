@@ -201,7 +201,7 @@ plot_spectrum(ax, uc, spectrum, 180)
 # a model is fitted to the spectrum to get a more precise estimate.
 
 # %%
-result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
+result = estimate_acint(spectrum, ExpTailModel(), verbose=True, uc=uc)
 
 # %%
 # The essential result:

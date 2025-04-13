@@ -348,7 +348,9 @@ def demo_stacie(stride=1):
     # by inspecting the first spectrum plot.
     # Beyond the cutoff frequency, the spectrum has resonance peaks that
     # the ExpTailModel is not designed to handle.
-    result = estimate_acint(spectrum, ExpTailModel(), fcut_max=TERAHERTZ, verbose=True)
+    result = estimate_acint(
+        spectrum, ExpTailModel(), fcut_max=TERAHERTZ, verbose=True, uc=uc
+    )
 
     # Plotting
     plt.close(f"spectrum_{stride}")

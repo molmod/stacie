@@ -28,9 +28,9 @@ from .cost import LowFreqCost
 from .cutoff import CutoffCriterion, CV2LCriterion, integral_to_cutoff, switch_func
 from .model import SpectrumModel, guess
 from .spectrum import Spectrum
-from .utils import PositiveDefiniteError, mixture_stats, robust_posinv
+from .utils import PositiveDefiniteError, UnitConfig, label_unit, mixture_stats, robust_posinv
 
-__all__ = ("Result", "estimate_acint", "fit_model_spectrum")
+__all__ = ("Result", "estimate_acint", "fit_model_spectrum", "summarize_results")
 
 
 @attrs.define
@@ -47,9 +47,10 @@ class Result:
     """The criterion used to select or weight cutoff frequencies."""
 
     props: dict[str] = attrs.field()
-    """The properties of the selected cutoff frequency or ensemble of cutoff frequencies.
+    """The properties marginalized over the ensemble of cutoff frequencies.
 
     Properties of this class derive their results from information in this dictionary.
+    See docstring of :func:`fit_model_spectrum` for details.
     """
 
     history: list[dict[str]] = attrs.field()
@@ -111,6 +112,7 @@ def estimate_acint(
     nonlinear_budget: int = 10,
     criterion_high: float = 100,
     verbose: bool = False,
+    uc: UnitConfig | None = None,
 ) -> Result:
     r"""Estimate the integral of the autocorrelation function.
 
@@ -143,7 +145,7 @@ def estimate_acint(
     neff_min
         The minimum effective number of frequency data points to include in the fit.
         (The effective number of points is the sum of weights in the smooth cutoff.)
-        If not provided, this is set to 10 times the number of model parameters as a default.
+        If not provided, this is set to 5 times the number of model parameters as a default.
     neff_max
         The maximum number of effective points to include in the fit.
         This parameter limits the total computational cost.
@@ -177,6 +179,11 @@ def estimate_acint(
     verbose
         Set this to ``True`` to print progress information of the frequency cutoff search
         to the standard output.
+    uc
+        Unit configuration object used to format the output.
+        If not provided, the default unit configuration is used.
+        See :py:class:`stacie.utils.UnitConfig` for details.
+        This is only affects the screen output (if any) and not the results.
 
     Returns
     -------
@@ -186,14 +193,16 @@ def estimate_acint(
     if rng is None:
         rng = np.random.default_rng(42)
     if neff_min is None:
-        neff_min = 10 * model.npar
+        neff_min = 5 * model.npar
     if cutoff_criterion is None:
         cutoff_criterion = CV2LCriterion()
+    if uc is None:
+        uc = UnitConfig()
 
     def log(props):
         neff = props["neff"]
         criterion = props["criterion"]
-        line = f"{neff:9.1f}   {criterion:10.1f}"
+        line = f"{neff:9.1f}  {criterion:10.1f}    {fcut / uc.freq_unit:{uc.freq_fmt}}"
         msg = props.get("msg")
         if msg is not None:
             line += f"  ({msg})"
@@ -206,8 +215,9 @@ def estimate_acint(
     history = []
     best_criterion = None
     if verbose:
-        print("CUTOFF FREQUENCY SCAN")
-        print("     neff    criterion")
+        print(f"CUTOFF FREQUENCY SCAN {cutoff_criterion.name}")
+        print(f"     neff   criterion  {label_unit('fcut', uc.freq_unit_str):>10s}")
+        print("---------  ----------  ----------")
     icut = 0
     while True:
         fcut = fcut_min * fcut_ratio**icut
@@ -238,15 +248,13 @@ def estimate_acint(
                 best_criterion = criterion
             elif criterion > best_criterion + criterion_high:
                 if verbose:
-                    print(f"Cutoff criterion exceed minimum + {criterion_high}.")
+                    print(f"Cutoff criterion exceeds minimum + {criterion_high}.")
                 break
         if neff_max is not None and props["neff"] > neff_max:
             if verbose:
                 print(f"Reached the maximum number of effective points ({neff_max}).")
             break
         icut += 1
-    if verbose:
-        print()
 
     if len(history) == 0:
         raise ValueError("The cutoff criterion could not be computed for any cutoff frequency.")
@@ -266,27 +274,34 @@ def estimate_acint(
     freqs = spectrum.freqs[:ncut]
     weights = weights[:ncut]
 
-    # Parameters and covariance
-    all_pars = np.array([props["pars"] for props in history])
-    all_covars = np.array([props["covar"] for props in history])
-    pars, covar = mixture_stats(all_pars, all_covars, fcut_weights)
-    acint, acint_var = model.derive_acint(pars, covar)
-
     props = {
         "fcut": np.dot(fcut_weights, [props["fcut"] for props in history]),
         "ncut": ncut,
         "weights": weights,
-        "pars": pars,
-        "covar": covar,
-        "acint": acint,
-        "acint_var": acint_var,
-        "acint_std": np.sqrt(acint_var),
-        "amplitudes_model": model.compute(freqs, pars, deriv=1),
         "switch_exponent": switch_exponent,
     }
-    props.update(model.derive_props(props["pars"], props["covar"]))
+    for key in history[0]:
+        if f"{key}_var" in history[0]:
+            all_mean = np.array([props[key] for props in history])
+            all_var = np.array([props[f"{key}_var"] for props in history])
+            mean, var = mixture_stats(all_mean, all_var, fcut_weights)
+            props[key] = mean
+            props[f"{key}_var"] = var
+            props[f"{key}_std"] = np.sqrt(var)
+        elif f"{key}_covar" in history[0]:
+            all_mean = np.array([props[key] for props in history])
+            all_covar = np.array([props[f"{key}_covar"] for props in history])
+            mean, covar = mixture_stats(all_mean, all_covar, fcut_weights)
+            props[key] = mean
+            props[f"{key}_covar"] = covar
+    props["amplitudes_model"] = model.compute(freqs, props["pars"], deriv=1)
 
-    return Result(spectrum, model, cutoff_criterion, props, history)
+    result = Result(spectrum, model, cutoff_criterion, props, history)
+
+    if verbose:
+        print()
+        print(summarize_results(result, uc=uc))
+    return result
 
 
 def fit_model_spectrum(
@@ -341,20 +356,26 @@ def fit_model_spectrum(
     - ``cost_hess_scales``: Hessian rescaling vector, see ``robust_posinv``.
     - ``cost_hess_rescaled_evals``: Rescaled Hessian eigenvalues
     - ``cost_hess_rescaled_evecs``: Rescaled hessian eigenvectors
-    - ``covar``: covariance matrix of the parameters
     - ``switch_exponent``: exponent used to construct the cutoff
     - ``criterion``: value of the criterion whose minimizer determines the frequency cutoff
     - ``ll``: log likelihood
     - ``pars_init``: initial guess of the parameters
     - ``pars``: optimized parameters
+    - ``pars_covar``: covariance matrix of the parameters
 
     The ``ExpTailModel`` has the following additional properties:
 
     - ``corrtime_exp``: estimate of the slowest time scale in the sequences
     - ``corrtime_exp_var``: variance of the estimate of the slowest time scale
     - ``corrtime_exp_std``: standard error of the estimate of the slowest time scale
-    - ``exptail_simulation_time``: recommended simulation time based on the Exptail model
-    - ``exptail_block_time``: recommended block time based on the Exptail model
+    - ``exptail_simulation_time``: recommended simulation time based on the ExpTail model
+    - ``exptail_block_time``: recommended block time based on the ExpTail model
+
+    The ``ExpPolyModel`` has the following additional properties:
+
+    - ``log_acint``: the logarithm of the autocorrelation integral
+    - ``log_acint_var``: variance of the logarithm of the autocorrelation integral
+    - ``log_acint_std``: standard error of the logarithm of the autocorrelation integral
 
     If the fit fails, the following properties are set:
 
@@ -363,7 +384,7 @@ def fit_model_spectrum(
     """
     # Create a switching function for a smooth cutoff
     weights = switch_func(spectrum.freqs, fcut, switch_exponent)
-    ncut = (weights >= 1e-3).nonzero()[0][-1]
+    ncut = max((weights >= 1e-3).nonzero()[0][-1], 2 * model.npar)
     freqs = spectrum.freqs[:ncut]
     ndofs = spectrum.ndofs[:ncut]
     amplitudes = spectrum.amplitudes[:ncut]
@@ -410,7 +431,7 @@ def fit_model_spectrum(
 
     # Compute the Hessian and its properties.
     try:
-        hess_scales, evals, evecs, covar = robust_posinv(props["cost_hess"])
+        hess_scales, evals, evecs, pars_covar = robust_posinv(props["cost_hess"])
     except PositiveDefiniteError as exc:
         props["criterion"] = np.inf
         props["msg"] = f"opt: Hessian {exc.args[0]}"
@@ -418,17 +439,81 @@ def fit_model_spectrum(
     props["cost_hess_scales"] = hess_scales
     props["cost_hess_rescaled_evals"] = evals
     props["cost_hess_rescaled_evecs"] = evecs
-    props["covar"] = covar
-
-    # Derive estimates from model parameters.
-    acint, acint_var = model.derive_acint(pars_opt, covar)
-    props["acint"] = acint
-    props["acint_var"] = acint_var
-    props["acint_std"] = np.sqrt(acint_var)
-    props.update(model.derive_props(props["pars"], props["covar"]))
+    props["pars_covar"] = pars_covar
 
     # Add remaining properties and derive the cutoff criterion
+    props.update(model.derive_props(pars_opt, pars_covar))
     props.update(cutoff_criterion(spectrum, model, props))
+    # Add convenience properties
+    std_props = {}
+    for key, value in props.items():
+        if key.endswith("_var"):
+            std_props[f"{key[:-4]}_std"] = np.sqrt(value) if value >= 0 else np.inf
+    props.update(std_props)
 
     # Done
     return props
+
+
+def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
+    """Return a string summarizing the Result object."""
+    if isinstance(res, Result):
+        res = [res]
+    if uc is None:
+        uc = UnitConfig()
+    texts = []
+    for r in res:
+        text = GENERAL_TEMPLATE.format(
+            r=r,
+            uc=uc,
+            model=r.model.name,
+            cutoff_criterion=r.cutoff_criterion.name,
+            timestep=r.spectrum.timestep / uc.time_unit,
+            prefactor=r.spectrum.prefactor / uc.acint_unit,
+            acint=r.acint / uc.acint_unit,
+            acint_std=r.acint_std / uc.acint_unit,
+            corrtime_int=r.corrtime_int / uc.time_unit,
+            corrtime_int_std=r.corrtime_int_std / uc.time_unit,
+            npar=len(r.props["pars"]),
+            maxdof=r.spectrum.ndofs.max(),
+        )
+        if "corrtime_exp" in r.props:
+            text += EXP_TAIL_TEMPLATE.format(
+                uc=uc,
+                corrtime_exp=r.props["corrtime_exp"] / uc.time_unit,
+                corrtime_exp_std=r.props["corrtime_exp_std"] / uc.time_unit,
+                exptail_simulation_time=r.props["exptail_simulation_time"] / uc.time_unit,
+                exptail_simulation_time_std=r.props["exptail_simulation_time_std"] / uc.time_unit,
+                exptail_block_time=r.props["exptail_block_time"] / uc.time_unit,
+                exptail_block_time_std=r.props["exptail_block_time_std"] / uc.time_unit,
+            )
+        texts.append(text)
+    return "\n---\n".join(texts)
+
+
+GENERAL_TEMPLATE = """\
+SPECTRUM SETTINGS
+    Time step:                     {timestep:{uc.time_fmt}} {uc.time_unit_str}
+    Maximum degrees of freedom:    {maxdof}
+
+MAIN RESULTS
+    Autocorrelation integral:      {acint:{uc.acint_fmt}} ± {acint_std:{uc.acint_fmt}} \
+{uc.acint_unit_str}
+    Integrated correlation time:   {corrtime_int:{uc.time_fmt}} ± {corrtime_int_std:{uc.time_fmt}} \
+{uc.time_unit_str}
+
+MODEL {model} | CUTOFF CRITERION {cutoff_criterion}
+    Number of parameters:          {npar}
+    Effective points:              {r.neff:.1f}
+"""
+
+EXP_TAIL_TEMPLATE = """\
+    Exponential correlation time:  {corrtime_exp:{uc.time_fmt}} ± {corrtime_exp_std:{uc.time_fmt}} \
+{uc.time_unit_str}
+
+RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL TAIL MODEL)
+    Simulation time:               {exptail_simulation_time:{uc.time_fmt}} ± \
+{exptail_simulation_time_std:{uc.time_fmt}} {uc.time_unit_str}
+    Block time:                    {exptail_block_time:{uc.time_fmt}} ± \
+{exptail_block_time_std:{uc.time_fmt}} {uc.time_unit_str}
+"""
