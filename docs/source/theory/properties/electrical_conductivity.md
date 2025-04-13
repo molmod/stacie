@@ -5,17 +5,17 @@ of the charge current as follows:
 
 $$
     \sigma = \frac{1}{2 V k_\text{B} T}
-        \frac{1}{D}\sum_{d=1}^D
+        \frac{1}{d}\sum_{i=1}^d
         \int_{-\infty}^{+\infty}
-        \cov[\hat{J}^\text{c}_d(t_0) \,,\, \hat{J}^\text{c}_d(t_0 + \Delta_t)]
+        \cov[\hat{J}^\text{c}_i(t_0) \,,\, \hat{J}^\text{c}_i(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
 $$
 
 where $V$ is the volume of the simulation cell,
 $k_\text{B}$ is the Boltzmann constant,
 $T$ is the temperature,
-$D$ is the dimensionality of the system,
-and $\hat{J}^\text{c}_d$ is the instantaneous charge current along one of the Cartesian directions.
+$d$ is the dimensionality of the system,
+and $\hat{J}^\text{c}_i$ is the instantaneous charge current along one of the Cartesian directions.
 The time origin $t_0$ is arbitrary:
 the expected value is computed over all possible time origins.
 
