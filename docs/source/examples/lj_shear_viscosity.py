@@ -58,13 +58,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from path import Path
 from yaml import safe_load
-from stacie import (
-    UnitConfig,
-    compute_spectrum,
-    estimate_acint,
-    summarize_results,
-    ExpTailModel,
-)
+from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
 from stacie.plot import plot_fitted_spectrum, plot_extras
 
 # %%
@@ -136,7 +130,7 @@ def estimate_viscosity(name, pcomps, av_temperature, volume, timestep):
     )
 
     # Estimate the viscosity from the spectrum.
-    result = estimate_acint(spectrum, ExpTailModel(), verbose=True)
+    result = estimate_acint(spectrum, ExpTailModel(), verbose=True, uc=uc)
 
     # Plot some basic analysis figures.
     plt.close(f"{name}_spectrum")
@@ -145,10 +139,6 @@ def estimate_viscosity(name, pcomps, av_temperature, volume, timestep):
     plt.close(f"{name}_extras")
     _, axs = plt.subplots(2, 2, num=f"{name}_extras")
     plot_extras(axs, uc, result)
-
-    # Print the recommended block size and simulation time.
-    print()
-    print(summarize_results(result, uc))
 
     # Return the viscosity
     return result.acint

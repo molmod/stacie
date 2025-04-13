@@ -21,6 +21,7 @@
 import attrs
 import numpy as np
 from numpy.typing import NDArray
+from scipy.special import polygamma
 
 from .model import SpectrumModel
 from .spectrum import Spectrum
@@ -92,6 +93,19 @@ class CutoffCriterion:
 class CV2LCriterion(CutoffCriterion):
     """Criterion based on the difference between fits to two halves of the spectrum."""
 
+    fcut_factor: float = attrs.field(default=1.2)
+    """The scale factor to apply to the cutoff frequency.
+
+    If 1.0, the same part of the spectrum is used as in the full non-linear regression.
+    By using a larger value, the default, the criterion also tests whether
+    the fitted parameters can (somewhat) extrapolate to larger frequencies,
+    which reduces the risk of underfitting.
+    This results in less bias on the autocorrelation integral, but slightly larger variance.
+    """
+
+    log: bool = attrs.field(default=False)
+    """Whether to fit a linearized model to the logarithm of the spectrum."""
+
     cond: float = attrs.field(default=1e6)
     """The threshold for the condition number of the preconditioned covariance matrix.
 
@@ -109,7 +123,7 @@ class CV2LCriterion(CutoffCriterion):
     @property
     def name(self) -> str:
         """The name of the criterion."""
-        return "cv2l"
+        return f"cv2l({self.fcut_factor:.0%}{',log' if self.log else ''})"
 
     def __call__(
         self,
@@ -122,30 +136,40 @@ class CV2LCriterion(CutoffCriterion):
         fcut = props["fcut"]
         switch_exponent = props["switch_exponent"]
         freqs = spectrum.freqs
-        weights = switch_func(freqs, fcut, switch_exponent)
-        weights1 = switch_func(freqs, 0.5 * fcut, switch_exponent)
+        weights = switch_func(freqs, self.fcut_factor * fcut, switch_exponent)
+        weights1 = switch_func(freqs, 0.5 * self.fcut_factor * fcut, switch_exponent)
         weights2 = weights - weights1
         ncut = (weights > 1e-3).sum()
-        del weights
         if ncut == len(freqs):
             return {
                 "criterion": np.inf,
                 "msg": "cv2l: Insufficient data after cutoff.",
             }
         freqs = freqs[:ncut]
+        weights = weights[:ncut]
         weights1 = weights1[:ncut]
         weights2 = weights2[:ncut]
         amplitudes_model = model.compute(freqs, props["pars"], 1)
 
-        # Construct a linear regression for the residual on the logarithm of the spectrum.
-        design_matrix = amplitudes_model[1].T
-        expected_values = spectrum.amplitudes[:ncut] - amplitudes_model[0]
+        alphas = 0.5 * spectrum.ndofs[:ncut]
+        if self.log:
+            # Construct a linear regression for the residual of the logarithm of the spectrum.
+            design_matrix = (amplitudes_model[1] / amplitudes_model[0]).T
+            expected_values = np.log(spectrum.amplitudes[:ncut]) - np.log(amplitudes_model[0])
+            evstd = np.sqrt(polygamma(1, alphas))
+        else:
+            # Construct a linear regression for the residual of the spectrum.
+            design_matrix = amplitudes_model[1].T
+            expected_values = spectrum.amplitudes[:ncut] - amplitudes_model[0]
+            evstd = amplitudes_model[0] / np.sqrt(alphas)
+
+        # Correct the standard deviation on the expected values for the fact
+        # that they are residuals with fewer degrees of freedom than the original data.
+        evstd *= np.sqrt((weights.sum() - model.npar) / weights.sum())
 
         # Transform equations to have unit variance on the expected values.
-        alphas = 0.5 * spectrum.ndofs[:ncut]
-        data_std = amplitudes_model[0] / np.sqrt(alphas)
-        design_matrix = design_matrix / data_std.reshape(-1, 1)
-        expected_values = expected_values / data_std
+        design_matrix = design_matrix / evstd.reshape(-1, 1)
+        expected_values = expected_values / evstd
 
         xs, cs = linear_weighted_regression(
             design_matrix,

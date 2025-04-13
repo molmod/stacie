@@ -18,17 +18,88 @@
 # --
 """Utilities for preparing inputs."""
 
+import attrs
 import numpy as np
 from numpy.typing import NDArray
 
 __all__ = (
     "PositiveDefiniteError",
+    "UnitConfig",
     "block_average",
+    "label_unit",
     "mixture_stats",
     "robust_dot",
     "robust_posinv",
     "split",
 )
+
+
+@attrs.define
+class UnitConfig:
+    """Unit configuration for plotting function.
+
+    Note that values are *divided* by their units before plotting.
+    """
+
+    acint_symbol: str = attrs.field(default=r"\mathcal{I}", kw_only=True)
+    """The symbol used for the autocorrelation integral."""
+
+    acint_unit_str: str = attrs.field(default="", kw_only=True)
+    """The text used for the autocorrelation integral unit."""
+
+    acint_unit: float = attrs.field(default=1.0, kw_only=True)
+    """The unit of an autocorrelation integral."""
+
+    acint_fmt: str = attrs.field(default=".2e", kw_only=True)
+    """The format string for an autocorrelation integral."""
+
+    freq_unit_str: str = attrs.field(default="", kw_only=True)
+    """The text used for the frequency unit."""
+
+    freq_unit: float = attrs.field(default=1.0, kw_only=True)
+    """The unit of frequency."""
+
+    freq_fmt: str = attrs.field(default=".2e", kw_only=True)
+    """The format string for a frequency."""
+
+    time_unit_str: str = attrs.field(default="", kw_only=True)
+    """The text used for the time unit."""
+
+    time_unit: float = attrs.field(default=1.0, kw_only=True)
+    """The unit of time."""
+
+    time_fmt: str = attrs.field(default=".2e", kw_only=True)
+    """The format string for a time value."""
+
+    clevel: float = attrs.field(default=0.95)
+    """The confidence level used to plot confidence intervals."""
+
+    @property
+    def clb(self) -> float:
+        """The confidence lower bound used to plot confidence intervals."""
+        return (1 - self.clevel) / 2
+
+    @property
+    def cub(self) -> float:
+        """The confidence upper bound used to plot confidence intervals."""
+        return (1 + self.clevel) / 2
+
+
+def label_unit(label: str, unit_str: str | None) -> str:
+    """Format a label with the unit string as `label [unit]`.
+
+    When the unit is ``""`` or ``None``, the unit is omitted.
+
+    Parameters
+    ----------
+    label
+        The label text.
+    unit_str
+        The unit string.
+    """
+    if unit_str in ("", None):
+        return label
+    return f"{label} [{unit_str}]"
 
 
 def split(sequences: NDArray[float], nsplit: int) -> NDArray:
@@ -204,8 +275,10 @@ def mixture_stats(means: NDArray[float], covars: NDArray[float], weights: NDArra
     weights = np.asarray(weights)
     if means.ndim < 1:
         raise ValueError("means must be at least a 1D array.")
+    unpack = False
     if means.ndim == 1:
         means = means.reshape(-1, 1)
+        unpack = True
     ncomp, nfeature = means.shape
     if covars.ndim < 1:
         raise ValueError("covars must be at least a 1D array.")
@@ -219,12 +292,15 @@ def mixture_stats(means: NDArray[float], covars: NDArray[float], weights: NDArra
     if covars.shape == means.shape:
         covar = np.dot(weights, covars)
         covar += np.einsum("i,ij,ij->j", weights, deltas, deltas)
-        return mean, covar
-    if covars.shape == (ncomp, nfeature, nfeature):
+    elif covars.shape == (ncomp, nfeature, nfeature):
         covar = np.einsum("i,ijk->jk", weights, covars)
         covar += np.einsum("i,ij,ik->jk", weights, deltas, deltas)
-        return mean, covar
-    raise ValueError(
-        f"Unsupported shape for covars: {covars.shape}. "
-        f"Expected ({ncomp},), {means.shape}, or ({ncomp}, {nfeature}, {nfeature})."
-    )
+    else:
+        raise ValueError(
+            f"Unsupported shape for covars: {covars.shape}. "
+            f"Expected ({ncomp},), {means.shape}, or ({ncomp}, {nfeature}, {nfeature})."
+        )
+    if unpack:
+        mean = mean[0]
+        covar = covar[0]
+    return mean, covar

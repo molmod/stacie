@@ -30,11 +30,10 @@ import pytest
 from path import Path
 
 from stacie.cutoff import CV2LCriterion
-from stacie.estimate import Result, estimate_acint
+from stacie.estimate import Result, estimate_acint, summarize_results
 from stacie.model import ExpPolyModel, ExpTailModel, SpectrumModel
 from stacie.plot import plot_results
 from stacie.spectrum import Spectrum
-from stacie.summary import summarize_results
 
 # Combinations of test spectra and suitable models, with a manual cutoff frequency.
 CASES = [

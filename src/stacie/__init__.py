@@ -20,9 +20,9 @@
 
 from .estimate import estimate_acint
 from .model import ExpPolyModel, ExpTailModel, PadeModel
-from .plot import UnitConfig, plot_results
+from .plot import plot_results
 from .spectrum import compute_spectrum
-from .summary import summarize_results
+from .utils import UnitConfig
 
 __all__ = (
     "ExpPolyModel",
@@ -34,5 +34,4 @@ __all__ = (
     "compute_spectrum",
     "estimate_acint",
     "plot_results",
-    "summarize_results",
 )

@@ -211,27 +211,6 @@ class SpectrumModel:
         amplitudes_model = np.dot(linear_pars, basis)
         return linear_pars, amplitudes_model
 
-    def derive_acint(
-        self, pars: NDArray[float], covar: NDArray[float] | None = None
-    ) -> float | tuple[float, float]:
-        """Derive the autocorrelation integral from the parameters.
-
-        Parameters
-        ----------
-        pars
-            The model parameters.
-        covar
-            The covariance matrix of the parameters, optional.
-
-        Returns
-        -------
-        acint
-            The autocorrelation integral.
-        acint_var
-            The variance of the autocorrelation integral, optional.
-        """
-        raise NotImplementedError
-
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
     ) -> dict[str, NDArray[float]]:
@@ -384,28 +363,23 @@ class ExpTailModel(SpectrumModel):
             raise ValueError("Third or higher derivatives are not supported.")
         return results
 
-    def derive_acint(
-        self, pars: NDArray[float], covar: NDArray[float] | None = None
-    ) -> float | tuple[float, float]:
-        """Derive the autocorrelation integral from the parameters."""
-        acint = pars[:2].sum()
-        if covar is None:
-            return acint
-        acint_var = covar[:2, :2].sum()
-        return acint, acint_var
-
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
     ) -> dict[str, NDArray[float]]:
         """Return additional properties derived from model-specific parameters."""
+        acint = pars[:2].sum()
+        acint_var = covar[:2, :2].sum()
         corrtime = pars[2]
         corrtime_var = covar[2, 2]
         return {
+            "acint": acint,
+            "acint_var": acint_var,
             "corrtime_exp": corrtime,
             "corrtime_exp_var": corrtime_var,
-            "corrtime_exp_std": (np.sqrt(corrtime_var) if corrtime_var >= 0 else np.inf),
             "exptail_block_time": corrtime * np.pi / 20,
+            "exptail_block_time_var": corrtime_var * np.pi / 20,
             "exptail_simulation_time": 20 * corrtime * np.pi,
+            "exptail_simulation_time_var": 20 * corrtime_var * np.pi,
         }
 
 
@@ -509,15 +483,24 @@ class ExpPolyModel(SpectrumModel):
         amplitudes_model = np.exp(np.dot(design_matrix, pars))
         return pars, amplitudes_model
 
-    def derive_acint(
-        self, pars: NDArray[float], covar: NDArray[float] | None = None
-    ) -> float | tuple[float, float]:
-        """Derive the autocorrelation integral from the parameters."""
-        acint = np.exp(pars[0])
-        if covar is None:
-            return acint
-        acint_var = np.exp(2 * pars[0]) * covar[0, 0]
-        return acint, acint_var
+    def derive_props(
+        self, pars: NDArray[float], covar: NDArray[float]
+    ) -> dict[str, NDArray[float]]:
+        """Return additional properties derived from model-specific parameters."""
+        # The logarithm of the autocorrelation integral is the first parameter,
+        # which is assumed to be normally distributed.
+        log_acint = pars[0]
+        log_acint_var = covar[0, 0]
+        # The autocorrelation integral is the exponential of the first parameter,
+        # and is therefore log-normally distributed.
+        acint = np.exp(log_acint + 0.5 * log_acint_var)
+        acint_var = (np.exp(log_acint_var) - 1) * np.exp(2 * log_acint + log_acint_var)
+        return {
+            "log_acint": log_acint,
+            "log_acint_var": log_acint_var,
+            "acint": acint,
+            "acint_var": acint_var,
+        }
 
 
 @attrs.define
@@ -674,15 +657,16 @@ class PadeModel(SpectrumModel):
         amplitudes_model = np.dot(pars_n, basis_n) / (1 + np.dot(pars_d, basis_d))
         return pars, amplitudes_model
 
-    def derive_acint(
-        self, pars: NDArray[float], covar: NDArray[float] | None = None
-    ) -> float | tuple[float, float]:
+    def derive_props(
+        self, pars: NDArray[float], covar: NDArray[float]
+    ) -> dict[str, NDArray[float]]:
         """Derive the autocorrelation integral from the parameters."""
         acint = pars[0]
-        if covar is None:
-            return acint
         acint_var = covar[0, 0]
-        return acint, acint_var
+        return {
+            "acint": acint,
+            "acint_var": acint_var,
+        }
 
 
 def guess(
