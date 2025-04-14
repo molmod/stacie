@@ -30,15 +30,9 @@ from .utils import PositiveDefiniteError, robust_posinv
 __all__ = (
     "CV2LCriterion",
     "CutoffCriterion",
-    "integral_to_cutoff",
     "linear_weighted_regression",
     "switch_func",
 )
-
-
-def integral_to_cutoff(integral: float, exponent: float) -> float:
-    """Create a switching function with a given integral from 0 to infinity."""
-    return integral * exponent * np.sin(np.pi / exponent) / np.pi
 
 
 def switch_func(x: NDArray[float], cutoff: float, exponent: float) -> NDArray[float]:
@@ -48,14 +42,14 @@ def switch_func(x: NDArray[float], cutoff: float, exponent: float) -> NDArray[fl
     return 1 / (1 + (x / cutoff) ** exponent)
 
 
+WEIGHT_EPS = 1e-3
+
+
 @attrs.define
 class CutoffCriterion:
     """Base class for cutoff criteria.
 
     Subclasses should implement the ``__call__`` method.
-
-    The call method must return a dictionary with at least one key ``"criterion"``.
-    It may also return a ``"msg"`` if it fails to compute the criterion.
     """
 
     @property
@@ -84,7 +78,8 @@ class CutoffCriterion:
         -------
         results
             A dictionary with "criterion" and other fields.
-            (See module docstring for details.)
+            It may also contain a ``"msg"`` if it fails to compute the criterion.
+            If the "stop" field is present and set to True, the cutoff scan can be stopped.
         """
         raise NotImplementedError
 
@@ -120,6 +115,13 @@ class CV2LCriterion(CutoffCriterion):
     This option is only disabled for testing. Always leave it enabled in production.
     """
 
+    regularize: bool = attrs.field(default=True)
+    """Whether to regularize the linear regression.
+
+    This option is only disabled for testing. Always leave it enabled in production.
+    It will only have an impact on very ill-conditioned fits.
+    """
+
     @property
     def name(self) -> str:
         """The name of the criterion."""
@@ -139,11 +141,12 @@ class CV2LCriterion(CutoffCriterion):
         weights = switch_func(freqs, self.fcut_factor * fcut, switch_exponent)
         weights1 = switch_func(freqs, 0.5 * self.fcut_factor * fcut, switch_exponent)
         weights2 = weights - weights1
-        ncut = (weights > 1e-3).sum()
+        ncut = (weights > WEIGHT_EPS).sum()
         if ncut == len(freqs):
             return {
                 "criterion": np.inf,
                 "msg": "cv2l: Insufficient data after cutoff.",
+                "stop": True,
             }
         freqs = freqs[:ncut]
         weights = weights[:ncut]
@@ -151,10 +154,18 @@ class CV2LCriterion(CutoffCriterion):
         weights2 = weights2[:ncut]
         amplitudes_model = model.compute(freqs, props["pars"], 1)
 
+        # Prepare the linear problem: transform to a basis where the covariance of
+        # the non-linear regression becomes the identity matrix.
         alphas = 0.5 * spectrum.ndofs[:ncut]
+        design_matrix = amplitudes_model[1].T
+        if self.regularize:
+            design_matrix /= props["cost_hess_scales"]
+            design_matrix = np.dot(design_matrix, props["cost_hess_rescaled_evecs"])
+            design_matrix /= props["cost_hess_rescaled_evals"] ** 0.5
+
         if self.log:
             # Construct a linear regression for the residual of the logarithm of the spectrum.
-            design_matrix = (amplitudes_model[1] / amplitudes_model[0]).T
+            design_matrix /= design_matrix[0][:, None]
             expected_values = (
                 np.log(spectrum.amplitudes[:ncut])
                 - polygamma(0, alphas)
@@ -163,7 +174,6 @@ class CV2LCriterion(CutoffCriterion):
             evstd = np.sqrt(polygamma(1, alphas))
         else:
             # Construct a linear regression for the residual of the spectrum.
-            design_matrix = amplitudes_model[1].T
             expected_values = spectrum.amplitudes[:ncut] - amplitudes_model[0]
             evstd = amplitudes_model[0] / np.sqrt(alphas)
 
@@ -180,6 +190,7 @@ class CV2LCriterion(CutoffCriterion):
             expected_values,
             np.array([weights1, weights2]),
             np.array([[1.0, -1.0]]),
+            ridge=1e-6 if self.regularize else 0.0,
         )
         xd = xs[0]
         cd = cs[0, :, 0]
@@ -220,12 +231,21 @@ class CV2LCriterion(CutoffCriterion):
             + 0.5 * np.log(2 * np.pi * evals).sum()
             + np.log(scales).sum()
         )
+        if self.regularize:
+            nll -= (
+                np.log(props["cost_hess_scales"]).sum()
+                + 0.5 * np.log(props["cost_hess_rescaled_evals"]).sum()
+            )
 
         return {"criterion": nll}
 
 
 def linear_weighted_regression(
-    dm: NDArray[float], ev: NDArray[float], ws: NDArray[float], lc: NDArray[float] | None = None
+    dm: NDArray[float],
+    ev: NDArray[float],
+    ws: NDArray[float],
+    lc: NDArray[float] | None = None,
+    ridge: float = 0.0,
 ) -> tuple[NDArray[float], NDArray[float]]:
     """Perform a linear regression with multiple weight vectors.
 
@@ -266,10 +286,11 @@ def linear_weighted_regression(
     # Perform SVD on each weighted design matrix.
     rws = np.sqrt(ws)
     u, s, vt = np.linalg.svd(np.einsum("we,ep->wep", rws, dm), full_matrices=False)
+    sinv = s / (s**2 + ridge**2)
     # Solve the problem for each weight vector.
-    xs = np.einsum("wip,wi,wei,e,we->wp", vt, 1 / s, u, ev, rws)
+    xs = np.einsum("wip,wi,wei,e,we->wp", vt, sinv, u, ev, rws)
     # Construct the square roots of the covariance matrix for each weight vector.
-    rcs = np.einsum("wip,wi,wei,we->wpe", vt, 1 / s, u, rws)
+    rcs = np.einsum("wip,wi,wei,we->wpe", vt, sinv, u, rws)
     # If lc is None, use the identity matrix.
     if lc is not None:
         # Work out the requested linear combinations.

@@ -21,11 +21,11 @@
 import attrs
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import minimize
+from scipy.optimize import minimize, root_scalar
 
 from .conditioning import ConditionedCost
 from .cost import LowFreqCost
-from .cutoff import CutoffCriterion, CV2LCriterion, integral_to_cutoff, switch_func
+from .cutoff import WEIGHT_EPS, CutoffCriterion, CV2LCriterion, switch_func
 from .model import SpectrumModel, guess
 from .spectrum import Spectrum
 from .utils import PositiveDefiniteError, UnitConfig, label_unit, mixture_stats, robust_posinv
@@ -208,9 +208,19 @@ def estimate_acint(
             line += f"  ({msg})"
         print(line)
 
-    deltaf = spectrum.freqs[1] - spectrum.freqs[0]
-    fcut_min0 = integral_to_cutoff(neff_min, switch_exponent) * deltaf - spectrum.freqs[0]
+    # Determine range of cutoff frequencies
+    fcut_min0 = root_scalar(
+        (lambda f: switch_func(spectrum.freqs, f, switch_exponent).sum() - neff_min),
+        bracket=(spectrum.freqs[1], spectrum.freqs[-1]),
+    ).root
     fcut_min = fcut_min0 if fcut_min is None else max(fcut_min0, fcut_min)
+    fcut_max0 = root_scalar(
+        (lambda f: switch_func(spectrum.freqs[-1], f, switch_exponent) - WEIGHT_EPS),
+        bracket=(spectrum.freqs[1], spectrum.freqs[-1]),
+    ).root
+    fcut_max = fcut_max0 if fcut_max is None else min(fcut_max0, fcut_max)
+
+    # Iterate over the cutoff frequency_grid
     fcut_ratio = np.exp(fcut_spacing / switch_exponent)
     history = []
     best_criterion = None
@@ -254,6 +264,10 @@ def estimate_acint(
             if verbose:
                 print(f"Reached the maximum number of effective points ({neff_max}).")
             break
+        if props.get("stop", False):
+            if verbose:
+                print("Scan stopped by cutoff criterion.")
+            break
         icut += 1
 
     if len(history) == 0:
@@ -270,7 +284,7 @@ def estimate_acint(
         fcut_weight * switch_func(spectrum.freqs, props["fcut"], switch_exponent)
         for fcut_weight, props in zip(fcut_weights, history, strict=True)
     )
-    ncut = np.sum(weights > 1e-3)
+    ncut = np.sum(weights > WEIGHT_EPS)
     freqs = spectrum.freqs[:ncut]
     weights = weights[:ncut]
 
@@ -384,7 +398,7 @@ def fit_model_spectrum(
     """
     # Create a switching function for a smooth cutoff
     weights = switch_func(spectrum.freqs, fcut, switch_exponent)
-    ncut = max((weights >= 1e-3).nonzero()[0][-1], 2 * model.npar)
+    ncut = (weights >= WEIGHT_EPS).sum()
     freqs = spectrum.freqs[:ncut]
     ndofs = spectrum.ndofs[:ncut]
     amplitudes = spectrum.amplitudes[:ncut]

@@ -160,6 +160,22 @@ class SpectrumModel:
         """
         raise NotImplementedError
 
+    def neglog_prior(self, pars: NDArray[float], deriv: int = 0) -> list[NDArray[float]]:
+        """Minus logarithm of the prior probability density function, if any.
+
+        Subclasses may implement (a very weak) prior, if any.
+        """
+        vec_shape = pars.shape[:-1]
+        par_shape = pars.shape[-1:]
+        result = [np.zeros(vec_shape)]
+        if deriv > 0:
+            result.append(np.zeros(vec_shape + par_shape))
+        if deriv > 1:
+            result.append(np.zeros(vec_shape + par_shape + par_shape))
+        if deriv > 2:
+            raise ValueError("Third or higher derivatives are not supported.")
+        return result
+
     def solve_linear(
         self,
         freqs: NDArray[float],
@@ -362,6 +378,41 @@ class ExpTailModel(SpectrumModel):
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
         return results
+
+    def neglog_prior(self, pars: NDArray[float], deriv: int = 0) -> list[NDArray[float]]:
+        """Minus logarithm of the prior probability density function, if any.
+
+        Subclasses may implement (a very weak) prior, if any.
+        """
+        # A very weak normal prior on the logarithm of the correlation time parameter:
+        mean_ct = 0.5 * (np.log(self.scales["timestep"]) + np.log(self.scales["time_scale"]))
+        big = 1e6
+        std_ct = big * mean_ct
+        std_amp = big * self.scales["amp_scale"]
+        # Constant terms are not implemented.
+        vec_shape = pars.shape[:-1]
+        par_shape = pars.shape[-1:]
+        result = [
+            0.5 * ((pars[..., 0] - pars[..., 1]) / std_amp) ** 2
+            + 0.5 * ((pars[..., 2] - mean_ct) / std_ct) ** 2
+        ]
+        if deriv > 0:
+            grad = np.zeros(vec_shape + par_shape)
+            grad[..., 0] = (pars[..., 0] - pars[..., 1]) / std_amp**2
+            grad[..., 1] = (pars[..., 1] - pars[..., 0]) / std_amp**2
+            grad[..., 2] = (pars[..., 2] - mean_ct) / std_ct**2
+            result.append(grad)
+        if deriv > 1:
+            hess = np.zeros(vec_shape + par_shape + par_shape)
+            hess[..., 0, 0] = 1 / std_amp**2
+            hess[..., 0, 1] = -1 / std_amp**2
+            hess[..., 1, 0] = -1 / std_amp**2
+            hess[..., 1, 1] = 1 / std_amp**2
+            hess[..., 2, 2] = 1 / std_ct**2
+            result.append(hess)
+        if deriv > 2:
+            raise ValueError("Third or higher derivatives are not supported.")
+        return result
 
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]

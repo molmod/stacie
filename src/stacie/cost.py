@@ -99,17 +99,21 @@ class LowFreqCost:
         # The Gamma distribution is used because the scale parameter is easily incorporated.
         thetas = [am / alphas for am in amplitudes_model]
         ll_terms = logpdf_gamma(self.amplitudes, alphas, thetas[0], deriv)
-        results[0][mask] = -np.einsum("...i,i->...", ll_terms[0], self.weights)
+        nlp = self.model.neglog_prior(pars[mask] if mask.ndim > 0 else pars, deriv=deriv)
+        results[0][mask] = -np.einsum("...i,i->...", ll_terms[0], self.weights) + nlp[0]
         if deriv >= 1:
-            results[1][mask] = -np.einsum(
-                "...pi,...i,i->...p", thetas[1], ll_terms[1], self.weights
+            results[1][mask] = (
+                -np.einsum("...pi,...i,i->...p", thetas[1], ll_terms[1], self.weights) + nlp[1]
             )
         if deriv >= 2:
-            results[2] = -(
-                np.einsum(
-                    "...pi,...qi,...i,i->...pq", thetas[1], thetas[1], ll_terms[2], self.weights
+            results[2] = (
+                -(
+                    np.einsum(
+                        "...pi,...qi,...i,i->...pq", thetas[1], thetas[1], ll_terms[2], self.weights
+                    )
+                    + np.einsum("...pqi,...i,i->...pq", thetas[2], ll_terms[1], self.weights)
                 )
-                + np.einsum("...pqi,...i,i->...pq", thetas[2], ll_terms[1], self.weights)
+                + nlp[2]
             )
         return results
 
