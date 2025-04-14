@@ -245,6 +245,7 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the cutoff criterion as a function of cutoff frequency."""
     fcuts = np.array([props["fcut"] for props in r.history])
     criteria = np.array([props["criterion"] for props in r.history])
+    criteria -= criteria.min()
     probs = np.exp(-criteria)
     probs /= probs.max()
     ax.plot(fcuts / uc.freq_unit, probs, color="C1", lw=1)

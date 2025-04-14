@@ -114,7 +114,7 @@ class LowFreqCost:
         return results
 
 
-def logpdf_gamma(x: NDArray[float], alpha: NDArray[float], theta: NDArray[float], deriv: int = 1):
+def logpdf_gamma(x: NDArray[float], alpha: NDArray[float], theta: NDArray[float], deriv: int = 0):
     """Compute the logarithm of the probability density function of the Gamma distribution.
 
     Parameters
@@ -150,7 +150,7 @@ def logpdf_gamma(x: NDArray[float], alpha: NDArray[float], theta: NDArray[float]
     return results
 
 
-def entropy_gamma(alpha: NDArray[float], theta: NDArray[float], deriv: int = 1):
+def entropy_gamma(alpha: NDArray[float], theta: NDArray[float], deriv: int = 0):
     """Compute the entropy of the Gamma distribution.
 
     Parameters

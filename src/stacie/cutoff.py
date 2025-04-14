@@ -155,7 +155,11 @@ class CV2LCriterion(CutoffCriterion):
         if self.log:
             # Construct a linear regression for the residual of the logarithm of the spectrum.
             design_matrix = (amplitudes_model[1] / amplitudes_model[0]).T
-            expected_values = np.log(spectrum.amplitudes[:ncut]) - np.log(amplitudes_model[0])
+            expected_values = (
+                np.log(spectrum.amplitudes[:ncut])
+                - polygamma(0, alphas)
+                - np.log(amplitudes_model[0])
+            )
             evstd = np.sqrt(polygamma(1, alphas))
         else:
             # Construct a linear regression for the residual of the spectrum.
