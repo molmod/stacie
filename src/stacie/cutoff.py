@@ -185,13 +185,19 @@ class CV2LCriterion(CutoffCriterion):
         design_matrix = design_matrix / evstd.reshape(-1, 1)
         expected_values = expected_values / evstd
 
-        xs, cs = linear_weighted_regression(
-            design_matrix,
-            expected_values,
-            np.array([weights1, weights2]),
-            np.array([[1.0, -1.0]]),
-            ridge=1e-6 if self.regularize else 0.0,
-        )
+        try:
+            xs, cs = linear_weighted_regression(
+                design_matrix,
+                expected_values,
+                np.array([weights1, weights2]),
+                np.array([[1.0, -1.0]]),
+                ridge=1e-6 if self.regularize else 0.0,
+            )
+        except ValueError as exc:
+            return {
+                "criterion": np.inf,
+                "msg": f"cv2l: {exc.args[0]}",
+            }
         xd = xs[0]
         cd = cs[0, :, 0]
 
