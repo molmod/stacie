@@ -59,11 +59,11 @@ and then bring the sums out of the integral:
 
 $$
     \sigma = \frac{1}{2 V k_\text{B} T}
-        \frac{1}{D}\sum_{d=1}^D
+        \frac{1}{d}\sum_{i=1}^d
         \sum_{n=1}^{N_q} \sum_{m=1}^{N_q}
         q_n q_m
         \int_{-\infty}^{+\infty}
-        \cov[\hat{v}_{n,d}(t_0) \,,\, \hat{v}_{m,d}(t_0 + \Delta_t)]
+        \cov[\hat{v}_{n,i}(t_0) \,,\, \hat{v}_{m,i}(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
 $$
 
@@ -75,9 +75,9 @@ $$
     \sigma \approx \sigma_{NE} = \frac{1}{2 V k_\text{B} T}
         \sum_{n=1}^{N_q}
         q_n^2
-        \frac{1}{D}\sum_{d=1}^D
+        \frac{1}{d}\sum_{i=1}^d
         \int_{-\infty}^{+\infty}
-        \cov[\hat{v}_{n,d}(t_0) \,,\, \hat{v}_{n,d}(t_0 + \Delta_t)]
+        \cov[\hat{v}_{n,i}(t_0) \,,\, \hat{v}_{n,i}(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
 $$
 
@@ -92,10 +92,10 @@ $$
         \sum_{k=1}^{K}
         q_k^2 N_k
         \left(
-        \frac{1}{2 N_k D}\sum_{d=1}^D
+        \frac{1}{2 N_k d}\sum_{i=1}^d
         \sum_{n\in S_k}
         \int_{-\infty}^{+\infty}
-        \cov[\hat{v}_{n,d}(t_0) \,,\, \hat{v}_{n,d}(t_0 + \Delta_t)]
+        \cov[\hat{v}_{n,i}(t_0) \,,\, \hat{v}_{n,i}(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
         \right)
 $$
