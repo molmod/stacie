@@ -88,7 +88,7 @@ class CutoffCriterion:
 class CV2LCriterion(CutoffCriterion):
     """Criterion based on the difference between fits to two halves of the spectrum."""
 
-    fcut_factor: float = attrs.field(default=1.2)
+    fcut_factor: float = attrs.field(default=1.25)
     """The scale factor to apply to the cutoff frequency.
 
     If 1.0, the same part of the spectrum is used as in the full non-linear regression.
@@ -165,7 +165,7 @@ class CV2LCriterion(CutoffCriterion):
 
         if self.log:
             # Construct a linear regression for the residual of the logarithm of the spectrum.
-            design_matrix /= design_matrix[0][:, None]
+            design_matrix /= amplitudes_model[0][:, None]
             expected_values = (
                 np.log(spectrum.amplitudes[:ncut])
                 - polygamma(0, alphas)

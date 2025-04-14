@@ -109,7 +109,7 @@ def estimate_acint(
     switch_exponent: float = 8.0,
     cutoff_criterion: CutoffCriterion | None = None,
     rng: np.random.Generator | None = None,
-    nonlinear_budget: int = 10,
+    nonlinear_budget: int = 100,
     criterion_high: float = 100,
     verbose: bool = False,
     uc: UnitConfig | None = None,
@@ -256,9 +256,12 @@ def estimate_acint(
             criterion = props["criterion"]
             if best_criterion is None or criterion < best_criterion:
                 best_criterion = criterion
-            elif criterion > best_criterion + criterion_high:
+            elif criterion > best_criterion + criterion_high and len(history) > 10:
                 if verbose:
-                    print(f"Cutoff criterion exceeds minimum + {criterion_high}.")
+                    print(
+                        "Cutoff criterion exceeds incumbent + margin: "
+                        f"{best_criterion:.1f} + {criterion_high:.1f}."
+                    )
                 break
         if neff_max is not None and props["neff"] > neff_max:
             if verbose:
