@@ -426,7 +426,7 @@ def fit_model_spectrum(
 
     # Construct cost function and further validate initial guess
     cost = LowFreqCost(freqs, ndofs, amplitudes, weights, model)
-    if not np.isfinite(cost(pars_init, 0)[0]):
+    if not np.isfinite(cost(pars_init, deriv=0)[0]):
         props["criterion"] = np.inf
         props["msg"] = "init: Infinite cost for initial parameters"
         return props
@@ -444,7 +444,7 @@ def fit_model_spectrum(
     )
     pars_opt = conditioned_cost.from_reduced(opt.x)
     props["pars"] = pars_opt
-    props["cost_value"], props["cost_grad"], props["cost_hess"] = cost(pars_opt, 2)
+    props["cost_value"], props["cost_grad"], props["cost_hess"] = cost(pars_opt, deriv=2)
 
     # Compute the Hessian and its properties.
     try:

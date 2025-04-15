@@ -40,7 +40,7 @@ class ConditionedCost:
     par_scales: NDArray[float] = attrs.field()
     cost_scale: float = attrs.field()
 
-    def __call__(self, pars: NDArray[float], deriv: int = 0) -> list[NDArray[float]]:
+    def __call__(self, pars: NDArray[float], *, deriv: int = 0) -> list[NDArray[float]]:
         """Evaluate the pre-conditioned cost function.
 
         Parameters
@@ -64,7 +64,7 @@ class ConditionedCost:
         if deriv < 0:
             raise ValueError("Argument deriv must be zero or positive.")
         pars_orig = pars * self.par_scales
-        results_orig = self.cost(pars_orig, deriv)
+        results_orig = self.cost(pars_orig, deriv=deriv)
         results = [results_orig[0] / self.cost_scale]
         if deriv == 0:
             return results
@@ -121,8 +121,8 @@ class ConditionedCost:
         cost_reduced
             The cost normalized function value.
         """
-        return self(pars, 1)
+        return self(pars, deriv=1)
 
     def hess(self, pars: NDArray[float]) -> NDArray[float]:
         """Compute the Hessian matrix of the cost function."""
-        return self(pars, 2)[2]
+        return self(pars, deriv=2)[2]

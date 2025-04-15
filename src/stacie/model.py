@@ -168,7 +168,7 @@ class SpectrumModel:
         nonlinear_mask = self.get_par_nonlinear()
         pars = np.ones(self.npar)
         pars[nonlinear_mask] = nonlinear_pars
-        basis = self.compute(freqs, pars, 1)[1][~nonlinear_mask]
+        basis = self.compute(freqs, pars, deriv=1)[1][~nonlinear_mask]
         amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
         rescaling = np.sqrt(weights) / amplitudes_std
         linear_pars = np.linalg.lstsq(
@@ -181,7 +181,7 @@ class SpectrumModel:
         return linear_pars, amplitudes_model
 
     def compute(
-        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+        self, freqs: NDArray[float], pars: NDArray[float], *, deriv: int = 0
     ) -> list[NDArray[float]]:
         """Compute the amplitudes of the spectrum model.
 
@@ -211,7 +211,7 @@ class SpectrumModel:
         """
         raise NotImplementedError
 
-    def neglog_prior(self, pars: NDArray[float], deriv: int = 0) -> list[NDArray[float]]:
+    def neglog_prior(self, pars: NDArray[float], *, deriv: int = 0) -> list[NDArray[float]]:
         """Minus logarithm of the prior probability density function, if any.
 
         Subclasses may implement (a very weak) prior, if any.
@@ -326,7 +326,7 @@ class ExpTailModel(SpectrumModel):
         return np.exp(rng.uniform(np.log(corrtime_min), np.log(corrtime_max), (budget, 1)))
 
     def compute(
-        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+        self, freqs: NDArray[float], pars: NDArray[float], *, deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         # Sanity checks
@@ -379,7 +379,7 @@ class ExpTailModel(SpectrumModel):
             raise ValueError("Third or higher derivatives are not supported.")
         return results
 
-    def neglog_prior(self, pars: NDArray[float], deriv: int = 0) -> list[NDArray[float]]:
+    def neglog_prior(self, pars: NDArray[float], *, deriv: int = 0) -> list[NDArray[float]]:
         """Minus logarithm of the prior probability density function, if any.
 
         Subclasses may implement (a very weak) prior, if any.
@@ -510,7 +510,7 @@ class ExpPolyModel(SpectrumModel):
         return pars, amplitudes_model
 
     def compute(
-        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+        self, freqs: NDArray[float], pars: NDArray[float], *, deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):
@@ -643,7 +643,7 @@ class PadeModel(SpectrumModel):
         return pars, amplitudes_model
 
     def compute(
-        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+        self, freqs: NDArray[float], pars: NDArray[float], *, deriv: int = 0
     ) -> list[NDArray[float]]:
         """See :py:meth:`SpectrumModel.compute`."""
         if not isinstance(deriv, int):

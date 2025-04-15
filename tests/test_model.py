@@ -45,7 +45,7 @@ PARS_REF_EXP_TAIL = [
 def check_vectorize_compute(model, pars_ref, broadcast=False):
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
     pars_ref = np.array(pars_ref)
-    amplitudes = model.compute(FREQS, pars_ref, 2)
+    amplitudes = model.compute(FREQS, pars_ref, deriv=2)
     nvec, npar = pars_ref.shape
     assert amplitudes[0].shape == (nvec, len(FREQS))
     if broadcast:
@@ -55,7 +55,7 @@ def check_vectorize_compute(model, pars_ref, broadcast=False):
         assert amplitudes[1].shape == (nvec, npar, len(FREQS))
         assert amplitudes[2].shape == (nvec, npar, npar, len(FREQS))
     for i, one_pars_ref in enumerate(pars_ref):
-        one_amplitudes = model.compute(FREQS, one_pars_ref, 2)
+        one_amplitudes = model.compute(FREQS, one_pars_ref, deriv=2)
         assert one_amplitudes[0].shape == (len(FREQS),)
         assert one_amplitudes[1].shape == (npar, len(FREQS))
         assert one_amplitudes[2].shape == (npar, npar, len(FREQS))
@@ -99,7 +99,7 @@ def test_gradient_exptail_compute(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpTailModel()
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_gradient(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
+    check_gradient(lambda pars, *, deriv=0: model.compute(FREQS, pars, deriv=deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
@@ -107,7 +107,7 @@ def test_hessian_exptail_compute(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpTailModel()
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_hessian(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
+    check_hessian(lambda pars, *, deriv=0: model.compute(FREQS, pars, deriv=deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
@@ -115,7 +115,7 @@ def test_gradient_exptail_prior(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpTailModel()
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_gradient(lambda pars, deriv=0: model.neglog_prior(pars, deriv), pars_ref)
+    check_gradient(lambda pars, *, deriv=0: model.neglog_prior(pars, deriv=deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
@@ -123,7 +123,7 @@ def test_hessian_exptail_prior(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpTailModel()
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_hessian(lambda pars, deriv=0: model.neglog_prior(pars, deriv), pars_ref)
+    check_hessian(lambda pars, *, deriv=0: model.neglog_prior(pars, deriv=deriv), pars_ref)
 
 
 def test_guess_exptail():
@@ -167,7 +167,7 @@ def test_gradient_exppoly_compute(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpPolyModel(list(range(len(pars_ref))))
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_gradient(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
+    check_gradient(lambda pars, *, deriv=0: model.compute(FREQS, pars, deriv=deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_POLY)
@@ -175,7 +175,7 @@ def test_hessian_exppoly_compute(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpPolyModel(list(range(len(pars_ref))))
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_hessian(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
+    check_hessian(lambda pars, *, deriv=0: model.compute(FREQS, pars, deriv=deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_POLY)
@@ -183,7 +183,7 @@ def test_gradient_exppoly_prior(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpPolyModel(list(range(len(pars_ref))))
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_gradient(lambda pars, deriv=0: model.neglog_prior(pars, deriv), pars_ref)
+    check_gradient(lambda pars, *, deriv=0: model.neglog_prior(pars, deriv=deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_POLY)
@@ -191,7 +191,7 @@ def test_hessian_exppoly_prior(pars_ref):
     pars_ref = np.array(pars_ref)
     model = ExpPolyModel(list(range(len(pars_ref))))
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_hessian(lambda pars, deriv=0: model.neglog_prior(pars, deriv), pars_ref)
+    check_hessian(lambda pars, *, deriv=0: model.neglog_prior(pars, deriv=deriv), pars_ref)
 
 
 def test_guess_exppoly():
@@ -233,7 +233,7 @@ def test_gradient_pade(pars_ref):
     pars_ref = np.array(pars_ref)
     model = PadeModel([0, 1, 2], [2])
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_gradient(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
+    check_gradient(lambda pars, *, deriv=0: model.compute(FREQS, pars, deriv=deriv), pars_ref)
 
 
 @pytest.mark.parametrize("pars_ref", PARS_REF_PADE)
@@ -241,7 +241,7 @@ def test_hessian_pade(pars_ref):
     pars_ref = np.array(pars_ref)
     model = PadeModel([0, 1, 2], [2])
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_hessian(lambda pars, deriv=0: model.compute(FREQS, pars, deriv), pars_ref)
+    check_hessian(lambda pars, *, deriv=0: model.compute(FREQS, pars, deriv=deriv), pars_ref)
 
 
 def test_guess_pade():
@@ -260,7 +260,7 @@ def test_guess_pade_detailed():
     model = PadeModel([0, 2], [2])
     model.configure_scales(TIMESTEP, freqs, AMPLITUDES_REF)
     pars_ref = np.array([3.0, 1.5, 2.0])
-    amplitudes_ref = model.compute(freqs, pars_ref, 0)[0]
+    amplitudes_ref = model.compute(freqs, pars_ref, deriv=0)[0]
     x = freqs / freqs[-1]
     assert amplitudes_ref == pytest.approx((3.0 + 1.5 * x**2) / (1.0 + 2.0 * x**2), rel=1e-10)
     ndofs = np.full(len(freqs), 20)

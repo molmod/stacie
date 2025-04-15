@@ -88,7 +88,7 @@ class CutoffCriterion:
 class CV2LCriterion(CutoffCriterion):
     """Criterion based on the difference between fits to two halves of the spectrum."""
 
-    fcut_factor: float = attrs.field(default=1.25)
+    fcut_factor: float = attrs.field(default=1.25, kw_only=True)
     """The scale factor to apply to the cutoff frequency.
 
     If 1.0, the same part of the spectrum is used as in the full non-linear regression.
@@ -98,10 +98,10 @@ class CV2LCriterion(CutoffCriterion):
     This results in less bias on the autocorrelation integral, but slightly larger variance.
     """
 
-    log: bool = attrs.field(default=False)
+    log: bool = attrs.field(default=False, kw_only=True)
     """Whether to fit a linearized model to the logarithm of the spectrum."""
 
-    cond: float = attrs.field(default=1e6)
+    cond: float = attrs.field(default=1e6, kw_only=True)
     """The threshold for the condition number of the preconditioned covariance matrix.
 
     Due to the preconditioning, the condition number should be close to 1.0.
@@ -109,13 +109,13 @@ class CV2LCriterion(CutoffCriterion):
     In this case, "inf" is returned as the criterion.
     """
 
-    precondition: bool = attrs.field(default=True)
+    precondition: bool = attrs.field(default=True, kw_only=True)
     """Whether to precondition the covariance eigendecomposition.
 
     This option is only disabled for testing. Always leave it enabled in production.
     """
 
-    regularize: bool = attrs.field(default=True)
+    regularize: bool = attrs.field(default=True, kw_only=True)
     """Whether to regularize the linear regression.
 
     This option is only disabled for testing. Always leave it enabled in production.
@@ -152,7 +152,7 @@ class CV2LCriterion(CutoffCriterion):
         weights = weights[:ncut]
         weights1 = weights1[:ncut]
         weights2 = weights2[:ncut]
-        amplitudes_model = model.compute(freqs, props["pars"], 1)
+        amplitudes_model = model.compute(freqs, props["pars"], deriv=1)
 
         # Prepare the linear problem: transform to a basis where the covariance of
         # the non-linear regression becomes the identity matrix.
