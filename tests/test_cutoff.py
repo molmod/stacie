@@ -37,7 +37,34 @@ def test_cv2l_preconditioned():
     pars = np.array([0.1, 0.2])
     fcut = spectrum.freqs[nstep // 4]
     ncut = nstep // 3
-    props = {"fcut": fcut, "ncut": ncut, "pars": pars, "switch_exponent": 20.0}
+    props = {
+        "fcut": fcut,
+        "ncut": ncut,
+        "pars": pars,
+        "switch_exponent": 20.0,
+    }
+    result1 = CV2LCriterion(regularize=False)(spectrum, model, props)
+    result2 = CV2LCriterion(regularize=False, precondition=False)(spectrum, model, props)
+    assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)
+
+
+def test_cv2l_regularize():
+    nstep = 400
+    rng = np.random.default_rng(42)
+    spectrum = compute_spectrum(rng.standard_normal((10, nstep)))
+    model = ExpPolyModel([0, 1])
+    pars = np.array([0.1, 0.2])
+    fcut = spectrum.freqs[nstep // 4]
+    ncut = nstep // 3
+    props = {
+        "fcut": fcut,
+        "ncut": ncut,
+        "pars": pars,
+        "switch_exponent": 20.0,
+        "cost_hess_scales": np.array([1.0, 10.0]),
+        "cost_hess_rescaled_evals": np.array([1.0, 2.0]),
+        "cost_hess_rescaled_evecs": np.array([[1.0, 0.0], [0.0, 1.0]]),
+    }
     result1 = CV2LCriterion()(spectrum, model, props)
     result2 = CV2LCriterion(precondition=False)(spectrum, model, props)
     assert result1["criterion"] == pytest.approx(result2["criterion"], rel=1e-5)
