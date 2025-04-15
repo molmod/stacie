@@ -558,33 +558,15 @@ class ExpPolyModel(SpectrumModel):
 class PadeModel(SpectrumModel):
     """A rational function model for the spectrum, a.k.a. a Padé approximation."""
 
-    numer_degrees: list[int] = attrs.field(converter=list)
+    numer_degrees: list[int] = attrs.field(converter=_convert_degrees, validator=_validate_degrees)
     """The degrees of the monomials in the numerator."""
 
-    @numer_degrees.validator
-    def _validate_num_degrees(self, attribute, value):
-        if not all(isinstance(degree, int) and degree >= 0 for degree in value):
-            raise ValueError("All numer_degrees must be non-negative, got {value}.")
-        if len(value) == 0:
-            raise ValueError("The list of numer_degrees must not be empty.")
-        if len(value) != len(set(value)):
-            raise ValueError("The list of numer_degrees must not contain duplicates.")
-
-    denom_degrees: list[int] = attrs.field(converter=list)
+    denom_degrees: list[int] = attrs.field(converter=_convert_degrees, validator=_validate_degrees)
     """The degrees of the monomials in the denominator.
 
     Note that the leading term is always 1, and there is no need to include
     degree zero.
     """
-
-    @denom_degrees.validator
-    def _validate_num_degrees(self, attribute, value):
-        if not all(isinstance(degree, int) and degree >= 1 for degree in value):
-            raise ValueError("All denom_degrees must be structky positive, got {value}.")
-        if len(value) == 0:
-            raise ValueError("The list of denom_degrees must not be empty.")
-        if len(value) != len(set(value)):
-            raise ValueError("The list of denom_degrees must not contain duplicates.")
 
     @property
     def name(self):
@@ -731,7 +713,12 @@ class PadeModel(SpectrumModel):
             "acint": acint,
             "acint_var": acint_var,
         }
-        if self.numer_degrees == [0, 2] and self.denom_degrees == [2]:
+        if (
+            self.numer_degrees.shape == (2,)
+            and (self.numer_degrees == [0, 2]).all()
+            and self.denom_degrees.shape == (1,)
+            and (self.denom_degrees == [2]).all()
+        ):
             # The following estimates of the exponential correlation time and its variance
             # are only valid for small variances.
             tau = np.sqrt(pars[2]) / (2 * np.pi)
