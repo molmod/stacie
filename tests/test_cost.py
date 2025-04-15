@@ -36,22 +36,22 @@ LOGPDF_GAMMA_CASES = [
 
 @pytest.mark.parametrize(("x", "alpha", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_logpdf_gamma_deriv1(x, alpha, theta_ref):
-    check_deriv(lambda theta, deriv=0: logpdf_gamma(x, alpha, theta, deriv), theta_ref)
+    check_deriv(lambda theta, *, deriv=0: logpdf_gamma(x, alpha, theta, deriv=deriv), theta_ref)
 
 
 @pytest.mark.parametrize(("x", "alpha", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_logpdf_gamma_deriv2(x, alpha, theta_ref):
-    check_curv(lambda theta, deriv=0: logpdf_gamma(x, alpha, theta, deriv), theta_ref)
+    check_curv(lambda theta, *, deriv=0: logpdf_gamma(x, alpha, theta, deriv=deriv), theta_ref)
 
 
 @pytest.mark.parametrize(("x", "alpha", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_entropy_gamma_deriv1(x, alpha, theta_ref):
-    check_deriv(lambda theta, deriv=0: entropy_gamma(alpha, theta, deriv), theta_ref)
+    check_deriv(lambda theta, *, deriv=0: entropy_gamma(alpha, theta, deriv=deriv), theta_ref)
 
 
 @pytest.mark.parametrize(("x", "alpha", "theta_ref"), LOGPDF_GAMMA_CASES)
 def test_entropy_gamma_deriv2(x, alpha, theta_ref):
-    check_curv(lambda theta, deriv=0: entropy_gamma(alpha, theta, deriv), theta_ref)
+    check_curv(lambda theta, *, deriv=0: entropy_gamma(alpha, theta, deriv=deriv), theta_ref)
 
 
 def test_entropy():
@@ -89,14 +89,14 @@ PARS_REF_EXP_TAIL = [
 
 def test_vectorize_exptail(mycost):
     """Check that the model is vectorized."""
-    results = mycost(PARS_REF_EXP_TAIL, 2)
+    results = mycost(PARS_REF_EXP_TAIL, deriv=2)
     assert len(results) == 3
     nvec = len(PARS_REF_EXP_TAIL)
     assert results[0].shape == (nvec,)
     assert results[1].shape == (nvec, 3)
     assert results[2].shape == (nvec, 3, 3)
     for i, one_pars_ref in enumerate(PARS_REF_EXP_TAIL):
-        one_results = mycost(one_pars_ref, 2)
+        one_results = mycost(one_pars_ref, deriv=2)
         assert one_results[0].shape == ()
         assert one_results[1].shape == (3,)
         assert one_results[2].shape == (3, 3)

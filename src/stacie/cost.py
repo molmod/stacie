@@ -47,7 +47,7 @@ class LowFreqCost:
     model: SpectrumModel = attrs.field()
     """The model to be fitted to the spectrum."""
 
-    def __call__(self, pars: NDArray[float], deriv: int = 0) -> float:
+    def __call__(self, pars: NDArray[float], *, deriv: int = 0) -> float:
         """Evaluate the cost function and its derivatives.
 
         Parameters
@@ -81,7 +81,7 @@ class LowFreqCost:
 
         # Compute the model spectrum and its derivatives.
         amplitudes_model = self.model.compute(
-            self.freqs, pars if mask.ndim == 0 else pars[mask], deriv
+            self.freqs, pars if mask.ndim == 0 else pars[mask], deriv=deriv
         )
         alphas = 0.5 * self.ndofs
 
@@ -98,7 +98,7 @@ class LowFreqCost:
         # Log-likelihood computed with the scaled Chi-squared distribution.
         # The Gamma distribution is used because the scale parameter is easily incorporated.
         thetas = [am / alphas for am in amplitudes_model]
-        ll_terms = logpdf_gamma(self.amplitudes, alphas, thetas[0], deriv)
+        ll_terms = logpdf_gamma(self.amplitudes, alphas, thetas[0], deriv=deriv)
         nlp = self.model.neglog_prior(pars[mask] if mask.ndim > 0 else pars, deriv=deriv)
         results[0][mask] = -np.einsum("...i,i->...", ll_terms[0], self.weights) + nlp[0]
         if deriv >= 1:
@@ -118,7 +118,9 @@ class LowFreqCost:
         return results
 
 
-def logpdf_gamma(x: NDArray[float], alpha: NDArray[float], theta: NDArray[float], deriv: int = 0):
+def logpdf_gamma(
+    x: NDArray[float], alpha: NDArray[float], theta: NDArray[float], *, deriv: int = 0
+):
     """Compute the logarithm of the probability density function of the Gamma distribution.
 
     Parameters
@@ -154,7 +156,7 @@ def logpdf_gamma(x: NDArray[float], alpha: NDArray[float], theta: NDArray[float]
     return results
 
 
-def entropy_gamma(alpha: NDArray[float], theta: NDArray[float], deriv: int = 0):
+def entropy_gamma(alpha: NDArray[float], theta: NDArray[float], *, deriv: int = 0):
     """Compute the entropy of the Gamma distribution.
 
     Parameters

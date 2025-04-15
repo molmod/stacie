@@ -52,12 +52,12 @@ def function(x, deriv: int = 0):
 def test_vectorize_function():
     """Check that the function can be vectorized."""
     x0 = np.array([[1.0, 2.0, 4.0], [1.0, 3.0, 4.0]])
-    results = function(x0, 2)
+    results = function(x0, deriv=2)
     assert results[0].shape == (2,)
     assert results[1].shape == (2, 3)
     assert results[2].shape == (2, 3, 3)
     for i, one_x0 in enumerate(x0):
-        one_results = function(one_x0, 2)
+        one_results = function(one_x0, deriv=2)
         assert one_results[0].shape == ()
         assert one_results[1].shape == (3,)
         assert one_results[2].shape == (3, 3)
@@ -81,12 +81,12 @@ def test_vectorize_conditioned_cost():
     par_scales = np.array([5.0, 2.3, 7.0])
     cost = ConditionedCost(function, par_scales, 5.0)
     x0 = np.array([[1.0, 2.0, 3.0], [1.0, 3.0, 4.0]])
-    results = cost(x0, 2)
+    results = cost(x0, deriv=2)
     assert results[0].shape == (2,)
     assert results[1].shape == (2, 3)
     assert results[2].shape == (2, 3, 3)
     for i, one_x0 in enumerate(x0):
-        one_results = cost(one_x0, 2)
+        one_results = cost(one_x0, deriv=2)
         assert one_results[0].shape == ()
         assert one_results[1].shape == (3,)
         assert one_results[2].shape == (3, 3)
@@ -99,12 +99,12 @@ def test_conditioned_cost():
     par_scales = np.array([1.0, 2.0, 3.0, 4.0])
     cost = ConditionedCost(function, par_scales, 5.0)
     x0 = np.array([0.1, 0.2, 0.3, 0.4])
-    assert cost(x0, 0) == pytest.approx([np.prod(x0 * par_scales) / 5.0])
+    assert cost(x0, deriv=0) == pytest.approx([np.prod(x0 * par_scales) / 5.0])
     assert cost.from_reduced(x0) == pytest.approx(x0 * par_scales)
     assert cost.to_reduced(x0) == pytest.approx(x0 / par_scales)
     assert cost.funcgrad(x0)[0] == pytest.approx(cost(x0)[0])
-    assert cost.funcgrad(x0)[1] == pytest.approx(cost(x0, 1)[1])
-    assert cost.hess(x0) == pytest.approx(cost(x0, 2)[2])
+    assert cost.funcgrad(x0)[1] == pytest.approx(cost(x0, deriv=1)[1])
+    assert cost.hess(x0) == pytest.approx(cost(x0, deriv=2)[2])
 
 
 def test_conditioned_cost_deriv1():

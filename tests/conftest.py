@@ -34,7 +34,7 @@ mpl.rcParams["axes.spines.right"] = False
 
 def check_deriv(func, x0):
     """Check the derivative with Stacie's convention for returning gradients."""
-    deriv = func(x0, 1)[1]
+    deriv = func(x0, deriv=1)[1]
     num_deriv, info = nd.Derivative(lambda x: func(x)[0], full_output=True)(x0)
     error = np.clip(info.error_estimate, 1e-15, np.inf)
     assert deriv / error == pytest.approx(num_deriv / error, abs=100)
@@ -42,15 +42,15 @@ def check_deriv(func, x0):
 
 def check_curv(func, x0):
     """Check the curvature with Stacie's convention for returning gradients."""
-    curv = func(x0, 2)[2]
-    num_curv, info = nd.Derivative(lambda x: func(x, 1)[1], full_output=True)(x0)
+    curv = func(x0, deriv=2)[2]
+    num_curv, info = nd.Derivative(lambda x: func(x, deriv=1)[1], full_output=True)(x0)
     error = np.clip(info.error_estimate, 1e-15, np.inf)
     assert curv / error == pytest.approx(num_curv / error, abs=100)
 
 
 def check_gradient(func, x0):
     """Check the gradient with Stacie's convention for returning gradients."""
-    grad = func(x0, 1)[1]
+    grad = func(x0, deriv=1)[1]
     num_grad, info = nd.Gradient(lambda x: func(x)[0], full_output=True)(x0)
     error = np.clip(info.error_estimate, 1e-15, np.inf)
     if num_grad.ndim == 2:
@@ -61,7 +61,7 @@ def check_gradient(func, x0):
 
 def check_hessian(func, x0):
     """Check the Hessian with Stacie's convention for returning gradients."""
-    hess = func(x0, 2)[2]
-    num_hess, info = nd.Gradient(lambda x: func(x, 1)[1], full_output=True)(x0)
+    hess = func(x0, deriv=2)[2]
+    num_hess, info = nd.Gradient(lambda x: func(x, deriv=1)[1], full_output=True)(x0)
     error = np.clip(info.error_estimate, 1e-15, np.inf)
     assert hess / error == pytest.approx(num_hess / error, abs=100)
