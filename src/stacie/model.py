@@ -606,8 +606,9 @@ class PadeModel(SpectrumModel):
         """Return the scales of the parameters and the cost function."""
         return np.concatenate(
             [
-                np.full(len(self.numer_degrees), self.scales["amp_scale"]),
-                np.ones(len(self.denom_degrees)),
+                self.scales["amp_scale"]
+                * self.scales["freq_scale"] ** (-np.array(self.numer_degrees)),
+                self.scales["freq_scale"] ** (-np.array(self.denom_degrees)),
             ]
         )
 
@@ -632,9 +633,8 @@ class PadeModel(SpectrumModel):
             raise ValueError("The number of parameters does not match the model.")
 
         # Construct two bases of monomials.
-        x = freqs / self.scales["freq_scale"]
-        basis_n = np.power.outer(x, self.numer_degrees).T
-        basis_d = np.power.outer(x, self.denom_degrees).T
+        basis_n = np.power.outer(freqs, self.numer_degrees).T
+        basis_d = np.power.outer(freqs, self.denom_degrees).T
         pars_n = pars[..., :npar_n]
         pars_d = pars[..., npar_n:]
 
@@ -692,9 +692,14 @@ class PadeModel(SpectrumModel):
         """
         if len(nonlinear_pars) != 0:
             raise ValueError("The number of nonlinear parameters must be exactly 0.")
+        # Rescale frequencies as a simple form of preconditioning.
         x = freqs / freqs[-1]
+
+        # Construct bases of monomials.
         basis_n = np.power.outer(x, self.numer_degrees).T
         basis_d = np.power.outer(x, self.denom_degrees).T
+
+        # Set up and solve linear regression problem.
         amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
         rescaling = np.sqrt(weights) / amplitudes_std
         expected_values = amplitudes * rescaling
@@ -702,10 +707,18 @@ class PadeModel(SpectrumModel):
         part_d = -basis_d * expected_values
         design_matrix = np.concatenate([part_n, part_d]).T
         pars = np.linalg.lstsq(design_matrix, expected_values, rcond=-1)[0]
+
+        # Compute fitted model amplitudes.
         npar_n = len(self.numer_degrees)
         pars_n = pars[:npar_n]
         pars_d = pars[npar_n:]
         amplitudes_model = np.dot(pars_n, basis_n) / (1 + np.dot(pars_d, basis_d))
+
+        # Convert parameters to the original scale.
+        pars = np.zeros(self.npar)
+        pars[:npar_n] = pars_n / self.scales["freq_scale"] ** self.numer_degrees
+        pars[npar_n:] = pars_d / self.scales["freq_scale"] ** self.denom_degrees
+
         return pars, amplitudes_model
 
     def derive_props(
@@ -714,10 +727,26 @@ class PadeModel(SpectrumModel):
         """Derive the autocorrelation integral from the parameters."""
         acint = pars[0]
         acint_var = covar[0, 0]
-        return {
+        props = {
             "acint": acint,
             "acint_var": acint_var,
         }
+        if self.numer_degrees == [0, 2] and self.denom_degrees == [2]:
+            # The following estimates of the exponential correlation time and its variance
+            # are only valid for small variances.
+            tau = np.sqrt(pars[2]) / (2 * np.pi)
+            dtau_dp = 1 / (4 * np.pi * np.sqrt(pars[2]))
+            tau_var = covar[2, 2] * dtau_dp**2
+            tau_props = {
+                "corrtime_exp": tau,
+                "corrtime_exp_var": tau_var,
+                "exptail_block_time": tau * np.pi / 20,
+                "exptail_block_time_var": tau_var * np.pi / 20,
+                "exptail_simulation_time": 20 * tau * np.pi,
+                "exptail_simulation_time_var": 20 * tau_var * np.pi,
+            }
+            props.update(tau_props)
+        return props
 
 
 def guess(

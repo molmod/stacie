@@ -31,7 +31,7 @@ from path import Path
 
 from stacie.cutoff import CV2LCriterion
 from stacie.estimate import Result, estimate_acint, summarize_results
-from stacie.model import ExpPolyModel, ExpTailModel, SpectrumModel
+from stacie.model import ExpPolyModel, ExpTailModel, PadeModel, SpectrumModel
 from stacie.plot import plot_results
 from stacie.spectrum import Spectrum
 
@@ -44,7 +44,8 @@ CASES = [
     ("pure", ExpTailModel(), 0.1),
     ("pure", ExpPolyModel([0, 2]), 0.02),
     ("double", ExpTailModel(), 0.1),
-    ("double", ExpPolyModel([0, 2]), 0.02),
+    ("double", ExpPolyModel([0, 2]), 0.05),
+    ("double", PadeModel([0, 2], [2]), 0.05),
 ]
 CRITERIA = [CV2LCriterion()]
 
