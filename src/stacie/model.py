@@ -129,53 +129,6 @@ class SpectrumModel:
         """
         raise NotImplementedError
 
-    def compute(
-        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
-    ) -> list[NDArray[float]]:
-        """Compute the amplitudes of the spectrum model.
-
-        Parameters
-        ----------
-        freqs
-            The frequencies for which the model spectrum amplitudes are computed.
-        pars
-            The parameter vector.
-            For vectorized calculations, the last axis corresponds to the parameter index.
-        deriv
-            The maximum order of derivatives to compute: 0, 1 or 2.
-
-        Returns
-        -------
-        results
-            A results list, index corresponds to order of derivative.
-            The shape of the arrays in the results list is as follows:
-
-            - For ``deriv=0``, the shape is ``(*vec_shape, len(freqs))``.
-            - For ``deriv=1``, the shape is ``(*vec_shape, len(pars), len(freqs))``.
-            - For ``deriv=2``, the shape is ``(*vec_shape, len(pars), len(pars), len(freqs))``
-
-            If some derivatives are independent of the parameters,
-            broadcasting rules may be used to reduce the memory footprint.
-            This means that ``vec_shape`` may be replaced by a tuple of ones with the same length.
-        """
-        raise NotImplementedError
-
-    def neglog_prior(self, pars: NDArray[float], deriv: int = 0) -> list[NDArray[float]]:
-        """Minus logarithm of the prior probability density function, if any.
-
-        Subclasses may implement (a very weak) prior, if any.
-        """
-        vec_shape = pars.shape[:-1]
-        par_shape = pars.shape[-1:]
-        result = [np.zeros(vec_shape)]
-        if deriv > 0:
-            result.append(np.zeros(vec_shape + par_shape))
-        if deriv > 1:
-            result.append(np.zeros(vec_shape + par_shape + par_shape))
-        if deriv > 2:
-            raise ValueError("Third or higher derivatives are not supported.")
-        return result
-
     def solve_linear(
         self,
         freqs: NDArray[float],
@@ -226,6 +179,53 @@ class SpectrumModel:
         )[0]
         amplitudes_model = np.dot(linear_pars, basis)
         return linear_pars, amplitudes_model
+
+    def compute(
+        self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
+    ) -> list[NDArray[float]]:
+        """Compute the amplitudes of the spectrum model.
+
+        Parameters
+        ----------
+        freqs
+            The frequencies for which the model spectrum amplitudes are computed.
+        pars
+            The parameter vector.
+            For vectorized calculations, the last axis corresponds to the parameter index.
+        deriv
+            The maximum order of derivatives to compute: 0, 1 or 2.
+
+        Returns
+        -------
+        results
+            A results list, index corresponds to order of derivative.
+            The shape of the arrays in the results list is as follows:
+
+            - For ``deriv=0``, the shape is ``(*vec_shape, len(freqs))``.
+            - For ``deriv=1``, the shape is ``(*vec_shape, len(pars), len(freqs))``.
+            - For ``deriv=2``, the shape is ``(*vec_shape, len(pars), len(pars), len(freqs))``
+
+            If some derivatives are independent of the parameters,
+            broadcasting rules may be used to reduce the memory footprint.
+            This means that ``vec_shape`` may be replaced by a tuple of ones with the same length.
+        """
+        raise NotImplementedError
+
+    def neglog_prior(self, pars: NDArray[float], deriv: int = 0) -> list[NDArray[float]]:
+        """Minus logarithm of the prior probability density function, if any.
+
+        Subclasses may implement (a very weak) prior, if any.
+        """
+        vec_shape = pars.shape[:-1]
+        par_shape = pars.shape[-1:]
+        result = [np.zeros(vec_shape)]
+        if deriv > 0:
+            result.append(np.zeros(vec_shape + par_shape))
+        if deriv > 1:
+            result.append(np.zeros(vec_shape + par_shape + par_shape))
+        if deriv > 2:
+            raise ValueError("Third or higher derivatives are not supported.")
+        return result
 
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
@@ -485,6 +485,30 @@ class ExpPolyModel(SpectrumModel):
         """Return a boolean mask for the nonlinear parameters."""
         return np.zeros(self.npar, dtype=bool)
 
+    def solve_linear(
+        self,
+        freqs: NDArray[float],
+        ndofs: NDArray[float],
+        amplitudes: NDArray[float],
+        weights: NDArray[float],
+        nonlinear_pars: NDArray[float],
+    ) -> NDArray[float]:
+        """Use linear linear regression to solve a subset of the parameters.
+
+        This is a specialized implementation that rewrites the problem
+        in a different form to solve all parameters with a linear regression.
+        """
+        if len(nonlinear_pars) != 0:
+            raise ValueError("The number of nonlinear parameters must be exactly 0.")
+        log_amplitudes = np.log(amplitudes)
+        log_amplitudes_std = polygamma(1, 0.5 * ndofs)
+        rescaling = np.sqrt(weights) / log_amplitudes_std
+        expected_values = log_amplitudes * rescaling
+        design_matrix = np.power.outer(freqs, self.degrees) * rescaling[:, None]
+        pars = np.linalg.lstsq(design_matrix, expected_values, rcond=-1)[0]
+        amplitudes_model = np.exp(np.dot(design_matrix, pars))
+        return pars, amplitudes_model
+
     def compute(
         self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
@@ -509,30 +533,6 @@ class ExpPolyModel(SpectrumModel):
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
         return results
-
-    def solve_linear(
-        self,
-        freqs: NDArray[float],
-        ndofs: NDArray[float],
-        amplitudes: NDArray[float],
-        weights: NDArray[float],
-        nonlinear_pars: NDArray[float],
-    ) -> NDArray[float]:
-        """Use linear linear regression to solve a subset of the parameters.
-
-        This is a specialized implementation that rewrites the problem
-        in a different form to solve all parameters with a linear regression.
-        """
-        if len(nonlinear_pars) != 0:
-            raise ValueError("The number of nonlinear parameters must be exactly 0.")
-        log_amplitudes = np.log(amplitudes)
-        log_amplitudes_std = polygamma(1, 0.5 * ndofs)
-        rescaling = np.sqrt(weights) / log_amplitudes_std
-        expected_values = log_amplitudes * rescaling
-        design_matrix = np.power.outer(freqs, self.degrees) * rescaling[:, None]
-        pars = np.linalg.lstsq(design_matrix, expected_values, rcond=-1)[0]
-        amplitudes_model = np.exp(np.dot(design_matrix, pars))
-        return pars, amplitudes_model
 
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
@@ -598,6 +598,50 @@ class PadeModel(SpectrumModel):
         """Return a boolean mask for the nonlinear parameters."""
         return np.zeros(self.npar, dtype=bool)
 
+    def solve_linear(
+        self,
+        freqs: NDArray[float],
+        ndofs: NDArray[float],
+        amplitudes: NDArray[float],
+        weights: NDArray[float],
+        nonlinear_pars: NDArray[float],
+    ) -> NDArray[float]:
+        """Use linear linear regression to solve a subset of the parameters.
+
+        This is a specialized implementation that rewrites the problem
+        in a different form to solve all parameters with a linear regression.
+        """
+        if len(nonlinear_pars) != 0:
+            raise ValueError("The number of nonlinear parameters must be exactly 0.")
+        # Rescale frequencies as a simple form of preconditioning.
+        x = freqs / freqs[-1]
+
+        # Construct bases of monomials.
+        basis_n = np.power.outer(x, self.numer_degrees).T
+        basis_d = np.power.outer(x, self.denom_degrees).T
+
+        # Set up and solve linear regression problem.
+        amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
+        rescaling = np.sqrt(weights) / amplitudes_std
+        expected_values = amplitudes * rescaling
+        part_n = basis_n * rescaling
+        part_d = -basis_d * expected_values
+        design_matrix = np.concatenate([part_n, part_d]).T
+        pars = np.linalg.lstsq(design_matrix, expected_values, rcond=-1)[0]
+
+        # Compute fitted model amplitudes.
+        npar_n = len(self.numer_degrees)
+        pars_n = pars[:npar_n]
+        pars_d = pars[npar_n:]
+        amplitudes_model = np.dot(pars_n, basis_n) / (1 + np.dot(pars_d, basis_d))
+
+        # Convert parameters to the original scale.
+        pars = np.zeros(self.npar)
+        pars[:npar_n] = pars_n / self.scales["freq_scale"] ** self.numer_degrees
+        pars[npar_n:] = pars_d / self.scales["freq_scale"] ** self.denom_degrees
+
+        return pars, amplitudes_model
+
     def compute(
         self, freqs: NDArray[float], pars: NDArray[float], deriv: int = 0
     ) -> list[NDArray[float]]:
@@ -658,50 +702,6 @@ class PadeModel(SpectrumModel):
         if deriv >= 3:
             raise ValueError("Third or higher derivatives are not supported.")
         return results
-
-    def solve_linear(
-        self,
-        freqs: NDArray[float],
-        ndofs: NDArray[float],
-        amplitudes: NDArray[float],
-        weights: NDArray[float],
-        nonlinear_pars: NDArray[float],
-    ) -> NDArray[float]:
-        """Use linear linear regression to solve a subset of the parameters.
-
-        This is a specialized implementation that rewrites the problem
-        in a different form to solve all parameters with a linear regression.
-        """
-        if len(nonlinear_pars) != 0:
-            raise ValueError("The number of nonlinear parameters must be exactly 0.")
-        # Rescale frequencies as a simple form of preconditioning.
-        x = freqs / freqs[-1]
-
-        # Construct bases of monomials.
-        basis_n = np.power.outer(x, self.numer_degrees).T
-        basis_d = np.power.outer(x, self.denom_degrees).T
-
-        # Set up and solve linear regression problem.
-        amplitudes_std = amplitudes / np.sqrt(0.5 * ndofs)
-        rescaling = np.sqrt(weights) / amplitudes_std
-        expected_values = amplitudes * rescaling
-        part_n = basis_n * rescaling
-        part_d = -basis_d * expected_values
-        design_matrix = np.concatenate([part_n, part_d]).T
-        pars = np.linalg.lstsq(design_matrix, expected_values, rcond=-1)[0]
-
-        # Compute fitted model amplitudes.
-        npar_n = len(self.numer_degrees)
-        pars_n = pars[:npar_n]
-        pars_d = pars[npar_n:]
-        amplitudes_model = np.dot(pars_n, basis_n) / (1 + np.dot(pars_d, basis_d))
-
-        # Convert parameters to the original scale.
-        pars = np.zeros(self.npar)
-        pars[:npar_n] = pars_n / self.scales["freq_scale"] ** self.numer_degrees
-        pars[npar_n:] = pars_d / self.scales["freq_scale"] ** self.denom_degrees
-
-        return pars, amplitudes_model
 
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
