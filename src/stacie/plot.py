@@ -247,10 +247,10 @@ def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     criteria = np.array([props["criterion"] for props in r.history])
     criteria -= criteria.min()
     probs = np.exp(-criteria)
-    probs /= probs.max()
+    probs /= probs.sum()
     ax.plot(fcuts / uc.freq_unit, probs, color="C1", lw=1)
     ax.set_xlabel(label_unit("Cutoff frequency", uc.freq_unit_str))
-    ax.set_ylabel("Relative probability")
+    ax.set_ylabel("Cutoff weight")
     ax.set_title("Cutoff criterion " + r.cutoff_criterion.name, wrap=True)
 
 
