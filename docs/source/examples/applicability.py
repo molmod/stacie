@@ -125,7 +125,7 @@ sequences = trajectory[:, 0, :].T
 spectrum = compute_spectrum(
     sequences,
     timestep=TIMESTEP,
-    prefactor=1 / (NSTEP * TIMESTEP * NSYS),
+    prefactors=1 / (NSTEP * TIMESTEP * NSYS),
     include_zero_freq=False,
 )
 plt.close("spectrum")

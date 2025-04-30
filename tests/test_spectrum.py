@@ -26,7 +26,8 @@ from stacie.spectrum import compute_spectrum
 
 
 @pytest.mark.parametrize("use_iter", [False, True])
-def test_basics(use_iter):
+@pytest.mark.parametrize("prefactors_none", [False, True])
+def test_basics(use_iter: bool, prefactors_none: bool):
     sequences = np.array(
         [
             [0.66134257, 1.69596962, 2.08533685, 0.62396761, -0.21445517, 1.2226847],
@@ -35,14 +36,24 @@ def test_basics(use_iter):
     )
     prefactor = 0.34
     timestep = 10.0
-    spectrum = compute_spectrum(
-        iter(sequences) if use_iter else sequences, prefactor=prefactor, timestep=timestep
-    )
+    if prefactors_none:
+        spectrum = compute_spectrum(
+            [(prefactor, sequences[0]), (prefactor, sequences[1])]
+            if use_iter
+            else (prefactor, sequences),
+            prefactors=None,
+            timestep=timestep,
+        )
+    else:
+        spectrum = compute_spectrum(
+            iter(sequences) if use_iter else sequences,
+            prefactors=[prefactor] * 2 if use_iter else prefactor,
+            timestep=timestep,
+        )
     # Test simple properties.
     assert spectrum.nfreq == 4
     assert_equal(spectrum.ndofs, [2, 4, 4, 2])
     assert spectrum.nstep == 6
-    assert spectrum.prefactor == prefactor
     assert spectrum.timestep == timestep
     assert spectrum.freqs[0] == 0.0
     assert len(spectrum.freqs) == 4
@@ -69,12 +80,11 @@ def test_single():
     sequence = np.array([0.66134257, 1.69596962, 2.08533685, 0.62396761, -0.21445517, 1.2226847])
     prefactor = 0.25
     timestep = 2.5
-    spectrum = compute_spectrum(sequence, prefactor=prefactor, timestep=timestep)
+    spectrum = compute_spectrum(sequence, prefactors=prefactor, timestep=timestep)
     # Test simple properties.
     assert spectrum.nfreq == 4
     assert_equal(spectrum.ndofs, [1, 2, 2, 1])
     assert spectrum.nstep == 6
-    assert spectrum.prefactor == prefactor
     assert spectrum.timestep == timestep
     assert spectrum.freqs[0] == 0.0
     assert len(spectrum.freqs) == 4
@@ -97,26 +107,6 @@ def test_single():
     assert spectrum2.amplitudes_ref is None
 
 
-def test_nsplit():
-    sequence = np.array(
-        [
-            0.25958082,
-            0.90295639,
-            0.95906289,
-            0.14652049,
-            0.6751826,
-            0.99754354,
-            0.2955122,
-            0.18958874,
-            0.29405263,
-        ]
-    )
-    spectrum = compute_spectrum(sequence, nsplit=2)
-    assert spectrum.nstep == 4
-    assert spectrum.nfreq == 3
-    assert_equal(spectrum.ndofs, [2, 4, 4])
-
-
 def test_variance():
     sequences = np.array(
         [
@@ -128,6 +118,6 @@ def test_variance():
     s1 = compute_spectrum(sequences)
     s2 = s1.without_zero_freq()
     s3 = compute_spectrum(sequences, include_zero_freq=False)
-    assert s1.variance == pytest.approx((sequences**2).mean())
-    assert s2.variance == pytest.approx(np.var(sequences, ddof=1))
-    assert s3.variance == pytest.approx(np.var(sequences, ddof=1))
+    assert s1.variance == pytest.approx(0.5 * (sequences**2).mean())
+    assert s2.variance == pytest.approx(0.5 * np.var(sequences, ddof=1))
+    assert s3.variance == pytest.approx(0.5 * np.var(sequences, ddof=1))
