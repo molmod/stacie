@@ -144,10 +144,13 @@ chargecurrent = np.einsum("ijk,i", ionvels, charges)
 # Actual computation with Stacie.
 # Note that the average spectrum over the three components is implicit.
 # There is no need to include 1/3 here.
+# Note that the zero-frequency component is usually not reliable
+# because usually the total momentum is constrained or conserved.
 spectrum = compute_spectrum(
     chargecurrent,
     prefactor=0.5 / (volume * temperature * boltzmann_const),
     timestep=timestep,
+    include_zero_freq=False,
 )
 result = estimate_acint(spectrum, PolynomialModel(2, even=True))
 print("Electrical conductivity", result.acint)
