@@ -9,6 +9,7 @@
     "MD033": {
       "allowed_elements": ["sup", "sub"]
     },
-    "MD046": false
+    "MD046": false,
+    "MD051": false
   }
 }
