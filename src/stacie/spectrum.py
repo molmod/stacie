@@ -112,7 +112,7 @@ def compute_spectrum(
     ----------
     sequences
         The input sequences, which can have several forms.
-        If ``prefactors`` is not ``None`, it can be:
+        If ``prefactors`` is not ``None``, it can be:
 
         - An array with shape ``(nindep, nstep)`` or ``(nstep,)``.
           In case of a 2D array, each row is a time-dependent sequence.
