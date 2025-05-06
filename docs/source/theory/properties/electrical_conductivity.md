@@ -4,8 +4,9 @@ The (ionic) electrical conductivity of a system is related to the autocorrelatio
 of the charge current as follows:
 
 $$
-    \sigma = \frac{1}{2 V k_\text{B} T}
+    \sigma = \frac{1}{V k_\text{B} T}
         \frac{1}{d}\sum_{i=1}^d
+        \frac{1}{2}
         \int_{-\infty}^{+\infty}
         \cov[\hat{J}^\text{c}_i(t_0) \,,\, \hat{J}^\text{c}_i(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
@@ -58,10 +59,11 @@ First insert the expression for the charge current into the conductivity
 and then bring the sums out of the integral:
 
 $$
-    \sigma = \frac{1}{2 V k_\text{B} T}
+    \sigma = \frac{1}{V k_\text{B} T}
         \frac{1}{d}\sum_{i=1}^d
         \sum_{n=1}^{N_q} \sum_{m=1}^{N_q}
         q_n q_m
+        \frac{1}{2}
         \int_{-\infty}^{+\infty}
         \cov[\hat{v}_{n,i}(t_0) \,,\, \hat{v}_{m,i}(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
@@ -72,10 +74,11 @@ all correlations between ion velocities (even of the same type) are neglected
 by discarding all off-diagonal terms in the double sum over $n$ and $m$.
 
 $$
-    \sigma \approx \sigma_{NE} = \frac{1}{2 V k_\text{B} T}
+    \sigma \approx \sigma_{NE} = \frac{1}{V k_\text{B} T}
         \sum_{n=1}^{N_q}
         q_n^2
         \frac{1}{d}\sum_{i=1}^d
+        \frac{1}{2}
         \int_{-\infty}^{+\infty}
         \cov[\hat{v}_{n,i}(t_0) \,,\, \hat{v}_{n,i}(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
@@ -92,8 +95,9 @@ $$
         \sum_{k=1}^{K}
         q_k^2 N_k
         \left(
-        \frac{1}{2 N_k d}\sum_{i=1}^d
+        \frac{1}{N_k d}\sum_{i=1}^d
         \sum_{n\in S_k}
+        \frac{1}{2}
         \int_{-\infty}^{+\infty}
         \cov[\hat{v}_{n,i}(t_0) \,,\, \hat{v}_{n,i}(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
@@ -148,7 +152,7 @@ chargecurrent = np.einsum("ijk,i", ionvels, charges)
 # because usually the total momentum is constrained or conserved.
 spectrum = compute_spectrum(
     chargecurrent,
-    prefactor=0.5 / (volume * temperature * boltzmann_const),
+    prefactor=1.0 / (volume * temperature * boltzmann_const),
     timestep=timestep,
     include_zero_freq=False,
 )

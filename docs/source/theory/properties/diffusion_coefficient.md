@@ -3,7 +3,7 @@
 The diffusion coefficient (or diffusivity) of a set of $N$ particles in $d$ dimensions is given by:
 
 $$
-D = \frac{1}{2N\,d}\int_{-\infty}^{+\infty}
+D = \frac{1}{N\,d} \frac{1}{2}\int_{-\infty}^{+\infty}
     \sum_{n=1}^N \sum_{i=1}^{d}
     \cov[\hat{v}_{n,i}(t_0),\, \hat{v}_{n,i}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
@@ -54,7 +54,7 @@ timestep = ...
 # because usually the total momentum is constrained or conserved.
 spectrum = compute_spectrum(
     velocities,
-    prefactor=0.5,
+    prefactor=1.0,
     timestep=timestep,
     include_zero_freq=False,
 )

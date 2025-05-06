@@ -4,8 +4,9 @@ The thermal conductivity of a system is related to the autocorrelation
 of the heat flux as follows:
 
 $$
-    \alpha = \frac{1}{2 V k_\text{B} T^2}
+    \alpha = \frac{1}{V k_\text{B} T^2}
         \frac{1}{3}\sum_{\alpha=x, y, z}
+        \frac{1}{2}
         \int_{-\infty}^{+\infty}
         \cov[\hat{J}^\text{h}_\alpha(t_0) \,,\, \hat{J}^\text{h}_\alpha(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
@@ -52,7 +53,7 @@ volume, temperature, boltzmann_const, timestep = ...
 # There is no need to include 1/3 here.
 spectrum = compute_spectrum(
     heatflux,
-    prefactor=0.5 / (volume * temperature**2 * boltzmann_const),
+    prefactor=1.0 / (volume * temperature**2 * boltzmann_const),
     timestep=timestep,
 )
 result = estimate_acint(spectrum, ExpTailModel())

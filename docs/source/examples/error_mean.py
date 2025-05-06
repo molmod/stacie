@@ -168,7 +168,7 @@ plot_chains()
 # Compute and plot the power spectrum.
 spectrum = compute_spectrum(
     sequences,
-    prefactors=1 / sequences.size,
+    prefactors=2.0 / sequences.size,
     include_zero_freq=False,
 )
 

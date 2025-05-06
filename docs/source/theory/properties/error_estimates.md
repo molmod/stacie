@@ -86,9 +86,10 @@ sequences, timestep = ...
 # Get the total simulation time (sum over all sequences)
 total_time = timestep * sequences.size
 
+# The factor 2 is just compensating for the factor 1/2 in the definition of the spectrum.
 spectrum = compute_spectrum(
     sequences,
-    prefactor=1 / total_time,
+    prefactor=2.0 / total_time,
     timestep=timestep,
     include_zero_freq=False,
 )

@@ -2,7 +2,7 @@
 
 When computer simulations generate time-dependent data,
 they often use a time step that is much shorter than needed for an autocorrelation integral.
-Storing (and processing) all the data may require too much resources.
+Storing (and processing) all the data may require too many resources.
 To reduce the amount of data, we recommend taking block averages.
 These block averages form a new time series with a time step equal to the block size.
 This reduces the storage requirements by a factor equal to the block size.
@@ -22,19 +22,19 @@ For low frequencies (low indexes $k$), we make the following approximations:
 $$
     \hat{C}_k
     &=
-        F h \sum_{\Delta=0}^{N-1} \hat{c}_\Delta \omega^{-kn}
+        F h \frac{1}{2} \sum_{\Delta=0}^{N-1} \hat{c}_\Delta \omega^{-kn}
     \\
     &=
-        \frac{F h}{N}\left|\sum_{n=0}^{N-1} \hat{x}_n \omega_N^{-kn}\right|^2
+        \frac{F h}{N} \frac{1}{2} \left|\sum_{n=0}^{N-1} \hat{x}_n \omega_N^{-kn}\right|^2
     \\
     &\approx
-        \frac{F h}{N} \left|\sum_{n=0}^{N-1} \hat{y}_{\lfloor n/B\rfloor} \omega_N^{-kn}\right|^2
+        \frac{F h}{N} \frac{1}{2} \left|\sum_{n=0}^{N-1} \hat{y}_{\lfloor n/B\rfloor} \omega_N^{-kn}\right|^2
     \\
     &\approx
-        \frac{F h}{N} \left| \sum_{m=0}^{M-1} B \hat{y}_m \omega_N^{-kmB}\right|^2
+        \frac{F h}{N} \frac{1}{2} \left| \sum_{m=0}^{M-1} B \hat{y}_m \omega_N^{-kmB}\right|^2
     \\
     &\approx
-        \frac{F h B}{M} \left| \sum_{m=0}^{M-1} \hat{y}_m \omega_M^{-km}\right|^2
+        \frac{F h B}{M} \frac{1}{2} \left| \sum_{m=0}^{M-1} \hat{y}_m \omega_M^{-km}\right|^2
 $$
 
 with

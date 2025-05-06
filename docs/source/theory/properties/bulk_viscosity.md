@@ -4,7 +4,7 @@ The bulk viscosity of a fluid is related to the autocorrelation
 of isotropic pressure fluctuations as follows:
 
 $$
-    \eta_b = \frac{V}{2 k_\text{B} T}
+    \eta_b = \frac{V}{k_\text{B} T} \frac{1}{2}
         \int_{-\infty}^{+\infty}
         \cov[\hat{P}_\text{iso}(t_0) \,,\, \hat{P}_\text{iso}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
@@ -54,7 +54,7 @@ piso = (pcomps[0] + pcomps[1] + pcomps[2]) / 3
 # Actual computation with Stacie.
 spectrum = compute_spectrum(
     piso,
-    prefactor=0.5 * volume / (temperature * boltzmann_const),
+    prefactor=volume / (temperature * boltzmann_const),
     timestep=timestep,
     include_zero_freq=False,
 )

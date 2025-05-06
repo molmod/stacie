@@ -81,7 +81,7 @@ class Spectrum:
 def compute_spectrum(
     sequences: Iterable[NDArray[float]] | NDArray[float],
     *,
-    prefactors: Iterable[NDArray[float]] | NDArray[float] | None = 0.5,
+    prefactors: Iterable[NDArray[float]] | NDArray[float] | None = 1.0,
     timestep: float = 1,
     include_zero_freq: bool = True,
 ) -> Spectrum:
@@ -91,7 +91,7 @@ def compute_spectrum(
 
     .. math::
 
-        C_k = \frac{1}{M}\sum_{m=1}^M \frac{F_m h}{N} \left|
+        C_k = \frac{1}{M}\sum_{m=1}^M \frac{F_m h}{2 N} \left|
             \sum_{n=0}^{N-1} x^{(m)}_n \exp\left(-i \frac{2 \pi n k}{N}\right)
         \right|^2
 
@@ -105,14 +105,14 @@ def compute_spectrum(
     - :math:`k` is the frequency index.
 
     The sum over :math:`m` simply averages spectra obtained from different sequences.
-    The factor :math:`F_m h/N` normalizes the spectrum so that its zero-frequency limit
+    The factor :math:`F_m h/ 2 N` normalizes the spectrum so that its zero-frequency limit
     is an estimate of the autocorrelation integral.
 
     Parameters
     ----------
     sequences
         The input sequences, which can have several forms.
-        If ``prefactors`` is not ``None`, it can be:
+        If ``prefactors`` is not ``None``, it can be:
 
         - An array with shape ``(nindep, nstep)`` or ``(nstep,)``.
           In case of a 2D array, each row is a time-dependent sequence.
@@ -261,8 +261,8 @@ def _process_sequences(
         raise ValueError("All sequences must have the same length.")
     nindep = sequences.shape[0]
 
-    # Multiply the square root of the prefactor with the sequences.
-    sequences = np.sqrt(prefactors)[:, None] * sequences
+    # Multiply the square root of (prefactor / 2) with the sequences.
+    sequences = np.sqrt(prefactors / 2)[:, None] * sequences
 
     # Compute the spectrum.
     # We already divide by nstep here to keep the order of magnitude under control.
