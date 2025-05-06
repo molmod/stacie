@@ -60,13 +60,13 @@ def test_basics(use_iter: bool, prefactors_none: bool):
     assert spectrum.freqs[1] == pytest.approx(1 / (6 * timestep))
     assert spectrum.amplitudes_ref is None
     # Test the DC-component.
-    scale = prefactor * timestep / sequences.shape[1]
+    scale = 0.5 * prefactor * timestep / sequences.shape[1]
     dccomp = (sequences.sum(axis=1) ** 2).mean()
     assert spectrum.amplitudes[0] == pytest.approx(dccomp * scale)
     # Test the Plancherel theorem (taking into account RFFT conventions).
     sumsq = (sequences**2).sum()
     assert (spectrum.amplitudes * spectrum.ndofs).sum() == pytest.approx(
-        sumsq * prefactor * timestep
+        sumsq * 0.5 * prefactor * timestep
     )
     # Test removing the zero frequency
     spectrum2 = spectrum.without_zero_freq()
@@ -91,13 +91,13 @@ def test_single():
     assert spectrum.freqs[1] == pytest.approx(1 / (6 * timestep))
     assert spectrum.amplitudes_ref is None
     # Test the DC-component.
-    scale = prefactor * timestep / sequence.shape[0]
+    scale = 0.5 * prefactor * timestep / sequence.shape[0]
     dccomp = sequence.sum() ** 2
     assert spectrum.amplitudes[0] == pytest.approx(dccomp * scale)
     # Test the Plancherel theorem (taking into account RFFT conventions).
     sumsq = (sequence**2).sum()
     assert (spectrum.amplitudes * spectrum.ndofs).sum() == pytest.approx(
-        sumsq * prefactor * timestep
+        sumsq * 0.5 * prefactor * timestep
     )
     # Test removing the zero frequency
     spectrum2 = spectrum.without_zero_freq()

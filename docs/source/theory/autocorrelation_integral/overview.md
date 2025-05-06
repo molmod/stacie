@@ -14,7 +14,7 @@ The integral of the autocorrelation function is defined as:
 
 $$
 \mathcal{I} =
-    F \int_{-\infty}^{\infty}
+    \frac{F}{2} \int_{-\infty}^{\infty}
     \cov \bigl[ \hat{x}(t) \,,\,\hat{x}(t + \Delta_t) \bigr]
     \, \mathrm{d}\Delta_t
 $$
@@ -23,6 +23,9 @@ A prefactor $F$ is usually present,
 for example containing a temperature and/or a volume in Green-Kubo formalisms.
 The integrand is the autocorrelation function, $c(\Delta_t)$,
 of the time-dependent input $\hat{x}(t)$.
+It is common to integrate only from $0$ to $\infty$,
+but we prefer to use the full range and compensate with the factor $\frac{1}{2}$ in front of the integral.
+(The integrand is an even function of $\Delta_t$.)
 The expected value is obtained by averaging over all times $t$
 and all observations of $\hat{x}(t)$.
 Let $C(f)$ be the Fourier transform of the autocorrelation function:
@@ -31,11 +34,11 @@ $$
 C(f)=\mathcal{F}[c](f)=\int_{-\infty}^\infty c(\Delta_t) e^{-i2\pi f \Delta_t} \mathrm{d} \Delta_t
 $$
 
-Then $\mathcal{I}$ is simply the DC component,
+Then $\mathcal{I}$ is simply proportional to the DC component,
 i.e., the zero-frequency limit of this Fourier transform:
 
 $$
-\mathcal{I} = F C(0)
+\mathcal{I} = \frac{F C(0)}{2}
 $$
 
 At first glance, this result seems trivial,
@@ -59,16 +62,16 @@ as the limit of a mean-square displacement {cite:p}`hansen_2013_theory`:
 
 $$
     \mathcal{I} =
-        F \lim_{\Delta_t \rightarrow \infty} \frac{\mathrm{d}}{\mathrm{d}\Delta_t}
+        F \frac{1}{2} \lim_{\Delta_t \rightarrow \infty} \frac{\mathrm{d}}{\mathrm{d}\Delta_t}
         \Bigl\langle
             \bigl|\hat{y}(t_0 + \Delta_t) - \hat{y}(t_0)\bigr|^2
         \Bigr\rangle
 $$
 
-where $y$ is the antiderivative of $x$:
+where $\hat{y}$ is the antiderivative of $\hat{x}$:
 
 $$
-    x = \frac{\mathrm{d}y}{\mathrm{d}t}
+    \hat{x} = \frac{\mathrm{d}\hat{y}}{\mathrm{d}t}
 $$
 
 Stacie can also be used to evaluate such limits,
@@ -95,7 +98,7 @@ far away from the zero-frequency limit.
 The autocorrelation integral is approximated with a simple quadrature rule:
 
 $$
-\mathcal{I} = F h \sum_{\Delta=0}^{N-1} \cov \bigl[ \hat{x}_n \,,\, \hat{x}_{n+\Delta} \bigr]
+\mathcal{I} = F h \frac{1}{2} \sum_{\Delta=0}^{N-1} \cov \bigl[ \hat{x}_n \,,\, \hat{x}_{n+\Delta} \bigr]
 $$
 
 The summand is the discrete autocorrelation function, $c_\Delta$.
@@ -108,14 +111,14 @@ over which one can compute averages.
 Let $C_k$ be the discrete Fourier transform of the autocorrelation function:
 
 $$
-C_k = F h \sum_{\Delta=0}^{N-1} c_\Delta \omega^{-kn}
+C_k = F h \frac{1}{2} \sum_{\Delta=0}^{N-1} c_\Delta \omega^{-kn}
 $$
 
 with $\omega = \exp(i 2\pi/N)$.
 This is also known as the power spectrum:
 
 $$
-C_k = \frac{F h}{N}\mean \bigl[|\hat{X}_k|^2\bigr]
+C_k = \frac{F h}{N} \frac{1}{2}\mean \bigl[|\hat{X}_k|^2\bigr]
 $$
 
 with
@@ -126,7 +129,7 @@ $$
 
 The division by $N$ comes from the fact that the autocorrelation function is defined as
 an average over all $n$ (and all realizations of $\hat{x}_n$).
-We have included the prefactor $F h$ in the definition of the power spectrum,
+We have included the prefactor $F h / 2$ in the definition of the power spectrum,
 so that $\mathcal{I} = C_0$.
 Plotting an estimated spectrum with this normalization
 has the advantage of giving a quick visual estimate of $\mathcal{I}$ with the appropriate units.

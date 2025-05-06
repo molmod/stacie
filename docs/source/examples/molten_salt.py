@@ -91,13 +91,13 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
                 positions = (
                     positions[:, atnums == 11].transpose(1, 2, 0).reshape(-1, nstep)
                 )
-                prefactor = 0.5
+                prefactor = 1.0
             elif transport_property.lower() == "cl":
                 # Select only the positions of chlorine atoms for diffusion analysis
                 positions = (
                     positions[:, atnums == 17].transpose(1, 2, 0).reshape(-1, nstep)
                 )
-                prefactor = 0.5
+                prefactor = 1.0
             elif transport_property.lower() == "conductivity":
                 # Compute the instantaneous dipole moment
                 # These are not really "positions", but we use the same variable name
@@ -110,7 +110,7 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
                         - positions[:, atnums == 17].sum(axis=1)
                     ).T
                 )
-                prefactor = 0.5 / (
+                prefactor = 1.0 / (
                     data["volume"] * data["temperature"] * BOLTZMANN_CONSTANT
                 )
             else:

@@ -125,7 +125,7 @@ def estimate_viscosity(name, pcomps, av_temperature, volume, timestep):
     )
     spectrum = compute_spectrum(
         pcomps,
-        prefactors=0.5 * volume / av_temperature,
+        prefactors=volume / av_temperature,
         timestep=timestep,
     )
 

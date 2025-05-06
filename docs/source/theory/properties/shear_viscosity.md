@@ -4,7 +4,7 @@ The shear viscosity of a fluid is related to the autocorrelation
 of microscopic off-diagonal pressure tensor fluctuations as follows:
 
 $$
-    \eta = \frac{V}{2 k_\text{B} T}
+    \eta = \frac{V}{k_\text{B} T} \frac{1}{2}
         \int_{-\infty}^{+\infty}
         \cov[\hat{P}_{xy}(t_0) \,,\, \hat{P}_{xy}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
@@ -84,7 +84,7 @@ $$
 This symmetric matrix is an idempotent projection matrix and has an eigendecomposition
 $\mathbf{T}=\mathbf{U}\mathbf{\Lambda}\mathbf{U}^\top$ with:
 
-\begin{align*}
+$$
     \operatorname{diag}(\mathbf{\Lambda}) &=
     \left[\begin{matrix}
         0 \\ 1 \\ 1 \\ 1 \\ 1 \\ 1
@@ -104,7 +104,7 @@ $\mathbf{T}=\mathbf{U}\mathbf{\Lambda}\mathbf{U}^\top$ with:
         \\
         & & & & & 1
     \end{matrix}\right]
-\end{align*}
+$$
 
 The zero eigenvalue corresponds to the isotropic component being removed.
 Transforming the pressure to this basis of eigenvectors constructs five off-diagonal components.
@@ -134,7 +134,7 @@ that can be used as inputs to the viscosity calculation:
 
 $$
     \eta =
-    \frac{V}{2 k_\text{B} T}
+    \frac{V}{k_\text{B} T} \frac{1}{2}
     \int_{-\infty}^{+\infty}
     \cov[\hat{P}_i^{\prime}(t_0) \,,\, \hat{P}_i^\prime(t_0 + \Delta_t)]
     \,\mathrm{d}\Delta_t
@@ -260,7 +260,7 @@ it is shown below that the average viscosity over the five components proposed h
 is equivalent to the equation proposed by Daivis and Evans {cite:p}`daivis_1994_comparison`:
 
 $$
-    \eta = \frac{1}{5} \frac{V}{2k_\text{B} T} \int_{-\infty}^{+\infty}
+    \eta = \frac{1}{5} \frac{V}{k_\text{B} T} \frac{1}{2} \int_{-\infty}^{+\infty}
         \frac{1}{2}\mean\left[\hat{\mathbf{P}}_\text{tl}(t_0):\hat{\mathbf{P}}_\text{tl}(t_0 + \Delta_t)\right]
         \,\mathrm{d}\Delta_t
 $$
@@ -310,7 +310,7 @@ $$
 We can do the same for our average viscosity over the five independent components:
 
 $$
-    \eta = \frac{1}{5} \frac{V}{2 k_\text{B} T}
+    \eta = \frac{1}{5} \frac{V}{k_\text{B} T} \frac{1}{2}
     \int_{-\infty}^{+\infty}
     \sum_{i=1}^5 \cov[\hat{P}_i^{\prime}(t_0) \,,\, \hat{P}_i^\prime(t_0 + \Delta_t)]
     \,\mathrm{d}\Delta_t
@@ -406,7 +406,7 @@ indep_pcomps = np.array([
 # Actual computation with Stacie.
 spectrum = compute_spectrum(
     indep_pcomps,
-    prefactor=0.5 * volume / (temperature * boltzmann_const),
+    prefactor=volume / (temperature * boltzmann_const),
     timestep=timestep,
 )
 result = estimate_acint(spectrum, ExpTailModel())
