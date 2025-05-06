@@ -37,7 +37,7 @@ def generate(
         The power spectral density.
         The normalization of the PSD is consistent with the ``compute_spectrum`` function.
         When the return value is used as input for the ``compute_spectrum`` function,
-        with the default ``prefactor=0.5`` and the given `timestep`,
+        with the default ``prefactors=2.0`` and the given `timestep`,
         the resulting amplitudes of the spectrum will be equal to the given PSD,
         up to statistical fluctuations.
         Hence ``psd[0]`` is the ground truth of the autocorrelation integral.
@@ -75,4 +75,4 @@ def generate(
     ft[:, -1].imag = 0
     ft[:, 1:-1] /= np.sqrt(2)
     ft *= np.sqrt(psd)
-    return np.fft.irfft(ft, nstep) * np.sqrt(2 * nstep / timestep)
+    return np.fft.irfft(ft, nstep) * np.sqrt(nstep / timestep)
