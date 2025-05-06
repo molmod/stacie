@@ -7,8 +7,14 @@ There are two definitions {cite:p}`sokal_1997_monte`:
 1. The *integrated* autocorrelation time is derived from the autocorrelation integral:
 
     $$
-        \tau_\text{int} = \frac{\int_{-\infty}^{+\infty} c(\Delta_t)\,\mathrm{d}\Delta_t}{2 c(0)}
+        \tau_\text{int}
+        = \frac{\int_{-\infty}^{+\infty} c(\Delta_t)\,\mathrm{d}\Delta_t}{2 c(0)}
+        = \frac{\mathcal{I}}{F c(0)}
     $$
+
+    where $c(\Delta_t)$ is the autocorrelation function,
+    $\mathcal{I}$ is the autocorrelation integral computed with STACIE's conventions,
+    and $F$ is the prefactor of the autocorrelation integral.
 
 2. The *exponential* autocorrelation time is defined as
    the limit of the exponential decay rate of the autocorrelation function.

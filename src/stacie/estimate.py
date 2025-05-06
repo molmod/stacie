@@ -89,12 +89,12 @@ class Result:
     @property
     def corrtime_int(self) -> float:
         """The integrated correlation time."""
-        return self.props["acint"] / (2 * self.spectrum.variance)
+        return self.props["acint"] / self.spectrum.variance
 
     @property
     def corrtime_int_std(self) -> float:
         """The uncertainty of the integrated correlation time."""
-        return self.props["acint_std"] / (2 * self.spectrum.variance)
+        return self.props["acint_std"] / self.spectrum.variance
 
 
 def estimate_acint(
