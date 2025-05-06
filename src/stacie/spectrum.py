@@ -91,13 +91,13 @@ def compute_spectrum(
 
     .. math::
 
-        C_k = \frac{F h}{N} \frac{1}{M}\sum_{m=1}^M \left|
+        C_k = \frac{1}{M}\sum_{m=1}^M \frac{F_m h}{N} \left|
             \sum_{n=0}^{N-1} x^{(m)}_n \exp\left(-i \frac{2 \pi n k}{N}\right)
         \right|^2
 
     where:
 
-    - :math:`F` is the given prefactor,
+    - :math:`F_m` is the given prefactor (may be different for each sequence),
     - :math:`h` is the timestep,
     - :math:`N` is the number of time steps in the input sequences,
     - :math:`M` is the number of independent sequences,
@@ -105,7 +105,7 @@ def compute_spectrum(
     - :math:`k` is the frequency index.
 
     The sum over :math:`m` simply averages spectra obtained from different sequences.
-    The factor :math:`F h/N` normalizes the spectrum so that its zero-frequency limit
+    The factor :math:`F_m h/N` normalizes the spectrum so that its zero-frequency limit
     is an estimate of the autocorrelation integral.
 
     Parameters
@@ -122,15 +122,15 @@ def compute_spectrum(
 
         If ``prefactors`` is ``None``:
 
-        - A tuple of a prefactor (or an array of prefactors) and a sequence array,
+        - A tuple of a prefactor (or an array of prefactors) and a sequences array,
           either 1D or 2D as described above.
         - An iterable whose items are tuples of a prefactor (or an array of prefactors)
-          and a sequence array, either 1D or 2D as described above.
+          and a sequences array, either 1D or 2D as described above.
 
         All sequences are assumed to be statistically independent and have length ``nstep``.
         (Time correlations within one sequence are fine, obviously.)
         We recommend using multiple independent sequences to reduce uncertainties.
-        Lists of floating point values are not supported.
+        Arrays must be used. (lists of floating point values are not supported.)
     prefactors
         A positive factor to be multiplied with the autocorrelation function
         to give it a physically meaningful unit.
@@ -141,7 +141,7 @@ def compute_spectrum(
         - A single floating point value: the same prefactor is used for all input sequences.
         - A single array with shape ``(nindep,)``:
           each sequence is multiplied with the corresponding prefactor.
-        - An iterable whose items or of the form described in the previous two points.
+        - An iterable whose items are of the form described in the previous two points.
           In this case, the sequences must also be given as an iterable with the same length.
     timestep
         The time step of the input sequence.
