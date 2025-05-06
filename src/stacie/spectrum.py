@@ -48,7 +48,7 @@ class Spectrum:
     """The equidistant frequency axis of the spectrum."""
 
     ndofs: NDArray[int] = attrs.field()
-    """The number of independnt contributions to each amplitude."""
+    """The number of independent contributions to each amplitude."""
 
     amplitudes: NDArray[float] = attrs.field()
     """The spectrum amplitudes averaged over the given input sequences."""
@@ -218,7 +218,7 @@ def _process_sequences(
     ----------
     sequences
         The input sequences, which can be in two forms:
-        This ia an array with shape ``(nindep, nstep)`` or ``(nstep,)``.
+        This is an array with shape ``(nindep, nstep)`` or ``(nstep,)``.
         In case of a 2D array, each row is a time-dependent sequence.
         In case of a 1D array, a single sequence is used.
     prefactors
