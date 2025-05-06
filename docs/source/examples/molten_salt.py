@@ -75,35 +75,29 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
     if len(paths_npz) == 0:
         raise ValueError("No NPZ files found in the input list.")
 
-    # Compute average volume and temperature
-    volumes = []
-    temperatures = []
-    for path_npz in paths_npz:
-        data = np.load(path_npz)
-        volumes.append(data["volume"])
-        temperatures.append(data["temperature"])
-    time = data["time"]
-    atnums = data["atnums"]
+    # Get the time step from the first NPZ file.
+    time = np.load(paths_npz[0])["time"]
     nstep = len(time)
-    volume = np.mean(volumes)
-    temperature = np.mean(temperatures)
     timestep = time[1] - time[0]
 
     def iter_sequences():
         """A generator that only loads one MD trajectory at a time in memory."""
         for path_npz in paths_npz:
             data = np.load(path_npz)
+            atnums = data["atnums"]
             positions = data["atcoords"]
             if transport_property.lower() == "na":
                 # Select only the positions sodium atoms for diffusion analysis
                 positions = (
                     positions[:, atnums == 11].transpose(1, 2, 0).reshape(-1, nstep)
                 )
+                prefactor = 0.5
             elif transport_property.lower() == "cl":
                 # Select only the positions of chlorine atoms for diffusion analysis
                 positions = (
                     positions[:, atnums == 17].transpose(1, 2, 0).reshape(-1, nstep)
                 )
+                prefactor = 0.5
             elif transport_property.lower() == "conductivity":
                 # Compute the instantaneous dipole moment
                 # These are not really "positions", but we use the same variable name
@@ -115,6 +109,9 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
                         positions[:, atnums == 11].sum(axis=1)
                         - positions[:, atnums == 17].sum(axis=1)
                     ).T
+                )
+                prefactor = 0.5 / (
+                    data["volume"] * data["temperature"] * BOLTZMANN_CONSTANT
                 )
             else:
                 raise ValueError(
@@ -128,7 +125,7 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
             # of velocities in the Verlet algorithm,
             # without additional approximations.
             velocities = np.diff(positions, axis=1) / timestep
-            yield velocities
+            yield prefactor, velocities
 
     # Configure units for output
     uc = UnitConfig(
@@ -146,9 +143,7 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
     spectrum = compute_spectrum(
         iter_sequences(),
         timestep=timestep,
-        prefactor=0.5 / (volume * temperature * BOLTZMANN_CONSTANT)
-        if transport_property == "conductivity"
-        else 0.5,
+        prefactors=None,
         include_zero_freq=False,
     )
     result = estimate_acint(spectrum, ExpPolyModel(degrees), verbose=True, uc=uc)

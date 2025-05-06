@@ -89,12 +89,12 @@ class Result:
     @property
     def corrtime_int(self) -> float:
         """The integrated correlation time."""
-        return self.props["acint"] / (2 * self.spectrum.prefactor * self.spectrum.variance)
+        return self.props["acint"] / (2 * self.spectrum.variance)
 
     @property
     def corrtime_int_std(self) -> float:
         """The uncertainty of the integrated correlation time."""
-        return self.props["acint_std"] / (2 * self.spectrum.prefactor * self.spectrum.variance)
+        return self.props["acint_std"] / (2 * self.spectrum.variance)
 
 
 def estimate_acint(
@@ -486,7 +486,6 @@ def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
             model=r.model.name,
             cutoff_criterion=r.cutoff_criterion.name,
             timestep=r.spectrum.timestep / uc.time_unit,
-            prefactor=r.spectrum.prefactor / uc.acint_unit,
             acint=r.acint / uc.acint_unit,
             acint_std=r.acint_std / uc.acint_unit,
             corrtime_int=r.corrtime_int / uc.time_unit,

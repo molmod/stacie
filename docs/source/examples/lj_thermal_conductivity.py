@@ -60,7 +60,7 @@ def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep
     )
     spectrum = compute_spectrum(
         jcomps,
-        prefactor=0.5 / (volume * av_temperature**2),
+        prefactors=0.5 / (volume * av_temperature**2),
         timestep=timestep,
     )
 
