@@ -67,6 +67,9 @@ def test_psd(truncate: bool):
     assert sequences.shape == (nseq, nstep)
     # Test the consistency with compute_spectrum.
     spectrum = compute_spectrum(sequences, prefactors=2.0, timestep=h)
+    if truncate:
+        # The spectrum subsampled due to the truncation.
+        psd = psd[::2]
     assert spectrum.amplitudes[:512] == pytest.approx(psd[:512], rel=0.2)
     # Test the Plancherel theorem. Origins of the factors 2:
     # - One factor two from the RFFT. (The PSD is one-sided.)
