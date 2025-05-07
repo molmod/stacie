@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Generate synthetic time-correlated data for testing and validation."""
+"""Generate synthetic time-correlated data for algorithmic testing and validation."""
 
 import numpy as np
 from numpy.typing import NDArray
@@ -35,11 +35,9 @@ def generate(
     ----------
     psd
         The power spectral density.
-        The normalization of the PSD is consistent with the ``compute_spectrum`` function.
-        When the return value is used as input for the ``compute_spectrum`` function,
-        with the default ``prefactors=2.0`` and the given `timestep`,
-        the resulting amplitudes of the spectrum will be equal to the given PSD,
-        up to statistical fluctuations.
+        The normalization of the PSD is consistent ``compute_spectrum`` when
+        using ``prefactors=2.0`` and the given ``timestep`` as arguments.
+        The empirical amplitudes of the spectrum will then be consistent with given PSD.
         Hence ``psd[0]`` is the ground truth of the autocorrelation integral.
     timestep
         The time between two subsequent elements in the sequence.
@@ -75,4 +73,4 @@ def generate(
     ft[:, -1].imag = 0
     ft[:, 1:-1] /= np.sqrt(2)
     ft *= np.sqrt(psd)
-    return np.fft.irfft(ft, nstep) * np.sqrt(nstep / timestep)
+    return np.fft.irfft(ft)[:, :nstep] * np.sqrt(nstep_max / timestep)
