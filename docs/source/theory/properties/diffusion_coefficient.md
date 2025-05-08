@@ -54,7 +54,7 @@ timestep = ...
 # because usually the total momentum is constrained or conserved.
 spectrum = compute_spectrum(
     velocities,
-    prefactor=1.0,
+    prefactors=1.0,
     timestep=timestep,
     include_zero_freq=False,
 )

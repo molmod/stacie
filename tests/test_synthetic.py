@@ -66,16 +66,17 @@ def test_psd(truncate: bool):
     # Test the shape of the output.
     assert sequences.shape == (nseq, nstep)
     # Test the consistency with compute_spectrum.
-    spectrum = compute_spectrum(sequences, timestep=h)
+    spectrum = compute_spectrum(sequences, prefactors=2.0, timestep=h)
+    if truncate:
+        # The spectrum subsampled due to the truncation.
+        psd = psd[::2]
     assert spectrum.amplitudes[:512] == pytest.approx(psd[:512], rel=0.2)
     # Test the Plancherel theorem. Origins of the factors 2:
     # - One factor two from the RFFT. (The PSD is one-sided.)
-    # - Another factor two because the default prefactor in compute_spectrum is 0.5.
-    #   The generate function follows the same convention.
-    # - If truncated, there is a third factor 2, because the power spectrum
+    # - If truncated, there is a second factor 2, because the power spectrum
     #   in compute_spectrum has a factor 1/N, and the generate function
-    #   is comptaible with this conventon by including factor 1/sqrt(N) in the inverse RFFT.
-    true_variance = 4 * psd.sum() * freq0
+    #   is compatible with this convention by including factor 1/sqrt(N) in the inverse RFFT.
+    true_variance = 2 * psd.sum() * freq0
     if truncate:
         true_variance *= 2
     assert (sequences**2).mean() == pytest.approx(true_variance, rel=0.1)

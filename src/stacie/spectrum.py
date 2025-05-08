@@ -33,10 +33,10 @@ class Spectrum:
     """Container class holding all the inputs for the autocorrelation integral estimate."""
 
     mean: float = attrs.field(converter=float)
-    """The mean of the input sequences, includes the square root of the prefactor."""
+    """The mean of the input sequences multiplied by the square root of the prefactor."""
 
     variance: float = attrs.field(converter=float)
-    """The variance of the input sequences, includes the prefactor."""
+    """The variance of the input sequences multiplied by the prefactor."""
 
     timestep: float = attrs.field(converter=float)
     """The time between two subsequent elements in the given sequence."""
@@ -262,11 +262,11 @@ def _process_sequences(
     nindep = sequences.shape[0]
 
     # Multiply the square root of (prefactor / 2) with the sequences.
-    sequences = np.sqrt(prefactors / 2)[:, None] * sequences
+    sequences = np.sqrt(prefactors)[:, None] * sequences
 
     # Compute the spectrum.
     # We already divide by nstep here to keep the order of magnitude under control.
-    amplitudes = (abs(np.fft.rfft(sequences, axis=1)) ** 2).sum(axis=0) / nstep
+    amplitudes = 0.5 * (abs(np.fft.rfft(sequences, axis=1)) ** 2).sum(axis=0) / nstep
 
     # Compute the variance of the input sequences.
     total = sequences.sum() / nstep

@@ -54,7 +54,7 @@ piso = (pcomps[0] + pcomps[1] + pcomps[2]) / 3
 # Actual computation with Stacie.
 spectrum = compute_spectrum(
     piso,
-    prefactor=volume / (temperature * boltzmann_const),
+    prefactors=volume / (temperature * boltzmann_const),
     timestep=timestep,
     include_zero_freq=False,
 )

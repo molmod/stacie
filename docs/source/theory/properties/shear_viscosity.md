@@ -406,7 +406,7 @@ indep_pcomps = np.array([
 # Actual computation with Stacie.
 spectrum = compute_spectrum(
     indep_pcomps,
-    prefactor=volume / (temperature * boltzmann_const),
+    prefactors=volume / (temperature * boltzmann_const),
     timestep=timestep,
 )
 result = estimate_acint(spectrum, ExpTailModel())

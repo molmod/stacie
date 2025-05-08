@@ -152,7 +152,7 @@ chargecurrent = np.einsum("ijk,i", ionvels, charges)
 # because usually the total momentum is constrained or conserved.
 spectrum = compute_spectrum(
     chargecurrent,
-    prefactor=1.0 / (volume * temperature * boltzmann_const),
+    prefactors=1.0 / (volume * temperature * boltzmann_const),
     timestep=timestep,
     include_zero_freq=False,
 )

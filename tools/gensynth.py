@@ -26,7 +26,7 @@ from stacie.synthetic import generate
 def generate_lorentzian(
     name: str, seed: int, nseq: int, nstep: int, awhite: float, lterms: list
 ) -> Spectrum:
-    """Generate an averaged white-noise spectrum
+    """Generate a white-noise + Lorentzian(s) spectrum
     Parameters
     ----------
     name
@@ -56,7 +56,7 @@ def generate_lorentzian(
         raise ValueError("DC component is not unity")
     rng = np.random.default_rng(seed)
     sequences = generate(psd, 1.0, nseq, nstep, rng)
-    spectrum = compute_spectrum(sequences)
+    spectrum = compute_spectrum(sequences, prefactors=2.0)
     spectrum.amplitudes_ref = psd
     np.savez_compressed("../tests/inputs/spectrum_" + name, **attrs.asdict(spectrum))
 

@@ -53,7 +53,7 @@ volume, temperature, boltzmann_const, timestep = ...
 # There is no need to include 1/3 here.
 spectrum = compute_spectrum(
     heatflux,
-    prefactor=1.0 / (volume * temperature**2 * boltzmann_const),
+    prefactors=1.0 / (volume * temperature**2 * boltzmann_const),
     timestep=timestep,
 )
 result = estimate_acint(spectrum, ExpTailModel())
