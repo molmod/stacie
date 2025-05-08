@@ -45,7 +45,7 @@ mpl.rc_file("matplotlibrc")
 # ## Reusable Code for the Analysis
 #
 # The `analyze` function takes a few parameters to apply the same analysis with Stacie
-# to different inputs, and with a different degree for the polynomial.
+# to different inputs, and with a different degree for the ExpPoly model.
 
 # %%
 BOLTZMANN_CONSTANT = 1.380649e-23  # J/K
@@ -64,7 +64,7 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
         - 'cl': Computes the self-diffusivity of chloride ions.
         - 'conductivity': Computes the ionic conductivity.
     degree
-        The degree of the polynomial to fit to the spectrum, by default 1.
+        The degree of the polynomial in the ExpPoly model fitted to the spectrum, by default 1.
 
     Returns
     -------
@@ -171,7 +171,7 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
 # - An appropriate simulation time to achieve sufficient frequency resolution.
 # - A suitable block size to reduce storage by discarding irrelevant high-frequency data.
 #
-# A degree 1 polynomial is fitted to the spectrum to limit the number of unknowns in the fit.
+# Degree 1 is used to limit the number of unknowns in the fit because the data is limited.
 
 # %%
 path_nve_npz = "../../data/openmm_salt/output/exploration_nve_traj.npz"
@@ -197,7 +197,7 @@ analyze([path_nve_npz], "conductivity", [0, 1])
 # The analysis of the production trajectories follows the same approach
 # as the exploration trajectory, with two key differences:
 # - The trajectory files are loaded as input.
-# - For the diffusion constants, the degree of the polynomial is increased to 2.
+# - The degree of the polynomial in the ExpPoly model is increased to 2.
 
 # %%
 paths_nve_npz = glob("../../data/openmm_salt/output/prod????_nve_traj.npz")

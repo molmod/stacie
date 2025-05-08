@@ -3,15 +3,15 @@
 Stacie supports two models for fitting the low-frequency part of the power spectrum.
 In both models, the value at zero frequency corresponds to the autocorrelation integral.
 
-1. The polynomial model is the most general: it consists of a linear combination of
-   simple mononomials of the frequency.
-   One can specify the polynomial degree and typically a low degree works fine:
+1. The [ExpPolyModel](#stacie.model.ExpPolyModel) is the most general:
+   it is an exponential function of a linear combination of simple monomials of the frequency.
+   One can specify the degrees of the monomials and typically a low degree works fine:
 
-    - Degree 0 is suitable for a white noise spectrum.
-    - Degree 1 can be used to extract useful information of a very noisy spectrum.
-    - Degree 2 is only applicable to spectra with low statistical uncertainty,
+    - Degree `[0]` is suitable for a white noise spectrum.
+    - Degrees `[0, 1]` can be used to extract useful information of a very noisy spectrum.
+    - Degrees `[0, 1, 2]` is applicable to spectra with low statistical uncertainty,
       e.g. averaged over 100 inputs.
-    - An even polynomial with degree 2 is suitable for spectra with a peak at zero frequency.
+    - An even polynomial with degrees `[0, 2]` is suitable for spectra with a peak at zero frequency.
 
     The main advantage of this model is its broad applicability,
     as it requires little prior knowledge of the functional form of the spectra.
@@ -20,21 +20,27 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
    Its primary advantage is that, in addition to the integrated correlation time,
    it also provides an estimate of the exponential correlation time.
 
-## 1. Polynomial Model
+## 1. ExpPolyModel
 
-The polynomial model is defined as
-
-$$
-    C^\text{poly}_k \approx \sum_{n=0}^N a_n f_k^n
-$$
-
-where $N$ is the polynomial degree.
-With this form, :math:`a_n` corresponds to the integral of the autocorrelation function.
-
-Stacie also supports even polynomials:
+The [ExpPolyModel](#stacie.model.ExpPolyModel) is defined as
 
 $$
-    C^\text{evenpoly}_k \approx \sum_{n=0}^{\lfloor N/2 \rfloor} a_n f_k^{2n}
+    C^\text{exppoly}_k = \exp\left(\sum_{s\in S} a_s f_k^s\right)
+$$
+
+where $S$ is the set of polynomial degrees.
+With this form, $a_0$ corresponds to the integral of the autocorrelation function.
+When one obtains an estimate $\hat{a}_0$ and an estimated variance $\hat{C}(a_0)$,
+the autocorrelation integral is [log-normally distributed](https://en.wikipedia.org/wiki/Log-normal_distribution)
+with estimated mean and variance:
+
+$$
+    \hat{\mathcal{I}}
+    &= \exp\left(\hat{a}_0 + \frac{1}{2}\hat{C}(a_0)\right)
+    \\
+    \hat{C}(\mathcal{I})
+    &= \exp\left(2\hat{a}_0 + \hat{C}(a_0)\right)
+    \left(\exp(\hat{C}(a_0)) - 1 \right)
 $$
 
 ## 2. Exponential Tail Model
