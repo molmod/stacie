@@ -303,7 +303,7 @@ def estimate_acint(
         np.array([props["pars_covar"] for props in history]),
         fcut_weights,
     )
-    # Derive other properties from the model, instead of mixing them in the same way.
+    # Derive other properties from the mixed parameters, instead of mixing them directly.
     # This seems to be slightly better,
     # likely because the fcut_weights are based on parameter vectors only.
     props["amplitudes_model"] = model.compute(freqs, props["pars"], deriv=1)
