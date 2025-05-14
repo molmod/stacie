@@ -297,21 +297,17 @@ def estimate_acint(
         "weights": weights,
         "switch_exponent": switch_exponent,
     }
-    for key in history[0]:
-        if f"{key}_var" in history[0]:
-            all_mean = np.array([props[key] for props in history])
-            all_var = np.array([props[f"{key}_var"] for props in history])
-            mean, var = mixture_stats(all_mean, all_var, fcut_weights)
-            props[key] = mean
-            props[f"{key}_var"] = var
-            props[f"{key}_std"] = np.sqrt(var)
-        elif f"{key}_covar" in history[0]:
-            all_mean = np.array([props[key] for props in history])
-            all_covar = np.array([props[f"{key}_covar"] for props in history])
-            mean, covar = mixture_stats(all_mean, all_covar, fcut_weights)
-            props[key] = mean
-            props[f"{key}_covar"] = covar
+    # Use fcut_weights to mix model parameters and their covariance
+    props["pars"], props["pars_covar"] = mixture_stats(
+        np.array([props["pars"] for props in history]),
+        np.array([props["pars_covar"] for props in history]),
+        fcut_weights,
+    )
+    # Derive other properties from the model, instead of mixing them in the same way.
+    # This seems to be slightly better,
+    # likely because the fcut_weights are based on parameter vectors only.
     props["amplitudes_model"] = model.compute(freqs, props["pars"], deriv=1)
+    _finalize_props(props, model)
 
     result = Result(spectrum, model, cutoff_criterion, props, history)
 
@@ -458,18 +454,23 @@ def fit_model_spectrum(
     props["cost_hess_rescaled_evecs"] = evecs
     props["pars_covar"] = pars_covar
 
-    # Add remaining properties and derive the cutoff criterion
-    props.update(model.derive_props(pars_opt, pars_covar))
+    # Compute the cutoff criterion
     props.update(cutoff_criterion(spectrum, model, props))
-    # Add convenience properties
+
+    _finalize_props(props, model)
+
+    # Done
+    return props
+
+
+def _finalize_props(props: dict[str, NDArray | float], model: SpectrumModel):
+    """Add remaining properties in-place."""
+    props.update(model.derive_props(props["pars"], props["pars_covar"]))
     std_props = {}
     for key, value in props.items():
         if key.endswith("_var"):
             std_props[f"{key[:-4]}_std"] = np.sqrt(value) if value >= 0 else np.inf
     props.update(std_props)
-
-    # Done
-    return props
 
 
 def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
