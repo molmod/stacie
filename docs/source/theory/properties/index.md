@@ -4,6 +4,7 @@ This section outlines the statistical or physical quantities
 that can be computed as the integral of an autocorrelation function.
 For each property, a code skeleton is provided
 as a starting point for your calculations.
+All skeletons are written under the assumption that you can load the relevant input data into NumPy arrays.
 
 First, we discuss few properties that may be relevant to several scientific disciplines:
 
@@ -14,7 +15,7 @@ The following physicochemical properties can be computed
 as autocorrelation integrals of outputs of molecular dynamics simulations,
 using so-called Green-Kubo relations
 {cite:p}`green_1952_markoff,green_1954_markoff,kubo_1957_statistical,helfand_1960_transport`.
-These properties are sometimes referred to as diagonal transport coefficients {cite:p}`pegolo_2025_transport`.
+These properties have recently been referred to as diagonal transport coefficients {cite:p}`pegolo_2025_transport`.
 
 - [Diffusion coefficient](diffusion_coefficient.md), $D$
 - [Electrical conductivity](electrical_conductivity.md), $\sigma$
@@ -51,6 +52,7 @@ or by applying analytical corrections, such as the Yeh-Hummer correction
 The NVE ensemble is generally recommended for computing transport coefficients,
 as thermostats and barostats (used in NVT and NpT ensembles)
 can interfere with system dynamics and introduce bias in the transport property.
+{cite:p}`maginn_2020_best`
 A good approach would be to first equilibrate the system using NVT or NpT,
 before switching to NVE for transport property calculations.
 The main difficulty is that a single NVE simulation does not fully represent an NVT or NpT ensemble,
@@ -69,15 +71,16 @@ All examples in the STACIE documentation follow this approach.
 
 For the equilibration runs discussed in the previous section,
 the choice of thermostat and barostat time constants is not critical,
-as long as they allow for a full equilibration of the system
+as long as they are correctly sampling the ensemble
+and allow for a full equilibration of the system
 within the duration of the equilibration run.
 During the equilibration, a local thermostat can be used to make the equilibration more efficient.
 
 In some cases, one may still prefer to run production runs for transport properties
 in the NVT or NpT ensemble, despite the fact that this introduces an avoidable bias,
 especially if the thermostat or barostat relaxation times are too short.
-However, NpT ensemble for the production runs should generally be avoided,
-as barostats introduce volume fluctuations which then significantly alters the system's dynamics.
+However, NpT ensemble for the production runs should be avoided,
+as barostats introduce coordinate scaling, which affects the atomic mean squared displacements.
 Studies suggest well-tuned NVT simulations yield comparable results with the NVE simulations.
 {cite:p}`fanourgakis_2012_determining, basconi_2013_effects, ke_2022_effects`
 Basconi et al. recommended using a thermostat with slow relaxation times, global coupling,

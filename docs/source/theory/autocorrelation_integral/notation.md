@@ -43,6 +43,7 @@ The following notation is used throughout STACIE's documentation.
 
     - $\mean[\cdot]$ is the mean operator.
     - $\var[\cdot]$ is the variance operator.
+    - $\std[\cdot]$ is the standard deviation.
     - $\cov[\cdot,\cdot]$ is the covariance operator.
 
 - The Gamma distribution with shape $\alpha$ and scale $\theta$ is denoted as:

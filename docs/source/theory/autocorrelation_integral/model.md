@@ -94,7 +94,8 @@ where $f_k$ is the standard frequency grid of the discrete Fourier transform,
 $f_k = k / (hN)$, $h$ is the time step of the discretized time axis,
 and $N$ is the number of samples.
 The parameter $A$ is the white noise level, and $B$ is the amplitude of the Lorentzian peak.
-Of particular interest is the correlation time $\tau_\text{exp}$.
+Of particular interest is the correlation time $\tau_\text{exp}$,
+which can be visually related to the width of the peak ($2 \pi \tau_\text{exp}$) in the power spectrum.
 When fitting the PadeModel with $S_\text{num} = \{0, 2\}$ and $S_\text{den} = \{2\}$,
 the exponential correlation time and its variance can be derived
 from the fitted parameters as with first-order error propagation:
@@ -104,3 +105,17 @@ $$
     \\
     \hat{\sigma}^2_{\tau_\text{exp}} &= \frac{1}{16 \pi^2 \hat{q}_2} \hat{\sigma}^2_{q_2}
 $$
+
+Note that this model is also applicable data whose short-time correlations are not exponential,
+as long as the tail of the ACF decays exponentially.
+Such deviating short-time correlations will only affect the white noise level $A$
+and features in the PSD at higher frequencies.
+
+To construct this model, you can create an instance of the `PadeModel` class as follows:
+
+```python
+from stacie.model import PadeModel
+model = PadeModel(
+    numerator=[0, 2],
+    denominator=[2],
+)

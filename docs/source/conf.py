@@ -166,6 +166,7 @@ mathjax3_config = {
         "macros": {
             "mean": r"\operatorname{E}",
             "var": r"\operatorname{VAR}",
+            "std": r"\operatorname{STD}",
             "cov": r"\operatorname{COV}",
             "gdist": r"\operatorname{Gamma}",
         }

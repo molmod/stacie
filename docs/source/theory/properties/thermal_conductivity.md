@@ -23,10 +23,18 @@ The derivation of this result can be found in
 Section 8.5 of "Theory of Simple Liquids"
 by Hansen and McDonald {cite:p}`hansen_2013_theory`.
 
-The calculation of the heat flux is not discussed here.
-Simulation codes like [LAMMPS](https://lammps.org/) can write out this quantity.
-Note, however, that LAMMPS only considers the energy due to pairwise interactions,
-which limits its applicability.
+::: {warning}
+The LAMMPS `compute/heat flux` command is reported to produce unphysical results
+when many-body interactions (e.g. angle, dihedral, impropers) are present
+{cite:p}`jamali_2019_octp`, {cite:p}`surblys_2019_application`,
+{cite:p}`boone_2019_heat`, {cite:p}`surblys_2021_methodology`.
+This command only treats pairwise interactions correctly.
+If this is relevant, one should use the `compute heat/flux` command with
+[`compute centroid/stress/atom`](https://docs.lammps.org/compute_heat_flux.html).
+For systems with only two-body interactions, as in this notebook,
+the `compute heat/flux` command with `compute stress/atom` command is sufficient.
+This warning is important for molecular systems.
+:::
 
 ## How to Compute with STACIE?
 
@@ -74,3 +82,6 @@ plot_results("thermal_conductivity.pdf", result, uc)
 ```
 
 This script is trivially extended to combine data from multiple trajectories.
+
+A worked example can be found in the notebook
+[Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../../examples/lj_thermal_conductivity.py).

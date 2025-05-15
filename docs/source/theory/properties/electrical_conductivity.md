@@ -116,7 +116,8 @@ respectively.
 The Nernst-Einstein approximation may not seem useful
 because it neglects correlated motion between different types of charge carriers.
 (The effect may be large!)
-Nevertheless, it is sometimes interesting to quantify the degree of such correlations.
+Nevertheless, a comparison of the Nernst-Einstein approximation to the actual conductivity
+can help to quantify the degree of such correlations.
 {cite:p}`shao_2020_role`
 
 ## How to Compute with STACIE?
@@ -131,7 +132,7 @@ in an array `charges`.
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,
 all in consistent units.
-With these requirements, the shear viscosity can be computed as follows:
+With these requirements, the ionic electrical conductivity can be computed as follows:
 
 ```python
 import numpy as np
@@ -172,4 +173,17 @@ uc = UnitConfig(
 plot_results("electrical_conductivity.pdf", result, uc)
 ```
 
-This script is trivially extended to combine data from multiple trajectories.
+There are several ways to alter this script, depending on your needs and the available data:
+
+- This script is trivially extended to combine data from multiple trajectories.
+- Some codes can directly output the charge current,
+  which will reduce the amount of data stored on disk.
+- Some simulations codes will print out the instantaneous dipole moment,
+  to which finite-differences can be applied to compute the charge current.
+  Even if the dipole moment printed only every $B$ steps,
+  this approximation is useful and corresponds to taking block averages of the charge current.
+  See the section on [block averages](../advanced_topics/block_averages.md)
+  for more details.
+
+A worked example can be found in the notebook
+[Ionic Conductivity and Self-diffusivity in Molten Sodium Chloride at 1100 K (OpenMM)](../../examples/molten_salt.py)

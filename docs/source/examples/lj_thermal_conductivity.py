@@ -27,6 +27,16 @@
 # For convenience, the reduced unit of thermal conductivity is denoted as κ\*,
 # and the reduced unit of time as τ\*.
 
+# %% [markdown]
+# %% [markdown]
+# ::: {warning}
+# A Lennard-Jones system only exhibits pairwise interactions,
+# for which the LAMMPS command `compute/heat flux` produces valid results.
+# For systems with three- or higher-body interactions, one cannot simply use the same command.
+# Consult the theory section on [thermal conductivity](../theory/properties/thermal_conductivity.md)
+# for more background.
+# :::
+
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
@@ -165,19 +175,6 @@ alpha_production = demo_production()
 # Even when we include these runs, the total simulation time is still much lower
 # than in the work of Viscardi *et al*.
 
-# %% [markdown]
-# ::: {warning}
-# The LAMMPS `compute/heat flux` command is reported to produce unphysical results
-# when many-body interactions (e.g. angle, dihedral, impropers) are present
-# {cite:p}`jamali_2019_octp`, {cite:p}`surblys_2019_application`,
-# {cite:p}`boone_2019_heat`, {cite:p}`surblys_2021_methodology`.
-# In that case, one should use the `compute heat/flux` command with
-# [`compute centroid/stress/atom`](https://docs.lammps.org/compute_heat_flux.html).
-# For systems with only two-body interactions, as in this notebook,
-# the `compute heat/flux` command with `compute stress/atom` command is sufficient.
-# This warning is important for molecular systems.
-# :::
-#
 # ::: {note}
 # The results in this study were obtained using
 # [LAMMPS version 19 Nov 2024](https://github.com/lammps/lammps/releases/tag/patch_19Nov2024).

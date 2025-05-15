@@ -75,3 +75,6 @@ plot_results("bulk_viscosity.pdf", result, uc)
 ```
 
 This script is trivially extended to combine data from multiple trajectories.
+
+A worked example can be found in the notebook
+[Bulk viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../../examples/lj_bulk_viscosity.py)

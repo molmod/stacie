@@ -2,7 +2,7 @@
 
 ## Definitions
 
-There are two definitions {cite:p}`sokal_1997_monte`:
+There are two definitions {cite:p}`sokal_1997_monte` of the autocorrelation time:
 
 1. The *integrated* autocorrelation time is derived from the autocorrelation integral:
 
@@ -25,9 +25,8 @@ There are two definitions {cite:p}`sokal_1997_monte`:
     $$
 
     The exponential autocorrelation time characterizes the slowest mode in the input.
-    The parameter $\tau_\text{exp}$ in
-    [the Exponential Tail Model](../autocorrelation_integral/model.md)
-    estimates this quantity.
+    The parameter $\tau_\text{exp}$ can be estimated with the
+    [the Pade Model](../autocorrelation_integral/model.md).
 
 Both correlation times are the same if the autocorrelation is nothing more than
 an exponentially decaying function:
@@ -40,14 +39,16 @@ In practice, however, the two correlation times may differ.
 This can happen if the input sequences
 are a superposition of signals with different relaxation times,
 or when they contain non-diffusive contributions such as oscillations at certain frequencies.
+It is even not guaranteed that the exponential autocorrelation time is always well-defined,
+e.g. when the ACF decays as a power law.
 
 ## Which Definition Should I Use?
 
 There is no right or wrong.
-Both definitions are useful and relevant for different purposes.
+Both definitions are useful and relevant for different applications.
 
-1. The integrated correlation time is related to the uncertainty of the mean
-   of a time-correlated sequence:
+1. The integrated correlation time is related to [the variance of the mean
+   of a time-correlated sequence](error_estimates.md):
 
     $$
         \var[\hat{x}_\text{av}] = \frac{\var[\hat{x}_n]}{N} \frac{2\tau_\text{int}}{h}
@@ -73,8 +74,8 @@ Both definitions are useful and relevant for different purposes.
    $h$ is the time step and $N$ the number of steps.
    This resolution must be fine enough to resolve the zero frequency peak
    associated with the exponential decay of the autocorrelation function.
-   The [width of the peak](../autocorrelation_integral/model.md#peak-width)
-   is $1/2\pi\tau_\text{exp}$.
+   The width of the peak can be derived from [the Pade model](../autocorrelation_integral/model.md#pademodel)
+   and is $1/2\pi\tau_\text{exp}$.
    To have ample frequency grid points in this first peak,
    the simulation time must be sufficiently long:
 
@@ -82,7 +83,7 @@ Both definitions are useful and relevant for different purposes.
         T \gg 2\pi\tau_\text{exp}
     $$
 
-    For example, $T = 20 \times 2\pi\tau_\text{exp}$ will provide a decent resolution.
+    For example, $T = 10 \times 2\pi\tau_\text{exp}$ will provide a decent resolution.
 
     Of course, before you start generating the data (e.g. through simulations),
     the value of $\tau_\text{exp}$ is yet unclear.
@@ -92,8 +93,10 @@ Both definitions are useful and relevant for different purposes.
 
     If you notice your input sequences are many orders of magnitudes longer than $\tau_\text{exp}$,
     the number of relevant frequency grid points in the spectrum can become impractical.
-    In this case, splitting up the input sequences in shorter parts with
+    In this case, you can split up the input sequences in shorter parts with
     {py:func}`stacie.utils.split`.
+    However, a better solution is to plan ahead more carefully and avoid longer-than-necessary sequences.
+    It is more efficient to generate more fully independent and shorter sequences instead.
 
     Note that $\tau_\text{exp}$ is also related to the block size
     when working with [block averages](../advanced_topics/block_averages.md)
@@ -111,7 +114,7 @@ With this data, the autocorrelation times are computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results, ExpTailModel
+from stacie import compute_spectrum, estimate_acint, plot_results, PadeModel
 
 # Load all the required inputs, the details of which will depend on your use case.
 sequences = ...
@@ -119,13 +122,13 @@ timestep = ...
 
 # Computation with STACIE.
 spectrum = compute_spectrum(sequences, timestep=timestep)
-result = estimate_acint(spectrum, ExpTailModel())
+result = estimate_acint(spectrum, PadeModel([0, 2], [2]))
 print("Exponential autocorrelation time", result.corrtime_exp)
 print("Standard error of the exponential autocorrelation time", result.corrtime_exp_std)
 print("Integrated autocorrelation time", result.corrtime_int)
 print("Standard error of the integrated autocorrelation time", result.corrtime_int_std)
 ```
 
-For more details, check out the example notebook:
+A worked example can be found in the notebook
 [Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).
 It also discusses the correlation times associated with the diffusive motion of the particles.

@@ -6,13 +6,13 @@ The theory section consists of three parts:
    [autocorrelation integrals](autocorrelation_integral/index.md) in general.
 2. A section on [properties](properties/index.md) that can be derived
    from the autocorrelation function and its integral.
-3. A few [advanced topics](advanced_topics/index.md),
-   mainly relevant for high-quality production simulations.
+3. Recommendations for [preparing inputs](preparing_inputs/index.md),
+   to efficiently obtain high-quality results with STACIE.
 
 ```{toctree}
 :hidden:
 
 autocorrelation_integral/index.md
 properties/index.md
-advanced_topics/index.md
+preparing_inputs/index.md
 ```

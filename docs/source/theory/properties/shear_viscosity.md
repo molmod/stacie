@@ -24,10 +24,10 @@ by Hansen and McDonald {cite:p}`hansen_2013_theory`,
 or Section 13.3.1 of "Statistical Mechanics: Theory and Molecular Simulation"
 by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
-## Five Independent Off-Diagonal Pressure Components of an Isotropic Liquid
+## Five Independent Anisotropic Pressure Contributions of an Isotropic Liquid
 
 To the best of our knowledge, there is no previous work showing how to prepare
-five *independent* inputs with off-diagonal pressure tensor contributions
+five *independent* inputs with anisotropic pressure tensor contributions
 that can be used as inputs to the autocorrelation integral.
 For example, the result below is not mentioned in a recent comparison of methods
 for including diagonal elements of the traceless pressure tensor
@@ -37,7 +37,7 @@ one of which is the isotropic pressure,
 the remaining five should be related to anisotropic contributions.
 
 It is well known that the viscosity of an isotropic fluid can be derived from
-six off-diagonal and diagonal traceless pressure tensor elements in the case
+six off-diagonal and diagonal traceless pressure tensor elements
 {cite:p}`daivis_1994_comparison`.
 However, by subtracting the isotropic term, the six components of the traceless pressure tensor
 become statistically correlated.
@@ -45,7 +45,7 @@ For a proper uncertainty analysis of the estimated viscosity,
 STACIE requires the inputs to be statistically independent,
 so we cannot use the Daivis and Evans equation.
 Here we provide a transformation of the pressure tensor
-that yields five independent components,
+that yields five independent contributions,
 each of which can be used individually to compute the viscosity.
 The average of these five viscosities is equivalent to the result of Daivis and Evans.
 
@@ -85,6 +85,7 @@ This symmetric matrix is an idempotent projection matrix and has an eigendecompo
 $\mathbf{T}=\mathbf{U}\mathbf{\Lambda}\mathbf{U}^\top$ with:
 
 $$
+    \begin{aligned}
     \operatorname{diag}(\mathbf{\Lambda}) &=
     \left[\begin{matrix}
         0 \\ 1 \\ 1 \\ 1 \\ 1 \\ 1
@@ -104,12 +105,13 @@ $$
         \\
         & & & & & 1
     \end{matrix}\right]
+    \end{aligned}
 $$
 
 The zero eigenvalue corresponds to the isotropic component being removed.
-Transforming the pressure to this basis of eigenvectors constructs five off-diagonal components.
+Transforming the pressure to this basis of eigenvectors constructs five anisotropic components.
 Since this transformation is orthonormal, the five components remain statistically uncorrelated.
-It can be shown that the two first off-diagonal components must be rescaled
+It can be shown that the two first anisotropic components must be rescaled
 with a factor $1/\sqrt{2}$, as in $\hat{\mathbf{P}}^\prime = \mathbf{V} \hat{\mathbf{P}}$ with
 
 $$
@@ -129,7 +131,7 @@ $$
     \end{matrix}\right]
 $$
 
-to obtain five time-dependent off-diagonal pressure components
+to obtain five time-dependent anisotropic pressure components
 that can be used as inputs to the viscosity calculation:
 
 $$
@@ -173,13 +175,13 @@ $$
     \end{matrix}\right]
 $$
 
-In the new axes frame, the last off-diagonal element is a proper off-diagonal term equal to
+In the new axes frame, the last off-diagonal element is a proper anisotropic term equal to
 $\frac{\hat{P}_{yy}}{2}-\frac{\hat{P}_{zz}}{2}$.
 
 For the first component, $\hat{P}'_1$, the proof is a little more involved.
 There is no rotation of the Cartesian axis frame
 in which this linear combination appears as an off-diagonal element.
-Instead, it is simply a scaled sum of two off-diagonal stresses:
+Instead, it is simply a scaled sum of two anisotropic stresses:
 
 $$
     \hat{P}'_1 = \alpha\left(
@@ -367,7 +369,7 @@ $$
 Adding up those five contributions
 results in exactly the same expansion as that of Daivis and Evans.
 
-Working with the five components, as we propose, is advantageous.
+Working with the five anisotropic components, as we propose, is advantageous.
 It makes explicit how many independent sequences are used as input,
 which allows for a precise uncertainty quantification.
 
@@ -426,3 +428,6 @@ plot_results("shear_viscosity.pdf", result, uc)
 ```
 
 This script is trivially extended to combine data from multiple trajectories.
+
+A worked example can be found in the notebook
+[Shear viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../../examples/lj_shear_viscosity.py)
