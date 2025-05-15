@@ -10,12 +10,12 @@ If the program generating the sequences does not support block averages,
 you can use {py:func}`stacie.utils.block_average`.
 
 If the blocks are sufficiently small compared to the decay rate of the autocorrelation function,
-Stacie will produce virtually the same results for all parameters of the Exponential Tail Model.
+STACIE will produce virtually the same results for all parameters of the Exponential Tail Model.
 This should not be surprising,
-since the block averaging method is commonly used for practically the same purpose as Stacie.
+since the block averaging method is commonly used for practically the same purpose as STACIE.
 
 The effect of block averages can be understood by inserting them in the discrete power spectrum,
-using Stacie's normalization convention to obtain the proper zero frequency limit.
+using STACIE's normalization convention to obtain the proper zero frequency limit.
 Let $\hat{y}_m$ be the $m$'th block average of $M$ blocks with block size $B$.
 For low frequencies (low indexes $k$), we make the following approximations:
 
@@ -47,7 +47,7 @@ The approximations assume that for small indexes $k$,
 $\omega_N^{-kn}$ is nearly independent of $n$,
 which is indeed true for slowly varying Fourier basis functions.
 The last expression for the sample spectrum is simply that of the spectrum of the block averages,
-with Stacie's normalization convention for a step size $hB$.
+with STACIE's normalization convention for a step size $hB$.
 
 A good value for the block size is related to
 [the exponential autocorrelation time](../properties/autocorrelation_time.md),
@@ -89,5 +89,5 @@ Larger block sizes will generally lead to worse results:
   This workaround is not ideal because
   the (slowest) relaxation time can no longer be derived from such block averages.
 
-An application of Stacie with block averages can be found in the following example notebook:
+An application of STACIE with block averages can be found in the following example notebook:
 [Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).

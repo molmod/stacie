@@ -119,7 +119,7 @@ because it neglects correlated motion between different types of charge carriers
 Nevertheless, it is sometimes interesting to quantify the degree of such correlations.
 {cite:p}`shao_2020_role`
 
-## How to Compute with Stacie?
+## How to Compute with STACIE?
 
 It is assumed that you can load the time-dependent ion velocity components
 into a NumPy array `ionvels`.
@@ -145,7 +145,7 @@ volume, temperature, boltzmann_const, timestep = ...
 # Compute the charge current
 chargecurrent = np.einsum("ijk,i", ionvels, charges)
 
-# Actual computation with Stacie.
+# Actual computation with STACIE.
 # Note that the average spectrum over the three components is implicit.
 # There is no need to include 1/3 here.
 # Note that the zero-frequency component is usually not reliable

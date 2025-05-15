@@ -65,7 +65,7 @@ $$
     \var[\hat{x}_\text{av}] = \frac{1}{T} \int_{-\infty}^\infty c(\Delta_t)\,\mathrm{d} \Delta_t
 $$
 
-## How to Compute with Stacie?
+## How to Compute with STACIE?
 
 It is assumed that you can load the time-dependent sequences into a NumPy array,
 where each row is a sequence and each column a time step.

@@ -28,8 +28,8 @@ def _get_version_info():
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Stacie"
-copyright = "2024, Toon Verstraelen"  # noqa: A001
-author = "Toon Verstraelen"
+copyright = "2024--2025, Toon Verstraelen, Gozdenur Tomaran"  # noqa: A001
+author = "Toon Verstraelen, Gozdenur Tomaran"
 version, release = _get_version_info()
 
 # -- General configuration ---------------------------------------------------

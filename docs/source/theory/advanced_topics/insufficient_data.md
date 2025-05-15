@@ -1,6 +1,6 @@
 # How to Detect and Address Insufficient Data
 
-If the spectrum analyzed by Stacie contains too little information,
+If the spectrum analyzed by STACIE contains too little information,
 i.e., there is not enough independent data in the input sequences,
 the estimated parameters and uncertainties will be unreliable.
 The most common consequence is that the autocorrelation integral will be underestimated,
@@ -14,7 +14,7 @@ If not, one should be cautious in interpretating the results and consider genera
 
     > The slowest time correlations can only be detected
     > if these slow changes in the inputs are repeated a few times.
-    > This is a rather general requirement, not specific to Stacie.
+    > This is a rather general requirement, not specific to STACIE.
     > If this condition is not met, the relevant information for estimating
     > the autocorrelation integral is simply missing.
     > More details can be found in the section on the

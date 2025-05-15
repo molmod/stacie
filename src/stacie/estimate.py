@@ -130,9 +130,9 @@ def estimate_acint(
 
     .. math::
 
-        \frac{f_{i+1}}{f_{i}} = \exp(s / p)
+        \frac{f_{k+1}}{f_{k}} = \exp(g_\text{sp} / \beta)
 
-    where :math:`s` is ``fcut_spacing`` and :math:`p` is ``switch_exponent``.
+    where :math:`g_\text{sp}` is ``fcut_spacing`` and :math:`\beta` is ``switch_exponent``.
 
     Parameters
     ----------

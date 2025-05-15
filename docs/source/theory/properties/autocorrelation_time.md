@@ -18,7 +18,7 @@ There are two definitions {cite:p}`sokal_1997_monte`:
 
 2. The *exponential* autocorrelation time is defined as
    the limit of the exponential decay rate of the autocorrelation function.
-   In Stacie's notation, this means that for large $\Delta_t$, we have:
+   In STACIE's notation, this means that for large $\Delta_t$, we have:
 
     $$
         c(\Delta_t) \propto \exp\left(-\frac{|\Delta_t|}{\tau_\text{exp}}\right)
@@ -99,7 +99,7 @@ Both definitions are useful and relevant for different purposes.
     when working with [block averages](../advanced_topics/block_averages.md)
     to reduce storage requirements for production simulations.
 
-## How to Compute with Stacie?
+## How to Compute with STACIE?
 
 It is assumed that you can load one or (ideally) more
 time-dependent sequences of equal length into a NumPy array `sequences`.
@@ -117,7 +117,7 @@ from stacie import compute_spectrum, estimate_acint, plot_results, ExpTailModel
 sequences = ...
 timestep = ...
 
-# Computation with Stacie.
+# Computation with STACIE.
 spectrum = compute_spectrum(sequences, timestep=timestep)
 result = estimate_acint(spectrum, ExpTailModel())
 print("Exponential autocorrelation time", result.corrtime_exp)

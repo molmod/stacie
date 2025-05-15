@@ -6,13 +6,13 @@ are discussed in the next section.
 
 Some of the derivations in the theory section can also be found in other references.
 They are included here to make the theory more accessible
-and to explain all the details needed to implement Stacie.
+and to explain all the details needed to implement STACIE.
 
-First, the [notation](notation.md) is fixed
-and an [overview](overview.md) of the derivation is given.
+First, the [notation](notation.md) is fixed,
+and an [overview](overview.md) is given of how STACIE works.
 The three main parts of the derivation consist of:
 
-- a [model](model.md) for the low-frequency part of the power spectrum.
+- A [model](model.md) for the low-frequency part of the power spectrum,
 - the algorithm to [estimate the parameters](statistics.md) in this model,
   from which the autocorrelation integral and its uncertainty can be derived,
 - and the algorithm to determine the [frequency cutoff](cutoff.md) used

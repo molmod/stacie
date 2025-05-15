@@ -1,216 +1,228 @@
 # Frequency Cutoff
 
-The Exponential Tail model should be fitted to the low-frequency part of the spectrum,
-but it is not clear *a priori* up to which frequency.
-Stacie's strategy is to test several frequency cutoffs, uniformly distributed on a log scale.
-The best cutoff is identified as the one
-that maximizes the amount of data included without an obvious trend in the residuals.
-Including more data points reduces the variance of the autocorrelation integral estimate,
-but any trend in the residuals would be a sign of underfitting, leading to biased parameters.
+In STACIE, a model must be fitted to the low-frequency part of the sampling PSD.
+The [previous section](statistics.md) discussed how to implement a local regression
+using a smooth switching function parametrized by a cutoff frequency, $f_\text{cut}$.
+A good choice of the cutoff seeks a trade-off between two conflicting goals:
 
-Visually recognizing underfitting may seem trivial,
-but designing a robust criterion to quantify it is not.
-Traditional model selection criteria such as
-[Marginal Likelihood](https://en.wikipedia.org/wiki/Marginal_likelihood),
-[Akaike's Information Criterion (AIC)](https://en.wikipedia.org/wiki/Akaike_information_criterion),
-or [Bayesian Information Criterion](https://en.wikipedia.org/wiki/Bayesian_information_criterion)
-are not trivially applicable because they solve a different problem:
-identifying the best model for a given data set.
-Here, the model is the same for all cutoffs, but the amount of fitting data varies.
+1. When too much data is included in the fit,
+   the model is too simple to explain all the features of the spectrum.
+   It underfits the data and the estimates are in general biased.
+2. When too little data is included in the fit,
+   the variance of the estimated parameters is larger than needed,
+   meaning that not all relevant information is used.
 
-A new "underfitting criterion" (UFC) for selecting the best cutoff frequency is presented below.
-Its value decreases slowly as more data is included and as long as the residuals exhibit no trends.
-As soon as any trend appears in the residuals, the underfitting criterion increases sharply.
-The amount of data for which the criterion becomes minimal represents a sweet spot:
-the amount of useful information is maximized,
-subject to the constraint that there is no risk of biasing the parameters.
+Finding a good compromise between the two can be done in several ways,
+and similar difficulties can be found in other approaches to compute transport coefficients.
+For example, in the direct quadrature of the ACF, the truncation of the integral faces the same problem.
 
-The UFC and AIC (with a workaround discussed below) can be used to select a domain
-when fitting a smooth univariate model to noisy data.
-Both criteria are illustrated for a simple polynomial fit to noisy cosine data
-in the [Underfitting Criterion Demo](../../examples/underfitting_criterion.py).
-This example may be helpful to gain some intuition for the theory derived below.
+Because the [model](model.md) is fitted to a sampling PSD with known and convenient statistical properties,
+as discussed in the [previous section](statistics.md),
+it becomes possible to determine the cutoff frequency systematically.
+As also explained in the [previous section](statistics.md),
+the cutoff frequency is not a proper hyperparameter in the Bayesian sense,
+meaning that a straightforward of marginalization over the cutoff frequency is not possible
+{cite}`rasmussen_2005_gaussian`.
+Instead, we propose to use cross validation to find a good compromise between bias and variance.
+As explained below, we use cross-validation to construct a model likelihood,
+whose unit is independent of the cutoff frequency,
+and which can be used to marginalize estimated parameters over the cutoff frequency.
 
-## Normalized Residuals
+## Effective number of fitting points
 
-The underfitting criterion is applicable to any 1D curve fitting problem
-where only a part of the data is expected to follow the model.
-This "part" is not known *a priori*,
-and an appropriate range of the dependent variables is searched.
-For each selected range, the model is fitted to $N_\text{fit}$ data points.
-The corresponding data points are labeled with an integer index $i \in \{1 \ldots N_\text{fit}\}$.
-The index must preserve the order of the independent variables.
-For example, in the case of a spectrum, from low frequency to high frequency.
-
-The underfitting criterion uses normalized residuals after maximizing the likelihood:
+The following subsections regularly use the concept "effective number of fitting points".
+We define it for a given cutoff frequency, as:
 
 $$
-    \hat{R}_i = \frac{\hat{Y}_i - \hat{\mu}_i}{\hat{\sigma}_i}
+    N_{\text{eff}}(f_{\text{cut}}) = \sum_{k=1}^{M} w(f_k|f_{\text{cut}})
 $$
 
-where $\hat{\mu}_i$ and $\hat{\sigma}_i$
-are the maximum-likelihood mean and standard deviation of the model for data point $i$.
-In the case of spectra, the residuals in the notation from the
-[Parameter Estimation](model.md) section are:
+This is simply the sum of the weights introduced in
+the [regression](statistics.md#regression) of the model to the sampling PSD.
+
+## Grid of cutoff frequencies
+
+STACIE fits models for a logarithmic grid of cutoff frequencies, defined as:
 
 $$
-  \hat{Y}_i &= \hat{C}_i
-  \\
-  \hat{\mu}_i &= \alpha_i\,\hat{\theta}_i
-  \\
-  \hat{\sigma}_i &= \sqrt{\alpha_i}\,\hat{\theta}_i
+    f_{\text{cut},j} = f_{\text{cut},0} \, r^j
 $$
 
-The parameter $\hat{\theta}_i$ is the scale of the Gamma distribution at each frequency,
-found with the best parameters, i.e. those that maximize the log-likelihood.
+where $f_{\text{cut},0}$ is the lowest cutoff frequency in the grid
+and $r$ is the ratio between two consecutive cutoff frequencies.
+The following parameters control the parameters of the grid:
 
-In a regression problem (without underfitting), we would have the following expected values:
+- The lowest cutoff considered is fixed by solving
 
-$$
-    \mean[\hat{R}_i] = 0 \qquad \mean[\hat{R}^2_i] < 1
-$$
+    $$
+        N_{\text{eff}}(f_{\text{cut,min}}) = g_\text{min} P
+    $$
 
-Although the residuals have been normalized, their variance should be less than one.
-On average,
-the maximum likelihood model is (slightly) closer to the measured data than to the ground truth
-because it tries to make the residuals as small as possible.
-In other words, on average, likelihood maximization will result in a slightly overfitted model.
+    where $g_\text{min}$ is a user-defined parameter and $P$ is the number model parameters.
+    In STACIE, the default value is $g_\text{min} = 5$
+    to reduce the risk of numerical issues in the regression.
+    One can change the value of $g_\text{min} P$ with the option `neff_min`
+    of the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
 
-If a model is too simple to describe the data,
-there will be some underfitting and the normalized residuals can become (much) larger than one.
-Therefore, in principle, a sample variance of the normalized residuals
-greater than one can be used to detect underfitting.
-However, such a simple criterion does not detect small misfits.
-In edge cases, the variance of the normalized residuals may still be close to one,
-even though they show a trend.
+- The maximum cutoff frequency is fixed by solving
 
-## Cumulative Sums of Residuals
+    $$
+        N_{\text{eff}}(f_{\text{cut,max}}) = g_\text{max}
+    $$
 
-Underfitting can be detected more robustly by
-making use of correlations between nearby residuals.
-For example, the analytical spectrum of the Exponential Tail model is smooth
-compared to the uncorrelated uncertainties of a power spectrum.
-If the model cannot fully describe the data,
-nearby residuals will have the same sign on average.
+    where $g_\text{max}$ is a user-defined parameter.
+    In STACIE, the default value is $g_\text{max} = 1000$.
+    One can change the value of $g_\text{max}$ with the option `neff_max`
+    of the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
+    The sole purpose of this parameter is to control the computional cost of the regression.
+    (For short inputs, the highest cutoff frequency is also limited by the Nyquist frequency.)
 
-One can amplify correlations between nearby residuals
-by using a shifted cumulative sum of residuals:
+- The ratio between two consecutive cutoff frequencies is:
 
-$$
-    \hat{U}_j
-        = 2\sum_{i=1}^j \hat{R}_i - \sum_{i=1}^{N_\text{fit}} \hat{R}_i
-           \qquad \forall\,j \in \lbrace 0, \ldots, N_\text{fit}\rbrace
-$$
+    $$
+        r = \exp(g_\text{sp}/\beta)
+    $$
 
-The first term is twice the cumulative sum of the residuals,
-and the second term shifts them down by the sum of all residuals.
-This shifted cumulative sum can be rewritten as:
+    where $g_\text{sp}$ is a user-defined parameter
+    and $\beta$ controls the steepness of the switching function $w(f|f_{\text{cut}})$.
+    In STACIE, the default value is $g_\text{sp} = 0.5$.
+    One can change the value of $g_\text{sp}$ with the option `fcut_spacing`
+    of the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
+    By incorporating the parameter $\beta$ in the definition of $r$,
+    we automatically ensure that a steeper switching function will require a finer grid of cutoff frequencies.
 
-$$
-    \hat{U}_j
-        = \sum_{i=1}^j \hat{R}_i - \sum_{i=j+1}^{N_\text{fit}} \hat{R}_i
-$$
+Parameters are fitted for all cutoffs, starting for the lowest one.
+As shown, below one can terminate the scan of the cutoff frequencies
+well before reaching the maximum cutoff frequency.
 
-In this form, $\hat{U}_j$ is the sum of all residuals up to index $j$,
-minus the sum of the remaining residuals.
-If $j$ corresponds to the data point where the model goes from over- to undershooting the data,
-then $\hat{U}_j$ will add systematic errors on both sides of $j$ with the same sign.
+## Cross-validation
 
-In the absence of underfitting, the corresponding expected values should satisfy:
+Given a cutoff frequency, $f_{\text{cut},j}$, STACIE estimates model parameters
+$\hat{\mathbf{b}}^{(j)}$ and their covariance matrix $\hat{\mathbf{C}}_{\mathbf{b}^{(j)},\mathbf{b}^{(j)}}$.
+To quantify the degree of over- or underfitting, the model parmaeters are further refined
+by refitting them to the first and the second halves of the low-frequency part of the sampling PSD.
+To make these refinements robust, the two halves are also defined through smooth switching functions:
 
 $$
-    \mean[\hat{U}_j] = 0 \qquad \mean[\hat{U}^2_j] < N_\text{fit}
+    w_{\text{left}}(f|f_{\text{cut},j}) &= w(f|g_\text{cv} f_{\text{cut},j} / 2)
+    \\
+    w_{\text{right}}(f|f_{\text{cut},j}) &= w(f|g_\text{cv} f_{\text{cut},j}) - w_{\text{left}}(f|f_{\text{cut},j})
 $$
 
-However, in case of underfitting, there is a trend in the residuals,
-meaning that nearby residuals are positively correlated.
-In this case, the positively correlated errors will add up in the cumulative sums,
-such that the sample variance of $\hat{U}^2_j$ quickly exceeds the expected value above.
+The parameter $g_\text{cv}$ is a user-defined parameter to control the amount of data used in the refinements.
+In STACIE, the default value is $g_\text{cv} = 1.25$,
+meaning that 25% more data is used compared to the original fit.
+(This makes the cross-validation a bit more sensitive to underfitting,
+which we found to be beneficial in practice.)
+This parameter can be controlled with the option `fcut_factor`
+of the [`CV2LCriterion`](#stacie.cutoff.CV2LCriterion) class.
+An instance of this class can be passed to the `cutoff_criterion` argument
+of the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
 
-## Underfitting Criterion
+Instead of performing two full non-linear regressions of the parameters for the two halves,
+we use the linear approximation of the changes in parameters.
+For cutoffs leading to well-behaved fits, these corrections are small,
+justifying the use of a linear approximation.
 
-We propose the following criterion to detect underfitting artifacts:
-
-$$
-    \operatorname{UFC}
-        = \frac{1}{N_\text{fit} + 1}
-          \left(\sum_{j=0}^{N_\text{fit}} \hat{U}^2_j\right)
-          - N_\text{fit}
-$$
-
-Averaging over all indexes $j$ in the first term has the advantage that the UFC accounts for
-all possible indexes $j$ where systematic errors may change sign.
-
-If there is no underfitting, the UFC will be negative.
-Empirically, we observe that the UFC decreases slowly with increasing amounts of data,
-e.g., increasing frequency cutoff,
-as long as there is no underfitting.
-As soon as the model begins to underfit the data,
-the sample variance of the cumulative sums and the UFC increase rapidly.
-The frequency cutoff for which the UFC is minimal
-always seems to strike a good balance between over- and underfitting.
-The minimum is located at the onset of underfitting,
-which is barely visible in the residuals to the naked eye.
-At this point, one has (nearly) the maximum amount of data in the fit
-(and thus minimal uncertainty of the parameters)
-without biasing the estimated parameters due to underfitting.
-
-## Akaike's Information Criterion
-
-Akaike's Information Criterion (AIC) is intended for model selection, not data selection.
-At first glance, it does not seem applicable to frequency cutoff selection.
-However, it is possible reformulate data selection as model selection.
-
-The "trick" is to introduce an additional dummy parameter to "fit" the discarded data point.
-By introducing such dummy parameters,
-all data in the spectrum is always included in the likelihood (regardless of the cutoff).
-The cutoff simply determines at which part is modeled
-with the Exponential Tail model or the dummy parameters.
-Finding the optimal cutoff is thus reduced to a model selection problem.
-
-In the case of the frequency cutoff,
-the dummy parameter corresponds to the scale parameter of the Gamma distribution.
-Assuming that $\alpha_k > 1$, the probability for this point is maximized by:
+The design matrix of the linear regression is:
 
 $$
-    \hat{\theta}_k = \frac{\hat{C}_k}{\alpha_k - 1}.
+    D_{kp} = \left.
+            \frac{
+                \partial I^\text{model}(f_k; \mathbf{b})
+            }{
+                \partial b  _p
+            }
+        \right|_{\mathbf{b} = \hat{\mathbf{b}}^{(j)}}
 $$
 
-The log likelihood for such a point becomes:
+The expected values are the residual between the sampling PSD and the model:
 
 $$
-    \ln \mathcal{L}_k^\text{cut} =
-        -\ln\Gamma(\alpha_k)
-        - \ln\left(\frac{\hat{C}_k}{\alpha_k - 1}\right)
-        + (\alpha_k - 1) \Bigl(\ln(\alpha_k - 1) - 1\Bigr)
+    y_k = \hat{\mathbf{I}}_k - \mathbf{I}^\text{model}(f_k; \hat{\mathbf{b}}^{(j)})
 $$
 
-To obtain the total log likelihood, $\ln\mathcal{L}^\text{total}$,
-the terms $\ln \mathcal{L}_k^\text{cut}$ can be summed over all discarded points
-and added to the likelihood of the model fitted to the data before the cutoff.
-The AIC with this likelihood then becomes:
+The measurement error is the standard deviation of the Gamma distribution,
+using the model spectrum in the scale parameter and the shape parameter of the smapling PSD:
 
 $$
-    \operatorname{AIC}
-    = 2 (N_\text{par} + N_\text{discard}) - 2 \ln\mathcal{L}^\text{total}
+    \sigma_k = \frac{\mathbf{I}^\text{model}(f_k; \hat{\mathbf{b}}^{(j)})}{\sqrt{\alpha_k}}
 $$
 
-where:
+The weighted regression to obtain first-order corrections to the parameters $\hat{\mathbf{b}}^{(j)}$
+solves the following linear system in the least-squares sense:
 
-- $N_\text{par}$ is the number of parameters in the model for the low-frequency part of the spectrum
-  (3 in case of the Exponential Tail model),
-- $N_\text{discard}$ is the number of discarded data points
+$$
+    \frac{w_k}{\sigma_k} \sum_{p=1}^{P} \hat{b}^{(j)}_{\text{corr},p} D_{kp} = \frac{w_k}{\sigma_k} y_k
+$$
 
-## Cutoff selection
+where $w_k$ is the weight of the $k$-th frequency point.
+This system is solved once with weights for the left half and once for the right half.
 
-The AIC is the more fundamental of the two criteria and it is also widely used.
-Nevertheless, in our numerical benchmarks,
-the frequency cutoff that minimizes the AIC always leads to visually clearly biased fits.
-In contrast, a cutoff that minimizes the UFC always leads to residuals without a noticeable trend.
+The function [`linear_weighted_regression()`](#stacie.cutoff.linear_weighted_regression)
+has a robust pre-conditioned implementation of the above linear regression.
+It can handle multiple weight vectors at once,
+and can directly compute linear combinations of parameters for different weight vectors.
+It is used to directly compute the difference between the corrections for the left and right halves,
+denoted as $\hat{\mathbf{d}}$, and its covariance matrix $\hat{\mathbf{C}}_{\mathbf{d},\mathbf{d}}$.
+Normally, the model parameters fitted to both halves must be the same,
+and the negative log-likelihood that the fitted parameters are indeed identical is given by:
 
-We must emphasize that the UFC is an ad hoc construction.
-It is nothing more than a robust mathematical implementation
-of how one would intuitively describe the underfitting of a smooth 1D curve to noisy data.
-Nevertheless, its use is well justified by its practical utility,
-its simplicity, its effectiveness in our benchmarks,
-and the complete absence of manually tunable settings.
+$$
+    \operatorname{criterion}^\text{CV2L} = -\ln \mathcal{L}^\text{CV2L}\left(
+        \hat{\mathbf{d}}^{(j)},
+        \hat{\mathbf{C}}^{(j)}_{\mathbf{d}}
+    \right)
+    = \frac{P}{2}\ln(2\pi)
+      +\underbrace{\frac{1}{2}\ln\left|\hat{\mathbf{C}}^{(j)}_{\mathbf{d}}\right|}_\text{variance}
+      +\underbrace{
+        \frac{1}{2}
+        \bigl(\hat{\mathbf{d}}^{(j)}\bigr)^T
+        \bigl(\hat{\mathbf{C}}^{(j)}_{\mathbf{d}}\bigr)^{-1}
+        \hat{\mathbf{d}}^{(j)}
+      }_\text{bias}
+$$
+
+When starting from the lowest cutoff grid point,
+the second term of the criterion (the variance term) will be high
+because the parameters are poorly constrained by the small amount of data used in the fit.
+As the cutoff frequency and the effective number of fitting points increases,
+the model becomes better constrained.
+The second term will decrease but as soon as the model underfits the data,
+the third term (the bias term) will steeply increase.
+Practically, the cutoff scan is interrupted when the criterion exceeds the incumbent by $g_\text{incr}$.
+The default value is $g_\text{incr}=100$, but this can be changed
+with the option `criterion_high` of the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
+
+A good cutoff frequency is the one that minimizes the criterion and thereby finds a good compromise
+between bias and variance.
+
+## Marginalization over the cutoff frequency
+
+Any method to deduce the cutoff frequency from the spectrum,
+whether it is human judgment or an automated algorithm,
+will introduce some uncertainty in the final result,
+because the spectrum with some statistical uncertainty is used as input.
+
+In STACIE, we account for this uncertainty by marginalizing the model parameters over the cutoff frequency,
+using $\mathcal{L}^\text{CV2L}$ as a model for the likelihood.
+This naturally accounts for the uncertainty in the cutoff frequency
+and is preferred over fixing the cutoff frequency at a single value.
+
+Practically, the final estimate of the parameters and their covariance is computed
+using [standard expression for mixture distributions](https://en.wikipedia.org/wiki/Mixture_distribution#Moments):
+
+$$
+  \begin{split}
+    \hat{\mathbf{b}} &= \sum_{j=1}^J W_j\, \hat{\mathbf{b}}^{(j)}
+    \\
+    \hat{C}_{\mathbf{b},\mathbf{b}} &= \sum_{j=1}^J W_j\, \left(
+      \hat{C}_{\mathbf{b}^{(j)},\mathbf{b}^{(j)}}
+      + (\hat{\mathbf{b}} - \hat{\mathbf{b}}^{(j)})^2
+    \right)
+  \end{split}
+$$
+
+Here, $\hat{\mathbf{b}}^{(j)}$ and $\hat{C}_{\mathbf{b}^{(j)},\mathbf{b}^{(j)}}$ represent
+the parameters and their covariance, respectively, for cutoff $j$.
+The weights $W_j$ sum up to 1 and are proportional to $\mathcal{L}^\text{CV2L}$.

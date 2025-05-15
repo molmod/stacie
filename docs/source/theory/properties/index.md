@@ -63,7 +63,7 @@ depending on the ensemble of interest.
 The final state of each equilibration run then serves as a starting point for an NVE run,
 **without rescaling the volume or kinetic energy**,
 since that would artificially lower the variance in these quantities.
-All examples in the Stacie documentation follow this approach.
+All examples in the STACIE documentation follow this approach.
 
 ### 3. Thermostat and barostat settings
 

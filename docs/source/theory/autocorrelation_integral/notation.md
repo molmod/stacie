@@ -1,6 +1,6 @@
 # Notation
 
-The following notation is used throughout Stacie's documentation.
+The following notation is used throughout STACIE's documentation.
 
 ## Special functions
 
@@ -31,6 +31,10 @@ The following notation is used throughout Stacie's documentation.
 
     - If $\mathcal{I}$ is the ground truth of the autocorrelation integral,
       then $\hat{\mathcal{I}}$ is an estimate of $\mathcal{I}$.
+    - The sampling variance is denoted as $\hat{\sigma}^2_\mathcal{I}$.
+    - The sampling covariance is denoted as $\hat{C}_{a,b}$.
+    - The sampling covariance matrix of two stochastic vectors is denoted as
+      $\hat{\mathbf{C}}_{\mathbf{a},\mathbf{b}}$.
     - A sample point from a distribution $p_a(a)$ is denoted as $\hat{a}$.
     - A realization of a continuous stochastic process $p_{a(t)}[a]$ is written as $\hat{a}(t)$.
     - Similarly, a sample from a discrete stochastic process $p_{a_n}[a]$ is written as $\hat{a}_n$.

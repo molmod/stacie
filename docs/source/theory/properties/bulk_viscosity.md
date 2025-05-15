@@ -17,7 +17,7 @@ The time origin $t_0$ is arbitrary:
 the expected value is computed over all possible time origins.
 
 As will be shown below, one must take into account that the average pressure is not zero.
-For Stacie, there is no need to subtract the average pressure first.
+For STACIE, there is no need to subtract the average pressure first.
 Instead, you can simply drop the DC component from the spectrum.
 
 The derivation of this result can be found in several references, e.g.,
@@ -26,7 +26,7 @@ by Hansen and McDonald {cite:p}`hansen_2013_theory`,
 or Section 2.7 of "Computer Simulation of Liquids"
 by Allen and Tildesley {cite:p}`allen_2017_computer`.
 
-## How to Compute with Stacie?
+## How to Compute with STACIE?
 
 It is assumed that you can load the diagonal time-dependent pressure tensor components
 into a NumPy array `pcomps`.
@@ -51,7 +51,7 @@ volume, temperature, boltzmann_const, timestep = ...
 # Convert pressure components to the isotropic pressure
 piso = (pcomps[0] + pcomps[1] + pcomps[2]) / 3
 
-# Actual computation with Stacie.
+# Actual computation with STACIE.
 spectrum = compute_spectrum(
     piso,
     prefactors=volume / (temperature * boltzmann_const),

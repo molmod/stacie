@@ -31,7 +31,7 @@ by Hansen and McDonald {cite:p}`hansen_2013_theory`,
 or Section 13.3.2 of "Statistical Mechanics: Theory and Molecular Simulation"
 by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
-## How to Compute with Stacie?
+## How to Compute with STACIE?
 
 It is assumed that you can load the particle velocities into a NumPy array `velocities`.
 Each row of this array corresponds to a single Cartesian component of particle's velocity, while
@@ -47,7 +47,7 @@ from stacie import compute_spectrum, estimate_acint, plot_results, ExpPolyModel,
 velocities = ...
 timestep = ...
 
-# Computation with Stacie.
+# Computation with STACIE.
 # Note that the factor 1/(N*d) is implied:
 # the average spectrum over all velocity components is computed.
 # Note that the zero-frequency component is usually not reliable

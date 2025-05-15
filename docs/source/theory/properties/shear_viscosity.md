@@ -42,7 +42,7 @@ six off-diagonal and diagonal traceless pressure tensor elements in the case
 However, by subtracting the isotropic term, the six components of the traceless pressure tensor
 become statistically correlated.
 For a proper uncertainty analysis of the estimated viscosity,
-Stacie requires the inputs to be statistically independent,
+STACIE requires the inputs to be statistically independent,
 so we cannot use the Daivis and Evans equation.
 Here we provide a transformation of the pressure tensor
 that yields five independent components,
@@ -371,7 +371,7 @@ Working with the five components, as we propose, is advantageous.
 It makes explicit how many independent sequences are used as input,
 which allows for a precise uncertainty quantification.
 
-## How to Compute with Stacie?
+## How to Compute with STACIE?
 
 It is assumed that you can load the time-dependent pressure tensor components
 (diagonal and off-diagonal) into a NumPy array `pcomps`.
@@ -394,7 +394,7 @@ volume, temperature, boltzmann_const, timestep = ...
 
 # Convert pressure components to five independent components.
 # This is the optimal usage of pressure information
-# and it informs Stacie of the amount of independent inputs.
+# and it informs STACIE of the amount of independent inputs.
 indep_pcomps = np.array([
     (pcomps[0] - 0.5 * pcomps[1] - 0.5 * pcomps[2]) / np.sqrt(3),
     0.5 * pcomps[1] - 0.5 * pcomps[2],
@@ -403,7 +403,7 @@ indep_pcomps = np.array([
     pcomps[5],
 ])
 
-# Actual computation with Stacie.
+# Actual computation with STACIE.
 spectrum = compute_spectrum(
     indep_pcomps,
     prefactors=volume / (temperature * boltzmann_const),
