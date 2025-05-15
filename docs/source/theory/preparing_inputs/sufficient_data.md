@@ -103,4 +103,4 @@ the quality of the results:
       T \gg 2\pi\tau_\text{exp}
   $$
 
-  For example, $T = 10 \times 2\pi\tau_\text{exp}$ will provide a decent resolution.
+  For example, $T = 20\pi\tau_\text{exp}$ will provide a decent resolution.

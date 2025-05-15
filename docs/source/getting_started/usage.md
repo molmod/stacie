@@ -48,7 +48,7 @@ and then generate the final input data and run the final analysis.
 In extreme cases, you may need sequences with billions of steps,
 making it impractical to store them in full detail prior to analysis.
 To reduce the storage requirements, you can store
-[block averages](../theory/advanced_topics/block_averages.md).
+[block averages](../theory/preparing_inputs/block_averages.md).
 The recommended block size is also related to the *exponential* autocorrelation time.
 Therefore, some preliminary analysis may be required to prepare appropriate inputs.
 

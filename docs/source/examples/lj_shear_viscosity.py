@@ -81,7 +81,7 @@ mpl.rc_file("matplotlibrc")
 #   It also prints recommendations for data reduction (block averaging) and simulation time,
 #   as explained in the following two sections of the documentation:
 #     - [Autocorrelation Time](../theory/properties/autocorrelation_time.md)
-#     - [Block Averages](../theory/advanced_topics/block_averages.md)
+#     - [Block Averages](../theory/preparing_inputs/block_averages.md)
 
 
 # %%

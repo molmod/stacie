@@ -1,12 +1,13 @@
 # Reducing Storage Requirements with Block Averages
 
 When computer simulations generate time-dependent data,
-they often use a time step that is much shorter than needed for an autocorrelation integral.
-Storing (and processing) all the data may require too many resources.
+they often use a discretization of the time axis with a resolution (much) higher
+than needed for a computation of the autocorrelation integral with STACIE.
+Storing (and processing) all these data may require too many resources.
 To reduce the amount of data, we recommend taking block averages.
 These block averages form a new time series with a time step equal to the block size
 times the original time step.
-This reduces the storage requirements by a factor equal to the block size.
+They reduce the storage requirements by a factor equal to the block size.
 If the program generating the sequences does not support block averages,
 you can use {py:func}`stacie.utils.block_average`.
 
@@ -18,8 +19,9 @@ is commonly used for estimating the error on the mean of time-correlated data.
 
 The effect of block averages can be understood by inserting them in the discrete power spectrum,
 using STACIE's normalization convention to obtain the proper zero frequency limit.
-Let $\hat{a}_m$ be the $m$'th block average of $L$ blocks with block size $B$.
-For low frequencies (low indexes $k$), we make the following approximations:
+Let $\hat{a}_\ell$ be the $\ell$'th block average of $L$ blocks with block size $B$.
+We can start from the power spectrum of the original sequence, $\hat{x}_n$,
+and then introduce approximations to rewrite it in terms of the block averages:
 
 $$
     \hat{I}_k
@@ -57,7 +59,7 @@ $$
     \frac{kB}{N} \ll 1
 $$
 
-Put differently, the larger the block size $B$,
+The larger the block size $B$,
 the smaller the range of frequencies for which $\hat{I}_k$ is well approximated.
 
 Depending on the model fitted to the spectrum,
@@ -76,7 +78,7 @@ there are two ways to determine the appropriate block size.
      This practically means that there should be at least $400 \, P$ blocks.
      Fewer blocks will unavoidable lead to significant aliasing effects.
 
-2. When using the [Pade model](../autocorrelation_integral/model.md#pademodel),
+2. When using the [Pade model](../autocorrelation_integral/model.md),
    one should ensure that the spectrum amplitudes $\hat{I}_k$ in the peak at zero frequency
    are not distorted by the block averages.
    The width of this peak in the Pade model is $1/2\pi\tau_\text{exp}$,
@@ -89,13 +91,13 @@ there are two ways to determine the appropriate block size.
     $$
 
     For example, $B = \frac{\pi \tau_\text{exp}}{10 h}$ will ensure that
-    the relevant spectral features are preserved without any distortion
+    the relevant spectral features are reasonably preserved
     in the spectrum derived from the block averages.
 
 Just as with the required length of the input sequences,
 a good choice of the block size cannot be determined *a priori*.
 Also for the block size, a preliminary analysis with STACIE is recommended,
-i.e. without any block averages initially.
+i.e. initially without block averages.
 
 An application of STACIE with block averages can be found in the following example notebook:
 [Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).

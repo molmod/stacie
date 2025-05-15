@@ -396,7 +396,7 @@ print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 #
 # This section repeats the same example,
 # but now with block averages of velocities.
-# [Block averages](../theory/advanced_topics/block_averages.md)
+# [Block averages](../theory/preparing_inputs/block_averages.md)
 # are primarily useful for reducing storage requirements
 # when saving trajectories to disk before processing them with Stacie.
 # In this example, the block size is determined by the following guideline:

@@ -99,7 +99,7 @@ Both definitions are useful and relevant for different applications.
     It is more efficient to generate more fully independent and shorter sequences instead.
 
     Note that $\tau_\text{exp}$ is also related to the block size
-    when working with [block averages](../advanced_topics/block_averages.md)
+    when working with [block averages](../preparing_inputs/block_averages.md)
     to reduce storage requirements for production simulations.
 
 ## How to Compute with STACIE?

@@ -1,11 +1,11 @@
 # Preparing inputs
 
 This section discusses how to prepare input sequences for STACIE
-to guarantee high-quality results:
+to guarantee high-quality results.
+It consists of two parts:
 
-- We first discuss how to prepare [sufficiently long input sequences](sufficient_data.md)
-  for STACIE.
-- Efficient storage of trajectory data is discussed in the section on [block averages](block_averages.md)
+- How to plan and prepare [sufficient input sequences](sufficient_data.md) for STACIE.
+- How to store sequences efficiently on disk with [block averages](block_averages.md).
 
 ```{toctree}
 :hidden:

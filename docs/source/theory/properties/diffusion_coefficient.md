@@ -79,7 +79,7 @@ One may also use particle positions as input instead of velocities.
 When velocities are recorded every $B$ steps,
 the finite difference approximation of the velocities obtained from the positions
 are equivalent to block-averaged velocities, which can be used in STACE.
-See the section on [block averages](../advanced_topics/block_averages.md)
+See the section on [block averages](../preparing_inputs/block_averages.md)
 for more details.
 
 A worked example can be found in the notebook

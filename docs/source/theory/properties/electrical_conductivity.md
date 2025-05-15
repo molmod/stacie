@@ -182,7 +182,7 @@ There are several ways to alter this script, depending on your needs and the ava
   to which finite-differences can be applied to compute the charge current.
   Even if the dipole moment printed only every $B$ steps,
   this approximation is useful and corresponds to taking block averages of the charge current.
-  See the section on [block averages](../advanced_topics/block_averages.md)
+  See the section on [block averages](../preparing_inputs/block_averages.md)
   for more details.
 
 A worked example can be found in the notebook
