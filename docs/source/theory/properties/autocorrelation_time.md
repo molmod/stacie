@@ -2,7 +2,7 @@
 
 ## Definitions
 
-There are two definitions {cite:p}`sokal_1997_monte` of the autocorrelation time:
+There are two definitions of the autocorrelation time {cite:p}`sokal_1997_monte`:
 
 1. The *integrated* autocorrelation time is derived from the autocorrelation integral:
 
@@ -13,8 +13,9 @@ There are two definitions {cite:p}`sokal_1997_monte` of the autocorrelation time
     $$
 
     where $c(\Delta_t)$ is the autocorrelation function,
-    $\mathcal{I}$ is the autocorrelation integral computed with STACIE's conventions,
-    and $F$ is the prefactor of the autocorrelation integral.
+    $\mathcal{I}$ is the ACF defined with STACIE's conventions,
+    and $F$ is the prefactor of the autocorrelation integral,
+    introduced in the [overview of the autocorrelation integral](../autocorrelation_integral/overview.md).
 
 2. The *exponential* autocorrelation time is defined as
    the limit of the exponential decay rate of the autocorrelation function.
@@ -29,7 +30,7 @@ There are two definitions {cite:p}`sokal_1997_monte` of the autocorrelation time
     [the Pade Model](../autocorrelation_integral/model.md).
 
 Both correlation times are the same if the autocorrelation is nothing more than
-an exponentially decaying function:
+a two-sided exponentially decaying function:
 
 $$
     c(\Delta_t) = c_0 \exp\left(-\frac{|\Delta_t|}{\tau_\text{exp}}\right)
@@ -74,7 +75,7 @@ Both definitions are useful and relevant for different applications.
    $h$ is the time step and $N$ the number of steps.
    This resolution must be fine enough to resolve the zero frequency peak
    associated with the exponential decay of the autocorrelation function.
-   The width of the peak can be derived from [the Pade model](../autocorrelation_integral/model.md#pademodel)
+   The width of the peak can be derived from [the Pade model](../autocorrelation_integral/model.md)
    and is $1/2\pi\tau_\text{exp}$.
    To have ample frequency grid points in this first peak,
    the simulation time must be sufficiently long:
@@ -83,34 +84,36 @@ Both definitions are useful and relevant for different applications.
         T \gg 2\pi\tau_\text{exp}
     $$
 
-    For example, $T = 10 \times 2\pi\tau_\text{exp}$ will provide a decent resolution.
+    For example, $T = 20\pi\tau_\text{exp}$ will provide a decent resolution.
 
     Of course, before you start generating the data (e.g. through simulations),
     the value of $\tau_\text{exp}$ is yet unclear.
-    Without prior knowledge on $\tau_\text{exp}$,
+    Without prior knowledge of $\tau_\text{exp}$,
     you should first analyze preliminary data to get a first estimate of $\tau_\text{exp}$,
     after which you can plan the data generation more carefully.
+    More details can be found in the section on [data sufficiency](../preparing_inputs/data_sufficiency.md).
 
-    If you notice your input sequences are many orders of magnitudes longer than $\tau_\text{exp}$,
-    the number of relevant frequency grid points in the spectrum can become impractical.
+    If you notice that your input sequences are many orders of magnitudes longer than $\tau_\text{exp}$,
+    the number of relevant frequency grid points in the spectrum can become impractically large.
     In this case, you can split up the input sequences in shorter parts with
     {py:func}`stacie.utils.split`.
-    However, a better solution is to plan ahead more carefully and avoid longer-than-necessary sequences.
+    However, a better solution is to plan ahead more carefully
+    and avoid sequences that are far longer than necessary.
     It is more efficient to generate more fully independent and shorter sequences instead.
 
     Note that $\tau_\text{exp}$ is also related to the block size
     when working with [block averages](../preparing_inputs/block_averages.md)
-    to reduce storage requirements for production simulations.
+    to reduce storage requirements of production simulations.
 
 ## How to Compute with STACIE?
 
 It is assumed that you can load one or (ideally) more
-time-dependent sequences of equal length into a NumPy array `sequences`.
+time-dependent sequences of equal length into a 2D NumPy array `sequences`.
 Each row in this array is a sequence and the columns correspond to time steps.
 You also need to store the time step in a Python variable.
 (If your data does not have a time step, just omit it from the code below.)
 
-With this data, the autocorrelation times are computed as follows:
+With these data, the autocorrelation times are computed as follows:
 
 ```python
 import numpy as np

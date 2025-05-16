@@ -31,22 +31,23 @@ when many-body interactions (e.g. angle, dihedral, impropers) are present
 This command only treats pairwise interactions correctly.
 If this is relevant, one should use the `compute heat/flux` command with
 [`compute centroid/stress/atom`](https://docs.lammps.org/compute_heat_flux.html).
-For systems with only two-body interactions, as in this notebook,
+For systems with only two-body interactions,
 the `compute heat/flux` command with `compute stress/atom` command is sufficient.
-This warning is important for molecular systems.
+Molecular liquids are practically always simulated with some many-body terms,
+and thus require the `compute centroid/stress/atom` command.
 :::
 
 ## How to Compute with STACIE?
 
 It is assumed that you can load the time-dependent heat flux components
-into a NumPy array `heatflux`.
+into a 2D NumPy array `heatflux`.
 Each row of this array corresponds to one heat flux component
 in the order $\hat{J}_x$, $\hat{J}_y$ and $\hat{J}_z$.
 Columns correspond to time steps.
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,
 all in consistent units.
-With these requirements, the shear viscosity can be computed as follows:
+With these requirements, the thermal conductivity can be computed as follows:
 
 ```python
 import numpy as np

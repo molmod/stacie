@@ -1,5 +1,5 @@
-# Stacie is a STable AutoCorrelation Integral Estimator.
-# Copyright (C) 2024-2025 The contributors of the Stacie Python Package.
+# STACIE is a STable AutoCorrelation Integral Estimator.
+# Copyright (C) 2024-2025 The contributors of the STACIE Python Package.
 # See the CONTRIBUTORS.md file in the project root for a full list of contributors.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,11 +16,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""Regression tests for typical Stacie workflows.
+"""Regression tests for typical STACIE workflows.
 
 Note that the test cases here are not meant as examples of properly analyzed spectra.
 (Some of the fits are really poor.)
-These test cases explore a few corner cases and verify that Stacie behaves as expected.
+These test cases explore a few corner cases and verify that STACIE behaves as expected.
 """
 
 from collections.abc import Callable
@@ -51,7 +51,7 @@ CRITERIA = [CV2LCriterion()]
 
 
 def output_test_result(prefix: str, res: Result | list[Result]):
-    """Dump results with Stacie's standard output formats."""
+    """Dump results with STACIE's standard output formats."""
     dn_out = Path("tests/outputs")
     dn_out.makedirs_p()
     plot_results(dn_out / f"{prefix}.pdf", res)

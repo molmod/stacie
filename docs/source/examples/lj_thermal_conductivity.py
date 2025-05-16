@@ -10,7 +10,7 @@
 # The exploration phase is skipped and it is only checked *a posteriori* that the simulations
 # contain sufficient data.
 #
-# This notebook does not only show how to use Stacie.
+# This notebook does not only show how to use STACIE.
 # It also illustrates how it makes effective use of trajectory information.
 # The results in this notebook are comparable in terms of statistical uncertainty to
 # state-of-the-art results, even though the simulation time is much shorter.
@@ -162,10 +162,10 @@ alpha_production = demo_production()
 #
 # | Method                     | Simulation time  [τ\*] | Thermal conductivity [κ\*] | Reference |
 # |----------------------------|------------------------|----------------------------|-----------|
-# | EMD NVE (Stacie)           | 2400                   | 6.982 ± 0.082              | This notebook |
+# | EMD NVE (STACIE)           | 2400                   | 6.982 ± 0.082              | This notebook |
 # | EMD NVE (Helfand-moment)   | 600000                 | 6.946 ± 0.12               | {cite:p}`viscardi_2007_transport2` |
 #
-# This small comparison confirms that Stacie can reproduce a well-known thermal conductivity result,
+# This small comparison confirms that STACIE can reproduce a well-known thermal conductivity result,
 # with small error bars, while using much less trajectory data than existing methods.
 #
 # Note that the simulation time mentioned in the table only covers the production runs.

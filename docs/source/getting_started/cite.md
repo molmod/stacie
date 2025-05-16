@@ -1,7 +1,7 @@
 # How to Cite?
 
-When you use Stacie in your research,
-please cite the [Stacie paper](https://doi.org/10.1xxx/yyy)
+When you use STACIE in your research,
+please cite the STACIE paper
 in any publications resulting from that research.
 The reference is provided in several formats below:
 

@@ -1,6 +1,6 @@
 # Autocorrelation Integral
 
-This theory section deals only with the integral of the autocorrelation function as such.
+This theory section deals only with the autocorrelation integral as such.
 The (physical) [properties](../properties/index.md) associated with this integral
 are discussed in the next section.
 

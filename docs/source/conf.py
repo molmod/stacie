@@ -27,7 +27,7 @@ def _get_version_info():
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Stacie"
+project = "STACIE"
 copyright = "2024--2025, Toon Verstraelen, Gozdenur Tomaran"  # noqa: A001
 author = "Toon Verstraelen, Gozdenur Tomaran"
 version, release = _get_version_info()
@@ -48,6 +48,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_codeautolink",
     "sphinx_copybutton",
+    "sphinx_tippy",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.inkscapeconverter",
 ]

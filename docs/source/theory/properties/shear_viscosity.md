@@ -32,7 +32,7 @@ that can be used as inputs to the autocorrelation integral.
 For example, the result below is not mentioned in a recent comparison of methods
 for including diagonal elements of the traceless pressure tensor
 {cite:p}`mercier_2023_computation`.
-Since a pressure tensor has 6 degrees of freedom
+Since a pressure tensor has 6 degrees of freedom,
 one of which is the isotropic pressure,
 the remaining five should be related to anisotropic contributions.
 
@@ -269,8 +269,8 @@ $$
 
 (This is Eq. A5 in their paper rewritten in our notation.)
 Working out the expansion, using
-$\hat{\mathbf{P}}_{\text{tl},xx} =
-\frac{1}{3}(2\hat{\mathbf{P}}_{xx} - \hat{\mathbf{P}}_{yy} - \hat{\mathbf{P}}_{zz})$
+$\hat{P}_{\text{tl},xx} =
+\frac{1}{3}(2\hat{P}_{xx} - \hat{P}_{yy} - \hat{P}_{zz})$
 and similar definitions for the two other Cartesian components, we get:
 
 $$
@@ -376,7 +376,7 @@ which allows for a precise uncertainty quantification.
 ## How to Compute with STACIE?
 
 It is assumed that you can load the time-dependent pressure tensor components
-(diagonal and off-diagonal) into a NumPy array `pcomps`.
+(diagonal and off-diagonal) into a 2D NumPy array `pcomps`.
 Each row of this array corresponds to one pressure tensor component in the order
 $\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, $\hat{P}_{xy}$.
 (Same order as in Voigt notation.)

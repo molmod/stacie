@@ -18,7 +18,7 @@ or guest molecules in porous media.
 
 Note that this definition is valid only if the particles of interest exhibit diffusive motion.
 If they oscillate around a fixed center,
-the zero-frequency component of the velocity autocorrelation spectrum will approach to zero,
+the zero-frequency component of the velocity autocorrelation spectrum will approach zero,
 resulting in a diffusion coefficient of zero.
 This scenario may occur when the diffusion is governed by an activated hopping process
 and the simulation is too short to capture such rare events.
@@ -33,7 +33,7 @@ by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
 ## How to Compute with STACIE?
 
-It is assumed that you can load the particle velocities into a NumPy array `velocities`.
+It is assumed that you can load the particle velocities into a 2D NumPy array `velocities`.
 Each row of this array corresponds to a single Cartesian component of particle's velocity, while
 each column corresponds to  a specific time step.
 You should also store the time step in a Python variable.
@@ -51,7 +51,7 @@ timestep = ...
 # Note that the factor 1/(N*d) is implied:
 # the average spectrum over all velocity components is computed.
 # Note that the zero-frequency component is usually not reliable
-# because usually the total momentum is constrained or conserved.
+# because typically the total momentum is constrained or conserved.
 spectrum = compute_spectrum(
     velocities,
     prefactors=1.0,
@@ -75,12 +75,13 @@ uc = UnitConfig(
 plot_results("diffusion_coefficient.pdf", result, uc)
 ```
 
-One may also use particle positions as input instead of velocities.
-When velocities are recorded every $B$ steps,
-the finite difference approximation of the velocities obtained from the positions
-are equivalent to block-averaged velocities, which can be used in STACE.
-See the section on [block averages](../preparing_inputs/block_averages.md)
-for more details.
+One can also use particle positions and apply a finite difference approximation
+to obtain the velocities.
+(For trajectories obtained with a Verlet integrator, this does not introduce additional approximations.)
+When positions are recorded every $B$ steps,
+the finite difference approximation can also be applied.
+The result is equivalent to block-averaging velocities, and can thus be used as inputs for STACIE.
+Consult the section on [block averages](../preparing_inputs/block_averages.md) for more details.
 
 A worked example can be found in the notebook
 [Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).

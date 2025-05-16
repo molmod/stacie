@@ -1,7 +1,7 @@
 # Uncertainty of the Mean of Time-Correlated Data
 
 When data exhibits time correlations,
-the error on the average cannot be computed by assuming that all data are statistically independent.
+the error of the average cannot be computed by assuming that all data are statistically independent.
 Because of time correlations, there are fewer independent values than the number of elements in the data.
 
 Quantifying the uncertainty of averages over time-correlated data is discussed
@@ -38,17 +38,18 @@ leading to:
 
 $$
   \var[\hat{x}_\text{av}] =
-    \frac{1}{N^2} \sum_{n=0}^{N-1} \sum_{\Delta=n-N+1}^{n}
-    \cov[\hat{x}_n \,,\, \hat{x}_\Delta]
+    \frac{1}{N^2} \sum_{n=0}^{N-1} \sum_{\Delta=-n}^{N-1-n}
+    \cov[\hat{x}_n \,,\, \hat{x}_{n+\Delta}]
 $$
 
 To simplify this expression, we must further assume that the second summation
 can be extended from $\Delta=-\infty$ to $\Delta=+\infty$.
 This approximation is acceptable if the correlation time of the sequence is small compared to $N$.
-In this limit, we find:
+(In other words, we assume that $c_\Delta$ decays to zero in a small number of steps compared to $N$.)
+With this assumption, we find:
 
 $$
-  \var[\hat{x}_\text{av}] =
+  \var[\hat{x}_\text{av}] \approx
     \frac{1}{N} \sum_{\Delta=-\infty}^{+\infty}
     c_\Delta
 $$
@@ -67,7 +68,11 @@ $$
 
 ## How to Compute with STACIE?
 
-It is assumed that you can load the time-dependent sequences into a NumPy array,
+Because no factor $1/2$ is present in the expression for the variance of the mean,
+the factor $F$ must compensator for the factor $1/2$ in the autocorrelation integral.
+Hence, we must be use $F=2$.
+
+It is assumed that you can load the time-dependent sequences into a 2D NumPy array,
 where each row is a sequence and each column a time step.
 If you have a physical time step (in some unit of time),
 it is recommended that you use it as shown below,
@@ -86,7 +91,7 @@ sequences, timestep = ...
 # Get the total simulation time (sum over all sequences)
 total_time = timestep * sequences.size
 
-# The factor 2 is just compensating for the factor 1/2 in the definition of the spectrum.
+# The factor 2 is just compensating for the factor 1/2 in the autocorrelation integral.
 spectrum = compute_spectrum(
     sequences,
     prefactors=2.0 / total_time,
@@ -99,10 +104,10 @@ print("Error of the mean", np.sqrt(result.acint))
 plot_results("error.pdf", result)
 ```
 
-The spectrum at zero frequency cannot be used because it contains contributions from the mean,
+The spectrum at zero frequency must be excluded because it contains contributions from the mean,
 i.e., not only from the autocorrelation integral.
 
-The Pade model is used here because it also estimates the exponential autocorrelation time.
+The Pade model is used here because it nearly always a good choice for error estimates.
 However, if the data does not feature an exponential decay of the ACF, this model may not be appropriate.
 In such cases, you can use the `ExpPolyModel` instead.
 For more details, see the section on [spectrum models](../autocorrelation_integral/model.md).

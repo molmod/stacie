@@ -16,20 +16,20 @@ and $\hat{P}_\text{iso}$ is the instantaneous isotropic pressure.
 The time origin $t_0$ is arbitrary:
 the expected value is computed over all possible time origins.
 
-As will be shown below, one must take into account that the average pressure is not zero.
-For STACIE, there is no need to subtract the average pressure first.
-Instead, you can simply drop the DC component from the spectrum.
-
 The derivation of this result can be found in several references, e.g.,
 Section 8.5 of "Theory of Simple Liquids"
 by Hansen and McDonald {cite:p}`hansen_2013_theory`,
 or Section 2.7 of "Computer Simulation of Liquids"
 by Allen and Tildesley {cite:p}`allen_2017_computer`.
 
+As will be shown below, one must take into account that the average pressure is not zero.
+For STACIE, there is no need to subtract the average pressure first.
+Instead, you can simply drop the DC component from the spectrum.
+
 ## How to Compute with STACIE?
 
 It is assumed that you can load the diagonal time-dependent pressure tensor components
-into a NumPy array `pcomps`.
+into a 2D NumPy array `pcomps`.
 (The same array as for [shear viscosity](shear_viscosity.md) can be used.)
 Each row of this array corresponds to one pressure tensor component in the order
 $\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, $\hat{P}_{xy}$.

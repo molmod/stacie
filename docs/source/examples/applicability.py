@@ -3,13 +3,13 @@
 # %% [markdown]
 # # Applicability of the Exponential Tail Model
 #
-# Stacie's Exponential Tail Model assumes that
+# STACIE's Exponential Tail Model assumes that
 # the autocorrelation function decays exponentially for large lag times.
 # Not all dynamical systems exhibit this exponential relaxation.
-# If you still want to apply Stacie to such cases,
+# If you still want to apply STACIE to such cases,
 # you need to implement an appropriate model for the low-frequency spectrum.
 #
-# This notebook applies Stacie to numerical solutions of
+# This notebook applies STACIE to numerical solutions of
 # [Thomas' Cyclically Symmetric Attractor](https://en.wikipedia.org/wiki/Thomas%27_cyclically_symmetric_attractor):
 #
 # $$
@@ -37,7 +37,7 @@
 # cannot be approximated well with the Exponential Tail model.
 #
 # This example is fully self-contained:
-# input data is generated with numerical integration and then analyzed with Stacie.
+# input data is generated with numerical integration and then analyzed with STACIE.
 # Dimensionless units are used throughout.
 
 # %% [markdown]

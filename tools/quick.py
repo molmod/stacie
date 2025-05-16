@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A minimalistic example demonstrating quick use of Stacie."""
+"""A minimalistic example demonstrating quick use of STACIE."""
 
 import matplotlib as mpl
 import numpy as np

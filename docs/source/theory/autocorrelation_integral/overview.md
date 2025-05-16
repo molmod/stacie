@@ -1,9 +1,9 @@
 # Overview
 
-The goal of STACIE is to estimate the integral of the autocorrelation function (AFF)
+The goal of STACIE is to estimate the integral of the {term}`ACF`
 of a physical continuous time-dependent function with an infinite domain.
 In practice, due to inherently finite computational resources, however,
-one resorts to discrete and finite time-dependent sequences.
+we resort to discrete and finite time-dependent sequences.
 We first formulate STACIE's goal in the continuous case
 and then reformulate it in the discrete case.
 
@@ -25,7 +25,7 @@ $$
   c(\Delta_t) = \cov \bigl[ \hat{x}(t) \,,\,\hat{x}(t + \Delta_t) \bigr]
 $$
 
-A prefactor $F$ is usually present, for example containing factors
+A prefactor $F$ is usually present, containing factors
 such as the temperature and/or the cell volume in Green--Kubo formalisms.
 {cite:p}`green_1952_markoff, green_1954_markoff, kubo_1957_statistical`
 The integrand is the ACF, $c(\Delta_t)$, of the time-dependent input $\hat{x}(t)$.
@@ -36,7 +36,7 @@ The expected value is obtained by averaging over all times $t$
 and all observations of $\hat{x}(t)$.
 
 Let $C(f)$ be the Fourier transform of the ACF,
-which is also known as the power spectral distribution (PSD):
+which is also known as the {term}`PSD`:
 
 $$
 C(f)=\mathcal{F}[c](f)=\int_{-\infty}^\infty c(\Delta_t) e^{-i2\pi f \Delta_t} \mathrm{d} \Delta_t
@@ -55,7 +55,7 @@ For numerical applications, this is actually a useful identity:
 The sampling ACF is practically computed using the sampling PSD as an intermediate step.
 When $\mathcal{I}$ is derived from the PSD,
 the inverse transform to derive the ACF from the PSD can be skipped.
-As we will see later, there are other advantages to using this limit to compute the integral.
+As we will see later, there are other advantages to using this zero-frequency limit to compute the integral.
 
 :::{note}
 Some derivations of Green--Kubo relations of transport properties,
@@ -106,10 +106,10 @@ $$
 $$
 
 The underlying continuous function $\hat{x}(t)$, and thus $\hat{x}_n$, are not necessarily periodic.
-Because we intend to use the discrete Fourier transform and rely on its well-known properties,
+However, because we intend to use the discrete Fourier transform and rely on its well-known properties,
 we will assume in the derivations that $\hat{x}_n$ is periodic with period $N$.
-In practice, such artifacts are negligible and only noticeable at higher frequencies,
-far away from the zero-frequency limit.
+In practice, this assumption has negligible effects and is only noticeable at higher frequencies,
+far away from the zero-frequency limit if interest.
 
 Due to the discretization in time,
 the autocorrelation integral must be approximated with a simple quadrature rule:
@@ -132,7 +132,7 @@ According to (the discrete version of) the Wiener--Khinchin theorem {cite:p}`opp
 this Fourier transform can be written in terms of the discrete PSD:
 
 $$
-C_k = \frac{1}{N}\mean \bigl[|\hat{X}_k|^2\bigr]
+C_k = \frac{1}{N}\mean \left[\left|\hat{X}_k\right|^2\right]
 $$
 
 with
@@ -156,7 +156,11 @@ the zero-frequency limit of the PSD: $\mathcal{I} = I_0$.
 So far, we have worked with ensemble averages to define the discrete ACF and PSD,
 but in practice, we must work with sampling estimates of these quantities.
 To keep the notation simple, we will assume that $\mean[\hat{x}_n]=0$.
-Furthermore, we will assume that $M$ independent sequences of length $N$, $\hat{x}_n^{(m)}$, are available.
+Furthermore, we will assume that we can use $M$ independent sequences of length $N$:
+
+$$
+    \hat{x}_n^{(m)} \quad \forall\, n=0 \ldots N-1 \quad \forall\, m=1 \ldots M
+$$
 
 In this case, the discrete sampling ACF is estimated as:
 
@@ -170,11 +174,11 @@ The discrete sampling PSD, rescaled with STACIE's conventions, becomes:
 
 $$
   I_k \approx \hat{I}_k
-    = \frac{Fh}{2N} \sum_{m=1}^M \sum_{n=0}^{N-1}
-      |\hat{X}_n^{(m)}|^2
+    = \frac{Fh}{2N} \sum_{m=1}^M
+      \left|\hat{X}_k^{(m)}\right|^2
 $$
 
-where $X_n^{(m)}$ is the discrete Fourier transform of the $m$-th sequence:
+where $X_k^{(m)}$ is the discrete Fourier transform of the $m$-th sequence:
 
 $$
   \hat{X}_k^{(m)} = \sum_{n=0}^{N-1} \hat{x}_n^{(m)} \omega^{-kn}
@@ -187,14 +191,15 @@ A direct computation of $\hat{I}_0$ for a limited number of input sequences
 would at best yield a high-variance estimate of $\mathcal{I}$.
 (This is only possible if $\mean[\hat{x}_n]=0$, which is not always the case.)
 
-To reduce the variance of the estimate of $\mathcal{I}$, STACIE derives the zero-frequency limit from
-the low-frequency part of the power spectrum $I_k$.
+To reduce the variance of the estimate of $\mathcal{I}$, STACIE derives the zero-frequency limit
+by fitting a model to the low-frequency part of the power spectrum $\hat{I}_k$.
 The following theory sections explain how this estimate can be made robustly.
 In summary, STACIE introduces a few [models](model.md) for the low-frequency spectrum.
 The parameters in such a model are estimated with likelihood maximization,
-and the parameter covariance is estimated with the Laplace approximation.
-To express the likelihood, one requires the [statistics](statistics.md) of the estimated spectrum.
-Finally, one must decide up to which [cutoff](cutoff.md) frequency the model will be fitted.
+and the parameter covariance is estimated with the Laplace approximation {cite:p}`mackay_2005_information`.
+To write out the likelihood function,
+the [statistics](statistics.md) of the estimated spectrum must be characterized.
+Finally, STACIE determines up to which [cutoff](cutoff.md) frequency the model will be fitted.
 For cutoffs that are too high,
 the model becomes too simple to describe all the features in the spectrum,
 which leads to significant underfitting.

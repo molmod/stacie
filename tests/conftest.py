@@ -1,5 +1,5 @@
-# Stacie is a STable AutoCorrelation Integral Estimator.
-# Copyright (C) 2024-2025 The contributors of the Stacie Python Package.
+# STACIE is a STable AutoCorrelation Integral Estimator.
+# Copyright (C) 2024-2025 The contributors of the STACIE Python Package.
 # See the CONTRIBUTORS.md file in the project root for a full list of contributors.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ mpl.rcParams["axes.spines.right"] = False
 
 
 def check_deriv(func, x0):
-    """Check the derivative with Stacie's convention for returning gradients."""
+    """Check the derivative with STACIE's convention for returning gradients."""
     deriv = func(x0, deriv=1)[1]
     num_deriv, info = nd.Derivative(lambda x: func(x)[0], full_output=True)(x0)
     error = np.clip(info.error_estimate, 1e-15, np.inf)
@@ -41,7 +41,7 @@ def check_deriv(func, x0):
 
 
 def check_curv(func, x0):
-    """Check the curvature with Stacie's convention for returning gradients."""
+    """Check the curvature with STACIE's convention for returning gradients."""
     curv = func(x0, deriv=2)[2]
     num_curv, info = nd.Derivative(lambda x: func(x, deriv=1)[1], full_output=True)(x0)
     error = np.clip(info.error_estimate, 1e-15, np.inf)
@@ -49,7 +49,7 @@ def check_curv(func, x0):
 
 
 def check_gradient(func, x0):
-    """Check the gradient with Stacie's convention for returning gradients."""
+    """Check the gradient with STACIE's convention for returning gradients."""
     grad = func(x0, deriv=1)[1]
     num_grad, info = nd.Gradient(lambda x: func(x)[0], full_output=True)(x0)
     error = np.clip(info.error_estimate, 1e-15, np.inf)
@@ -60,7 +60,7 @@ def check_gradient(func, x0):
 
 
 def check_hessian(func, x0):
-    """Check the Hessian with Stacie's convention for returning gradients."""
+    """Check the Hessian with STACIE's convention for returning gradients."""
     hess = func(x0, deriv=2)[2]
     num_hess, info = nd.Gradient(lambda x: func(x, deriv=1)[1], full_output=True)(x0)
     error = np.clip(info.error_estimate, 1e-15, np.inf)

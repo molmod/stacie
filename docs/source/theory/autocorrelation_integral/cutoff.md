@@ -1,8 +1,10 @@
 # Frequency Cutoff
 
-In STACIE, a model must be fitted to the low-frequency part of the sampling PSD.
+In STACIE, a model must be fitted to the low-frequency part of the sampling {term}`PSD`.
+This low-frequency part is defined by a cutoff frequency, $f_{\text{cut}}$,
+above which the model is not expected to explain the data.
 The [previous section](statistics.md) discussed how to implement a local regression
-using a smooth switching function parametrized by a cutoff frequency, $f_\text{cut}$.
+using a smooth switching function parametrized by such a cutoff frequency, $f_\text{cut}$.
 A good choice of the cutoff seeks a trade-off between two conflicting goals:
 
 1. When too much data is included in the fit,
@@ -14,7 +16,8 @@ A good choice of the cutoff seeks a trade-off between two conflicting goals:
 
 Finding a good compromise between the two can be done in several ways,
 and similar difficulties can be found in other approaches to compute transport coefficients.
-For example, in the direct quadrature of the ACF, the truncation of the integral faces the same problem.
+For example, in the direct quadrature of the {term}`ACF`,
+the truncation of the integral faces a similar trade-off.
 
 Because the [model](model.md) is fitted to a sampling PSD with known and convenient statistical properties,
 as discussed in the [previous section](statistics.md),
@@ -23,10 +26,10 @@ As also explained in the [previous section](statistics.md),
 the cutoff frequency is not a proper hyperparameter in the Bayesian sense,
 meaning that a straightforward of marginalization over the cutoff frequency is not possible
 {cite}`rasmussen_2005_gaussian`.
-Instead, we propose to use cross validation to find a good compromise between bias and variance.
-As explained below, we use cross-validation to construct a model likelihood,
-whose unit is independent of the cutoff frequency,
-and which can be used to marginalize estimated parameters over the cutoff frequency.
+Instead, STACIE uses cross validation to find a good compromise between bias and variance.
+As explained below, a model likelihood is constructed, based on cross-validation,
+whose unit is independent of the cutoff frequency.
+This model is then used to marginalize estimated parameters over the cutoff frequency.
 
 ## Effective number of fitting points
 
@@ -37,12 +40,12 @@ $$
     N_{\text{eff}}(f_{\text{cut}}) = \sum_{k=1}^{M} w(f_k|f_{\text{cut}})
 $$
 
-This is simply the sum of the weights introduced in
-the [regression](statistics.md#regression) of the model to the sampling PSD.
+This is simply the sum of the weights introduced in the section on [regression](statistics.md#regression).
 
 ## Grid of cutoff frequencies
 
-STACIE fits models for a logarithmic grid of cutoff frequencies, defined as:
+STACIE uses a logarithmic grid of cutoff frequencies, and fits model parameters for each cutoff.
+The grid is defined as:
 
 $$
     f_{\text{cut},j} = f_{\text{cut},0} \, r^j
@@ -50,9 +53,9 @@ $$
 
 where $f_{\text{cut},0}$ is the lowest cutoff frequency in the grid
 and $r$ is the ratio between two consecutive cutoff frequencies.
-The following parameters control the parameters of the grid:
+The following parameters define the grid:
 
-- The lowest cutoff considered is fixed by solving
+- The lowest cutoff is fixed by solving
 
     $$
         N_{\text{eff}}(f_{\text{cut,min}}) = g_\text{min} P
@@ -74,7 +77,7 @@ The following parameters control the parameters of the grid:
     In STACIE, the default value is $g_\text{max} = 1000$.
     One can change the value of $g_\text{max}$ with the option `neff_max`
     of the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
-    The sole purpose of this parameter is to control the computional cost of the regression.
+    The sole purpose of this parameter is to limit the computational cost of the regression.
     (For short inputs, the highest cutoff frequency is also limited by the Nyquist frequency.)
 
 - The ratio between two consecutive cutoff frequencies is:
@@ -92,14 +95,13 @@ The following parameters control the parameters of the grid:
     we automatically ensure that a steeper switching function will require a finer grid of cutoff frequencies.
 
 Parameters are fitted for all cutoffs, starting for the lowest one.
-As shown, below one can terminate the scan of the cutoff frequencies
-well before reaching the maximum cutoff frequency.
+As shown below, the scan of the cutoff frequencies can be stopped before reaching $f_{\text{cut,max}}$.
 
 ## Cross-validation
 
 Given a cutoff frequency, $f_{\text{cut},j}$, STACIE estimates model parameters
 $\hat{\mathbf{b}}^{(j)}$ and their covariance matrix $\hat{\mathbf{C}}_{\mathbf{b}^{(j)},\mathbf{b}^{(j)}}$.
-To quantify the degree of over- or underfitting, the model parmaeters are further refined
+To quantify the degree of over- or underfitting, the model parmaters are further refined
 by refitting them to the first and the second halves of the low-frequency part of the sampling PSD.
 To make these refinements robust, the two halves are also defined through smooth switching functions:
 
@@ -120,7 +122,7 @@ An instance of this class can be passed to the `cutoff_criterion` argument
 of the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
 
 Instead of performing two full non-linear regressions of the parameters for the two halves,
-we use the linear approximation of the changes in parameters.
+we use linear regression to make first-order approximations of the changes in parameters.
 For cutoffs leading to well-behaved fits, these corrections are small,
 justifying the use of a linear approximation.
 
@@ -139,25 +141,26 @@ $$
 The expected values are the residual between the sampling PSD and the model:
 
 $$
-    y_k = \hat{\mathbf{I}}_k - \mathbf{I}^\text{model}(f_k; \hat{\mathbf{b}}^{(j)})
+    y_k = \hat{I}_k - I^\text{model}(f_k; \hat{\mathbf{b}}^{(j)})
 $$
 
 The measurement error is the standard deviation of the Gamma distribution,
 using the model spectrum in the scale parameter and the shape parameter of the smapling PSD:
 
 $$
-    \sigma_k = \frac{\mathbf{I}^\text{model}(f_k; \hat{\mathbf{b}}^{(j)})}{\sqrt{\alpha_k}}
+    \sigma_k = \frac{I^\text{model}(f_k; \hat{\mathbf{b}}^{(j)})}{\sqrt{\alpha_k}}
 $$
 
 The weighted regression to obtain first-order corrections to the parameters $\hat{\mathbf{b}}^{(j)}$
 solves the following linear system in the least-squares sense:
 
 $$
-    \frac{w_k}{\sigma_k} \sum_{p=1}^{P} \hat{b}^{(j)}_{\text{corr},p} D_{kp} = \frac{w_k}{\sigma_k} y_k
+    \frac{w_k}{\sigma_k} \sum_{p=1}^{P} D_{kp}\, \hat{b}^{(j)}_{\text{corr},p}
+    = \frac{w_k}{\sigma_k} y_k
 $$
 
 where $w_k$ is the weight of the $k$-th frequency point.
-This system is solved once with weights for the left half and once for the right half.
+This system is solved once with weights for the left halve and once for the right halve.
 
 The function [`linear_weighted_regression()`](#stacie.cutoff.linear_weighted_regression)
 has a robust pre-conditioned implementation of the above linear regression.
@@ -166,7 +169,7 @@ and can directly compute linear combinations of parameters for different weight 
 It is used to directly compute the difference between the corrections for the left and right halves,
 denoted as $\hat{\mathbf{d}}$, and its covariance matrix $\hat{\mathbf{C}}_{\mathbf{d},\mathbf{d}}$.
 Normally, the model parameters fitted to both halves must be the same,
-and the negative log-likelihood that the fitted parameters are indeed identical is given by:
+and the negative log-likelihood of the fitted parameters being identical, is given by:
 
 $$
     \operatorname{criterion}^\text{CV2L} = -\ln \mathcal{L}^\text{CV2L}\left(
@@ -202,7 +205,7 @@ between bias and variance.
 Any method to deduce the cutoff frequency from the spectrum,
 whether it is human judgment or an automated algorithm,
 will introduce some uncertainty in the final result,
-because the spectrum with some statistical uncertainty is used as input.
+because the cutoff is based on a sampling PSD spectrum with some statistical uncertainty.
 
 In STACIE, we account for this uncertainty by marginalizing the model parameters over the cutoff frequency,
 using $\mathcal{L}^\text{CV2L}$ as a model for the likelihood.

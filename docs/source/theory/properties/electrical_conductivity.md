@@ -180,7 +180,7 @@ There are several ways to alter this script, depending on your needs and the ava
   which will reduce the amount of data stored on disk.
 - Some simulations codes will print out the instantaneous dipole moment,
   to which finite-differences can be applied to compute the charge current.
-  Even if the dipole moment printed only every $B$ steps,
+  Even if the dipole moment is printed only every $B$ steps,
   this approximation is useful and corresponds to taking block averages of the charge current.
   See the section on [block averages](../preparing_inputs/block_averages.md)
   for more details.

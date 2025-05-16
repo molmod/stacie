@@ -66,9 +66,9 @@ The following notation is used throughout STACIE's documentation.
 - $x_n$ is an element of a real periodic sequence $\mathbf{x}$ with period $N$.
 - $\mathbf{X} = \mathcal{F}[\mathbf{x}]$ is the discrete Fourier transform of the sequence,
   complex and periodic with period $N$.
-- When $S$ samples of the sequence are considered, they are denoted as $\mathbf{x}^s$
-  with elements $x^s_n$.
-  Their discrete Fourier transforms are $\mathbf{X}^s$ with elements $X^s_k$.
+- When $M$ samples of the sequence are considered, they are denoted as $\mathbf{x}^{(m)}$
+  with elements $x^{(m)}_n$.
+  Their discrete Fourier transforms are $\mathbf{X}^{(m)}$ with elements $X^{(m)}_k$.
 - The grid spacing on the frequency axis is $1/hN$, where $h$ is the spacing of the time axis.
 - Frequency grid points are labeled by an index $k$,
   such that the $k$<sup>th</sup> frequency is $k/hN$.

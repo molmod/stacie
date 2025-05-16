@@ -3,13 +3,13 @@
 > This contributor guide is created with the following template:
 > [nayafia/contributing-template](https://github.com/nayafia/contributing-template).
 
-First of all, thank you for considering contributing to Stacie!
-Stacie is being developed by academics who also have many other responsibilities,
+First of all, thank you for considering contributing to STACIE!
+STACIE is being developed by academics who also have many other responsibilities,
 and you are probably in a similar situation.
 The purpose of this guide is to make efficient use of everyone's time.
 
-Stacie has already been used for production simulations,
-but we are always open to (suggestions for) improvements that fit within the goals of Stacie.
+STACIE has already been used for production simulations,
+but we are always open to (suggestions for) improvements that fit within the goals of STACIE.
 New worked examples that are not too computationally demanding are also highly appreciated!
 Even simple things like correcting typos or fixing minor mistakes are welcome.
 
@@ -20,7 +20,7 @@ Below are some links to documentation for those who are not familiar with these 
 ## Ground Rules
 
 - We want everyone to have a positive experience with their (online) interactions related to
-  Stacie's development.
+  STACIE's development.
   Our expectations for (online) communication are outlined in
   the [Code of Conduct](../code_of_conduct.md).
 
@@ -39,7 +39,7 @@ Below are some links to documentation for those who are not familiar with these 
 
 Create a new issue (or find an existing one) and include the following information:
 
-1. What version of Stacie, Python and NumPy are you using?
+1. What version of STACIE, Python and NumPy are you using?
 2. What operating system and processor architecture are you using?
 3. What did you do?
 4. What did you expect to see?
@@ -58,10 +58,10 @@ If something goes wrong in the process of creating a pull request, we'll try to 
 
 ## Contribution Workflow
 
-Contributing to Stacie always involves the following steps:
+Contributing to STACIE always involves the following steps:
 
 1. Create an issue on GitHub to discuss your plans.
-1. Fork the Stacie repository on GitHub.
+1. Fork the STACIE repository on GitHub.
 1. Clone the original repository on your computer and add your fork as a second remote.
 1. Install [pre-commit](https://pre-commit.com/).
 1. Create a new branch. (Do not commit changes to the main branch.)
@@ -73,4 +73,4 @@ Contributing to Stacie always involves the following steps:
 1. Wait for your changes to be reviewed
    and handle all requests for improvements during the review process.
 1. If your change is accepted,
-   it will be merged into the main branch and included in the next release of Stacie.
+   it will be merged into the main branch and included in the next release of STACIE.

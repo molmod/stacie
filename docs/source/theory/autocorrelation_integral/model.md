@@ -11,7 +11,7 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
     - Degrees `[0, 1]` can be used to extract useful information from a very noisy spectrum.
     - Degrees `[0, 1, 2]` are applicable to spectra with low statistical uncertainty,
       e.g., averaged over 100 inputs.
-    - An even polynomial with degrees `[0, 2]` is for spectra
+    - An even polynomial with degrees `[0, 2]` is suitable for spectra
       that are expected to have a vanishing derivative at zero frequency.
 
     The main advantage of this model is its broad applicability,
@@ -20,8 +20,9 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
 2. The [PadeModel](#stacie.model.PadeModel) is useful in several scenarios:
 
     - It can be configured to model a spectrum with a Lorentzian peak at the origin
-      plus some white noise, which corresponds to an exponentially decaying ACF.
-      In this case, STACIE can derive the exponential correlation time.
+      plus some white noise, which corresponds to an exponentially decaying {term}`ACF`.
+      In this case, STACIE also derives the exponential correlation time,
+      which can deviate from the integrated correlation time.
 
     - Rational functions are, in general, interesting because they can be
       parameterized to have well-behaved high-frequency tails,
@@ -91,14 +92,15 @@ $$
 $$
 
 where $f_k$ is the standard frequency grid of the discrete Fourier transform,
-$f_k = k / (hN)$, $h$ is the time step of the discretized time axis,
-and $N$ is the number of samples.
-The parameter $A$ is the white noise level, and $B$ is the amplitude of the Lorentzian peak.
+$A$ is the white noise level, and $B$ is the amplitude of the Lorentzian peak,
+and $\tau_\text{exp}$ is the exponential correlation time.
+The frequency grid is defined as $f_k = k / (hN)$,
+where $h$ is the time step of the discretized time axis, and $N$ is the number of samples.
 Of particular interest is the correlation time $\tau_\text{exp}$,
 which can be visually related to the width of the peak ($2 \pi \tau_\text{exp}$) in the power spectrum.
-When fitting the PadeModel with $S_\text{num} = \{0, 2\}$ and $S_\text{den} = \{2\}$,
+When fitting the Pade model with $S_\text{num} = \{0, 2\}$ and $S_\text{den} = \{2\}$,
 the exponential correlation time and its variance can be derived
-from the fitted parameters as with first-order error propagation:
+from the fitted parameters with first-order error propagation:
 
 $$
     \tau_\text{exp} &= \frac{\sqrt{\hat{q}_2}}{2 \pi}

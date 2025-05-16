@@ -1,5 +1,5 @@
-# Stacie is a STable AutoCorrelation Integral Estimator.
-# Copyright (C) 2024-2025 The contributors of the Stacie Python Package.
+# STACIE is a STable AutoCorrelation Integral Estimator.
+# Copyright (C) 2024-2025 The contributors of the STACIE Python Package.
 # See the CONTRIBUTORS.md file in the project root for a full list of contributors.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""The Stacie package."""
+"""The STACIE package."""
 
 from .cutoff import CV2LCriterion
 from .estimate import estimate_acint

@@ -57,19 +57,19 @@ While we have validated STACIE in this low-data regime with the ACID test set,
 the visualization of the spectrum is not very informative.
 
 A single molecular dynamics simulation often provides already more than one independent sequence.
-The following table lists $M$ (for a single simulation) for transport properties discussed
+The following table lists $M$ (for a single simulation) for the transport properties discussed
 in the [Properties](../properties/index.md) section.
 
-| Property |  $M$  |
-| -------- | :---: |
+| Transport Property |  $M$  |
+| ------------------ | :---: |
 | Bulk Viscosity | $1$ |
 | Thermal Conductivity | $3$ |
 | Ionic Electrical Conductivity | $3$ |
 | Shear Viscosity | $5$ |
 | Diffusivity | $3N_\text{atom}$ |
 
-This means that for most properties (except for diffusivity), multiple independent simulations
-are required to achieve a good estimate of transport properties.
+This means that in most cases (except for diffusivity), multiple independent simulations
+are required to achieve a good estimate of the transport property.
 
 ## Testing the Sufficiency of the Number of Steps
 
@@ -83,18 +83,18 @@ you can extend the input sequences with additional steps and repeat the analysis
 Note that for some applications, $400\,P$ steps may be far too short,
 meaning that you will need to extend your inputs a few times
 before you get a clear picture of the relative error.
-It is not uncommon to run into problems with data storage in this scenario.
-To reduce the amount of required data, storing [block averages](block_averages.md) can be helpful.
+It is not uncommon to run into problems with storage quota in this scenario.
+To reduce the storage requirements, [block averages](block_averages.md) can be helpful.
 
 In addition to the relative error, there are other indicators to monitor
 the quality of the results:
 
 - The effective number of points used in the fit, which is determined by the cutoff frequency,
-  should be larger than 20 times the number of parameters to be fitted.
+  should be larger than 20 times the number of model parameters.
 - When using the Pade model, the total simulation time should be sufficient
-  to resolve the zero frequency peak in the spectrum.
+  to resolve the zero frequency peak of the spectrum.
   The width of the peak can be derived from
-  [the Pade model](../autocorrelation_integral/model.md#pademodel)
+  [the Pade model](../autocorrelation_integral/model.md)
   and is $1/2\pi\tau_\text{exp}$.
   Because the resolution of the frequency axis of the power spectrum is $1/T$,
   ample frequency grid points in this first peak are guaranteed when:

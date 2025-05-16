@@ -1,19 +1,21 @@
 # Parameter Estimation
 
 Before we discuss how to fit a model to spectral data,
-we first review the statistics of the sampling power spectral distribution.
-Given these statistics, we can derive the likelihood that some model parameters explain the data.
+we first review the statistics of the sampling {term}`PSD`.
+Given these statistical properties,
+we can derive the likelihood that some model parameters explain the observed PSD.
 
 ## Statistics of the Sampling Power Spectral Distribution
 
 When constructing an estimate of a discrete PSD from a finite mount if data,
 it is bound to contain some uncertainty, which will be characterized below.
-The estimate of the PSD is sometimes also called the periodogram or the (empiricl) power spectrum.
+The estimate of the PSD is sometimes also called
+the [periodogram](https://en.wikipedia.org/wiki/Periodogram) or the (empirical) power spectrum.
 
 Consider a periodic random real sequence $\hat{\mathbf{x}}$ with elements $\hat{x}_n$ and period $N$.
 For practical purposes it is sufficient to consider one period of this infinitely long sequence.
 The mean of the sequence is zero and its covariance is $\cov[\hat{x}_n \,,\, \hat{x}_m]$.
-The distribution of sequences is stationary,
+The distribution of sequence is stationary,
 i.e. each time translation of a sequence results in an equally probable sample.
 As a result, the covariance has a circulant structure:
 
@@ -112,7 +114,8 @@ $$
 
 This is the discrete version of the Wiener--Khinchin theorem {cite:p}`oppenheim_1999_power`.
 
-Finally, the covariance of the Fourier transform of the input sequence takes the following form:
+By combining the previous two results,
+we can write the covariance of the Fourier transform of the input sequence as:
 
 $$
     \cov[\hat{X}^*_k \,,\, \hat{X}_\ell]
@@ -236,8 +239,8 @@ $$
     \end{cases}
 $$
 
-The rescaled spectrum used in STACIE, $\hat{I}_k$, has the same distribution
-with a different scale parameter:
+The rescaled spectrum used in STACIE, $\hat{I}_k$, has the same distribution,
+except for the scale parameter:
 
 $$
     \hat{I}_k = \frac{F h}{2} \hat{C}_k
@@ -255,7 +258,7 @@ $$
     w(f_k|f_\text{cut}) = \frac{1}{1 + (f_k/f_\text{cut})^\beta}
 $$
 
-This switching function is $1/2$ when f_k=$f_\text{cut}$.
+This switching function is $1/2$ when $f_k=f_\text{cut}$.
 The hyperparameter $\beta$ controls the steepness of the transition and is 8 by default.
 (This is should be fine for most applications.)
 This value can be set with the `switch_exponent` argument
@@ -330,7 +333,7 @@ $$
     \hat{C}_{\hat{b}_i,\hat{b}_j} = \bigl(\hat{\mathbf{H}}^{-1}\bigr)_{ij}
 $$
 
-This covariance matrix is used to estimate the uncertainties on the model parameters
+This covariance matrix characterizes the uncertainties of the model parameters
 and thus also of the autocorrelation integral.
 More accurate covariance estimates can be obtained with Monte Carlo sampling,
 but this is not implemented in STACIE.
@@ -345,7 +348,7 @@ The estimated covariance has no factor $N_\text{fit}/(N_\text{fit} - N_\text{par
 where $N_\text{fit}$ is the amount of data in the fit
 and $N_\text{par}$ is the number of parameters.
 This is factor is specific for the case of (non)linear regression with normal deviates of
-which the standard deviation is not known a priori {cite:p}`millar_2011_maximum`.
+which the standard deviation is not known *a priori* {cite:p}`millar_2011_maximum`.
 Here, the amplitudes are Gamma-distributed with a known shape parameter.
 Only the scale parameter at each frequency is predicted by the model.
 :::

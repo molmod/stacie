@@ -13,10 +13,6 @@ you can use {py:func}`stacie.utils.block_average`.
 
 If the blocks are sufficiently small compared to the decay rate of the autocorrelation function,
 STACIE will produce virtually the same results.
-This should not be surprising,
-since the closely related block averaging method {cite:p}`allen_2017_computer`
-is commonly used for estimating the error on the mean of time-correlated data.
-
 The effect of block averages can be understood by inserting them in the discrete power spectrum,
 using STACIE's normalization convention to obtain the proper zero frequency limit.
 Let $\hat{a}_\ell$ be the $\ell$'th block average of $L$ blocks with block size $B$.
