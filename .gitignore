@@ -32,6 +32,8 @@ src/stacie/_version.py
 docs/build/
 docs/_build/
 docs/source/apidocs/
+docs/.jupyter_cache/
+docs/jupyter_execute/
 .Python
 build/
 develop-eggs/

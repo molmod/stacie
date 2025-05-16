@@ -3,12 +3,12 @@
 # %% [markdown]
 # # Standard Error of the Mean
 #
-# This notebook shows how to use Stacie to compute the error of the mean
+# This notebook shows how to use STACIE to compute the error of the mean
 # of a time-correlated input sequence,
 # i.e. of which not all values are statistically independent.
 #
 # This is a completely self-contained example that generates the input sequences
-# (with MCMC) and then analyzes them with Stacie.
+# (with MCMC) and then analyzes them with STACIE.
 # Atomic units are used unless otherwise noted.
 #
 # We suggest you experiment with this notebook by making the following changes:
@@ -152,7 +152,7 @@ plot_chains()
 # %% [markdown]
 #
 # The sequences in the plot are clearly time-correlated.
-# The following cells show how Stacie can be used
+# The following cells show how STACIE can be used
 # to compute the uncertainty of this average,
 # taking into account that not all samples
 # are independent due to time correlations.
@@ -208,7 +208,7 @@ result = estimate_acint(spectrum, ExpTailModel(), verbose=True, uc=uc)
 error_mc = np.sqrt(result.acint)
 print(f"Error of the mean = {error_mc:.5f}")
 
-# Because Stacie can estimate errors of the autocorrelation integral,
+# Because STACIE can estimate errors of the autocorrelation integral,
 # it can also estimate errors of errors of means.
 error_of_error_mc = 0.5 * result.acint_std / error_mc
 print(f"Uncertainty of the error of mean = {error_of_error_mc:.5f}")

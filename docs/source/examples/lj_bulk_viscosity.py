@@ -35,7 +35,7 @@ mpl.rc_file("matplotlibrc")
 #   and provides recommendations for data reduction (block averaging) and simulation time,
 #   as explained in the following two sections of the documentation:
 #     - [Autocorrelation Time](../theory/properties/autocorrelation_time.md)
-#     - [Block Averages](../theory/advanced_topics/block_averages.md)
+#     - [Block Averages](../theory/preparing_inputs/block_averages.md)
 
 
 # %%
@@ -145,10 +145,10 @@ eta_bulk_production = demo_production()
 #
 # | Method                     | Simulation time [τ\*] | Bulk viscosity [η$_b$\*] | Reference |
 # |----------------------------|-----------------------|-----------------|-----------|
-# | EMD NVE (Stacie)           | 2400                  | 1.138 ± 0.062   | This notebook |
+# | EMD NVE (STACIE)           | 2400                  | 1.138 ± 0.062   | This notebook |
 # | EMD NVE (Helfand-Einstein) | 300000                | 1.186 ± 0.084   | {cite:p}`meier_2004_transport_III` |
 #
-# This comparison demonstrates that Stacie accurately reproduces bulk viscosity results
+# This comparison demonstrates that STACIE accurately reproduces bulk viscosity results
 # while achieving lower statistical uncertainty with significantly less data than existing methods.
 #
 # ::: {note}

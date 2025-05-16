@@ -1,15 +1,15 @@
 # Installation
 
-You should have the following installed on your computer before starting:
+Before you begin, ensure that you have the following installed:
 
-- [Python](https://www.python.org/) ≥ 3.11
+- [Python](https://www.python.org/) version 3.11 or higher
 - [Pip](https://pip.pypa.io/)
 
-Other dependencies will be installed with the `pip` command below.
-It is assumed that you know how to use [Pip](https://pip.pypa.io/).
-We recommend performing the installation in a [Python virtual environment](https://docs.python.org/3/library/venv.html).
+Additional dependencies will be installed using the `pip` command below.
+Familiarity with [Pip](https://pip.pypa.io/) is assumed.
+We recommend performing the installation within a [Python virtual environment](https://docs.python.org/3/library/venv.html).
 
-Stacie can be installed with:
+To install STACIE, use the following shell command:
 
 ```bash
 pip install stacie

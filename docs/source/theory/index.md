@@ -1,18 +1,20 @@
 # Theory
 
-The theory section consists of three parts:
+This section outlines the theoretical foundations of STACIE
+and provides recommendations for its effective use.
+It is divided into three parts:
 
-1. A section on the estimation of
-   [autocorrelation integrals](autocorrelation_integral/index.md) in general.
-2. A section on [properties](properties/index.md) that can be derived
-   from the autocorrelation function and its integral.
-3. A few [advanced topics](advanced_topics/index.md),
-   mainly relevant for high-quality production simulations.
+1. An explanation of the mathematical foundations of STACIE,
+   specifically how it uses [autocorrelation integrals](autocorrelation_integral/index.md).
+2. A description of the [properties](properties/index.md)
+   that STACIE can derive from the {term}`ACF` and its integral.
+3. Recommendations for [preparing inputs](preparing_inputs/index.md)
+   for STACIE to efficiently obtain high-quality results.
 
 ```{toctree}
 :hidden:
 
 autocorrelation_integral/index.md
 properties/index.md
-advanced_topics/index.md
+preparing_inputs/index.md
 ```

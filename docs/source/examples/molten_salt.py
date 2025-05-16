@@ -9,7 +9,7 @@
 # making the approach here easily adaptable to other codes or physical systems.
 #
 # All OpenMM simulation inputs can be found in the directory `docs/data/openmm_salt`
-# in Stacie's source repository.
+# in STACIE's source repository.
 #
 # The MD simulations are performed using the Born-Huggins-Mayer-Tosi-Fumi potential,
 # which is a popular choice for molten salts.
@@ -44,7 +44,7 @@ mpl.rc_file("matplotlibrc")
 # %% [markdown]
 # ## Reusable Code for the Analysis
 #
-# The `analyze` function takes a few parameters to apply the same analysis with Stacie
+# The `analyze` function takes a few parameters to apply the same analysis with STACIE
 # to different inputs, and with a different degree for the ExpPoly model.
 
 # %%
@@ -139,7 +139,7 @@ def analyze(paths_npz: list[str], transport_property: str, degrees: list[int]) -
         freq_unit_str="THz",
     )
 
-    # Perform the analysis with Stacie
+    # Perform the analysis with STACIE
     spectrum = compute_spectrum(
         iter_sequences(),
         timestep=timestep,
@@ -259,8 +259,8 @@ density = estimate_density(paths_npt_npz)
 # | NpT+NVT (BHMTF) | > 5 ns              | 1.444                      | 9.36                                                | 8.14                                                | ≈ 310 (from plot)  | {cite:p}`wang_2014_molecular` |
 # | Experiment      | N.A.                | 1.542 ± 0.006              | 9.0 ± 0.5                                           | 6.50 ± 0.14                                         | 366 ± 3            | {cite:p}`janz_1968_molten` {cite:p}`bockris_1961_self` |
 #
-# The comparison shows that the results obtained with Stacie align reasonably well with the literature.
-# In terms of statistical efficiency, Stacie achieves comparable error bars.
+# The comparison shows that the results obtained with STACIE align reasonably well with the literature.
+# In terms of statistical efficiency, STACIE achieves comparable error bars.
 
 # %% [markdown]
 # ### Technical Details of the Analysis of the Literature Data

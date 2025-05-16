@@ -1,6 +1,6 @@
 # Development
 
-This section contains some technical details about the development of Stacie.
+This section contains some technical details about the development of STACIE.
 
 ```{toctree}
 :maxdepth: 1

@@ -13,7 +13,7 @@
 # makes it a popular benchmark for computational methods.
 #
 # All LAMMPS simulation inputs can be found in the directory `docs/data/lammps_lj3d`
-# in Stacie's source repository.
+# in STACIE's source repository.
 #
 # The simulations are performed in two stages:
 #
@@ -30,7 +30,7 @@
 #    that are rendered with different random seeds for each run.
 #    The production was initially planned for 4000 steps, but it was extended by 4000 more steps.
 #
-# In addition to demonstrating how to use Stacie,
+# In addition to demonstrating how to use STACIE,
 # this notebook also illustrates its efficient use of the trajectory information.
 # The results in this notebook are comparable in statistical uncertainty to state-of-the-art results,
 # despite using only a small fraction of the data as input.
@@ -81,7 +81,7 @@ mpl.rc_file("matplotlibrc")
 #   It also prints recommendations for data reduction (block averaging) and simulation time,
 #   as explained in the following two sections of the documentation:
 #     - [Autocorrelation Time](../theory/properties/autocorrelation_time.md)
-#     - [Block Averages](../theory/advanced_topics/block_averages.md)
+#     - [Block Averages](../theory/preparing_inputs/block_averages.md)
 
 
 # %%
@@ -196,7 +196,7 @@ eta_exploration = demo_exploration()
 #   Even shorter simulations should be avoided,
 #   as these will not sufficiently resolve the low-frequency part of the spectrum.
 #
-# A warning is also printed, by default, Stacie fits the spectrum using a  maximum of 1000 points
+# A warning is also printed, by default, STACIE fits the spectrum using a  maximum of 1000 points
 # (to limit the computational cost). Including more points would not provide useful information here,
 # as the high-frequency limit of the spectrum is irrelevant for the viscosity.
 
@@ -287,11 +287,11 @@ eta_production = demo_production()
 #
 # | Method                     | Simulation time [τ\*] | Shear viscosity [η\*] | Reference |
 # |----------------------------|-----------------------|-----------------|-----------|
-# | EMD NVE (Stacie)           | 2400                  | 3.193 ± 0.072   | This notebook |
+# | EMD NVE (STACIE)           | 2400                  | 3.193 ± 0.072   | This notebook |
 # | EMD NVE (Helfand-Einstein) | 75000                 | 3.277 ± 0.098   | {cite:p}`meier_2004_transport_I` |
 # | EMD NVE (Helfand-moment)   | 600000                | 3.268 ± 0.055   | {cite:p}`viscardi_2007_transport1` |
 #
-# This comparison confirms that Stacie can reproduce a well-known viscosity result,
+# This comparison confirms that STACIE can reproduce a well-known viscosity result,
 # and that it achieves a small statistical uncertainty with far less data than existing methods.
 #
 # To be fair, the simulation time only accounts for production runs.

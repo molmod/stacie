@@ -10,7 +10,7 @@
 # The exploration phase is skipped and it is only checked *a posteriori* that the simulations
 # contain sufficient data.
 #
-# This notebook does not only show how to use Stacie.
+# This notebook does not only show how to use STACIE.
 # It also illustrates how it makes effective use of trajectory information.
 # The results in this notebook are comparable in terms of statistical uncertainty to
 # state-of-the-art results, even though the simulation time is much shorter.
@@ -26,6 +26,16 @@
 # All MD simulations and this notebook use reduced Lennard-Jones units.
 # For convenience, the reduced unit of thermal conductivity is denoted as κ\*,
 # and the reduced unit of time as τ\*.
+
+# %% [markdown]
+# %% [markdown]
+# ::: {warning}
+# A Lennard-Jones system only exhibits pairwise interactions,
+# for which the LAMMPS command `compute/heat flux` produces valid results.
+# For systems with three- or higher-body interactions, one cannot simply use the same command.
+# Consult the theory section on [thermal conductivity](../theory/properties/thermal_conductivity.md)
+# for more background.
+# :::
 
 # %%
 import numpy as np
@@ -152,10 +162,10 @@ alpha_production = demo_production()
 #
 # | Method                     | Simulation time  [τ\*] | Thermal conductivity [κ\*] | Reference |
 # |----------------------------|------------------------|----------------------------|-----------|
-# | EMD NVE (Stacie)           | 2400                   | 6.982 ± 0.082              | This notebook |
+# | EMD NVE (STACIE)           | 2400                   | 6.982 ± 0.082              | This notebook |
 # | EMD NVE (Helfand-moment)   | 600000                 | 6.946 ± 0.12               | {cite:p}`viscardi_2007_transport2` |
 #
-# This small comparison confirms that Stacie can reproduce a well-known thermal conductivity result,
+# This small comparison confirms that STACIE can reproduce a well-known thermal conductivity result,
 # with small error bars, while using much less trajectory data than existing methods.
 #
 # Note that the simulation time mentioned in the table only covers the production runs.
@@ -165,19 +175,6 @@ alpha_production = demo_production()
 # Even when we include these runs, the total simulation time is still much lower
 # than in the work of Viscardi *et al*.
 
-# %% [markdown]
-# ::: {warning}
-# The LAMMPS `compute/heat flux` command is reported to produce unphysical results
-# when many-body interactions (e.g. angle, dihedral, impropers) are present
-# {cite:p}`jamali_2019_octp`, {cite:p}`surblys_2019_application`,
-# {cite:p}`boone_2019_heat`, {cite:p}`surblys_2021_methodology`.
-# In that case, one should use the `compute heat/flux` command with
-# [`compute centroid/stress/atom`](https://docs.lammps.org/compute_heat_flux.html).
-# For systems with only two-body interactions, as in this notebook,
-# the `compute heat/flux` command with `compute stress/atom` command is sufficient.
-# This warning is important for molecular systems.
-# :::
-#
 # ::: {note}
 # The results in this study were obtained using
 # [LAMMPS version 19 Nov 2024](https://github.com/lammps/lammps/releases/tag/patch_19Nov2024).

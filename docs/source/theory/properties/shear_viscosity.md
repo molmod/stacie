@@ -24,33 +24,32 @@ by Hansen and McDonald {cite:p}`hansen_2013_theory`,
 or Section 13.3.1 of "Statistical Mechanics: Theory and Molecular Simulation"
 by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 
-## Five Independent Off-Diagonal Pressure Components of an Isotropic Liquid
+## Five Independent Anisotropic Pressure Contributions of an Isotropic Liquid
 
-To the best of our knowledge, there is no previous work showing how to prepare
-five *independent* inputs with off-diagonal pressure tensor contributions
+To the best of our knowledge, there is no prior work demonstrating how to prepare
+five *independent* inputs with anisotropic pressure tensor contributions
 that can be used as inputs to the autocorrelation integral.
-For example, the result below is not mentioned in a recent comparison of methods
-for including diagonal elements of the traceless pressure tensor
+For instance, the result below is not mentioned in a recent comparison of methods
+for incorporating diagonal elements of the traceless pressure tensor
 {cite:p}`mercier_2023_computation`.
-Since a pressure tensor has 6 degrees of freedom
-one of which is the isotropic pressure,
-the remaining five should be related to anisotropic contributions.
+Since a pressure tensor has six degrees of freedom,
+one of which corresponds to the isotropic pressure,
+the remaining five should be associated with anisotropic contributions.
 
 It is well known that the viscosity of an isotropic fluid can be derived from
-six off-diagonal and diagonal traceless pressure tensor elements in the case
+six off-diagonal and diagonal traceless pressure tensor elements
 {cite:p}`daivis_1994_comparison`.
 However, by subtracting the isotropic term, the six components of the traceless pressure tensor
 become statistically correlated.
 For a proper uncertainty analysis of the estimated viscosity,
-Stacie requires the inputs to be statistically independent,
-so we cannot use the Daivis and Evans equation.
-Here we provide a transformation of the pressure tensor
-that yields five independent components,
+STACIE requires the inputs to be statistically independent,
+so the Daivis and Evans equation cannot be directly used.
+Here, we provide a transformation of the pressure tensor
+that yields five independent contributions,
 each of which can be used individually to compute the viscosity.
 The average of these five viscosities is equivalent to the result of Daivis and Evans.
 
-To facilitate working with linear transformations of pressure tensors,
-we use Voigt notation:
+To facilitate working with linear transformations of pressure tensors, we adopt Voigt notation:
 
 $$
     \hat{\mathbf{P}} =
@@ -85,6 +84,7 @@ This symmetric matrix is an idempotent projection matrix and has an eigendecompo
 $\mathbf{T}=\mathbf{U}\mathbf{\Lambda}\mathbf{U}^\top$ with:
 
 $$
+    \begin{aligned}
     \operatorname{diag}(\mathbf{\Lambda}) &=
     \left[\begin{matrix}
         0 \\ 1 \\ 1 \\ 1 \\ 1 \\ 1
@@ -104,13 +104,14 @@ $$
         \\
         & & & & & 1
     \end{matrix}\right]
+    \end{aligned}
 $$
 
 The zero eigenvalue corresponds to the isotropic component being removed.
-Transforming the pressure to this basis of eigenvectors constructs five off-diagonal components.
+Transforming the pressure tensor to this eigenvector basis constructs five anisotropic components.
 Since this transformation is orthonormal, the five components remain statistically uncorrelated.
-It can be shown that the two first off-diagonal components must be rescaled
-with a factor $1/\sqrt{2}$, as in $\hat{\mathbf{P}}^\prime = \mathbf{V} \hat{\mathbf{P}}$ with
+It can be shown that the first two anisotropic components must be rescaled by a factor of $1/\sqrt{2}$,
+as in $\hat{\mathbf{P}}^\prime = \mathbf{V} \hat{\mathbf{P}}$, with:
 
 $$
     \mathbf{V} =
@@ -129,7 +130,7 @@ $$
     \end{matrix}\right]
 $$
 
-to obtain five time-dependent off-diagonal pressure components
+to obtain five time-dependent anisotropic pressure components
 that can be used as inputs to the viscosity calculation:
 
 $$
@@ -173,13 +174,13 @@ $$
     \end{matrix}\right]
 $$
 
-In the new axes frame, the last off-diagonal element is a proper off-diagonal term equal to
-$\frac{\hat{P}_{yy}}{2}-\frac{\hat{P}_{zz}}{2}$.
+In the new axes frame, the last off-diagonal element is a proper anisotropic term, expressed as
+$\frac{\hat{P}_{yy}}{2} - \frac{\hat{P}_{zz}}{2}$.
 
-For the first component, $\hat{P}'_1$, the proof is a little more involved.
+For the first component, $\hat{P}'_1$, the proof is slightly more intricate.
 There is no rotation of the Cartesian axis frame
-in which this linear combination appears as an off-diagonal element.
-Instead, it is simply a scaled sum of two off-diagonal stresses:
+that results in this linear combination appearing as an off-diagonal element.
+Instead, it is simply a scaled sum of two anisotropic stress components:
 
 $$
     \hat{P}'_1 = \alpha\left(
@@ -267,8 +268,8 @@ $$
 
 (This is Eq. A5 in their paper rewritten in our notation.)
 Working out the expansion, using
-$\hat{\mathbf{P}}_{\text{tl},xx} =
-\frac{1}{3}(2\hat{\mathbf{P}}_{xx} - \hat{\mathbf{P}}_{yy} - \hat{\mathbf{P}}_{zz})$
+$\hat{P}_{\text{tl},xx} =
+\frac{1}{3}(2\hat{P}_{xx} - \hat{P}_{yy} - \hat{P}_{zz})$
 and similar definitions for the two other Cartesian components, we get:
 
 $$
@@ -364,24 +365,23 @@ $$
         \cov[\hat{P}_{xy}(t_0) \,,\, \hat{P}_{xy}(t_0+\Delta_t)]
 $$
 
-Adding up those five contributions
-results in exactly the same expansion as that of Daivis and Evans.
+Adding these five contributions together
+reproduces the exact same expansion as derived by Daivis and Evans.
 
-Working with the five components, as we propose, is advantageous.
-It makes explicit how many independent sequences are used as input,
-which allows for a precise uncertainty quantification.
+Using the five anisotropic components, as proposed here, offers significant advantages.
+It explicitly defines the number of independent sequences used as input,
+enabling precise uncertainty quantification.
 
-## How to Compute with Stacie?
+## How to Compute with STACIE?
 
 It is assumed that you can load the time-dependent pressure tensor components
-(diagonal and off-diagonal) into a NumPy array `pcomps`.
+(diagonal and off-diagonal) into a 2D NumPy array `pcomps`.
 Each row of this array corresponds to one pressure tensor component in the order
-$\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, $\hat{P}_{xy}$.
-(Same order as in Voigt notation.)
+$\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, $\hat{P}_{xy}$
+(same order as in Voigt notation).
 Columns correspond to time steps.
-You also need to store the cell volume, temperature,
-Boltzmann constant, and time step in Python variables,
-all in consistent units.
+You also need to store the cell volume, temperature, Boltzmann constant,
+and time step in Python variables, all in consistent units.
 With these requirements, the shear viscosity can be computed as follows:
 
 ```python
@@ -394,7 +394,7 @@ volume, temperature, boltzmann_const, timestep = ...
 
 # Convert pressure components to five independent components.
 # This is the optimal usage of pressure information
-# and it informs Stacie of the amount of independent inputs.
+# and it informs STACIE of the number of independent inputs.
 indep_pcomps = np.array([
     (pcomps[0] - 0.5 * pcomps[1] - 0.5 * pcomps[2]) / np.sqrt(3),
     0.5 * pcomps[1] - 0.5 * pcomps[2],
@@ -403,15 +403,15 @@ indep_pcomps = np.array([
     pcomps[5],
 ])
 
-# Actual computation with Stacie.
+# Actual computation with STACIE.
 spectrum = compute_spectrum(
     indep_pcomps,
     prefactors=volume / (temperature * boltzmann_const),
     timestep=timestep,
 )
 result = estimate_acint(spectrum, ExpTailModel())
-print("Shear viscosity", result.acint)
-print("Uncertainty of the shear viscosity", result.acint_std)
+print("Shear viscosity:", result.acint)
+print("Uncertainty of the shear viscosity:", result.acint_std)
 
 # The unit configuration assumes SI units are used systematically.
 # You may need to adapt this to the units of your data.
@@ -425,4 +425,7 @@ uc = UnitConfig(
 plot_results("shear_viscosity.pdf", result, uc)
 ```
 
-This script is trivially extended to combine data from multiple trajectories.
+This script can be trivially extended to combine data from multiple trajectories.
+
+A worked example can be found in the notebook
+[Shear viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../../examples/lj_shear_viscosity.py)

@@ -1,21 +1,21 @@
 # Autocorrelation Integral
 
-This theory section deals only with the integral of the autocorrelation function as such.
+This section focuses solely on the autocorrelation integral itself.
 The (physical) [properties](../properties/index.md) associated with this integral
-are discussed in the next section.
+are discussed in the subsequent section.
 
-Some of the derivations in the theory section can also be found in other references.
-They are included here to make the theory more accessible
-and to explain all the details needed to implement Stacie.
+Some derivations presented here can also be found in other sources.
+They are included to enhance accessibility
+and to provide all the necessary details for implementing STACIE.
 
-First, the [notation](notation.md) is fixed
-and an [overview](overview.md) of the derivation is given.
-The three main parts of the derivation consist of:
+First, the [notation](notation.md) is defined,
+and an [overview](overview.md) is presented of how STACIE works.
+The derivation comprises three main parts:
 
-- a [model](model.md) for the low-frequency part of the power spectrum.
-- the algorithm to [estimate the parameters](statistics.md) in this model,
+- A [model](model.md) for the low-frequency part of the power spectrum,
+- an algorithm to [estimate the parameters](statistics.md) of this model,
   from which the autocorrelation integral and its uncertainty can be derived,
-- and the algorithm to determine the [frequency cutoff](cutoff.md) used
+- and an algorithm to determine the [frequency cutoff](cutoff.md) used
   to identify the low-frequency part of the spectrum.
 
 ```{toctree}

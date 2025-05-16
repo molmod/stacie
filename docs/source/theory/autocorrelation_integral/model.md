@@ -1,215 +1,130 @@
 # Model Spectrum
 
-Stacie supports two models for fitting the low-frequency part of the power spectrum.
+STACIE supports two models for fitting the low-frequency part of the power spectrum.
 In both models, the value at zero frequency corresponds to the autocorrelation integral.
 
-1. The [ExpPolyModel](#stacie.model.ExpPolyModel) is the most general:
+1. The [ExpPolyModel](#stacie.model.ExpPolyModel) is the most general;
    it is an exponential function of a linear combination of simple monomials of the frequency.
-   One can specify the degrees of the monomials and typically a low degree works fine:
+   You can specify the degrees of the monomials, and typically a low degree works fine:
 
     - Degree `[0]` is suitable for a white noise spectrum.
-    - Degrees `[0, 1]` can be used to extract useful information of a very noisy spectrum.
-    - Degrees `[0, 1, 2]` is applicable to spectra with low statistical uncertainty,
-      e.g. averaged over 100 inputs.
-    - An even polynomial with degrees `[0, 2]` is suitable for spectra with a peak at zero frequency.
+    - Degrees `[0, 1]` can be used to extract useful information from a very noisy spectrum.
+    - Degrees `[0, 1, 2]` are applicable to spectra with low statistical uncertainty,
+      e.g., averaged over 100 inputs.
+    - An even polynomial with degrees `[0, 2]` is suitable for spectra
+      that are expected to have a vanishing derivative at zero frequency.
 
     The main advantage of this model is its broad applicability,
-    as it requires little prior knowledge of the functional form of the spectra.
+    as it requires little prior knowledge of the functional form of the spectrum.
 
-2. The Exponential Tail model is designed for autocorrelation functions that decay exponentially.
-   Its primary advantage is that, in addition to the integrated correlation time,
-   it also provides an estimate of the exponential correlation time.
+2. The [PadeModel](#stacie.model.PadeModel) is useful in several scenarios:
+
+    - It can be configured to model a spectrum with a Lorentzian peak at the origin
+      plus some white noise, which corresponds to an exponentially decaying {term}`ACF`.
+      In this case, STACIE also derives the exponential correlation time,
+      which can deviate from the integrated correlation time.
+
+    - Rational functions are, in general, interesting because they can be
+      parameterized to have well-behaved high-frequency tails,
+      which can facilitate the regression.
 
 ## 1. ExpPolyModel
 
-The [ExpPolyModel](#stacie.model.ExpPolyModel) is defined as
+The [ExpPolyModel](#stacie.model.ExpPolyModel) is defined as:
 
 $$
-    C^\text{exppoly}_k = \exp\left(\sum_{s\in S} a_s f_k^s\right)
+    I^\text{exppoly}_k = \exp\left(\sum_{s \in S} b_s f_k^s\right)
 $$
 
-where $S$ is the set of polynomial degrees.
-With this form, $a_0$ corresponds to the integral of the autocorrelation function.
-When one obtains an estimate $\hat{a}_0$ and an estimated variance $\hat{C}(a_0)$,
+where $S$ is the set of polynomial degrees, which must include 0.
+With this form, $b_0$ corresponds to the integral of the autocorrelation function.
+When one obtains an estimate $\hat{b}_0$ and its variance $\hat{\sigma}^2_{b_0}$,
 the autocorrelation integral is [log-normally distributed](https://en.wikipedia.org/wiki/Log-normal_distribution)
 with estimated mean and variance:
 
 $$
+    \begin{aligned}
     \hat{\mathcal{I}}
-    &= \exp\left(\hat{a}_0 + \frac{1}{2}\hat{C}(a_0)\right)
+    &= \exp\left(\hat{b}_0 + \frac{1}{2}\hat{\sigma}^2_{b_0}\right)
     \\
-    \hat{C}(\mathcal{I})
-    &= \exp\left(2\hat{a}_0 + \hat{C}(a_0)\right)
-    \left(\exp(\hat{C}(a_0)) - 1 \right)
+    \hat{\sigma}^2_{\mathcal{I}}
+    &= \exp\left(2\hat{b}_0 + \hat{\sigma}^2_{b_0}\right)
+        \left(\exp(\hat{\sigma}^2_{b_0}) - 1 \right)
+    \end{aligned}
 $$
 
-## 2. Exponential Tail Model
+To construct this model, you can create an instance of the `ExpPolyModel` class as follows:
 
-This model represents the autocorrelation function
-as the sum of a short-term component and a (periodic) exponentially decaying tail:
+```python
+from stacie.model import ExpPolyModel
+model = ExpPolyModel(degrees=[0, 1, 2])
+```
 
-$$
-c_\Delta = c_\Delta^\text{short} + c_\Delta^\text{tail}
-$$
+## 2. PadeModel
 
-### Short-term component
-
-The short-term component is non-zero only for small positive or negative time lags:
+The [PadeModel](#stacie.model.PadeModel) is defined as:
 
 $$
-c_\Delta^\text{short} \neq 0 & \quad\text{if } |\Delta| \le \Delta_\text{short}
-\\
-c_\Delta^\text{short} = 0 & \quad\text{if } \Delta_\text{short} \lt |\Delta| \le N/2
+    I^\text{pade}_k = \frac{
+        \displaystyle
+        \sum_{s \in S_\text{num}} p_s f_k^s
+    }{
+        \displaystyle
+        1 + \sum_{s \in S_\text{den}} q_s f_k^s
+    }
 $$
 
-Because summations in DFT are commonly taken from $0$ to $N-1$, we rewrite this as:
+where $S_\text{num}$ contains the polynomial degrees in the numerator, which must include 0,
+and $S_\text{den}$ contains the polynomial degrees in the denominator, which must not include 0.
+With this model, $p_0$ corresponds to the integral of the autocorrelation function,
+for which we simply have:
 
 $$
-c_\Delta^\text{short}
-    \neq 0 &\qquad \forall\,\Delta\in\lbrace
-        0, \ldots, \Delta_\text{short},
-        N-\Delta_\text{short}, \ldots, N-1
-    \rbrace
-\\
-c_\Delta^\text{short}
-    = 0 &\qquad \forall\,\Delta\in\lbrace
-        \Delta_\text{short}+1, \ldots, N-\Delta_\text{short} -1
-    \rbrace
-$$
-
-### Tail Component
-
-The tail component is the periodic repetition (sum over $i$) of two exponential functions:
-one decaying for positive time lags and one for negative time lags.
-For $\Delta \in \lbrace 0, \ldots, N-1 \rbrace$, this can be written as:
-
-$$
-c_\Delta^\text{tail}
-    = \frac{a_\text{tail}}{M} (r^\Delta + r^{N-\Delta}) \sum_{i=0}^\infty r^{iN}
-$$
-
-with $r < 1$.
-The factor $\frac{1}{M}$ normalizes the tail component so that it sums to $a_\text{tail}$.
-
-$$
-M
-    &= \left(\frac{1-r^N}{1-r} + r^N \frac{1-r^{-N}}{1-r^{-1}}\right) \sum_{i=0}^\infty r^{iN}
-\\
-    &= \left(1-r^{-N}\right) \frac{1 + r}{1-r} \sum_{i=0}^\infty r^{iN}
-$$
-
-We may absorb the infinite sum into the normalization constant to simplify the model:
-
-$$
-c_\Delta^\text{tail}
-    & = \frac{a_\text{tail}}{M'} (r^\Delta + r^{N-\Delta})
-\\
-M'
-    &= \left(1-r^{-N}\right) \frac{1 + r}{1-r}
-$$
-
-The exponential decay of the tail component is characterized by
-its autocorrelation time, $\tau_\text{exp}$ {cite:p}`sokal_1997_monte`:
-
-$$
-    r = \exp\left(-\frac{h}{\tau_\text{exp}}\right)
-$$
-
-where $h$ is the time step.
-
-### Discrete Fourier Transform
-
-For small values of $k$, the discrete Fourier transform of the model autocorrelation function becomes:
-
-$$
-C^\text{exp-tail}_k
-    &\approx
-    a_\text{short} + \frac{a_\text{tail}}{M'} \left(
-        \frac{1-r^N}{1 - r \omega^{-k}} + r^N\frac{1-r^{-N}}{1 - r^{-1} \omega^{-k}}
-    \right)
-\\
-    &\approx
-    a_\text{short} + \frac{a_\text{tail}}{M'} \left(
-        \frac{1-r^N}{1 - r \omega^{-k}} + \frac{1-r^N}{1 - r \omega^k} - \left(1-r^N\right)
-    \right)
-\\
-    &\approx
-    a_\text{short} + \frac{a_\text{tail}}{M'} \left(1-r^N\right) \left(
-         \frac{2 - r(\omega^k + \omega^{-k})}{1 - r(\omega^k + \omega^{-k}) + r^2} - 1
-    \right)
-\\
-    &\approx
-    a_\text{short} + a_\text{tail} \frac{1-r}{1+r} \left(
-         \frac{2 - r(\omega^k + \omega^{-k})}{1 - r(\omega^k + \omega^{-k}) + r^2} - 1
-    \right)
-$$
-
-For the first term we assumed $\omega^{k\Delta_\text{short}}\approx 1$.
-Finally, we can substitute $\omega^k + \omega^{-k} = 2\cos(2\pi k/N)$:
-
-$$
-C^\text{exp-tail}_k
-    &\approx
-    a_\text{short} + a_\text{tail} \frac{1-r}{1+r} \left(
-         2\frac{1 - r\cos(2\pi k/N)}{1 - 2r\cos(2\pi k/N) + r^2} - 1
-    \right)
+    \begin{aligned}
+    \hat{\mathcal{I}} &= \hat{p}_0
     \\
-    &\approx
-    a_\text{short} + a_\text{tail} \frac{(1-r)^2}{1 - 2r\cos(2\pi k/N) + r^2}
+    \hat{\sigma}^2_{\mathcal{I}} &= \hat{\sigma}^2_{p_0}
+    \end{aligned}
+$$
+
+For the special case of a Lorentzian peak at the origin plus some white noise,
+that is $S_\text{num} = \{0, 2\}$ and $S_\text{den} = \{2\}$,
+the model is equivalent to:
+
+$$
+    I^\text{lorentz}_k = A + \frac{B}{1 + (2 \pi f_k \tau_\text{exp})^2}
+$$
+
+where $f_k$ is the standard frequency grid of the discrete Fourier transform,
+$A$ is the white noise level, $B$ is the amplitude of the Lorentzian peak,
+and $\tau_\text{exp}$ is the exponential correlation time.
+The frequency grid is defined as $f_k = k / (hN)$,
+where $h$ is the time step of the discretized time axis, and $N$ is the number of samples.
+Of particular interest is the correlation time $\tau_\text{exp}$,
+which can be visually related to the width of the peak ($2 \pi \tau_\text{exp}$) in the power spectrum.
+When fitting the Pade model with $S_\text{num} = \{0, 2\}$ and $S_\text{den} = \{2\}$,
+the exponential correlation time and its variance can be derived
+from the fitted parameters with first-order error propagation:
+
+$$
+    \begin{aligned}
+    \tau_\text{exp} &= \frac{\sqrt{\hat{q}_2}}{2 \pi}
     \\
+    \hat{\sigma}^2_{\tau_\text{exp}} &= \frac{1}{16 \pi^2 \hat{q}_2} \hat{\sigma}^2_{q_2}
+    \end{aligned}
 $$
 
-This model can be fitted to the low-frequency part of an empirical autocorrelation function.
-Once the parameters are fitted to an empirical spectrum, one finds:
+Note that this model is also applicable to data whose short-time correlations are not exponential,
+as long as the tail of the ACF decays exponentially.
+Such deviating short-time correlations will only affect the white noise level $A$
+and features in the PSD at higher frequencies.
 
-$$
-    \mathcal{I} \approx \hat{\mathcal{I}} = \hat{C}^\text{exp-tail}_0 = \hat{a}_\text{short} + \hat{a}_\text{tail}
-$$
+To construct this model, you can create an instance of the `PadeModel` class as follows:
 
-### Peak width
-
-As illustrated in the
-[Exponential Tail Model](../../examples/model.py)
-example, the exponential decay of the autocorrelation function results in
-a peak in the power spectrum at zero frequency.
-The width of this peak at half the maximum of the tail term is found by solving:
-
-$$
-    1 - 2 r \cos(2\pi k_\text{half}/N) + r^2 = 2 (1 - r)^2
-$$
-
-The solution is:
-
-$$
-    k_\text{half}
-        &= \frac{N}{2\pi}\arccos\left(\frac{4r - r^2 -1 }{2r}\right)
-    \\
-        &= \frac{N}{2\pi}\arccos\left(2 - \cosh\left(\frac{h}{\tau_\text{exp}}\right)\right)
-$$
-
-Using RFFT conventions, $f=k/hN$, this can be rewritten as a frequency:
-
-$$
-    f_\text{half}
-        = \frac{1}{2\pi h}\arccos\left(2 - \cosh\left(\frac{h}{\tau_\text{exp}}\right)\right)
-$$
-
-We can rely on the following series expansion:
-
-$$
-    \arccos(2 - \cosh(u))
-    \approx
-    \left|u + \frac{1}{12} u^3 + \frac{1}{96} u^5 + \mathcal{O}(u^7)\right|
-$$
-
-Hence, in the limit $\tau_\text{exp} \gg h$, we find:
-
-$$
-    f_\text{half}
-        \approx \frac{1}{2\pi \tau_\text{exp}}
-$$
-
-Sequences obtained from computer simulations
-usually have sufficiently small time steps to satisfy this limit:
-The steps must be able to resolve the fastest oscillations in the system
-to correctly simulate its dynamics.
+```python
+from stacie.model import PadeModel
+model = PadeModel(
+    numerator=[0, 2],
+    denominator=[2],
+)
+```

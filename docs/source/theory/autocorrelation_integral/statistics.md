@@ -1,13 +1,22 @@
 # Parameter Estimation
 
-## Statistics of the Power Spectrum
+Before discussing how to fit a model to spectral data,
+we first review the statistics of the sampling {term}`PSD`.
+Given these statistical properties,
+we can derive the likelihood that certain model parameters explain the observed PSD.
+
+## Statistics of the Sampling Power Spectral Distribution
+
+When constructing an estimate of a discrete PSD from a finite amount of data,
+it is bound to contain some uncertainty, which will be characterized below.
+The estimate of the PSD is sometimes also called
+the [periodogram](https://en.wikipedia.org/wiki/Periodogram) or the (empirical) power spectrum.
 
 Consider a periodic random real sequence $\hat{\mathbf{x}}$ with elements $\hat{x}_n$ and period $N$.
-For practical purposes it is sufficient to consider one period of this infinitely long sequence.
-The mean of the sequence is zero and its covariance is $\cov[\hat{x}_n \,,\, \hat{x}_m]$.
-
-The distribution of sequences is stationary,
-i.e. each time translation of a sequence results in an equally probable sample.
+For practical purposes, it is sufficient to consider one period of this infinitely long sequence.
+The mean of the sequence is zero, and its covariance is $\cov[\hat{x}_n \,,\, \hat{x}_m]$.
+The distribution of the sequence is stationary,
+i.e., each time translation of a sequence results in an equally probable sample.
 As a result, the covariance has a circulant structure:
 
 $$
@@ -17,8 +26,7 @@ $$
 with $\Delta=n-m$.
 Thus, we can express the covariance with a single index and treat it as a real periodic sequence,
 albeit not stochastic.
-$c_\Delta$ is also known as the autocovariance or autocorrelation function
-of the stochastic process,
+$c_\Delta$ is also known as the autocovariance or autocorrelation function of the stochastic process
 because it expresses the covariance of a sequence $\hat{\mathbf{x}}$
 with itself translated by $\Delta$ steps.
 
@@ -32,9 +40,9 @@ with $\omega = e^{2\pi i/N}$.
 
 A well-known property of circulant matrices is that their eigenvectors
 are sine- and cosine-like basis functions.
-As a result, the covariance of the sequence $\hat{\mathbf{X}}$ becomes diagonal.
+As a result, the covariance of the discrete Fourier transform $\hat{\mathbf{X}}$ becomes diagonal.
 To make this derivation self-contained, we write out the mean and covariance of $\hat{X}_k$ explicitly.
-Note that the operators $\mean[\cdot]$, $\var[\cdot]$ and $\cov[\cdot,\cdot]$
+Note that the operators $\mean[\cdot]$, $\var[\cdot]$, and $\cov[\cdot,\cdot]$
 are expected values over all possible realizations of the sequence.
 
 For the expected value of the Fourier transform,
@@ -42,7 +50,7 @@ we take advantage of the fact that all time translations of $\hat{\mathbf{x}}$
 belong to the same distribution.
 We can explicitly compute the average over all time translations,
 in addition to computing the mean, without loss of generality.
-In the last steps, the index $n$ is relabeled to $n-m$ and some factors are rearranged,
+In the last steps, the index $n$ is relabeled to $n-m$, and some factors are rearranged,
 after which the sums can be worked out.
 
 $$
@@ -56,7 +64,9 @@ $$
         \right]
         \\
         &= \mean\left[
-            \frac{1}{N} \sum_{m=0}^{N-1} \omega^{km}\sum_{n=0}^{N-1} \hat{x}_{n} \omega^{-kn}
+            \frac{1}{N}
+            \underbrace{\left(\sum_{m=0}^{N-1} \omega^{km}\right)}_{=0}
+            \sum_{n=0}^{N-1} \hat{x}_{n} \omega^{-kn}
         \right]
         \\
         &= 0
@@ -64,7 +74,7 @@ $$
 
 The derivation of the covariance uses similar techniques.
 In the following derivation, $*$ stands for complex conjugation.
-Halfway, the summation index $n$ is written as $n=\Delta+m$.
+Halfway through, the summation index $n$ is written as $n=\Delta+m$.
 
 $$
     \cov[\hat{X}^*_k\,,\,\hat{X}_\ell]
@@ -101,7 +111,10 @@ $$
     &= \frac{1}{N} \mean\Bigl[|\hat{X}_k|^2\Bigr]
 $$
 
-Finally, the covariance of the Fourier transform of the input sequence takes the following form:
+This is the discrete version of the Wiener--Khinchin theorem {cite:p}`oppenheim_1999_power`.
+
+By combining the previous two results,
+we can write the covariance of the Fourier transform of the input sequence as:
 
 $$
     \cov[\hat{X}^*_k \,,\, \hat{X}_\ell]
@@ -174,16 +187,19 @@ $$
 In summary, the Fourier transform of a stationary stochastic process
 consists of uncorrelated real and imaginary components at each frequency.
 Furthermore, the variance of the Fourier transform is proportional to the power spectrum.
-This simple statistical structure makes the spectrum an easy starting point for further analysis.
-In comparison, the autocorrelation function itself has non-trivial correlated uncertainties,
-{cite:p}`bartlett_1980_introduction,boshnakov_1996_bartlett,francq_2009_bartlett`
-making it difficult to fit models directly to it (or its running integral).
+This simple statistical structure makes the spectrum a convenient starting point
+for further analysis and uncertainty quantification.
+In comparison, the ACF has non-trivial correlated uncertainties
+{cite:p}`bartlett_1980_introduction,boshnakov_1996_bartlett,francq_2009_bartlett`,
+making it difficult to fit models directly to the ACF (or its running integral).
 
 If we further assume that the sequence $\hat{\mathbf{x}}$ is the result of a periodic Gaussian process,
 the Fourier transform is normally distributed.
 In this case, the empirical power spectrum follows a scaled Chi-squared distribution
-{cite:p}`ercole_2017_accurate`.
-For notational consistency, we will use the Gamma distribution:
+{cite:p}`priestley_1982_spectral, fuller_1995_introduction, shumway_2017_time, ercole_2017_accurate`.
+For notational consistency, we will use the
+[$\gdist(\alpha,\theta)$ distribution](https://en.wikipedia.org/wiki/Gamma_distribution)
+with shape parameter $\alpha$ and scale parameter $\theta$:
 
 $$
     \hat{C}_0=\frac{1}{N}|\hat{X}_0|^2
@@ -198,60 +214,73 @@ $$
     \quad \text{for } 0<k<N \text { and } k \neq N/2
 $$
 
-Note that $\hat{X}_0$ and $\hat{X}_{N/2}$ have only a real component,
+Note that $\hat{X}_0$ and $\hat{X}_{N/2}$ have only a real component
 because the input sequence $\hat{\mathbf{x}}$ is real,
 which corresponds to a Chi-squared distribution with one degree of freedom.
-For all other frequencies, $\hat{X}_k$ have a real and imaginary component,
+For all other frequencies, $\hat{X}_k$ has a real and imaginary component,
 resulting in two degrees of freedom.
 
-Spectra are often computed by averaging them over $S$ samples to reduce the variance.
-In this case, the $S$-averaged empirical spectrum is distributed as:
+Spectra are often computed by averaging them over $M$ sequences to reduce the variance.
+In this case, the $M$-averaged empirical spectrum is distributed as:
 
 $$
-    \hat{C}_0=\frac{1}{NS}\sum_{s=1}^S|\hat{X}^s_0|^2
-    &\sim \gdist(\textstyle\frac{S}{2},\textstyle\frac{2}{S}C_0)
-    \\
-    \hat{C}_{N/2}=\frac{1}{NS}\sum_{s=1}^S|\hat{X}^s_{N/2}|^2
-    &\sim \gdist(\textstyle\frac{S}{2},\textstyle\frac{2}{S}C_{N/2})
-    \quad \text{if $N$ is even}
-    \\
-    \hat{C}_k=\frac{1}{NS}\sum_{s=1}^S|\hat{X}^s_k|^2
-    &\sim \gdist(S,\textstyle\frac{1}{S}C_0)
-    \quad \text{for } 0<k<N \text { and } k \neq N/2
+    \hat{C}_k=\frac{1}{NM}\sum_{s=1}^M|\hat{X}^s_0|^2
+    \sim \gdist(\textstyle\frac{\nu_k}{2},\textstyle\frac{2}{\nu_k}C_k)
+$$
+
+with
+
+$$
+    \nu_k = \begin{cases}
+        M & \text{if $k=0$} \\
+        M & \text{if $k=N/2$ and $N$ is even} \\
+        2M & \text{otherwise}
+    \end{cases}
+$$
+
+The rescaled spectrum used in STACIE, $\hat{I}_k$, has the same distribution,
+except for the scale parameter:
+
+$$
+    \hat{I}_k = \frac{F h}{2} \hat{C}_k
+    \sim \gdist(\textstyle\frac{\nu_k}{2},\textstyle\frac{2}{\nu_k}I_k)
 $$
 
 (lmax-target)=
 
-## Likelihood Maximization
+## Regression
 
-To facilitate the treatment of the (log) likelihood,
-we write the empirical spectrum as $\hat{C}_k$
-and introduce $\nu_k$ for the number of degrees of freedom contributing to each component.
-($S$ if there is only a real component, $2S$ if there are both real and imaginary ones.)
+To identify the low-frequency part of the spectrum,
+we introduce a smooth switching function that goes from 1 to 0 as the frequency increases:
 
-The model is not fitted to the entire spectrum, but only to a subset of the data,
-i.e., all indexes $k \in K$, where the set $K$ is fixed before maximizing the likelihood.
-There are two reasons to exclude parts of the spectrum from the fit:
+$$
+    w(f_k|f_\text{cut}) = \frac{1}{1 + (f_k/f_\text{cut})^\beta}
+$$
 
-- Frequency 0 corresponds to the DC component and may contain an unknown contribution.
-  For example, this is the case when the input sequences $\hat{\mathbf{x}}$
-  have a non-zero mean that cannot be easily subtracted.
-  (Subtracting the sample mean typically produces a biased DC component
-  and is therefore not recommended.)
-- The Exponential Tail model of Stacie is only applicable to low-frequency data.
-  It is not designed to describe all features in a spectrum.
+This switching function is $1/2$ when $f_k=f_\text{cut}$.
+The hyperparameter $\beta$ controls the steepness of the transition and is 8 by default.
+(This should be fine for most applications.)
+This value can be set with the `switch_exponent` argument
+of the [estimate_acint()](#stacie.estimate.estimate_acint) function.
+We will derive how to fit parameters for a given frequency cut-off $f_\text{cut}$.
+The [next section](cutoff.md) describes how to find suitable cutoffs.
 
-The log likelihood of the model $C^\text{model}_k(\mathbf{b})$ with parameter vector $\mathbf{b}$ becomes:
+To fit the model, we use a form of local regression
+by introducing weights into the log-likelihood function.
+The weighted log likelihood of the model $I^\text{model}_k(\mathbf{b})$
+with parameter vector $\mathbf{b}$ becomes:
 
 $$
     \ln\mathcal{L}(\mathbf{b})
-    &=\sum_{k\in K} \ln p_{\gdist(\alpha_k,\theta_k)}(\hat{C}_k)
+    &=\sum_{k\in K} w(f_k|f_\text{cut}) \ln p_{\gdist(\alpha_k,\theta_k)}(\hat{C}_k)
     \\
     &=\sum_{k\in K}
-      -\ln \Gamma(\alpha_k)
-      - \ln\bigl(\theta_k(\mathbf{b})\bigr)
-      + (\alpha_k - 1)\ln\left(\frac{\hat{C}_k}{\theta_k(\mathbf{b})}\right)
-      - \frac{\hat{C}_k}{\theta_k(\mathbf{b})}
+        w(f_k|f_\text{cut}) \left[
+            -\ln \Gamma(\alpha_k)
+            - \ln\bigl(\theta_k(\mathbf{b})\bigr)
+            + (\alpha_k - 1)\ln\left(\frac{\hat{C}_k}{\theta_k(\mathbf{b})}\right)
+            - \frac{\hat{C}_k}{\theta_k(\mathbf{b})}
+        \right]
 $$
 
 with
@@ -259,16 +288,27 @@ with
 $$
     \alpha_k &= \frac{\nu_k}{2}
     \\
-    \theta_k(\mathbf{b}) &= \frac{2 C^\text{model}_k(\mathbf{b})}{\nu_k}
+    \theta_k(\mathbf{b}) &= \frac{2 I^\text{model}_k(\mathbf{b})}{\nu_k}
 $$
 
 This log-likelihood is maximized to estimate the model parameters.
 The zero-frequency limit of the fitted model is then the estimate of the autocorrelation integral.
 
+:::{note}
+It is worth mentioning that the cutoff frequency is not a proper hyperparameter in the Bayesian sense.
+It appears in the weight factor $w(f_k|f_\text{cut})$, which is not part of the model.
+Instead, it is a concept taken from local regression methods.
+One conceptual limitation of this approach is that the unit of the likelihood function,
+$\mathcal{L}(\mathbf{b})$, depends on the cutoff frequency.
+As a result, one cannot compare the likelihood of two different cutoffs.
+This is of little concern when fitting parameters for a fixed cutoff,
+but it is important to keep in mind when searching for suitable cutoffs.
+:::
+
 For compatibility with the SciPy optimizers,
 the cost function $\ell(\mathbf{b}) = -\ln \mathcal{L}(\mathbf{b})$ is minimized.
-Stacie implements first and second derivatives of $\ell(\mathbf{b})$,
-and also a good initial guess of the parameters, using efficient vectorzed NumPy code.
+STACIE implements first and second derivatives of $\ell(\mathbf{b})$,
+and also a good initial guess of the parameters, using efficient vectorized NumPy code.
 These features make the optimization of the parameters both efficient and reliable.
 
 The Hessian computed with the estimated parameters, $\ell(\hat{\mathbf{b}})$,
@@ -285,24 +325,29 @@ $$
 $$
 
 The estimated covariance matrix of the estimated parameters
-is approximated by the inverse of the Hessian:
-{cite:p}`millar_2011_maximum`.
+is approximated by the inverse of the Hessian,
+which can be justified with the Laplace approximation:
+{cite:p}`mackay_2005_information`.
 
 $$
-    \widehat{\cov}[\hat{b}_i,\hat{b}_j] = (-\hat{\mathbf{H}}^{-1})_{ij}
+    \hat{C}_{\hat{b}_i,\hat{b}_j} = \bigl(\hat{\mathbf{H}}^{-1}\bigr)_{ij}
 $$
 
-This covariance matrix is used to estimate the uncertainties on the model parameters
-and thus also on the autocorrelation integral.
+This covariance matrix characterizes the uncertainties of the model parameters
+and thus also of the autocorrelation integral.
 More accurate covariance estimates can be obtained with Monte Carlo sampling,
-but this is not implemented in Stacie.
+but this is not implemented in STACIE.
+Note that this covariance only accounts for the uncertainty due to noise in the spectrum,
+which is acceptable if the cutoff frequency is a fixed value.
+However, in STACIE, the cutoff frequency is also fitted,
+meaning that the uncertainty due to the cutoff must also be accounted for.
+This will be discussed in the [next section](cutoff.md).
 
 :::{note}
 The estimated covariance has no factor $N_\text{fit}/(N_\text{fit} - N_\text{par})$,
-where $N_\text{fit}$ is the amount of data in the fit
-and $N_\text{par}$ is the number of parameters.
-This is factor is specific for the case of (non)linear regression with normal deviates of
-which the standard deviation is not known a priori {cite:p}`millar_2011_maximum`.
+where $N_\text{fit}$ is the amount of data in the fit and $N_\text{par}$ is the number of parameters.
+This factor is specific to the case of (non)linear regression with normal deviates
+of which the standard deviation is not known *a priori* {cite:p}`millar_2011_maximum`.
 Here, the amplitudes are Gamma-distributed with a known shape parameter.
 Only the scale parameter at each frequency is predicted by the model.
 :::

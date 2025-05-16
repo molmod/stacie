@@ -10,7 +10,7 @@
 # and the particle can only move in two dimensions.
 #
 # This is a completely self-contained example that generates the input sequences
-# (with numerical integration) and then analyzes them with Stacie.
+# (with numerical integration) and then analyzes them with STACIE.
 # Atomic units are used unless otherwise noted.
 
 # %% [markdown]
@@ -305,7 +305,7 @@ demo_chaos()
 #
 # This section considers 100 independent particles whose initial velocities
 # have the same magnitude by whose directions are random.
-# Their velocities are used as inputs for Stacie
+# Their velocities are used as inputs for STACIE
 # to compute the diffusion coefficient.
 
 
@@ -369,7 +369,7 @@ result_1 = demo_stacie()
 # The spectrum has several peaks related to oscillations of the particles
 # around a local minimum.
 # These are irrelevant to the diffusion coefficient.
-# The broad peak at zero frequency is used by Stacie
+# The broad peak at zero frequency is used by STACIE
 # to derive the diffusion coefficient.
 # The value is not directly comparable to experiment
 # because the 2D lattice model for the surface
@@ -396,9 +396,9 @@ print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 #
 # This section repeats the same example,
 # but now with block averages of velocities.
-# [Block averages](../theory/advanced_topics/block_averages.md)
+# [Block averages](../theory/preparing_inputs/block_averages.md)
 # are primarily useful for reducing storage requirements
-# when saving trajectories to disk before processing them with Stacie.
+# when saving trajectories to disk before processing them with STACIE.
 # In this example, the block size is determined by the following guideline:
 
 # %%

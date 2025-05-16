@@ -8,7 +8,7 @@ pip install stepup stepup-reprep
 ```
 
 It is also assumed that you have OpenMM, MDTraj, NGLView, NumPy and Pandas installed,
-which is part of the documentation dependencies of Stacie.
+which is part of the documentation dependencies of STACIE.
 You can install all required dependencies as follows:
 
 ```bash
