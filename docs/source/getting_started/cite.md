@@ -1,8 +1,6 @@
 # How to Cite?
 
-When you use STACIE in your research,
-please cite the STACIE paper
-in any publications resulting from that research.
+When using STACIE in your research, please cite the STACIE paper in any resulting publications.
 The reference is provided in several formats below:
 
 - BibTeX:

@@ -1,22 +1,22 @@
 # Parameter Estimation
 
-Before we discuss how to fit a model to spectral data,
+Before discussing how to fit a model to spectral data,
 we first review the statistics of the sampling {term}`PSD`.
 Given these statistical properties,
-we can derive the likelihood that some model parameters explain the observed PSD.
+we can derive the likelihood that certain model parameters explain the observed PSD.
 
 ## Statistics of the Sampling Power Spectral Distribution
 
-When constructing an estimate of a discrete PSD from a finite mount if data,
+When constructing an estimate of a discrete PSD from a finite amount of data,
 it is bound to contain some uncertainty, which will be characterized below.
 The estimate of the PSD is sometimes also called
 the [periodogram](https://en.wikipedia.org/wiki/Periodogram) or the (empirical) power spectrum.
 
 Consider a periodic random real sequence $\hat{\mathbf{x}}$ with elements $\hat{x}_n$ and period $N$.
-For practical purposes it is sufficient to consider one period of this infinitely long sequence.
-The mean of the sequence is zero and its covariance is $\cov[\hat{x}_n \,,\, \hat{x}_m]$.
-The distribution of sequence is stationary,
-i.e. each time translation of a sequence results in an equally probable sample.
+For practical purposes, it is sufficient to consider one period of this infinitely long sequence.
+The mean of the sequence is zero, and its covariance is $\cov[\hat{x}_n \,,\, \hat{x}_m]$.
+The distribution of the sequence is stationary,
+i.e., each time translation of a sequence results in an equally probable sample.
 As a result, the covariance has a circulant structure:
 
 $$
@@ -26,8 +26,7 @@ $$
 with $\Delta=n-m$.
 Thus, we can express the covariance with a single index and treat it as a real periodic sequence,
 albeit not stochastic.
-$c_\Delta$ is also known as the autocovariance or autocorrelation function
-of the stochastic process,
+$c_\Delta$ is also known as the autocovariance or autocorrelation function of the stochastic process
 because it expresses the covariance of a sequence $\hat{\mathbf{x}}$
 with itself translated by $\Delta$ steps.
 
@@ -43,7 +42,7 @@ A well-known property of circulant matrices is that their eigenvectors
 are sine- and cosine-like basis functions.
 As a result, the covariance of the discrete Fourier transform $\hat{\mathbf{X}}$ becomes diagonal.
 To make this derivation self-contained, we write out the mean and covariance of $\hat{X}_k$ explicitly.
-Note that the operators $\mean[\cdot]$, $\var[\cdot]$ and $\cov[\cdot,\cdot]$
+Note that the operators $\mean[\cdot]$, $\var[\cdot]$, and $\cov[\cdot,\cdot]$
 are expected values over all possible realizations of the sequence.
 
 For the expected value of the Fourier transform,
@@ -51,7 +50,7 @@ we take advantage of the fact that all time translations of $\hat{\mathbf{x}}$
 belong to the same distribution.
 We can explicitly compute the average over all time translations,
 in addition to computing the mean, without loss of generality.
-In the last steps, the index $n$ is relabeled to $n-m$ and some factors are rearranged,
+In the last steps, the index $n$ is relabeled to $n-m$, and some factors are rearranged,
 after which the sums can be worked out.
 
 $$
@@ -75,7 +74,7 @@ $$
 
 The derivation of the covariance uses similar techniques.
 In the following derivation, $*$ stands for complex conjugation.
-Halfway, the summation index $n$ is written as $n=\Delta+m$.
+Halfway through, the summation index $n$ is written as $n=\Delta+m$.
 
 $$
     \cov[\hat{X}^*_k\,,\,\hat{X}_\ell]
@@ -190,8 +189,8 @@ consists of uncorrelated real and imaginary components at each frequency.
 Furthermore, the variance of the Fourier transform is proportional to the power spectrum.
 This simple statistical structure makes the spectrum a convenient starting point
 for further analysis and uncertainty quantification.
-In comparison, the ACF has non-trivial correlated uncertainties,
-{cite:p}`bartlett_1980_introduction,boshnakov_1996_bartlett,francq_2009_bartlett`
+In comparison, the ACF has non-trivial correlated uncertainties
+{cite:p}`bartlett_1980_introduction,boshnakov_1996_bartlett,francq_2009_bartlett`,
 making it difficult to fit models directly to the ACF (or its running integral).
 
 If we further assume that the sequence $\hat{\mathbf{x}}$ is the result of a periodic Gaussian process,
@@ -215,10 +214,10 @@ $$
     \quad \text{for } 0<k<N \text { and } k \neq N/2
 $$
 
-Note that $\hat{X}_0$ and $\hat{X}_{N/2}$ have only a real component,
+Note that $\hat{X}_0$ and $\hat{X}_{N/2}$ have only a real component
 because the input sequence $\hat{\mathbf{x}}$ is real,
 which corresponds to a Chi-squared distribution with one degree of freedom.
-For all other frequencies, $\hat{X}_k$ have a real and imaginary component,
+For all other frequencies, $\hat{X}_k$ has a real and imaginary component,
 resulting in two degrees of freedom.
 
 Spectra are often computed by averaging them over $M$ sequences to reduce the variance.
@@ -260,13 +259,13 @@ $$
 
 This switching function is $1/2$ when $f_k=f_\text{cut}$.
 The hyperparameter $\beta$ controls the steepness of the transition and is 8 by default.
-(This is should be fine for most applications.)
+(This should be fine for most applications.)
 This value can be set with the `switch_exponent` argument
 of the [estimate_acint()](#stacie.estimate.estimate_acint) function.
 We will derive how to fit parameters for a given frequency cut-off $f_\text{cut}$.
 The [next section](cutoff.md) describes how to find suitable cutoffs.
 
-To fit the model, we use a form of local regression,
+To fit the model, we use a form of local regression
 by introducing weights into the log-likelihood function.
 The weighted log likelihood of the model $I^\text{model}_k(\mathbf{b})$
 with parameter vector $\mathbf{b}$ becomes:
@@ -300,7 +299,7 @@ It is worth mentioning that the cutoff frequency is not a proper hyperparameter 
 It appears in the weight factor $w(f_k|f_\text{cut})$, which is not part of the model.
 Instead, it is a concept taken from local regression methods.
 One conceptual limitation of this approach is that the unit of the likelihood function,
-$\mathcal{L}(\mathbf{b})$, depends on cutoff frequency.
+$\mathcal{L}(\mathbf{b})$, depends on the cutoff frequency.
 As a result, one cannot compare the likelihood of two different cutoffs.
 This is of little concern when fitting parameters for a fixed cutoff,
 but it is important to keep in mind when searching for suitable cutoffs.
@@ -309,7 +308,7 @@ but it is important to keep in mind when searching for suitable cutoffs.
 For compatibility with the SciPy optimizers,
 the cost function $\ell(\mathbf{b}) = -\ln \mathcal{L}(\mathbf{b})$ is minimized.
 STACIE implements first and second derivatives of $\ell(\mathbf{b})$,
-and also a good initial guess of the parameters, using efficient vectorzed NumPy code.
+and also a good initial guess of the parameters, using efficient vectorized NumPy code.
 These features make the optimization of the parameters both efficient and reliable.
 
 The Hessian computed with the estimated parameters, $\ell(\hat{\mathbf{b}})$,
@@ -326,7 +325,8 @@ $$
 $$
 
 The estimated covariance matrix of the estimated parameters
-is approximated by the inverse of the Hessian, which can be justified with the Laplace approximation:
+is approximated by the inverse of the Hessian,
+which can be justified with the Laplace approximation:
 {cite:p}`mackay_2005_information`.
 
 $$
@@ -337,18 +337,17 @@ This covariance matrix characterizes the uncertainties of the model parameters
 and thus also of the autocorrelation integral.
 More accurate covariance estimates can be obtained with Monte Carlo sampling,
 but this is not implemented in STACIE.
-Note that this covariance only accounts for the uncertainty due to noisy in the spectrum,
+Note that this covariance only accounts for the uncertainty due to noise in the spectrum,
 which is acceptable if the cutoff frequency is a fixed value.
 However, in STACIE, the cutoff frequency is also fitted,
-meaning that also the uncertainty due to the cutoff must be accounted for.
+meaning that the uncertainty due to the cutoff must also be accounted for.
 This will be discussed in the [next section](cutoff.md).
 
 :::{note}
 The estimated covariance has no factor $N_\text{fit}/(N_\text{fit} - N_\text{par})$,
-where $N_\text{fit}$ is the amount of data in the fit
-and $N_\text{par}$ is the number of parameters.
-This is factor is specific for the case of (non)linear regression with normal deviates of
-which the standard deviation is not known *a priori* {cite:p}`millar_2011_maximum`.
+where $N_\text{fit}$ is the amount of data in the fit and $N_\text{par}$ is the number of parameters.
+This factor is specific to the case of (non)linear regression with normal deviates
+of which the standard deviation is not known *a priori* {cite:p}`millar_2011_maximum`.
 Here, the amplitudes are Gamma-distributed with a known shape parameter.
 Only the scale parameter at each frequency is predicted by the model.
 :::

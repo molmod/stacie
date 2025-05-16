@@ -1,13 +1,13 @@
 # Getting Started
 
 STACIE is a Python software library that can be used interactively in a Jupyter Notebook
-or can be embedded non-interactively in larger computational workflows.
+or embedded non-interactively in larger computational workflows.
 
-To get started, you will need to:
+To get started:
 
 - Install the `stacie` Python library (see [installation](installation.md)),
 - Understand and accept the [open source licenses](licenses.md) we use,
-- Get a bird's eye view of [how to use](usage.md) STACIE,
+- Get a bird's-eye view of [how to use](usage.md) STACIE,
 - Know how to [cite](cite.md) STACIE when using it in your research.
 
 A basic understanding of the [theory](../theory/index.md) is highly recommended

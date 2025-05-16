@@ -2,19 +2,19 @@
 
 When computer simulations generate time-dependent data,
 they often use a discretization of the time axis with a resolution (much) higher
-than needed for a computation of the autocorrelation integral with STACIE.
-Storing (and processing) all these data may require too many resources.
+than needed for computing the autocorrelation integral with STACIE.
+Storing (and processing) all these data may require excessive resources.
 To reduce the amount of data, we recommend taking block averages.
 These block averages form a new time series with a time step equal to the block size
-times the original time step.
-They reduce the storage requirements by a factor equal to the block size.
+multiplied by the original time step.
+They reduce storage requirements by a factor equal to the block size.
 If the program generating the sequences does not support block averages,
 you can use {py:func}`stacie.utils.block_average`.
 
 If the blocks are sufficiently small compared to the decay rate of the autocorrelation function,
 STACIE will produce virtually the same results.
-The effect of block averages can be understood by inserting them in the discrete power spectrum,
-using STACIE's normalization convention to obtain the proper zero frequency limit.
+The effect of block averages can be understood by inserting them into the discrete power spectrum,
+using STACIE's normalization convention to obtain the proper zero-frequency limit.
 Let $\hat{a}_\ell$ be the $\ell$'th block average of $L$ blocks with block size $B$.
 We can start from the power spectrum of the original sequence, $\hat{x}_n$,
 and then introduce approximations to rewrite it in terms of the block averages:
@@ -22,7 +22,7 @@ and then introduce approximations to rewrite it in terms of the block averages:
 $$
     \hat{I}_k
     &=
-        F h \frac{1}{2} \sum_{\Delta=0}^{N-1} \hat{c}_\Delta \omega_N^{-kn}
+        F h \frac{1}{2} \sum_{\Delta=0}^{N-1} \hat{c}_\Delta \omega_N^{-k\Delta}
     \\
     &=
         \frac{F h}{N} \frac{1}{2} \left|\sum_{n=0}^{N-1} \hat{x}_n \omega_N^{-kn}\right|^2
@@ -70,9 +70,9 @@ there are two ways to determine the appropriate block size.
         B \ll \frac{N}{20 \, P}
      $$
 
-     E.g. $B = \frac{N}{400 P}$ is a good choice.
+     E.g., $B = \frac{N}{400 P}$ is a good choice.
      This practically means that there should be at least $400 \, P$ blocks.
-     Fewer blocks will unavoidable lead to significant aliasing effects.
+     Fewer blocks will inevitably lead to significant aliasing effects.
 
 2. When using the [Pade model](../autocorrelation_integral/model.md),
    one should ensure that the spectrum amplitudes $\hat{I}_k$ in the peak at zero frequency
@@ -93,7 +93,7 @@ there are two ways to determine the appropriate block size.
 Just as with the required length of the input sequences,
 a good choice of the block size cannot be determined *a priori*.
 Also for the block size, a preliminary analysis with STACIE is recommended,
-i.e. initially without block averages.
+i.e., initially without block averages.
 
 An application of STACIE with block averages can be found in the following example notebook:
 [Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).

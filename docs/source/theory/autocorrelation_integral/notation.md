@@ -9,24 +9,23 @@ The following notation is used throughout STACIE's documentation.
 
 ## Statistics
 
-- Several symbols are used to denote some form of time:
+- Several symbols are used to denote time:
 
     - $t$ is an absolute time.
     - $t_0$ is a reference point on the time axis.
     - $\Delta_t$ is a time difference or lag.
     - $\tau$ denotes a relaxation or autocorrelation time,
-      and usually gets a subscript $\text{int}$ or $\text{exp}$
+      and usually has a subscript $\text{int}$ or $\text{exp}$
       to distinguish between integrated and exponential autocorrelation times.
-    - $h$ is the time step of a discretized time axis
-      (with equal specing between the grid points).
-    - Integer steps on a discretized time axis are denoted as indexes $n$ or $m$,
-      the difference between them as $\Delta$.
+    - $h$ is the time step of a discretized time axis (with equal spacing between the grid points).
+    - Integer steps on a discretized time axis are denoted by
+      indices $n$ or $m$; the difference between them is $\Delta$.
 
 - $p_x(x)$ is the probability density function of $\hat{x}$.
 
 - A hat is used for all stochastic quantities, including functions of stochastic quantities.
   This is more general than the common practice of using hats for statistical estimates only.
-  We find it useful to identify all stochastic variables clearly.
+  We find it useful to clearly identify all stochastic variables.
   For example:
 
     - If $\mathcal{I}$ is the ground truth of the autocorrelation integral,
@@ -46,14 +45,16 @@ The following notation is used throughout STACIE's documentation.
     - $\std[\cdot]$ is the standard deviation.
     - $\cov[\cdot,\cdot]$ is the covariance operator.
 
-- The Gamma distribution with shape $\alpha$ and scale $\theta$ is denoted as:
+- The [Gamma distribution](https://en.wikipedia.org/wiki/Gamma_distribution)
+  with shape $\alpha$ and scale $\theta$ is denoted as:
 
     $$
         p_{\gdist(\alpha,\theta)} (x)
-        = \frac{1}{\theta^\alpha \Gamma(\alpha)} x^{k - 1} e^{-x/\theta}
+        = \frac{1}{\theta^\alpha \Gamma(\alpha)} x^{\alpha - 1} e^{-x/\theta}
     $$
 
-- The Chi-squared distribution with $\nu$ degrees of freedom is a special case of the Gamma distribution:
+- The [Chi-squared distribution](https://en.wikipedia.org/wiki/Chi-squared_distribution)
+  with $\nu$ degrees of freedom is a special case of the Gamma distribution:
 
     $$
         p_{\chi^2_\nu} (x)
@@ -70,6 +71,5 @@ The following notation is used throughout STACIE's documentation.
   with elements $x^{(m)}_n$.
   Their discrete Fourier transforms are $\mathbf{X}^{(m)}$ with elements $X^{(m)}_k$.
 - The grid spacing on the frequency axis is $1/hN$, where $h$ is the spacing of the time axis.
-- Frequency grid points are labeled by an index $k$,
-  such that the $k$<sup>th</sup> frequency is $k/hN$.
+- Frequency grid points are labeled by an index $k$, such that the $k$th frequency is $k/hN$.
 - Hats are added if the sequences are stochastic.

@@ -36,9 +36,9 @@ $$
 
 where $N_q$ is the number of charge carriers.
 The charge current can also be interpreted as
-the time-derivative of the instantaneous dipole moment of the system.
+the time derivative of the instantaneous dipole moment of the system.
 
-In case of molecular ions, the center-of-mass velocity can be used, but this is not critical.
+In the case of molecular ions, the center-of-mass velocity can be used, but this is not critical.
 You will get the same conductivity (possibly with slightly larger uncertainties)
 when using the velocity of any single atom in a molecular ion instead.
 The charges of ions must be integer multiples of the elementary charge
@@ -52,10 +52,10 @@ of the conductivity in terms of the self-diffusion coefficients of the ions.
 We include the derivation here because a consistent treatment of the pre-factors
 can be challenging.
 (Literature references are not always consistent due to differences in notation.)
-Our derivation is general, i.e. for an arbitrary number of different *types*
+Our derivation is general, i.e., for an arbitrary number of different *types*
 of charge carriers, which are not restricted to monovalent ions.
 
-First insert the expression for the charge current into the conductivity
+First, insert the expression for the charge current into the conductivity
 and then bring the sums out of the integral:
 
 $$
@@ -104,7 +104,7 @@ $$
         \right)
 $$
 
-The part between parenthesis is the self-diffusion coefficient of the ions of type $k$.
+The part between parentheses is the self-diffusion coefficient of the ions of type $k$.
 Finally, we get:
 
 $$
@@ -125,7 +125,7 @@ can help to quantify the degree of such correlations.
 It is assumed that you can load the time-dependent ion velocity components
 into a NumPy array `ionvels`.
 In the example below, this is a three-index array,
-where the first index is for the ion, the second for the Cartesian component
+where the first index is for the ion, the second for the Cartesian component,
 and the last for the time step.
 To compute the charge current, you need to put the charges of the ions
 in an array `charges`.
@@ -178,8 +178,8 @@ There are several ways to alter this script, depending on your needs and the ava
 - This script is trivially extended to combine data from multiple trajectories.
 - Some codes can directly output the charge current,
   which will reduce the amount of data stored on disk.
-- Some simulations codes will print out the instantaneous dipole moment,
-  to which finite-differences can be applied to compute the charge current.
+- Some simulation codes will print out the instantaneous dipole moment,
+  to which finite differences can be applied to compute the charge current.
   Even if the dipole moment is printed only every $B$ steps,
   this approximation is useful and corresponds to taking block averages of the charge current.
   See the section on [block averages](../preparing_inputs/block_averages.md)

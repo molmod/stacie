@@ -69,8 +69,8 @@ $$
 ## How to Compute with STACIE?
 
 Because no factor $1/2$ is present in the expression for the variance of the mean,
-the factor $F$ must compensator for the factor $1/2$ in the autocorrelation integral.
-Hence, we must be use $F=2$.
+the factor $F$ must compensate for the factor $1/2$ in the autocorrelation integral.
+Hence, we must use $F=2$.
 
 It is assumed that you can load the time-dependent sequences into a 2D NumPy array,
 where each row is a sequence and each column a time step.
@@ -93,13 +93,13 @@ total_time = timestep * sequences.size
 
 # The factor 2 is just compensating for the factor 1/2 in the autocorrelation integral.
 spectrum = compute_spectrum(
-    sequences,
-    prefactors=2.0 / total_time,
-    timestep=timestep,
-    include_zero_freq=False,
+        sequences,
+        prefactors=2.0 / total_time,
+        timestep=timestep,
+        include_zero_freq=False,
 )
 result = estimate_acint(spectrum, PadeModel([0, 2], [2]))
-print("The mean", seuqences.mean())
+print("The mean", sequences.mean())
 print("Error of the mean", np.sqrt(result.acint))
 plot_results("error.pdf", result)
 ```
@@ -107,7 +107,7 @@ plot_results("error.pdf", result)
 The spectrum at zero frequency must be excluded because it contains contributions from the mean,
 i.e., not only from the autocorrelation integral.
 
-The Pade model is used here because it nearly always a good choice for error estimates.
+The Pade model is used here because it is nearly always a good choice for error estimates.
 However, if the data does not feature an exponential decay of the ACF, this model may not be appropriate.
 In such cases, you can use the `ExpPolyModel` instead.
 For more details, see the section on [spectrum models](../autocorrelation_integral/model.md).

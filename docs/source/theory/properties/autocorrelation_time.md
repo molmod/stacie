@@ -27,7 +27,7 @@ There are two definitions of the autocorrelation time {cite:p}`sokal_1997_monte`
 
     The exponential autocorrelation time characterizes the slowest mode in the input.
     The parameter $\tau_\text{exp}$ can be estimated with the
-    [the Pade Model](../autocorrelation_integral/model.md).
+    [Pade Model](../autocorrelation_integral/model.md).
 
 Both correlation times are the same if the autocorrelation is nothing more than
 a two-sided exponentially decaying function:
@@ -41,7 +41,7 @@ This can happen if the input sequences
 are a superposition of signals with different relaxation times,
 or when they contain non-diffusive contributions such as oscillations at certain frequencies.
 It is even not guaranteed that the exponential autocorrelation time is always well-defined,
-e.g. when the ACF decays as a power law.
+e.g., when the ACF decays as a power law.
 
 ## Which Definition Should I Use?
 
@@ -72,8 +72,8 @@ Both definitions are useful and relevant for different applications.
    of the input sequences when computing an autocorrelation integral.
    The resolution of the frequency axis of the power spectrum is $1/T$,
    where $T=hN$ is the total simulation time,
-   $h$ is the time step and $N$ the number of steps.
-   This resolution must be fine enough to resolve the zero frequency peak
+   $h$ is the time step, and $N$ the number of steps.
+   This resolution must be fine enough to resolve the zero-frequency peak
    associated with the exponential decay of the autocorrelation function.
    The width of the peak can be derived from [the Pade model](../autocorrelation_integral/model.md)
    and is $1/2\pi\tau_\text{exp}$.
@@ -86,16 +86,16 @@ Both definitions are useful and relevant for different applications.
 
     For example, $T = 20\pi\tau_\text{exp}$ will provide a decent resolution.
 
-    Of course, before you start generating the data (e.g. through simulations),
+    Of course, before you start generating the data (e.g., through simulations),
     the value of $\tau_\text{exp}$ is yet unclear.
     Without prior knowledge of $\tau_\text{exp}$,
     you should first analyze preliminary data to get a first estimate of $\tau_\text{exp}$,
     after which you can plan the data generation more carefully.
     More details can be found in the section on [data sufficiency](../preparing_inputs/data_sufficiency.md).
 
-    If you notice that your input sequences are many orders of magnitudes longer than $\tau_\text{exp}$,
+    If you notice that your input sequences are many orders of magnitude longer than $\tau_\text{exp}$,
     the number of relevant frequency grid points in the spectrum can become impractically large.
-    In this case, you can split up the input sequences in shorter parts with
+    In this case, you can split up the input sequences into shorter parts with
     {py:func}`stacie.utils.split`.
     However, a better solution is to plan ahead more carefully
     and avoid sequences that are far longer than necessary.
@@ -109,7 +109,7 @@ Both definitions are useful and relevant for different applications.
 
 It is assumed that you can load one or (ideally) more
 time-dependent sequences of equal length into a 2D NumPy array `sequences`.
-Each row in this array is a sequence and the columns correspond to time steps.
+Each row in this array is a sequence, and the columns correspond to time steps.
 You also need to store the time step in a Python variable.
 (If your data does not have a time step, just omit it from the code below.)
 

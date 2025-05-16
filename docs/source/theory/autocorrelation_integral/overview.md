@@ -1,7 +1,7 @@
 # Overview
 
 The goal of STACIE is to estimate the integral of the {term}`ACF`
-of a physical continuous time-dependent function with an infinite domain.
+of a physical, continuous, time-dependent function with an infinite domain.
 In practice, due to inherently finite computational resources, however,
 we resort to discrete and finite time-dependent sequences.
 We first formulate STACIE's goal in the continuous case
@@ -26,8 +26,8 @@ $$
 $$
 
 A prefactor $F$ is usually present, containing factors
-such as the temperature and/or the cell volume in Green--Kubo formalisms.
-{cite:p}`green_1952_markoff, green_1954_markoff, kubo_1957_statistical`
+such as the temperature and/or the cell volume in Green--Kubo formalisms
+{cite:p}`green_1952_markoff, green_1954_markoff, kubo_1957_statistical`.
 The integrand is the ACF, $c(\Delta_t)$, of the time-dependent input $\hat{x}(t)$.
 It is common to integrate only from $0$ to $\infty$,
 but we prefer to use the full range and compensate with the factor $\frac{1}{2}$ in front of the integral.
@@ -52,7 +52,7 @@ $$
 At first glance, this result seems trivial,
 with no added value over the original form of the integral.
 For numerical applications, this is actually a useful identity:
-The sampling ACF is practically computed using the sampling PSD as an intermediate step.
+the sampling ACF is practically computed using the sampling PSD as an intermediate step.
 When $\mathcal{I}$ is derived from the PSD,
 the inverse transform to derive the ACF from the PSD can be skipped.
 As we will see later, there are other advantages to using this zero-frequency limit to compute the integral.
@@ -66,7 +66,7 @@ also express them as the zero-frequency limit of an appropriate spectrum
 
 One can always rewrite the autocorrelation integral
 as a so-called Einstein--Helfand relation {cite:p}`helfand_1960_transport`, i.e.,
-as the limit of the time-derivative of the mean-square displacement {cite:p}`hansen_2013_theory`:
+as the limit of the time derivative of the mean-square displacement {cite:p}`hansen_2013_theory`:
 
 $$
     \mathcal{I} =
@@ -82,7 +82,7 @@ $$
     \hat{x} = \frac{\mathrm{d}\hat{y}}{\mathrm{d}t}
 $$
 
-STACIE can also be used to evaluate such limits,
+STACIE can also be used to evaluate such limits
 by using samples of the time derivatives of $y$
 as input to the power spectrum computation.
 
@@ -109,7 +109,7 @@ The underlying continuous function $\hat{x}(t)$, and thus $\hat{x}_n$, are not n
 However, because we intend to use the discrete Fourier transform and rely on its well-known properties,
 we will assume in the derivations that $\hat{x}_n$ is periodic with period $N$.
 In practice, this assumption has negligible effects and is only noticeable at higher frequencies,
-far away from the zero-frequency limit if interest.
+far away from the zero-frequency limit of interest.
 
 Due to the discretization in time,
 the autocorrelation integral must be approximated with a simple quadrature rule:
@@ -124,7 +124,7 @@ The covariance is an expected value over all $n$ and all possible realizations o
 Let $C_k$ be the discrete Fourier transform of the autocorrelation function:
 
 $$
-C_k = \sum_{\Delta=0}^{N-1} c_\Delta \omega^{-kn}
+C_k = \sum_{\Delta=0}^{N-1} c_\Delta \omega^{-k\Delta}
 $$
 
 with $\omega = \exp(i 2\pi/N)$.
@@ -205,6 +205,6 @@ the model becomes too simple to describe all the features in the spectrum,
 which leads to significant underfitting.
 When the cutoff is too low,
 too few data points are included to obtain a low-variance estimate of $\mathcal{I}$.
-This is solved by considering a grid of cutoff frequencies,
+This is solved by considering a grid of cutoff frequencies
 and assigning weights to each grid point based on the bias-variance trade-off of the regression.
 The final parameters are obtained by averaging over the grid of cutoff frequencies.

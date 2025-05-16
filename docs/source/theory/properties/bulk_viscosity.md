@@ -9,7 +9,7 @@ $$
         \cov[\hat{P}_\text{iso}(t_0) \,,\, \hat{P}_\text{iso}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
-where $V$ is the volume of the simulation cell,
+where $V$ represents the volume of the simulation cell,
 $k_\text{B}$ is the Boltzmann constant,
 $T$ is the temperature,
 and $\hat{P}_\text{iso}$ is the instantaneous isotropic pressure.
@@ -28,12 +28,12 @@ Instead, you can simply drop the DC component from the spectrum.
 
 ## How to Compute with STACIE?
 
-It is assumed that you can load the diagonal time-dependent pressure tensor components
+It is assumed that you can load the diagonal, time-dependent pressure tensor components
 into a 2D NumPy array `pcomps`.
 (The same array as for [shear viscosity](shear_viscosity.md) can be used.)
 Each row of this array corresponds to one pressure tensor component in the order
 $\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, $\hat{P}_{xy}$.
-(Same order as in Voigt notation. The last three are not used and can be omitted.)
+(This is the same order as in Voigt notation. The last three components are not used and can be omitted.)
 Columns correspond to time steps.
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,
@@ -59,8 +59,8 @@ spectrum = compute_spectrum(
     include_zero_freq=False,
 )
 result = estimate_acint(spectrum, ExpTailModel())
-print("Bulk viscosity", result.acint)
-print("Uncertainty of the bulk viscosity", result.acint_std)
+print("Bulk viscosity:", result.acint)
+print("Uncertainty of the bulk viscosity:", result.acint_std)
 
 # The unit configuration assumes SI units are used systematically.
 # You may need to adapt this to the units of your data.
@@ -74,7 +74,7 @@ uc = UnitConfig(
 plot_results("bulk_viscosity.pdf", result, uc)
 ```
 
-This script is trivially extended to combine data from multiple trajectories.
+This script can be trivially extended to combine data from multiple trajectories.
 
 A worked example can be found in the notebook
 [Bulk viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../../examples/lj_bulk_viscosity.py)

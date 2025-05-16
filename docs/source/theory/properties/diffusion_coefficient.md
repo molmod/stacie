@@ -10,7 +10,7 @@ $$
 
 where $\hat{v}_{n,i}(t)$ is the $i$-th Cartesian component of
 the time-dependent velocity of particle $n$.
-For molecular systems, the center of mass velocities are typically used.
+For molecular systems, the center-of-mass velocities are typically used.
 
 For a simple fluid, the result is called the self-diffusion coefficient or self-diffusivity.
 The same expression applies to the diffusion coefficient of components of a mixture
@@ -20,7 +20,7 @@ Note that this definition is valid only if the particles of interest exhibit dif
 If they oscillate around a fixed center,
 the zero-frequency component of the velocity autocorrelation spectrum will approach zero,
 resulting in a diffusion coefficient of zero.
-This scenario may occur when the diffusion is governed by an activated hopping process
+This scenario may occur when the diffusion is governed by an activated hopping process,
 and the simulation is too short to capture such rare events.
 
 The derivation of this result can be found in several references, e.g.,
@@ -34,8 +34,8 @@ by Tuckerman {cite:p}`tuckerman_2023_statistical`.
 ## How to Compute with STACIE?
 
 It is assumed that you can load the particle velocities into a 2D NumPy array `velocities`.
-Each row of this array corresponds to a single Cartesian component of particle's velocity, while
-each column corresponds to  a specific time step.
+Each row of this array corresponds to a single Cartesian component of a particle's velocity, while
+each column corresponds to a specific time step.
 You should also store the time step in a Python variable.
 The diffusion coefficient can then be computed as follows:
 
@@ -80,7 +80,7 @@ to obtain the velocities.
 (For trajectories obtained with a Verlet integrator, this does not introduce additional approximations.)
 When positions are recorded every $B$ steps,
 the finite difference approximation can also be applied.
-The result is equivalent to block-averaging velocities, and can thus be used as inputs for STACIE.
+The result is equivalent to block-averaging velocities and can thus be used as inputs for STACIE.
 Consult the section on [block averages](../preparing_inputs/block_averages.md) for more details.
 
 A worked example can be found in the notebook

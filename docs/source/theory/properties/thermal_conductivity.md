@@ -25,14 +25,14 @@ by Hansen and McDonald {cite:p}`hansen_2013_theory`.
 
 ::: {warning}
 The LAMMPS `compute/heat flux` command is reported to produce unphysical results
-when many-body interactions (e.g. angle, dihedral, impropers) are present
+when many-body interactions (e.g., angle, dihedral, impropers) are present
 {cite:p}`jamali_2019_octp`, {cite:p}`surblys_2019_application`,
 {cite:p}`boone_2019_heat`, {cite:p}`surblys_2021_methodology`.
 This command only treats pairwise interactions correctly.
 If this is relevant, one should use the `compute heat/flux` command with
 [`compute centroid/stress/atom`](https://docs.lammps.org/compute_heat_flux.html).
 For systems with only two-body interactions,
-the `compute heat/flux` command with `compute stress/atom` command is sufficient.
+the `compute heat/flux` command with the `compute stress/atom` command is sufficient.
 Molecular liquids are practically always simulated with some many-body terms,
 and thus require the `compute centroid/stress/atom` command.
 :::
@@ -42,7 +42,7 @@ and thus require the `compute centroid/stress/atom` command.
 It is assumed that you can load the time-dependent heat flux components
 into a 2D NumPy array `heatflux`.
 Each row of this array corresponds to one heat flux component
-in the order $\hat{J}_x$, $\hat{J}_y$ and $\hat{J}_z$.
+in the order $\hat{J}_x$, $\hat{J}_y$, and $\hat{J}_z$.
 Columns correspond to time steps.
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,

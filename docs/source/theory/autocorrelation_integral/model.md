@@ -3,9 +3,9 @@
 STACIE supports two models for fitting the low-frequency part of the power spectrum.
 In both models, the value at zero frequency corresponds to the autocorrelation integral.
 
-1. The [ExpPolyModel](#stacie.model.ExpPolyModel) is the most general:
+1. The [ExpPolyModel](#stacie.model.ExpPolyModel) is the most general;
    it is an exponential function of a linear combination of simple monomials of the frequency.
-   One can specify the degrees of the monomials, and typically a low degree works fine:
+   You can specify the degrees of the monomials, and typically a low degree works fine:
 
     - Degree `[0]` is suitable for a white noise spectrum.
     - Degrees `[0, 1]` can be used to extract useful information from a very noisy spectrum.
@@ -43,12 +43,14 @@ the autocorrelation integral is [log-normally distributed](https://en.wikipedia.
 with estimated mean and variance:
 
 $$
+    \begin{aligned}
     \hat{\mathcal{I}}
     &= \exp\left(\hat{b}_0 + \frac{1}{2}\hat{\sigma}^2_{b_0}\right)
     \\
     \hat{\sigma}^2_{\mathcal{I}}
     &= \exp\left(2\hat{b}_0 + \hat{\sigma}^2_{b_0}\right)
         \left(\exp(\hat{\sigma}^2_{b_0}) - 1 \right)
+    \end{aligned}
 $$
 
 To construct this model, you can create an instance of the `ExpPolyModel` class as follows:
@@ -78,9 +80,11 @@ With this model, $p_0$ corresponds to the integral of the autocorrelation functi
 for which we simply have:
 
 $$
+    \begin{aligned}
     \hat{\mathcal{I}} &= \hat{p}_0
     \\
     \hat{\sigma}^2_{\mathcal{I}} &= \hat{\sigma}^2_{p_0}
+    \end{aligned}
 $$
 
 For the special case of a Lorentzian peak at the origin plus some white noise,
@@ -92,7 +96,7 @@ $$
 $$
 
 where $f_k$ is the standard frequency grid of the discrete Fourier transform,
-$A$ is the white noise level, and $B$ is the amplitude of the Lorentzian peak,
+$A$ is the white noise level, $B$ is the amplitude of the Lorentzian peak,
 and $\tau_\text{exp}$ is the exponential correlation time.
 The frequency grid is defined as $f_k = k / (hN)$,
 where $h$ is the time step of the discretized time axis, and $N$ is the number of samples.
@@ -103,12 +107,14 @@ the exponential correlation time and its variance can be derived
 from the fitted parameters with first-order error propagation:
 
 $$
+    \begin{aligned}
     \tau_\text{exp} &= \frac{\sqrt{\hat{q}_2}}{2 \pi}
     \\
     \hat{\sigma}^2_{\tau_\text{exp}} &= \frac{1}{16 \pi^2 \hat{q}_2} \hat{\sigma}^2_{q_2}
+    \end{aligned}
 $$
 
-Note that this model is also applicable data whose short-time correlations are not exponential,
+Note that this model is also applicable to data whose short-time correlations are not exponential,
 as long as the tail of the ACF decays exponentially.
 Such deviating short-time correlations will only affect the white noise level $A$
 and features in the PSD at higher frequencies.
@@ -121,3 +127,4 @@ model = PadeModel(
     numerator=[0, 2],
     denominator=[2],
 )
+```
