@@ -5,9 +5,9 @@ or embedded non-interactively in larger computational workflows.
 
 To get started:
 
-- Install the `stacie` Python library (see [installation](installation.md)),
-- Understand and accept the [open source licenses](licenses.md) we use,
-- Get a bird's-eye view of [how to use](usage.md) STACIE,
+- Install the `stacie` Python library (see [installation](installation.md)).
+- Understand and accept the [open source licenses](licenses.md) we use.
+- Get a bird's-eye view of [how to use](usage.md) STACIE.
 - Know how to [cite](cite.md) STACIE when using it in your research.
 
 A basic understanding of the [theory](../theory/index.md) is highly recommended

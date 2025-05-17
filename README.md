@@ -8,7 +8,7 @@
 
 ## About
 
-Stacie is a *STable AutoCorrelation Integral Estimator*.
+STACIE is a *STable AutoCorrelation Integral Estimator*.
 Documentation is here: <https://molmod.github.io/stacie>.
 
 ## Citation

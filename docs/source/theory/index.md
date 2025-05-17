@@ -5,11 +5,11 @@ and provides recommendations for its effective use.
 It is divided into three parts:
 
 1. An explanation of the mathematical foundations of STACIE,
-   specifically how it uses [autocorrelation integrals](autocorrelation_integral/index.md).
+   specifically how it computes [autocorrelation integrals](autocorrelation_integral/index.md).
 2. A description of the [properties](properties/index.md)
    that STACIE can derive from the {term}`ACF` and its integral.
 3. Recommendations for [preparing inputs](preparing_inputs/index.md)
-   for STACIE to efficiently obtain high-quality results.
+   to efficiently obtain high-quality results with STACIE.
 
 ```{toctree}
 :hidden:

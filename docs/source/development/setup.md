@@ -2,7 +2,7 @@
 
 ## Repository, Tests and Documentation Build
 
-It is assumed that you have installed Python, Git, pre-commit and direnv before.
+It is assumed that you have previously installed Python, Git, pre-commit and direnv.
 A local installation for testing and development can be installed as follows:
 
 ```bash
@@ -36,4 +36,4 @@ This will print a URL in the terminal that you open in your browser to preview t
 Now you can edit the documentation and see the result as soon as you save a file.
 
 Please, use [Semantic Line Breaks](https://sembr.org/)
-because it facilitates reviewing documentation changes.
+as it facilitates reviewing documentation changes.
