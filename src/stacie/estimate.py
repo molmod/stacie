@@ -376,13 +376,14 @@ def fit_model_spectrum(
     - ``pars``: optimized parameters
     - ``pars_covar``: covariance matrix of the parameters
 
-    The ``ExpTailModel`` has the following additional properties:
+    If the model can derive the exponential correlation time,
+    The following properties are also included:
 
     - ``corrtime_exp``: estimate of the slowest time scale in the sequences
     - ``corrtime_exp_var``: variance of the estimate of the slowest time scale
     - ``corrtime_exp_std``: standard error of the estimate of the slowest time scale
-    - ``exptail_simulation_time``: recommended simulation time based on the ExpTail model
-    - ``exptail_block_time``: recommended block time based on the ExpTail model
+    - ``exp_simulation_time``: recommended simulation time based on the ExpTail model
+    - ``exp_block_time``: recommended block time based on the ExpTail model
 
     The ``ExpPolyModel`` has the following additional properties:
 
@@ -493,16 +494,17 @@ def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
             corrtime_int_std=r.corrtime_int_std / uc.time_unit,
             npar=len(r.props["pars"]),
             maxdof=r.spectrum.ndofs.max(),
+            fcut=r.fcut / uc.freq_unit,
         )
         if "corrtime_exp" in r.props:
-            text += EXP_TAIL_TEMPLATE.format(
+            text += EXPONENTIAL_TEMPLATE.format(
                 uc=uc,
                 corrtime_exp=r.props["corrtime_exp"] / uc.time_unit,
                 corrtime_exp_std=r.props["corrtime_exp_std"] / uc.time_unit,
-                exptail_simulation_time=r.props["exptail_simulation_time"] / uc.time_unit,
-                exptail_simulation_time_std=r.props["exptail_simulation_time_std"] / uc.time_unit,
-                exptail_block_time=r.props["exptail_block_time"] / uc.time_unit,
-                exptail_block_time_std=r.props["exptail_block_time_std"] / uc.time_unit,
+                exp_simulation_time=r.props["exp_simulation_time"] / uc.time_unit,
+                exp_simulation_time_std=r.props["exp_simulation_time_std"] / uc.time_unit,
+                exp_block_time=r.props["exp_block_time"] / uc.time_unit,
+                exp_block_time_std=r.props["exp_block_time_std"] / uc.time_unit,
             )
         texts.append(text)
     return "\n---\n".join(texts)
@@ -521,16 +523,17 @@ MAIN RESULTS
 
 MODEL {model} | CUTOFF CRITERION {cutoff_criterion}
     Number of parameters:          {npar}
-    Effective points:              {r.neff:.1f}
+    Average effective points:      {r.neff:.1f}
+    Average cutoff frequency:      {fcut:{uc.freq_fmt}} {uc.freq_unit_str}
 """
 
-EXP_TAIL_TEMPLATE = """\
+EXPONENTIAL_TEMPLATE = """\
     Exponential correlation time:  {corrtime_exp:{uc.time_fmt}} ± {corrtime_exp_std:{uc.time_fmt}} \
 {uc.time_unit_str}
 
-RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL TAIL MODEL)
-    Simulation time:               {exptail_simulation_time:{uc.time_fmt}} ± \
-{exptail_simulation_time_std:{uc.time_fmt}} {uc.time_unit_str}
-    Block time:                    {exptail_block_time:{uc.time_fmt}} ± \
-{exptail_block_time_std:{uc.time_fmt}} {uc.time_unit_str}
+RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL CORR. TIME)
+    Simulation time:               {exp_simulation_time:{uc.time_fmt}} ± \
+{exp_simulation_time_std:{uc.time_fmt}} {uc.time_unit_str}
+    Block time:                    {exp_block_time:{uc.time_fmt}} ± \
+{exp_block_time_std:{uc.time_fmt}} {uc.time_unit_str}
 """

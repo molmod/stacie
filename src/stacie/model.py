@@ -427,10 +427,10 @@ class ExpTailModel(SpectrumModel):
             "acint_var": acint_var,
             "corrtime_exp": corrtime,
             "corrtime_exp_var": corrtime_var,
-            "exptail_block_time": corrtime * np.pi / 20,
-            "exptail_block_time_var": corrtime_var * np.pi / 20,
-            "exptail_simulation_time": 20 * corrtime * np.pi,
-            "exptail_simulation_time_var": 20 * corrtime_var * np.pi,
+            "exp_block_time": corrtime * np.pi / 20,
+            "exp_block_time_var": corrtime_var * np.pi / 20,
+            "exp_simulation_time": 20 * corrtime * np.pi,
+            "exp_simulation_time_var": 20 * corrtime_var * np.pi,
         }
 
 
@@ -727,10 +727,10 @@ class PadeModel(SpectrumModel):
             tau_props = {
                 "corrtime_exp": tau,
                 "corrtime_exp_var": tau_var,
-                "exptail_block_time": tau * np.pi / 20,
-                "exptail_block_time_var": tau_var * np.pi / 20,
-                "exptail_simulation_time": 20 * tau * np.pi,
-                "exptail_simulation_time_var": 20 * tau_var * np.pi,
+                "exp_block_time": tau * np.pi / 10,
+                "exp_block_time_var": tau_var * np.pi / 10,
+                "exp_simulation_time": 20 * tau * np.pi,
+                "exp_simulation_time_var": 20 * tau_var * np.pi,
             }
             props.update(tau_props)
         return props
