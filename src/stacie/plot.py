@@ -161,7 +161,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     freqs = r.spectrum.freqs[: r.ncut]
     # Show fitting weight on top of the spectrum
     ax2 = ax.twinx()
-    ax2.plot(freqs / uc.freq_unit, r.props["weights"], color="C3", ls="--")
+    ax2.plot(freqs / uc.freq_unit, r.props["weights"], color="C3", ls=":")
     ax2.set_ylabel("Fitting weight", color="C3")
     ax2.set_ylim(-0.02, 1.02)
     ax2.spines["right"].set_color("red")
