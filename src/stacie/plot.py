@@ -198,7 +198,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax.fill_between(
         freqs / uc.freq_unit,
         stats.gamma.ppf(uc.clb, alphas, scale=mean / alphas) / uc.acint_unit,
-        stats.gamma.ppf(uc.cub, alphas, scale=mean / alphas),
+        stats.gamma.ppf(uc.cub, alphas, scale=mean / alphas) / uc.acint_unit,
         color="C2",
         alpha=0.3,
         lw=0,
