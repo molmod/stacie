@@ -138,7 +138,7 @@ def _plot_ref_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: in
 
 
 FIT_LEFT_TITLE_TEMPLATE = (
-    "Spectrum model {model} ({uc.clevel:.0%} CI)\n"
+    "Spectrum model {model} \n"
     "${uc.acint_symbol}$ = {acint:{uc.acint_fmt}} ± {acint_std:{uc.acint_fmt}}"
     "{acint_unit_str}"
 )
@@ -194,7 +194,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         stats.norm.ppf(uc.cub, mean, std_fit) / uc.acint_unit,
         color="C2",
         ls="--",
-        label="95% CI (fitted model)",
+        label=f"{uc.clevel:.0%} CI (fitted model)",
     )
     ax.fill_between(
         freqs / uc.freq_unit,
@@ -203,7 +203,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         color="C2",
         alpha=0.3,
         lw=0,
-        label="95% CI (sampling PSD)",
+        label=f"{uc.clevel:.0%} CI (sampling PSD)",
     )
     ax.axvline(r.fcut / uc.freq_unit, ymax=0.1, color="k")
     ax.set_ylim(0, r.spectrum.amplitudes[: r.ncut].max() / uc.acint_unit * 1.1)
