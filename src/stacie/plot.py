@@ -194,6 +194,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         stats.norm.ppf(uc.cub, mean, std_fit) / uc.acint_unit,
         color="C2",
         ls="--",
+        label="95% CI (fitted model)",
     )
     ax.fill_between(
         freqs / uc.freq_unit,
@@ -202,10 +203,11 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         color="C2",
         alpha=0.3,
         lw=0,
+        label="95% CI (sampling PSD)",
     )
     ax.axvline(r.fcut / uc.freq_unit, ymax=0.1, color="k")
     ax.set_ylim(0, r.spectrum.amplitudes[: r.ncut].max() / uc.acint_unit * 1.1)
-
+    ax.legend(loc="upper right", fontsize="small")
     # Info in title
     fields = {
         "uc": uc,
