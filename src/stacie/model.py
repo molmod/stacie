@@ -718,6 +718,7 @@ class PadeModel(SpectrumModel):
             and (self.numer_degrees == [0, 2]).all()
             and self.denom_degrees.shape == (1,)
             and (self.denom_degrees == [2]).all()
+            and (pars[0] * pars[2] - pars[1]) > 0.0  # maximum in the origin
         ):
             # The following estimates of the exponential correlation time and its variance
             # are only valid for small variances.
