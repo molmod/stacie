@@ -23,7 +23,7 @@ The derivation of this result can be found in
 Section 8.5 of "Theory of Simple Liquids"
 by Hansen and McDonald {cite:p}`hansen_2013_theory`.
 
-::: {warning}
+:::{warning}
 The LAMMPS `compute/heat flux` command is reported to produce unphysical results
 when many-body interactions (e.g., angle, dihedral, impropers) are present
 {cite:p}`jamali_2019_octp`, {cite:p}`surblys_2019_application`,

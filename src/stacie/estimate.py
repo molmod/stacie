@@ -180,10 +180,10 @@ def estimate_acint(
         Set this to ``True`` to print progress information of the frequency cutoff search
         to the standard output.
     uc
-        Unit configuration object used to format the output.
+        Unit configuration object used to format the screen output.
         If not provided, the default unit configuration is used.
         See :py:class:`stacie.utils.UnitConfig` for details.
-        This is only affects the screen output (if any) and not the results.
+        This only affects the screen output (if any) and not the results!
 
     Returns
     -------

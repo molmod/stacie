@@ -2,7 +2,7 @@
 
 This section focuses solely on the autocorrelation integral itself.
 The (physical) [properties](../properties/index.md) associated with this integral
-are discussed in the subsequent section.
+are discussed later.
 
 Some derivations presented here can also be found in other sources.
 They are included to enhance accessibility

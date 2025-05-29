@@ -88,13 +88,53 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
     "footer_icons": load_footer_icons(),
+    "dark_css_variables": {
+        "admonition-title-font-size": "1rem",
+        "admonition-font-size": "1rem",
+    },
+    "light_css_variables": {
+        "admonition-title-font-size": "1rem",
+        "admonition-font-size": "1rem",
+    },
 }
 
 # -- Options for LaTeX output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/latex.html#module-latex
 latex_engine = "xelatex"
 latex_elements = {
-    "preamble": r"\input{macros.txt}",
+    "fontpkg": r"""
+\usepackage[mathbf=sym,mathrm=sym]{unicode-math}
+\usepackage{fontspec}
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont[Scale=0.85]{DejaVu Sans Mono}
+\setmathfont{XITS Math}
+\setmathfont[range={\mathcal,\mathbfcal},StylisticSet=1]{XITS Math}
+""",
+    "fncychap": r"\usepackage[Sonny]{fncychap}",
+    "papersize": "a4paper",
+    "preamble": r"""
+\input{macros.txt}
+\usepackage[framemethod=TikZ]{mdframed}
+\mdfdefinestyle{jupyquote}{
+  usetwoside=false,
+  topline=false,
+  bottomline=false,
+  rightline=false,
+  innerleftmargin=12pt,
+  leftmargin=12pt,
+  innerrightmargin=0pt,
+  rightmargin=0pt,
+  innertopmargin=12pt,
+  innerbottommargin=12pt,
+  linewidth=1pt,
+  linecolor=gray,
+  skipabove=\topskip,
+  skipbelow=\topskip
+}
+\renewenvironment{quote}{\begin{mdframed}[style=jupyquote]}{\end{mdframed}}
+""",
+    "sphinxsetup": "hmargin={2.2cm,2.2cm}, vmargin={3cm,3cm}",
 }
 latex_additional_files = ["macros.txt"]
 
@@ -162,6 +202,7 @@ napoleon_use_param = True
 # -- Configuration of mathjax extension ---------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/math.html#module-sphinx.ext.mathjax
 
+# These need to be synced with macros.tex
 mathjax3_config = {
     "tex": {
         "macros": {
@@ -178,6 +219,10 @@ mathjax3_config = {
 # https://sphinxcontrib-bibtex.readthedocs.io/en/latest/usage.html#configuration
 
 bibtex_bibfiles = ["references.bib"]
+
+# -- Inform examples of data location -----------------------------------------
+# This path is relative to the examples directory.
+os.environ["DATA_ROOT"] = "../../data"
 
 # -- Pre-build step to regenerate API documentation ---------------------------
 

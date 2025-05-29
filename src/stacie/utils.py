@@ -39,6 +39,8 @@ class UnitConfig:
     """Unit configuration for plotting function.
 
     Note that values are *divided* by their units before plotting.
+    This class only affects screen output and plotting.
+    It never influences numerical values in STACIE's computations.
     """
 
     acint_symbol: str = attrs.field(default=r"\mathcal{I}", kw_only=True)

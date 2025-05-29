@@ -1,6 +1,6 @@
-# Electrical Conductivity
+# Ionic Electrical Conductivity
 
-The (ionic) electrical conductivity of a system is related to the autocorrelation
+The ionic electrical conductivity of a system is related to the autocorrelation
 of the charge current as follows:
 
 $$
@@ -139,12 +139,14 @@ import numpy as np
 from stacie import compute_spectrum, estimate_acint, plot_results, ExpPolyModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
+# We assume ionvels has shape `(nstep, natom, ncart)`
+# and charges is a 1D array with shape `(natom,)`
 ionvels = ...
 charges = ...
 volume, temperature, boltzmann_const, timestep = ...
 
 # Compute the charge current
-chargecurrent = np.einsum("ijk,i", ionvels, charges)
+chargecurrent = np.einsum("ijk,j->ki", ionvels, charges)
 
 # Actual computation with STACIE.
 # Note that the average spectrum over the three components is implicit.
@@ -157,7 +159,7 @@ spectrum = compute_spectrum(
     timestep=timestep,
     include_zero_freq=False,
 )
-result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2], even=True))
+result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]))
 print("Electrical conductivity", result.acint)
 print("Uncertainty of the electrical conductivity", result.acint_std)
 

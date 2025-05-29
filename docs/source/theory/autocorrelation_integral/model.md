@@ -28,7 +28,9 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
       parameterized to have well-behaved high-frequency tails,
       which can facilitate the regression.
 
-## 1. ExpPolyModel
+(section-exppoly-target)=
+
+## 1. ExpPoly Model
 
 The [ExpPolyModel](#stacie.model.ExpPolyModel) is defined as:
 
@@ -60,7 +62,9 @@ from stacie.model import ExpPolyModel
 model = ExpPolyModel(degrees=[0, 1, 2])
 ```
 
-## 2. PadeModel
+(section-pade-target)=
+
+## 2. Pade Model
 
 The [PadeModel](#stacie.model.PadeModel) is defined as:
 
@@ -75,7 +79,7 @@ $$
 $$
 
 where $S_\text{num}$ contains the polynomial degrees in the numerator, which must include 0,
-and $S_\text{den}$ contains the polynomial degrees in the denominator, which must not include 0.
+and $S_\text{den}$ contains the polynomial degrees in the denominator, which must exclude 0.
 With this model, $p_0$ corresponds to the integral of the autocorrelation function,
 for which we simply have:
 
@@ -100,15 +104,27 @@ $A$ is the white noise level, $B$ is the amplitude of the Lorentzian peak,
 and $\tau_\text{exp}$ is the exponential correlation time.
 The frequency grid is defined as $f_k = k / (hN)$,
 where $h$ is the time step of the discretized time axis, and $N$ is the number of samples.
-Of particular interest is the correlation time $\tau_\text{exp}$,
-which can be visually related to the width of the peak ($2 \pi \tau_\text{exp}$) in the power spectrum.
-When fitting the Pade model with $S_\text{num} = \{0, 2\}$ and $S_\text{den} = \{2\}$,
-the exponential correlation time and its variance can be derived
+We can write the Lorentzian model parameters in terms of the Pade model parameters as follows:
+
+$$
+    \begin{aligned}
+        A &= \frac{\hat{p}_2}{\hat{q}_2}
+        \\
+        B &= \hat{p}_0 - \frac{\hat{p}_2}{\hat{q}_2}
+        \\
+        \tau_\text{exp} &= \frac{\sqrt{q_2}}{2 \pi}
+    \end{aligned}
+$$
+
+The Pade model will only correspond to a Lorentzian peak if $q_2 > 0$ and $p_0 q_2 > p_2$.
+When this is the case, $\tau_\text{exp}$ is related
+to the width of the peak ($2 \pi \tau_\text{exp}$) in the power spectrum.
+The exponential correlation time and its variance can then be derived
 from the fitted parameters with first-order error propagation:
 
 $$
     \begin{aligned}
-    \tau_\text{exp} &= \frac{\sqrt{\hat{q}_2}}{2 \pi}
+    \hat{\tau}_\text{exp} &= \frac{\sqrt{\hat{q}_2}}{2 \pi}
     \\
     \hat{\sigma}^2_{\tau_\text{exp}} &= \frac{1}{16 \pi^2 \hat{q}_2} \hat{\sigma}^2_{q_2}
     \end{aligned}
@@ -117,7 +133,7 @@ $$
 Note that this model is also applicable to data whose short-time correlations are not exponential,
 as long as the tail of the ACF decays exponentially.
 Such deviating short-time correlations will only affect the white noise level $A$
-and features in the PSD at higher frequencies.
+and features in the PSD at higher frequencies, which will be ignored by STACIE.
 
 To construct this model, you can create an instance of the `PadeModel` class as follows:
 

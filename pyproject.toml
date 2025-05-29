@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     # Ensure changes to these dependencies are reflected in .github/requirements-old.txt
@@ -60,8 +61,8 @@ docs = [
     "sphinx-tippy",
     "sphinxcontrib-bibtex",
     "sphinxcontrib-svg2pdfconverter",
-    "stepup>=2.1.4",
-    "stepup-reprep>=2.3.3",
+    "stepup>=3.0.2",
+    "stepup-reprep>=3.0.0",
 ]
 tests = [
     "pytest",

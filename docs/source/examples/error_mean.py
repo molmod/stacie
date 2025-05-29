@@ -1,33 +1,29 @@
-#!/usr/bin/env python3
-
 # %% [markdown]
 # # Standard Error of the Mean
 #
 # This notebook shows how to use STACIE to compute the error of the mean
 # of a time-correlated input sequence,
-# i.e. of which not all values are statistically independent.
+# meaning not all of its values are statistically independent.
 #
-# This is a completely self-contained example that generates the input sequences
+# This is a completely self-contained example that generates input sequences
 # (with MCMC) and then analyzes them with STACIE.
 # Atomic units are used unless otherwise noted.
 #
-# We suggest you experiment with this notebook by making the following changes:
+# We suggest experimenting with this notebook by making the following changes:
 #
 # - Change the number of sequences and their length.
 # - Change the correlation time through `PROPOSAL_STEP`.
-# - Change the cutoff criterion to the AIC.
-#   (Add the argument `cutoff_criterion=akaike_criterion` to `estimate_acint`,
-#    where `akaike_criterion` is imported from `stacie.cutoff`.)
 
 # %% [markdown]
-# ## Import Libraries and Configure `matplotlib`
+# ## Library Imports and Matplotlib Configuration
 
 # %%
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import quad
-from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
+import scipy.constants as sc
+from stacie import UnitConfig, compute_spectrum, estimate_acint, PadeModel
 from stacie.plot import plot_extras, plot_fitted_spectrum, plot_spectrum
 
 # %%
@@ -47,7 +43,7 @@ mpl.rc_file("matplotlibrc")
 # $$
 #
 # where $K$ is the force constant and $r_0$ the equilibrium bond length.
-# The sampled probability density is a Boltzmann distribution:
+# The sampled probability density is the Boltzmann distribution:
 #
 # $$
 #     p_r(r) = \frac{1}{Z} \exp\left(-\frac{U(r)}{k_\text{B}T}\right)
@@ -64,7 +60,7 @@ mpl.rc_file("matplotlibrc")
 K = 0.015
 R0 = 5.150
 TEMPERATURE = 1000
-BOLTZMANN = 3.167e-6
+BOLTZMANN = sc.value("Boltzmann constant") / sc.value("Hartree energy")
 BETA = 1 / (BOLTZMANN * TEMPERATURE)
 PROPOSAL_STEP = 0.1
 
@@ -96,7 +92,27 @@ plot_potential_dist()
 
 # %%
 def sample_mcmc_chain(niter, stride, ndim, burnin, seed=42):
-    """Sample independent Markov Chains with the Metropolis algorithm."""
+    """Sample independent Markov Chains with the Metropolis algorithm.
+
+    Parameters
+    ----------
+    niter
+        The number of MCMC iterations to run.
+    stride
+        The number of iterations between samples returned,
+        i.e. the thinning interval.
+    ndim
+        The number of independent Markov chains to run.
+    burnin
+        The number of iterations to discard at the beginning.
+    seed
+        The random number generator seed.
+
+    Returns
+    -------
+    result
+        A 2D array of shape (ndim, niter // stride) containing the sampled sequences.
+    """
     rng = np.random.default_rng(seed)
     result = np.zeros((ndim, niter // stride))
     r_old = np.full(ndim, R0)
@@ -123,10 +139,10 @@ def sample_mcmc_chain(niter, stride, ndim, burnin, seed=42):
     return result
 
 
-sequences = sample_mcmc_chain(20000, 5, 50, 200)
+sequences = sample_mcmc_chain(10240, 5, 50, 200)
 print(f"(nseq, nstep) = {sequences.shape}")
 mean_mc = sequences.mean()
-print(f"Monte Carlo E[r] ≈ {mean_mc:.5f} > {R0:.5f}")
+print(f"Monte Carlo E[r] ≈ {mean_mc:.5f} > R0 = {R0:.5f}")
 
 # %% [markdown]
 # Because of the finite temperature and the anharmonicity of the potential,
@@ -160,9 +176,11 @@ plot_chains()
 # %% [markdown]
 # ## Uncertainty Quantification
 #
-# The spectrum is calculated with settings appropriate for error estimation.
+# The spectrum is calculated using settings that are appropriate for error estimation.
 # See the [Error Estimates](../theory/properties/error_estimates.md) section
-# for more details.
+# for the justification of the `prefactors` and `include_zero_freq` keyword arguments.
+# Since we are analyzing MCMC data, the `timestep` argument is not specified,
+# corresponding to a dimensionless time step of 1.
 
 # %%
 # Compute and plot the power spectrum.
@@ -177,15 +195,11 @@ spectrum = compute_spectrum(
 # that are reused by most plotting functions.
 # The integral has units of length squared, $\mathrm{a}_0^2$.
 # (It is the variance of the mean.)
-# In MC sampling,
-# time and frequency are fictitious and therefore made dimensionless here.
 
 # %%
 uc = UnitConfig(
     acint_fmt=".1e",
     acint_unit_str=r"a$^2_0$",
-    freq_unit_str="1",
-    time_unit_str="1",
 )
 plt.close("spectrum")
 _, ax = plt.subplots(num="spectrum")
@@ -193,25 +207,31 @@ plot_spectrum(ax, uc, spectrum, 180)
 
 # %% [markdown]
 # From the spectrum, one can already visually estimate the variance of the mean:
-# the limit to zero frequency is about $3.5 \times 10^{-5}\,\mathrm{a}_0^2$.
+# the limit to zero frequency is about $6 \times 10^{-5}\,\mathrm{a}_0^2$.
 # By normalizing the spectrum with the total simulation time,
-# the spectrum has a unit of length squared,
-# which is correct for the variance in this case.
-# In the following,
-# a model is fitted to the spectrum to get a more precise estimate.
+# the spectrum has the correct unit of length squared.
+# In the following cell, a model is fitted to the spectrum to get a more precise estimate.
 
 # %%
-result = estimate_acint(spectrum, ExpTailModel(), verbose=True, uc=uc)
+result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True, uc=uc)
+
+# %% [markdown]
+# The spectrum is normalized such that the integral of the autocorrelation function
+# is equal to the variance of the mean.
+# Because STACIE estimates errors of the autocorrelation integral,
+# it can thus also estimate errors of errors of means.
+#
+# The error of the mean and its uncertainty are printed in the following cell.
 
 # %%
-# The essential result:
 error_mc = np.sqrt(result.acint)
 print(f"Error of the mean = {error_mc:.5f}")
-
-# Because STACIE can estimate errors of the autocorrelation integral,
-# it can also estimate errors of errors of means.
 error_of_error_mc = 0.5 * result.acint_std / error_mc
 print(f"Uncertainty of the error of mean = {error_of_error_mc:.5f}")
+
+# %% [markdown]
+# The error of the mean is about $8.0 \times 10^{-3}\,\mathrm{a}_0$.
+# It is also interesting to visualize the fitted spectrum and some intermediate results.
 
 # %%
 # Plot of the empirical and fitted model spectrum.
@@ -226,6 +246,11 @@ plt.close("extras")
 _, axs = plt.subplots(2, 2, num="extras")
 plot_extras(axs, uc, result)
 
+# %% [markdown]
+# The cutoff criterion remains high for the entire range of frequencies,
+# meaning that the data are extremely well described by the Pade model,
+# resulting in precise error estimates.
+# This result is somewhat fortuitous and is typically not encountered for data from complex systems.
 
 # %% [markdown]
 # ## Precise Mean With Numerical Quadrature
@@ -252,21 +277,23 @@ print(f"Estimated MC error = {error_mc:8.5f}")
 # %% [markdown]
 # ## Autocorrelation time
 #
-# The Exponential Tail model directly estimates the correlation time from the width
-# of the peak at zero frequency in the spectrum.
-# This correlation time is formally equivalent to the "exponential autocorrelation time",
-# as defined by Sokal {cite:p}`sokal_1997_monte`.
-# It may differ from the "integrated autocorrelation time".
+# The Pade model estimates the *exponential correlation time* {cite:p}`sokal_1997_monte`
+# from the width of the peak at zero frequency in the spectrum.
+# It may differ from the *integrated autocorrelation time*.
 # Only if the autocorrelation function is nothing but an exponentially decaying function,
 # both should match.
 
 # %%
 print("Autocorrelation times:")
-print(f"exponential: {result.props['corrtime_exp']:.2f}")
-print(f"integrated: {result.corrtime_int:.2f}")
+print(
+    f"exponential: {result.props['corrtime_exp']:5.2f} ± {result.props['corrtime_exp_std']:5.2f}"
+)
+print(f"integrated:  {result.corrtime_int:5.2f} ± {result.corrtime_int_std:5.2f}")
 
 # %% [markdown]
-# In this case, both autocorrelation times agree quite well.
+# Here, the deviation between the two autocorrelation times
+# falls within the uncertainty of the estimates.
+# This is the expected result, since the Lorentzian model is able to explain the whole spectrum.
 
 # %%  [markdown]
 # ## Regression Tests
@@ -275,7 +302,7 @@ print(f"integrated: {result.corrtime_int:.2f}")
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(mean_mc - 5.28807) > 1e-3:
+if abs(mean_mc - 5.28666) > 1e-3:
     raise ValueError(f"Wrong mean_mc: {mean_mc:.5f}")
-if abs(error_mc - 0.00577) > 1e-3:
+if abs(error_mc - 0.00794) > 1e-3:
     raise ValueError(f"Wrong error_mc: {error_mc:.5f}")

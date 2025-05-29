@@ -58,7 +58,7 @@ spectrum = compute_spectrum(
     timestep=timestep,
     include_zero_freq=False,
 )
-result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2], even=True))
+result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]))
 print("Diffusion coefficient", result.acint)
 print("Uncertainty of the diffusion coefficient", result.acint_std)
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # %% [markdown]
 # # Diffusion on a Surface with Newtonian Dynamics
 #
@@ -11,10 +9,10 @@
 #
 # This is a completely self-contained example that generates the input sequences
 # (with numerical integration) and then analyzes them with STACIE.
-# Atomic units are used unless otherwise noted.
+# Unless otherwise noted, atomic units are used.
 
 # %% [markdown]
-# ## Import Libraries and Configure `matplotlib`
+# ## Library Imports and Matplotlib Configuration
 
 # %%
 import attrs
@@ -24,7 +22,7 @@ import numdifftools as nd
 import numpy as np
 import scipy.constants as sc
 from numpy.typing import ArrayLike, NDArray
-from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
+from stacie import UnitConfig, compute_spectrum, estimate_acint, PadeModel
 from stacie.plot import plot_extras, plot_fitted_spectrum
 
 # %%
@@ -37,9 +35,9 @@ mpl.rc_file("matplotlibrc")
 # %% [markdown]
 # ### Potential energy surface
 #
-# The first cell below defines the potential energy of a particle on the surface
-# and the force exerted by the surface on the particle.
-# The model for the potential energy is a superposition of cosine functions:
+# The first cell below defines the potential energy of a particle on a surface,
+# as well as the force that the surface exerts on the particle.
+# The potential energy model is a superposition of cosine functions:
 #
 # $$
 #     U(\mathbf{r}) = -A \sum_{n=1}^N \cos(2\pi \mathbf{r}\cdot\mathbf{e}_n / \lambda)
@@ -61,8 +59,8 @@ mpl.rc_file("matplotlibrc")
 # - A square lattice: $N = 2$ and $\alpha = \pi/2$.
 # - A quasi-periodic pentagonal lattice: $N=5$ and $\alpha = 2\pi/5$.
 #
-# The remainder of the notebook is configured to work well for the default parameters.
-# If you change the potential energy model, remaining settings also need to be adapted.
+# The rest of the notebook is set up to work well with the default parameters.
+# If you change the potential energy model, remaining settings will also need to be adapted.
 
 # %%
 WAVELENGTH = 5.0
@@ -106,9 +104,17 @@ def potential_energy_force(coords: ArrayLike) -> tuple[NDArray, NDArray]:
     return AMPLITUDE * energy, AMPLITUDE * force
 
 
-# Quick visual test: the force is minus the energy gradient.
+# %% [markdown]
+# The following code cell provides a quick visual test of the forces using
+# [numdifftools](https://github.com/pbrod/numdifftools).
+# (The force is equal to minus the energy gradient.)
+
+# %%
 print(potential_energy_force([1, 2]))
 print(nd.Gradient(lambda coords: potential_energy_force(coords)[0])([1, 2]))
+
+# %% [markdown]
+# Finally, the following code cell plots the potential energy surface.
 
 
 # %%
@@ -162,7 +168,7 @@ class Trajectory:
     vels: NDArray = attrs.field()
     """The time-dependent particle velocities.
 
-    If stride is larger than 1,
+    If block_size is larger than 1,
     this attribute contains the block-averaged velocity.
     """
 
@@ -189,7 +195,7 @@ class Trajectory:
         return self.coords.shape[0]
 
 
-def integrate(coords: ArrayLike, vels: ArrayLike, nstep: int, stride: int = 1):
+def integrate(coords: ArrayLike, vels: ArrayLike, nstep: int, block_size: int = 1):
     """Integrate Newton's equation of motion for the given initial conditions.
 
     Parameters
@@ -202,36 +208,44 @@ def integrate(coords: ArrayLike, vels: ArrayLike, nstep: int, stride: int = 1):
         Index 0 and 1 of the last axis correspond to x and y coordinates.
     nstep
         The number of MD time steps.
-    stride
-        The stride with which to record the trajectory data.
+    block_size
+        The block_size with which to record the trajectory data.
 
     Returns
     -------
     trajectory
         A Trajectory object holding all the results.
     """
-    traj = Trajectory.empty(coords.shape[:-1], nstep // stride, TIMESTEP * stride)
+    traj = Trajectory.empty(coords.shape[:-1], nstep // block_size, TIMESTEP * block_size)
     energies, forces = potential_energy_force(coords)
     delta_vels = forces * (0.5 * TIMESTEP / MASS)
 
     vels_block = 0
-    for istep in range(traj.nstep * stride):
+    for istep in range(traj.nstep * block_size):
         vels += delta_vels
         coords += vels * TIMESTEP
         energies, forces = potential_energy_force(coords)
         delta_vels = forces * (0.5 * TIMESTEP / MASS)
         vels += delta_vels
         vels_block += vels
-        if istep % stride == stride - 1:
-            itraj = istep // stride
+        if istep % block_size == block_size - 1:
+            itraj = istep // block_size
             traj.coords[itraj] = coords
-            traj.vels[itraj] = vels_block / stride
+            traj.vels[itraj] = vels_block / block_size
             traj.potential_energies[itraj] = energies
             traj.kinetic_energies[itraj] = (0.5 * MASS) * (vels**2).sum(axis=-1)
             vels_block = 0
     return traj
 
 
+# %% [markdown]
+# As a quick test, the following code cell integrates the equations of motion
+# for a single particle with a small initial velocity.
+# In this case, the particle oscillates around the origin
+# and one can easily verify that the total energy is conserved.
+
+
+# %%
 def demo_energy_conservation():
     """Simple demo of the approximate energy conservation.
 
@@ -271,11 +285,19 @@ def demo_chaos():
     traj = integrate(np.zeros((2, 2)), vels, 2500)
     plt.close("chaos")
     _, ax = plt.subplots(num="chaos")
-    ax.plot(traj.coords[:, 0, 0], traj.coords[:, 0, 1], color="C1")
-    ax.plot(traj.coords[:, 1, 0], traj.coords[:, 1, 1], color="C3", ls=":")
+    ax.plot([0], [0], "o", color="k", label="Initial position")
+    ax.plot(traj.coords[:, 0, 0], traj.coords[:, 0, 1], color="C1", label="Trajectory 1")
+    ax.plot(
+        traj.coords[:, 1, 0],
+        traj.coords[:, 1, 1],
+        color="C3",
+        ls=":",
+        label="Trajectory 2",
+    )
     ax.set_aspect("equal", "box")
     ax.set_xlabel("x [a$_0$]")
     ax.set_ylabel("y [a$_0$]")
+    ax.legend()
     ax.set_title("Two Trajectories")
 
     plt.close("chaos_dist")
@@ -294,6 +316,7 @@ demo_chaos()
 # [chaotic](https://en.wikipedia.org/wiki/Chaos_theory),
 # the short term motion is ballistic,
 # while the long term motion is a random walk.
+#
 # Note that the random walk is only found in a specific energy window.
 # If the energy is too small,
 # the particles will oscillate around a local potential energy minimum.
@@ -301,25 +324,38 @@ demo_chaos()
 # the particles will follow almost linear paths over the surface.
 
 # %% [markdown]
-# ## Self-diffusion without block averages
+# ## Surface diffusion without block averages
 #
 # This section considers 100 independent particles whose initial velocities
-# have the same magnitude by whose directions are random.
-# Their velocities are used as inputs for STACIE
+# have the same magnitude but whose directions are random.
+# The time-dependent particle velocities are used as inputs for STACIE
 # to compute the diffusion coefficient.
 
 
 # %%
-def demo_stacie(stride=1):
+def demo_stacie(block_size: int = 1):
+    """Simulate particles on a surface and compute the diffusion coefficient.
+
+    Parameters
+    ----------
+    block_size
+        The block size for the block averages.
+        If 1, no block averages are used.
+
+    Returns
+    -------
+    result
+        The result of the STACIE analysis.
+    """
     natom = 100
     nstep = 20000
     rng = np.random.default_rng(42)
     vels = rng.normal(0, 1, (natom, 2))
     vels *= 9.7e-4 / np.linalg.norm(vels, axis=1).reshape(-1, 1)
-    traj = integrate(np.zeros((natom, 2)), vels, nstep, stride)
+    traj = integrate(np.zeros((natom, 2)), vels, nstep, block_size)
 
-    plt.close(f"trajs_{stride}")
-    _, ax = plt.subplots(num=f"trajs_{stride}")
+    plt.close(f"trajs_{block_size}")
+    _, ax = plt.subplots(num=f"trajs_{block_size}")
     for i in range(natom):
         ax.plot(traj.coords[:, i, 0], traj.coords[:, i, 1])
     ax.set_aspect("equal", "box")
@@ -331,11 +367,14 @@ def demo_stacie(stride=1):
         traj.vels.transpose(1, 2, 0).reshape(2 * natom, traj.nstep),
         timestep=traj.timestep,
     )
+
+    # Define units and conversion factors used for screen output and plotting.
+    # This does not affect numerical values stored in the result object.
     uc = UnitConfig(
         acint_symbol="D",
         acint_unit=sc.value("atomic unit of time")
         / sc.value("atomic unit of length") ** 2,
-        acint_unit_str="m$^2$ s",
+        acint_unit_str="m$^2$/s",
         acint_fmt=".2e",
         freq_unit=TERAHERTZ,
         freq_unit_str="THz",
@@ -347,17 +386,17 @@ def demo_stacie(stride=1):
     # The maximum cutoff frequency is chosen to be 1 THz,
     # by inspecting the first spectrum plot.
     # Beyond the cutoff frequency, the spectrum has resonance peaks that
-    # the ExpTailModel is not designed to handle.
+    # the Pade model is not designed to handle.
     result = estimate_acint(
-        spectrum, ExpTailModel(), fcut_max=TERAHERTZ, verbose=True, uc=uc
+        spectrum, PadeModel([0, 2], [2]), fcut_max=TERAHERTZ, verbose=True, uc=uc
     )
 
     # Plotting
-    plt.close(f"spectrum_{stride}")
-    _, ax = plt.subplots(num=f"spectrum_{stride}")
+    plt.close(f"spectrum_{block_size}")
+    _, ax = plt.subplots(num=f"spectrum_{block_size}")
     plot_fitted_spectrum(ax, uc, result)
-    plt.close(f"extras_{stride}")
-    _, axs = plt.subplots(2, 2, num=f"extras_{stride}")
+    plt.close(f"extras_{block_size}")
+    _, axs = plt.subplots(2, 2, num=f"extras_{block_size}")
     plot_extras(axs, uc, result)
     return result
 
@@ -368,13 +407,13 @@ result_1 = demo_stacie()
 # %% [markdown]
 # The spectrum has several peaks related to oscillations of the particles
 # around a local minimum.
-# These are irrelevant to the diffusion coefficient.
+# These peaks are irrelevant to the diffusion coefficient.
 # The broad peak at zero frequency is used by STACIE
 # to derive the diffusion coefficient.
-# The value is not directly comparable to experiment
+# The obtained value is not directly comparable to experiment
 # because the 2D lattice model for the surface
 # is not based on an experimental case.
-# The order of magnitude is comparable to the self-diffusion constants
+# However, the order of magnitude is comparable to the self-diffusion constants
 # of pure liquids {cite:p}`baba_2022_prediction`.
 #
 # It is also interesting to compare the integrated and exponential autocorrelation time,
@@ -385,14 +424,21 @@ print(f"corrtime_exp = {result_1.props['corrtime_exp'] / PICOSECOND:.3f} ps")
 print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 
 # %% [markdown]
-# The integrated autocorrelation time is smaller than
-# the exponential autocorrelation time
-# because the former represents an average of all time scales in the particle velocities.
+# The integrated autocorrelation time is smaller than the exponential one
+# because the former is an average of all time scales of the particle velocities.
 # This includes the slow diffusion and faster oscillations in local minima.
-# The exponential autocorrelation time only considers the slow diffusive motion.
+# In contrast, the exponential autocorrelation time only represents the slow diffusive motion.
+#
+# Finally, it is well known that the velocity autocorrelation function
+# of molecules in a liquid decays according to a power law {cite:p}`alder_1970_decay`.
+# One might wonder why the Pade model can be used here since it implies that diffusion
+# can be described with an exponentially decaying autocorrelation function.
+# The system in this notebook exhibits exponential decay
+# because every particle only interacts with the surface,
+# and not with each other, such that there are no collective modes with long memory effects.
 
 # %% [markdown]
-# ## Self-diffusion with block averages
+# ## Surface diffusion with block averages
 #
 # This section repeats the same example,
 # but now with block averages of velocities.
@@ -402,30 +448,29 @@ print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 # In this example, the block size is determined by the following guideline:
 
 # %%
-print(0.05 * result_1.props["corrtime_exp"] * np.pi / TIMESTEP)
+print(np.pi * result_1.props["corrtime_exp"] / (10 * TIMESTEP))
 
 # %% [markdown]
-# Let's use a block size of 30 to stay on the safe side.
+# Let's use a block size of 60 to stay on the safe side.
 
 # %%
-result_30 = demo_stacie(30)
+result_60 = demo_stacie(60)
 
 # %% [markdown]
-# As expected, there are not significant changes in the results.
+# As expected, there are no significant changes in the results.
 #
 # It is again interesting to compare the integrated and exponential autocorrelation times.
 
 # %%
-print(f"corrtime_exp = {result_30.props['corrtime_exp'] / PICOSECOND:.3f} ps")
-print(f"corrtime_int = {result_30.corrtime_int / PICOSECOND:.3f} ps")
+print(f"corrtime_exp = {result_60.props['corrtime_exp'] / PICOSECOND:.3f} ps")
+print(f"corrtime_int = {result_60.corrtime_int / PICOSECOND:.3f} ps")
 
 # %% [markdown]
-# The exponential autocorrelation time is not affected by the block averages,
-# but the integrated autocorrelation time has increased
-# compared to the result without block averages.
-# This is a consequence of the fact that
-# the integrated correlation averages over all time scales in the input,
-# and some of the fastest ones are washed out by the block averages.
+# The exponential autocorrelation time is unaffected by the block averages.
+# However, the integrated autocorrelation time has increased
+# and is now closer to the exponential value.
+# Taking block averages removes the fastest oscillations,
+# causing the integrated autocorrelation time to be dominated by slow diffusive motion.
 
 # %%  [markdown]
 # ## Regression Tests
@@ -436,8 +481,8 @@ print(f"corrtime_int = {result_30.corrtime_int / PICOSECOND:.3f} ps")
 # %%
 acint_unit = sc.value("atomic unit of time") / sc.value("atomic unit of length") ** 2
 acint_1 = result_1.acint / acint_unit
-if abs(acint_1 - 5.85e-7) > 5e-9:
+if abs(acint_1 - 5.88e-7) > 5e-9:
     raise ValueError(f"Wrong acint (no block average): {acint_1:.2e}")
-acint_30 = result_30.acint / acint_unit
-if abs(acint_30 - 5.87e-7) > 5e-9:
-    raise ValueError(f"Wrong acint (block size 30): {acint_30:.2e}")
+acint_60 = result_60.acint / acint_unit
+if abs(acint_60 - 5.88e-7) > 5e-9:
+    raise ValueError(f"Wrong acint (block size 60): {acint_60:.2e}")

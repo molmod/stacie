@@ -4,6 +4,7 @@
 # The settings in this file are based on the analysis of the exploration run.
 
 # The simulation consists only of additional NVE steps.
+# Velocities are not rescaled!
 
 # Reduced Lennard-Jones units are used throughout.
 
@@ -23,6 +24,7 @@ variable        block_size equal 10
 print """
 lammps_version: $(version)
 volume: $(vol)
+natom: $(atoms)
 nstep: ${nve_steps}
 block_size: ${block_size}
 """ file info.yaml screen no

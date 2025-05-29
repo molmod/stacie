@@ -1,0 +1,20 @@
+path_versions: .zenodo-versions.json
+endpoint: https://zenodo.org/api
+path_token: ~/.config/zenodo-org-token.txt
+metadata:
+  title: 'Output files of simulations analyzed in the examples in the STACIE documentation'
+  version: '1.0.0'
+  license: cc-by-nc-4.0
+  upload_type: dataset
+  creators:
+    - name: 'Toon Verstraelen'
+      affiliation: >-
+        Center for Molecular Modeling (CMM),
+        Ghent University,
+        Technologiepark-Zwijnaarde 46,
+        B-9052,
+        Ghent,
+        Belgium
+path_readme: zenodo.md
+paths:
+  - examples.zip

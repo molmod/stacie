@@ -5,8 +5,8 @@ It consists of three parts:
 
 - Guidelines for planning and preparing [sufficient input sequences](data_sufficiency.md) for STACIE.
 - Instructions for efficiently storing sequences on disk using [block averages](block_averages.md).
-- Steps to perform [molecular dynamics](molecular_dynamics.md) simulations
-  to generate suitable inputs for STACIE.
+- Recommendations for performing [molecular dynamics](molecular_dynamics.md) simulations
+  that generate suitable inputs for STACIE.
 
 ```{toctree}
 :hidden:

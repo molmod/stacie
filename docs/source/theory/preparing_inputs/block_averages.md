@@ -74,7 +74,7 @@ there are two ways to determine the appropriate block size.
      This practically means that there should be at least $400 \, P$ blocks.
      Fewer blocks will inevitably lead to significant aliasing effects.
 
-2. When using the [Pade model](../autocorrelation_integral/model.md),
+2. When using the [Pade model](#section-pade-target),
    one should ensure that the spectrum amplitudes $\hat{I}_k$ in the peak at zero frequency
    are not distorted by the block averages.
    The width of this peak in the Pade model is $1/2\pi\tau_\text{exp}$,

@@ -1,8 +1,4 @@
-# Equilibrium MD simulation of Lennard-Jones fluid in 3D: exploration
-
-# This is a preliminary simulation to get a gist of the relevant time scales
-# and determine the required simulation settings for a longer production run.
-# All data is stored and no efforts are made to reduce the output because the simulation is short.
+# Equilibrium MD simulation of Lennard-Jones fluid in 3D: (initial) production
 
 # Reduced Lennard-Jones units are used throughout.
 # The system is first equilibrated with two NVT runs, followed by an NVE production run.
@@ -25,14 +21,15 @@ variable        nrepz equal 7
 # making it challenging to converge transport properties.
 variable        density equal 0.8442
 variable        temperature1 equal 1.5  # High temperature for melting
-variable        temperature2 equal 0.722
+variable        temperature2 equal 0.722  # Target temperature for equilibration
 variable        cutoff_radius equal 2.5
 
 # Time-related settings
 variable        timestep equal 0.003
 variable        nvt_tau equal 0.5
-variable        nvt_steps equal 10000
-variable        nve_steps equal 50000
+variable        nvt_steps equal 5000
+variable        nve_steps equal 12000
+variable        block_size equal 10
 
 # 2. System setup in LAMMPS
 # -------------------------
@@ -45,9 +42,9 @@ create_atoms    1 box
 mass            1 1.0
 
 # Initial velocities
-velocity        all create ${temperature1} 42
+velocity        all create ${temperature1} {{ seed }}
 
-# Lennar-Jones potential
+# Lennard-Jones potential
 pair_style      lj/cut ${cutoff_radius}
 pair_coeff      1 1 1.0 1.0
 neighbor        0.3 bin
@@ -63,8 +60,10 @@ volume: $(vol)
 density: ${density}
 temperature: ${temperature2}
 cutoff_radius: ${cutoff_radius}
+natom: $(atoms)
 timestep: ${timestep}
 nstep: ${nve_steps}
+block_size: ${block_size}
 """ file info.yaml screen no
 
 
@@ -78,20 +77,28 @@ thermo_style    custom step time temp press pe ke etotal cpuremain
 # Dump images for a quick visual sanity check
 dump            vis all image ${nvt_steps} nvt_*.png type type
 
+# Subsampled instantaneous thermo output
+fix             thtxt all print ${block_size} &
+                "$(step) $(c_thermo_temp:%12.5e) $(ke:%12.5e) $(pe:%12.5e)" &
+                file nvt_thermo.txt &
+                screen no
+
 # High temperature to efficiently melt the fcc lattice
-fix             1 all nvt temp ${temperature1} ${temperature1} ${nvt_tau}
+fix             mdnve all nve
+fix             lgv1 all langevin &
+                ${temperature1} ${temperature1} ${nvt_tau} {{ seed + 12345 }} zero yes
 run             ${nvt_steps}
-unfix           1
+unfix           lgv1
 
 # Target temperature to equilibrate the system
-velocity        all scale ${temperature2}
-velocity        all zero linear
-fix             1 all nvt temp ${temperature2} ${temperature2} ${nvt_tau}
+fix             lgv1 all langevin &
+                ${temperature2} ${temperature2} ${nvt_tau} {{ seed + 67890 }} zero yes
 run             ${nvt_steps}
-unfix           1
+unfix           lgv1
 undump          vis
-velocity        all scale ${temperature2}
+unfix           thtxt
 velocity        all zero linear
+
 
 # 4. NVE Production run
 # ---------------------
@@ -100,27 +107,24 @@ velocity        all zero linear
 # so they can be loaded with the same post-processing scripts.
 
 reset_timestep  0
-fix             1 all nve
 
-# Thermo output
-fix             2 all print 1 &
+# Subsampled instantaneous thermo output
+fix             thtxt all print ${block_size} &
                 "$(step) $(c_thermo_temp:%12.5e) $(ke:%12.5e) $(pe:%12.5e)" &
-                file nve_thermo.txt screen no
+                file nve_thermo.txt &
+                screen no
 
-# Pressure output (xx, yy, zz, xy, xz, yz)
-fix             3 all print 1 &
-"$(step) $(c_thermo_press[1]:%12.5e) $(c_thermo_press[2]:%12.5e) $(c_thermo_press[3]:%12.5e) &
-$(c_thermo_press[4]:%12.5e) $(c_thermo_press[5]:%12.5e) $(c_thermo_press[6]:%12.5e)" &
-                file nve_pressure.txt screen no
+# Block-averaged pressure output (xx, yy, zz, xy, xz, yz)
+fix             blpress all ave/time 1 ${block_size} ${block_size} c_thermo_press[*] &
+                ave one format ' %12.5e' file nve_pressure_blav.txt
 
-# Heat flux output
+# Block-averaged heat flux output
 compute         atom_ke all ke/atom
 compute         atom_pe all pe/atom
 compute         atom_stress all stress/atom NULL virial
 compute         flux all heat/flux atom_ke atom_pe atom_stress
-fix             4 all print 1 &
-                "$(step) $(c_flux[1]:%12.5e) $(c_flux[2]:%12.5e) $(c_flux[3]:%12.5e)" &
-                file nve_heatflux.txt screen no
+fix             blheat all ave/time 1 ${block_size} ${block_size} c_flux[*] &
+                ave one format ' %12.5e' file nve_heatflux_blav.txt
 
 # Dump images for a quick visual sanity check
 dump            vis all image ${nve_steps} nve_*.png type type
@@ -128,5 +132,5 @@ dump            vis all image ${nve_steps} nve_*.png type type
 # Run the production simulation
 run             ${nve_steps}
 
-# Write restart file with final state
+# Write restart file with final state, in case we want to extend the simulation
 write_restart   nve_final.restart

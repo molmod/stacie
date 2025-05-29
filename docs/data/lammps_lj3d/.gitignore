@@ -2,6 +2,6 @@
 *.restart
 *.png
 *.yaml
-production/
+sims/
 .stepup
 *-old

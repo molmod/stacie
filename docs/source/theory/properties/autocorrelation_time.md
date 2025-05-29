@@ -27,7 +27,7 @@ There are two definitions of the autocorrelation time {cite:p}`sokal_1997_monte`
 
     The exponential autocorrelation time characterizes the slowest mode in the input.
     The parameter $\tau_\text{exp}$ can be estimated with the
-    [Pade Model](../autocorrelation_integral/model.md).
+    [Pade model](#section-pade-target).
 
 Both correlation times are the same if the autocorrelation is nothing more than
 a two-sided exponentially decaying function:
