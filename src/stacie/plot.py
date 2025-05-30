@@ -54,7 +54,8 @@ def plot_results(
     rs: Result | list[Result],
     uc: UnitConfig | None = None,
     *,
-    figsize: tuple = (10, 5.625),
+    figsize: tuple = (7.5, 4.21875),
+    legend: bool = True,
 ):
     """Generate a multi-page PDF with plots of the autocorrelation integral estimation.
 
@@ -85,7 +86,7 @@ def plot_results(
     with PdfPages(path_pdf) as pdf:
         for r in rs:
             fig, ax = plt.subplots(figsize=figsize)
-            plot_fitted_spectrum(ax, uc, r)
+            plot_fitted_spectrum(ax, uc, r, legend=legend)
             pdf.savefig(fig)
             plt.close(fig)
 
@@ -121,7 +122,8 @@ def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int | N
         "C0.",
     )
     _plot_ref_spectrum(ax, uc, s, nplot)
-    ax.set_xlim(left=0)
+    fmax = s.freqs[:nplot].max() / uc.freq_unit
+    ax.set_xlim(-0.01 * fmax, fmax * 1.01)
     ax.set_xlabel(label_unit("Frequency", uc.freq_unit_str))
     ax.set_ylabel(label_unit("Amplitude", uc.acint_unit_str))
     ax.set_title("Spectrum")
@@ -156,7 +158,7 @@ FIT_RIGHT_TITLE_TEMPLATE_EXP = (
 )
 
 
-def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result, *, legend: bool = True):
     """Plot the fitted model spectrum."""
     freqs = r.spectrum.freqs[: r.ncut]
     # Show fitting weight on top of the spectrum
@@ -169,17 +171,19 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     ax2.tick_params(axis="y", colors="red")
 
     # The empirical spectrum.
-    plot_spectrum(ax, uc, r.spectrum, 2 * r.ncut)
+    plot_spectrum(ax, uc, r.spectrum, r.ncut)
 
     # Model spectrum.
-    alphas = 0.5 * r.spectrum.ndofs[: r.ncut]
-    mean = r.props["amplitudes_model"][0]
+    neff = int(np.ceil(r.neff))
+    freqs = r.spectrum.freqs[:neff]
+    alphas = 0.5 * r.spectrum.ndofs[:neff]
+    mean = r.props["amplitudes_model"][0][:neff]
     std_fit = np.sqrt(
         np.einsum(
             "ij,ik,jk->k",
             r.props["pars_covar"],
-            r.props["amplitudes_model"][1],
-            r.props["amplitudes_model"][1],
+            r.props["amplitudes_model"][1][:, :neff],
+            r.props["amplitudes_model"][1][:, :neff],
         )
     )
     ax.plot(freqs / uc.freq_unit, mean / uc.acint_unit, color="C2")
@@ -194,7 +198,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         stats.norm.ppf(uc.cub, mean, std_fit) / uc.acint_unit,
         color="C2",
         ls="--",
-        label=f"{uc.clevel:.0%} CI (fitted model)",
+        label=f"{uc.clevel:.0%} CI fitted model",
     )
     ax.fill_between(
         freqs / uc.freq_unit,
@@ -203,11 +207,12 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
         color="C2",
         alpha=0.3,
         lw=0,
-        label=f"{uc.clevel:.0%} CI (sampling PSD)",
+        label=f"{uc.clevel:.0%} CI sampling PSD",
     )
     ax.axvline(r.fcut / uc.freq_unit, ymax=0.1, color="k")
     ax.set_ylim(0, r.spectrum.amplitudes[: r.ncut].max() / uc.acint_unit * 1.1)
-    ax.legend(loc="upper right", fontsize="small")
+    if legend:
+        ax.legend(loc="upper right")
     # Info in title
     fields = {
         "uc": uc,
