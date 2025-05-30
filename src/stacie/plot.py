@@ -140,7 +140,7 @@ def _plot_ref_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: in
 
 
 FIT_LEFT_TITLE_TEMPLATE = (
-    "Spectrum model {model} \n"
+    "Model {model} \n"
     "${uc.acint_symbol}$ = {acint:{uc.acint_fmt}} ± {acint_std:{uc.acint_fmt}}"
     "{acint_unit_str}"
 )
