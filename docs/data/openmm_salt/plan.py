@@ -1,29 +1,29 @@
 #!/usr/bin/env python3
 from stepup.core.api import mkdir, runpy, static
-from stepup.reprep.api import convert_jupyter
+from stepup.reprep.api import execute_papermill
 
 
 def plan_initial(seed: int):
     """Run initial euqilibrium and production runs."""
-    convert_jupyter(
+    execute_papermill(
         "initial.ipynb",
-        f"output/sim{seed:04d}_part00.html",
-        nbargs={"seed": seed},
+        f"output/sim{seed:04d}_part00.ipynb",
+        parameters={"seed": seed},
     )
 
 
-def plan_extension(seed: int, part: int, nsteps: int):
+def plan_extension(seed: int, part: int, nstep: int):
     """Extend the production run."""
-    convert_jupyter(
+    execute_papermill(
         "extension.ipynb",
-        f"output/sim{seed:04d}_part{part:02d}.html",
-        # Let StepUp know that this notebook depends on the previous one.
-        # This could be done with amend in the notebook, but this would cause
-        # a lot of rescheduling, making the workflow less efficient.
-        # By providing the dependency here, StepUp knows this dependency
-        # before it executes the notebook.
-        inp=f"output/sim{seed:04d}_part{part - 1:02d}.html",
-        nbargs={"seed": seed, "part": part, "nsteps": nsteps},
+        f"output/sim{seed:04d}_part{part:02d}.ipynb",
+        # Let StepUp know that this notebook depends on the previous checkpoint.
+        # This is also specified (with the amend function) in the notebook,
+        # but by providing the dependency here,
+        # StepUp knows about it before it executes the notebook,
+        # which avoids unnecessary rescheduling.
+        inp=f"output/sim{seed:04d}_part{part - 1:02d}_nve_last.chk",
+        parameters={"seed": seed, "part": part, "nstep_nve": nstep},
     )
 
 
