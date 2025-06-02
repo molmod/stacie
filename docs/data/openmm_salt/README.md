@@ -1,24 +1,7 @@
 # OpenMM Molten Salt Simulations
 
-## Data Generation
-
-All OpenMM simulations can be executed efficiently on a single compute node with StepUp:
-
-```bash
-OPENMM_CPU_THREADS=1 stepup boot -n 1.0
-```
-
-This will run in parallel the Jupyter notebooks `initial.ipynb` and `extension.ipynb`
-multiple times with the correct arguments and in the right order.
-All notebook outputs will be saved in the `output` directory.
-
-Because StepUp already executes the workflow in parallel, multithreading in OpenMM is disabled.
-The inputs were tested with OpenMM 8.2.0.
-
-Note that the calculations take a while and require a lot of disk space.
-You most likely want to run the workflow on a compute cluster.
-Only the NPZ files in the `output` directory are used
-as inputs for the worked example in the STACIE documentation.
+This dataset contains the OpenMM simulations of molten salts
+used to demonstrate the conductivity calculation in the STACIE documentation.
 
 ## Software Requirements
 
@@ -49,7 +32,7 @@ The relevant files are:
 ## File Content Details
 
 Most files contain comments and docstrings that explain their content in detail.
-The NPZ files in the `output/` directory contain the following data:
+The NPZ files in the `output/` directory con100tain the following data:
 
 - `time`: Time in seconds
 - `potential_energy`: Potential energy in kJ/mol
@@ -62,3 +45,23 @@ The NPZ files in the `output/` directory contain the following data:
 
 Quantities needed for the conductivity calculation are stored in base SI units
 to avoid unit confusion in the worked example.
+
+## Data Generation
+
+All OpenMM simulations can be executed efficiently on a single compute node with StepUp:
+
+```bash
+OPENMM_CPU_THREADS=1 stepup boot -n 1.0
+```
+
+This will run in parallel the Jupyter notebooks `initial.ipynb` and `extension.ipynb`
+multiple times with the correct arguments and in the right order.
+All notebook outputs will be saved in the `output` directory.
+
+Because StepUp already executes the workflow in parallel, multithreading in OpenMM is disabled.
+The inputs were tested with OpenMM 8.2.0.
+
+Note that the calculations take a while and require a lot of disk space.
+You most likely want to run the workflow on a compute cluster.
+Only the NPZ files in the `output` directory are used
+as inputs for the worked example in the STACIE documentation.
