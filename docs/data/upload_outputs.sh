@@ -3,12 +3,11 @@ if [ -z "$1" ]; then
     echo "Error: Remote host argument missing."
     exit 1
 fi
-rsync -avR --info=progress2 \
-    lammps_lj3d/exploration/*.txt\
-    lammps_lj3d/exploration/*.yaml \
-    lammps_lj3d/exploration/*.png \
-    lammps_lj3d/production/replica_*/*.txt \
-    lammps_lj3d/production/replica_*/*.yaml \
-    lammps_lj3d/production/replica_*/*.png \
-    openmm_salt/output/*.* \
+rsync -av --info=progress2 \
+    lammps_lj3d openmm_salt \
+    --include=lammps_lj3d/replica_????_part_??/*.yaml \
+    --include=lammps_lj3d/replica_????_part_??/nve_*.txt \
+    --include=openmm_salt/output/*.npz \
+    --exclude=*.* \
+    --prune-empty-dirs \
     $1:projects/emd-viscosity/stacie/
