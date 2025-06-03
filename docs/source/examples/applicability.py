@@ -120,7 +120,7 @@ plot_traj()
 # In the chaotic regime, the low-frequency spectrum indicates diffusive motion:
 # a large peak at the origin.
 # The spectrum is normalized so that the autocorrelation integral
-# becomes the [variance of the mean](../theory/properties/error_estimates.md).
+# becomes the [variance of the mean](../properties/error_estimates.md).
 
 # %%
 uc = UnitConfig(acint_fmt=".2e", acint_unit_str="1", time_unit_str="1", freq_unit_str="1")
@@ -163,7 +163,7 @@ print(f"Error of the mean: {error_mean:.3e}")
 # %% [markdown]
 # For sufficiently small values of $b$, the autocorrelation function is a simple
 # exponentially decaying function, so that the two
-# [autocorrelation times](../theory/properties/autocorrelation_time.md)
+# [autocorrelation times](../properties/autocorrelation_time.md)
 # are very similar:
 
 # %%

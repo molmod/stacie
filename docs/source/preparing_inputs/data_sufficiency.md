@@ -25,7 +25,7 @@ $$
 
 where $\nu_k$ is the number of degrees of freedom of the sampling PSD at frequency $k$.
 For most frequencies, we have $\nu_k=2M$.
-(See [Parameter Estimation](../autocorrelation_integral/statistics.md) for details.)
+(See [Parameter Estimation](../theory/statistics.md) for details.)
 Because we are only interested in an coarse estimate of the required number of independent sequences,
 we will use $\nu_k=2M$ for all frequencies.
 
@@ -94,7 +94,7 @@ the quality of the results:
 - When using the Pade model, the total simulation time should be sufficient
   to resolve the zero-frequency peak of the spectrum.
   The width of the peak can be derived from
-  [the Pade model](../autocorrelation_integral/model.md)
+  [the Pade model](../theory/model.md)
   and is $1/2\pi\tau_\text{exp}$,
   where $\tau_\text{exp}$ is the exponential correlation time.
   Because the resolution of the frequency axis of the power spectrum is $1/T$,

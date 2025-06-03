@@ -4,7 +4,7 @@
 # This example shows how to calculate viscosity of argon
 # from pressure tensor data obtained from {term}`LAMMPS` {term}`MD` simulations.
 # The required theoretical background is explained the
-# [](../theory/properties/shear_viscosity.md) section.
+# [](../properties/shear_viscosity.md) section.
 # The same simulations are also used for the [bulk viscosity](lj_bulk_viscosity.py)
 # and [thermal conductivity](lj_thermal_conductivity.py) examples in the following two notebooks.
 # The goal of the argon examples is to derive the three transport properties
@@ -26,7 +26,7 @@
 # The LAMMPS input files can be found in the directory `docs/data/lammps_lj3d`
 # of STACIE's Git source repository.
 # To obtain sufficient data for all three properties, we performed 100 independent runs,
-# for which the [guesstimated relative error](../theory/preparing_inputs/data_sufficiency.md)
+# for which the [guesstimated relative error](../preparing_inputs/data_sufficiency.md)
 # is tabulated below.
 # The [Pade model](#section-pade-target) is used to fit the spectrum,
 # with degrees $S_\text{num}=\{0, 2\}$ and $S_\text{den}=\{2\}$, corresponding to $P=3$ parameters.
@@ -42,7 +42,7 @@
 # corresponds to one tenth of a period of the fastest oscillations in the system.
 # At shorter time scales than 10 steps, the dynamics is most likely irrelevant for transport properties.
 # Hence, in our first simulations, all data was recorded with block averages of 10 steps.
-# As mentioned in the section on the [block averages](../theory/preparing_inputs/block_averages.md),
+# As mentioned in the section on the [block averages](../preparing_inputs/block_averages.md),
 # at least $400 P$ blocks are recommended.
 # The initial production runs therefore consisted of 12000 MD steps.
 # Note that these values are only coarse estimates.
@@ -55,10 +55,10 @@
 # that are rendered with different random seeds (and restart files) for each run.
 # The initial production simulations start from an FCC crystal structure,
 # which is first melted for 5000 steps
-# at an elevated temperature of $T=1.5\,\mathrm{T}^*$ in the NVT ensemble.
+# at an elevated temperature of $T=1.5\,\mathrm{T}^*$ in the {term}`NVT` ensemble.
 # The system is then equilibrated at the desired temperature
 # of $T=0.722\,\mathrm{T}^*$ for 5000 additional steps.
-# Starting from the equilibrated states, production runs were performed in the NVE ensemble.
+# Starting from the equilibrated states, production runs were performed in the {term}`NVE` ensemble.
 # The velocities are not rescaled after the NVT equilibration,
 # to ensure that the set of NVE runs as a whole is representative of the NVT ensemble.
 # During the production phase, trajectory data is collected with block averages over 10 steps.
@@ -98,6 +98,7 @@ from utils import plot_instantaneous_percentiles
 
 # %%
 mpl.rc_file("matplotlibrc")
+# %config InlineBackend.figure_formats = ["svg"]
 
 # %%
 # You normally do not need to change this path.
@@ -178,14 +179,14 @@ plot_equilibration()
 #
 # - `get_indep_paniso` transforms the pressure tensor components
 #   into five independent anisotropic contributions,
-#   as explained in the [](../theory/properties/shear_viscosity.md) theory section.
+#   as explained in the [](../properties/shear_viscosity.md) theory section.
 # - `plot_temperature` plots the instantaneous temperature and compares it to the desired temperature.
 # - `estimate_viscosity` calculates the viscosity and plots the results.
 #   It also prints recommendations for data reduction (block averaging) and simulation time,
 #   as explained in the following two sections of the documentation:
 #
-#     - [](../theory/properties/autocorrelation_time.md)
-#     - [](../theory/preparing_inputs/block_averages.md)
+#     - [](../properties/autocorrelation_time.md)
+#     - [](../preparing_inputs/block_averages.md)
 #
 #     These will be used to determine whether our initial simulation settings are appropriate.
 
@@ -513,7 +514,7 @@ demo_temperature()
 # ## Validation of the Independence of the Anistropic Contributions
 #
 # Here we validate numerically that the
-# [five independent anisotropic contributions](../theory/properties/shear_viscosity.md)
+# [five independent anisotropic contributions](../properties/shear_viscosity.md)
 # to the pressure tensor are indeed statistically independent.
 # The covariance matrix of the anisotropic contributions is computed and the off-diagonal elements
 # are plotted.

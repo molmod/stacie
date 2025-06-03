@@ -1,4 +1,4 @@
-# Autocorrelation Time
+# Integrated and Exponential Autocorrelation Time
 
 ## Definitions
 
@@ -15,7 +15,7 @@ There are two definitions of the autocorrelation time {cite:p}`sokal_1997_monte`
     where $c(\Delta_t)$ is the autocorrelation function,
     $\mathcal{I}$ is the ACF defined with STACIE's conventions,
     and $F$ is the prefactor of the autocorrelation integral,
-    introduced in the [overview of the autocorrelation integral](../autocorrelation_integral/overview.md).
+    introduced in the [overview of the autocorrelation integral](../theory/overview.md).
 
 2. The *exponential* autocorrelation time is defined as
    the limit of the exponential decay rate of the autocorrelation function.
@@ -75,7 +75,7 @@ Both definitions are useful and relevant for different applications.
    $h$ is the time step, and $N$ the number of steps.
    This resolution must be fine enough to resolve the zero-frequency peak
    associated with the exponential decay of the autocorrelation function.
-   The width of the peak can be derived from [the Pade model](../autocorrelation_integral/model.md)
+   The width of the peak can be derived from [the Pade model](../theory/model.md)
    and is $1/2\pi\tau_\text{exp}$.
    To have ample frequency grid points in this first peak,
    the simulation time must be sufficiently long:
@@ -133,5 +133,5 @@ print("Standard error of the integrated autocorrelation time", result.corrtime_i
 ```
 
 A worked example can be found in the notebook
-[Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).
+[Diffusion on a Surface with Newtonian Dynamics](../examples/surface_diffusion.py).
 It also discusses the correlation times associated with the diffusive motion of the particles.

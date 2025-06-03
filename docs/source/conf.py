@@ -105,11 +105,11 @@ latex_elements = {
     "fontpkg": r"""
 \usepackage[mathbf=sym,mathrm=sym]{unicode-math}
 \usepackage{fontspec}
-\setmainfont{DejaVu Serif}
-\setsansfont{DejaVu Sans}
-\setmonofont[Scale=0.85]{DejaVu Sans Mono}
-\setmathfont{XITS Math}
-\setmathfont[range={\mathcal,\mathbfcal},StylisticSet=1]{XITS Math}
+\setmainfont[Scale=1.2]{Libertinus Serif}
+\setsansfont[Scale=1.2]{Libertinus Sans}
+\setmonofont[Scale=0.85]{IBM Plex Mono}
+\setmathfont[Scale=1.2]{XITS Math}
+\setmathfont[Scale=1.2,range={\mathcal,\mathbfcal},StylisticSet=1]{XITS Math}
 """,
     "fncychap": r"\usepackage[Sonny]{fncychap}",
     "papersize": "a4paper",

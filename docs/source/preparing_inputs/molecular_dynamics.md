@@ -13,8 +13,8 @@ or by applying analytical corrections, such as the Yeh-Hummer correction
 
 ## Choice of ensemble
 
-The NVE ensemble is generally recommended for computing transport coefficients,
-as thermostats and barostats (used for simulations in the NVT and NpT ensembles)
+The {term}`NVE` ensemble is generally recommended for computing transport coefficients,
+as thermostats and barostats (used for simulations in the {term}`NVT` and {term}`NpT` ensembles)
 can interfere with system dynamics and introduce bias in transport properties
 {cite:p}`maginn_2020_best`.
 For production runs, the NpT ensemble has an additional drawback:

@@ -188,4 +188,4 @@ There are several ways to alter this script, depending on your needs and the ava
   for more details.
 
 A worked example can be found in the notebook
-[Ionic Conductivity and Self-diffusivity in Molten Sodium Chloride at 1100 K (OpenMM)](../../examples/molten_salt.py)
+[Ionic Conductivity and Self-diffusivity in Molten Sodium Chloride at 1100 K (OpenMM)](../examples/molten_salt.py)

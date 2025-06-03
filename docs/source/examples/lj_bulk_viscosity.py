@@ -6,7 +6,7 @@
 # It uses the same production runs and conventions
 # as in the [Shear viscosity example](lj_shear_viscosity.py).
 # The required theoretical background is explained the section
-# [](../theory/properties/bulk_viscosity.md).
+# [](../properties/bulk_viscosity.md).
 # In essence, it is computed in the same way as the shear viscosity,
 # except that the isotropic pressure fluctuations are used as input.
 #
@@ -35,6 +35,7 @@ display(HTML("<style> .note { text-align: justify; } </style>"))
 
 # %%
 mpl.rc_file("matplotlibrc")
+# %config InlineBackend.figure_formats = ["svg"]
 
 # %%
 # You normally do not need to change this path.
@@ -48,12 +49,12 @@ DATA_ROOT = Path(os.getenv("DATA_ROOT", "./")) / "lammps_lj3d/sims/"
 #
 # - `get_piso`: Computes the isotropic pressure from the diagonal components
 #   of the time-dependent pressure tensor ($P_{xx}$, $P_{yy}$, and $P_{zz}$),
-#   as explained in the [bulk viscosity](../theory/properties/bulk_viscosity.md) theory section.
+#   as explained in the [bulk viscosity](../properties/bulk_viscosity.md) theory section.
 # - `estimate_bulk_viscosity`: Computes the bulk viscosity, visualizes the results,
 #   and provides recommendations for data reduction (block averaging) and simulation time,
 #   as explained in the following two sections of the documentation:
-#     - [](../theory/properties/autocorrelation_time.md)
-#     - [](../theory/preparing_inputs/block_averages.md)
+#     - [](../properties/autocorrelation_time.md)
+#     - [](../preparing_inputs/block_averages.md)
 
 
 # %%
@@ -100,7 +101,7 @@ def estimate_bulk_viscosity(name, pcomps, av_temperature, volume, timestep):
 # the `compute_spectrum` function must be set to `False`,
 # as the average pressure is nonzero.
 # This ensures the DC component is excluded from the spectrum.
-# See the [bulk viscosity](../theory/properties/bulk_viscosity.md) theory section for more details.
+# See the [bulk viscosity](../properties/bulk_viscosity.md) theory section for more details.
 # :::
 
 

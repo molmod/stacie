@@ -51,7 +51,7 @@ With these requirements, the thermal conductivity can be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results, ExpTailModel, UnitConfig
+from stacie import compute_spectrum, estimate_acint, plot_results, PadeModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
 heatflux = ...
@@ -65,7 +65,7 @@ spectrum = compute_spectrum(
     prefactors=1.0 / (volume * temperature**2 * boltzmann_const),
     timestep=timestep,
 )
-result = estimate_acint(spectrum, ExpTailModel())
+result = estimate_acint(spectrum, PadeModel([0, 2], [2]))
 print("Thermal conductivity", result.acint)
 print("Uncertainty of the thermal conductivity", result.acint_std)
 
@@ -85,4 +85,4 @@ plot_results("thermal_conductivity.pdf", result, uc)
 This script is trivially extended to combine data from multiple trajectories.
 
 A worked example can be found in the notebook
-[Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../../examples/lj_thermal_conductivity.py).
+[Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../examples/lj_thermal_conductivity.py).

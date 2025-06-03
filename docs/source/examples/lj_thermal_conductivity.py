@@ -6,13 +6,13 @@
 # It uses the same production runs and conventions
 # as in the [Shear viscosity example](lj_shear_viscosity.py).
 # The required theoretical background is explained the section
-# [](../theory/properties/thermal_conductivity.md).
+# [](../properties/thermal_conductivity.md).
 #
 # :::{warning}
 # A Lennard-Jones system only exhibits pairwise interactions,
 # for which the LAMMPS command `compute/heat flux` produces valid results.
 # For systems with three- or higher-body interactions, one cannot simply use the same command.
-# Consult the theory section on [thermal conductivity](../theory/properties/thermal_conductivity.md)
+# Consult the theory section on [thermal conductivity](../properties/thermal_conductivity.md)
 # for more background.
 # :::
 #
@@ -38,6 +38,7 @@ from stacie.plot import plot_fitted_spectrum, plot_extras
 
 # %%
 mpl.rc_file("matplotlibrc")
+# %config InlineBackend.figure_formats = ["svg"]
 
 # %%
 # You normally do not need to change this path.

@@ -1,5 +1,5 @@
 # %% [markdown]
-# # Standard Error of the Mean
+# # Standard Error of the Mean of Time-Correlated Data
 #
 # This notebook shows how to use STACIE to compute the error of the mean
 # of a time-correlated input sequence,
@@ -177,7 +177,7 @@ plot_chains()
 # ## Uncertainty Quantification
 #
 # The spectrum is calculated using settings that are appropriate for error estimation.
-# See the [Error Estimates](../theory/properties/error_estimates.md) section
+# See the [Error Estimates](../properties/error_estimates.md) section
 # for the justification of the `prefactors` and `include_zero_freq` keyword arguments.
 # Since we are analyzing MCMC data, the `timestep` argument is not specified,
 # corresponding to a dimensionless time step of 1.

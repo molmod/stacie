@@ -8,9 +8,9 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
    You can specify the degrees of the monomials, and typically a low degree works fine:
 
     - Degree `[0]` is suitable for a white noise spectrum.
-    - Degrees `[0, 1]` can be used to extract useful information from a very noisy spectrum.
+    - Degrees `[0, 1]` can be used to extract useful information from a noisy spectrum.
     - Degrees `[0, 1, 2]` are applicable to spectra with low statistical uncertainty,
-      e.g., averaged over 100 inputs.
+      e.g., averaged over $>100$ inputs.
     - An even polynomial with degrees `[0, 2]` is suitable for spectra
       that are expected to have a vanishing derivative at zero frequency.
 
@@ -39,7 +39,7 @@ $$
 $$
 
 where $S$ is the set of polynomial degrees, which must include 0.
-With this form, $b_0$ corresponds to the integral of the autocorrelation function.
+With this form, $\exp(b_0)$ corresponds to the integral of the autocorrelation function.
 When one obtains an estimate $\hat{b}_0$ and its variance $\hat{\sigma}^2_{b_0}$,
 the autocorrelation integral is [log-normally distributed](https://en.wikipedia.org/wiki/Log-normal_distribution)
 with estimated mean and variance:

@@ -120,6 +120,7 @@ def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int | N
         s.freqs[:nplot] / uc.freq_unit,
         s.amplitudes[:nplot] / uc.acint_unit,
         "C0.",
+        mew=0,
     )
     _plot_ref_spectrum(ax, uc, s, nplot)
     fmax = s.freqs[:nplot].max() / uc.freq_unit

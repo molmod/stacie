@@ -386,7 +386,7 @@ With these requirements, the shear viscosity can be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results, ExpTailModel, UnitConfig
+from stacie import compute_spectrum, estimate_acint, plot_results, PadeModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
 pcomps = ...
@@ -409,7 +409,7 @@ spectrum = compute_spectrum(
     prefactors=volume / (temperature * boltzmann_const),
     timestep=timestep,
 )
-result = estimate_acint(spectrum, ExpTailModel())
+result = estimate_acint(spectrum, PadeModel([0, 2], [2]))
 print("Shear viscosity:", result.acint)
 print("Uncertainty of the shear viscosity:", result.acint_std)
 
@@ -428,4 +428,4 @@ plot_results("shear_viscosity.pdf", result, uc)
 This script can be trivially extended to combine data from multiple trajectories.
 
 A worked example can be found in the notebook
-[Shear viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../../examples/lj_shear_viscosity.py)
+[Shear viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../examples/lj_shear_viscosity.py)

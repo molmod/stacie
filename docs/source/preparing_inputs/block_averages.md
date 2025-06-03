@@ -96,4 +96,4 @@ Also for the block size, a preliminary analysis with STACIE is recommended,
 i.e., initially without block averages.
 
 An application of STACIE with block averages can be found in the following example notebook:
-[Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).
+[Diffusion on a Surface with Newtonian Dynamics](../examples/surface_diffusion.py).

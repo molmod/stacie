@@ -84,4 +84,4 @@ The result is equivalent to block-averaging velocities and can thus be used as i
 Consult the section on [block averages](../preparing_inputs/block_averages.md) for more details.
 
 A worked example can be found in the notebook
-[Diffusion on a Surface with Newtonian Dynamics](../../examples/surface_diffusion.py).
+[Diffusion on a Surface with Newtonian Dynamics](../examples/surface_diffusion.py).

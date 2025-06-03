@@ -42,7 +42,7 @@ With these requirements, the bulk viscosity can be computed as follows:
 
 ```python
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, plot_results, ExpTailModel, UnitConfig
+from stacie import compute_spectrum, estimate_acint, plot_results, PadeModel, UnitConfig
 
 # Load all the required inputs, the details of which will depend on your use case.
 pcomps = ...
@@ -58,7 +58,7 @@ spectrum = compute_spectrum(
     timestep=timestep,
     include_zero_freq=False,
 )
-result = estimate_acint(spectrum, ExpTailModel())
+result = estimate_acint(spectrum, PadeModel([0, 2], [2]))
 print("Bulk viscosity:", result.acint)
 print("Uncertainty of the bulk viscosity:", result.acint_std)
 
@@ -77,4 +77,4 @@ plot_results("bulk_viscosity.pdf", result, uc)
 This script can be trivially extended to combine data from multiple trajectories.
 
 A worked example can be found in the notebook
-[Bulk viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../../examples/lj_bulk_viscosity.py)
+[Bulk viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../examples/lj_bulk_viscosity.py)

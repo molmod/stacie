@@ -14,7 +14,7 @@
 # All OpenMM simulation notebooks can be found in the directory `docs/data/openmm_salt`
 # in STACIE's source repository.
 # The required theoretical background is explained the
-# [](../theory/properties/electrical_conductivity.md) section.
+# [](../properties/electrical_conductivity.md) section.
 #
 # The MD simulations are performed using the Born-Huggins-Mayer-Tosi-Fumi potential,
 # which is a popular choice for molten salts. {cite:p}`tosi_1964_ionic`
@@ -24,18 +24,18 @@
 # The molten salt was simulated with a 3D periodic box of 1728 ions (864 Na$^+$ and 864 Cl$^-$).
 # The time step in all simulations was 5 fs.
 #
-# Following the [](../theory/preparing_inputs/molecular_dynamics.md),
+# Following the [](../preparing_inputs/molecular_dynamics.md),
 # an initial block size of 10 steps (50 fs) was used.
 # Because there is little prior knowledge on the structure of the spectrum,
 # the exponential polynomial model (ExpPoly) with degrees $S=\{0, 1\}$ was used initially,
 # i.e. with $P=2$ parameters.
-# As explained in the section on [block averages](../theory/preparing_inputs/molecular_dynamics.md),
+# As explained in the section on [block averages](../preparing_inputs/molecular_dynamics.md),
 # $400 P$ blocks were collected in the initial production runs,
 # amounting to 8000 steps (40 ps) of simulation time.
 #
 # In total 100 NVE production runs were performed.
 # For each run, the system was first equilibrated in the NVT and later NPT ensemble.
-# According to the section [](../theory/preparing_inputs/data_sufficiency.md),
+# According to the section [](../preparing_inputs/data_sufficiency.md),
 # 100 runs should be sufficient to obtain a relative error on the ionic conductivity of about 1%:
 #
 # $$ \epsilon_\text{rel} \approx \frac{1}{\sqrt{20 P M}} \approx 0.0091$$
@@ -63,6 +63,7 @@ from utils import plot_instantaneous_percentiles
 
 # %%
 mpl.rc_file("matplotlibrc")
+# %config InlineBackend.figure_formats = ["svg"]
 
 # %%
 # You normally do not need to change this path.
@@ -318,10 +319,8 @@ conductivity_3_01 = analyze(ExpPolyModel([0, 1]), npart=3)
 
 # %% [markdown]
 # The analysis of the full extended production runs leads to a modest improvement.
-# The number of points included in the fit does not increase in line with the simulation time,
-# suggesting that the selected model is a poor choice in this case.
-# The utility of the first-order term of the model is also questionable,
-# given that it is nearly zero and could go either way
+# However, the utility of the first-order term of the model is questionable,
+# given that the slope is nearly zero and could go either way
 # according to the confidence intervals of the model (green dashed curves).
 # Hence, we first test a constant (white noise) model to the first part of the spectrum:
 
@@ -329,8 +328,6 @@ conductivity_3_01 = analyze(ExpPolyModel([0, 1]), npart=3)
 conductivity_3_0 = analyze(ExpPolyModel([0]), npart=3)
 
 # %% [markdown]
-# This already leads to smaller error bar and a better fit to the low-frequency part of the spectrum.
-#
 # Another model to consider is the Pade model, not because we expect the ACF to decay exponentially,
 # but because it features well-behaved high-frequency limits, which can facilitate the regression.
 
@@ -338,8 +335,8 @@ conductivity_3_0 = analyze(ExpPolyModel([0]), npart=3)
 conductivity_3_p = analyze(PadeModel([0, 2], [2]), npart=3)
 
 # %% [markdown]
-# This is indeed a successful regression, with 165 effective points for a three-parameter model.
-# The relative error estimate on the final result is 0.8%.
+# This is indeed a successful regression, with 829 effective points for a three-parameter model.
+# The relative error estimate on the final result is 0.37%.
 
 # %% [markdown]
 # ## Density
@@ -392,11 +389,11 @@ density = estimate_density()
 # | -------- | ------------------: | -------------------------: | -----------------: | --------- |
 # | NpT+NVE  | 4                   | 1.454 ± 0.014              | 347 ± 10.9         | init expoly(0,1) |
 # | NpT+NVE  | 8                   | 1.454 ± 0.014              | 354 ± 8.0          | ext1 expoly(0,1) |
-# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 354 ± 7.0          | ext2 expoly(0,1) |
-# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 353 ± 5.3          | ext2 expoly(0) |
+# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 353 ± 3.7          | ext2 expoly(0,1) |
+# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 353 ± 3.8          | ext2 expoly(0) |
 # | NpT+NVE  | 4                   | 1.454 ± 0.014              | 343 ± 5.4          | init pade([0, 2], [2]) |
 # | NpT+NVE  | 8                   | 1.454 ± 0.014              | 346 ± 3.7          | ext1 pade([0, 2], [2]) |
-# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 349 ± 3.1          | ext2 pade([0, 2], [2]) |
+# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 349 ± 1.3          | ext2 pade([0, 2], [2]) |
 # | NpT+NVT  | 6                   | 1.456                      | 348 ± 7    | {cite:p}`wang_2020_comparison` |
 # | NpT+NVT  | > 5                 | 1.444                      | ≈ 310      | {cite:p}`wang_2014_molecular` |
 # | Experiment | N.A.              | 1.542 ± 0.006              | 366 ± 3            | {cite:p}`janz_1968_molten` {cite:p}`bockris_1961_self` |
@@ -536,7 +533,7 @@ if abs(conductivity_1_01 - 347) > 10:
     raise ValueError(f"wrong conductivity (production): {conductivity_1_01:.0f}")
 if abs(conductivity_2_01 - 354) > 8:
     raise ValueError(f"wrong conductivity (production): {conductivity_2_01:.0f}")
-if abs(conductivity_3_01 - 354) > 7:
+if abs(conductivity_3_01 - 353) > 7:
     raise ValueError(f"wrong conductivity (production): {conductivity_3_01:.0f}")
 if abs(conductivity_3_0 - 353) > 5:
     raise ValueError(f"wrong conductivity (production): {conductivity_3_0:.0f}")
