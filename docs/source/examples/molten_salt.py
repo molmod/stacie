@@ -141,7 +141,7 @@ def plot_openmm_percentiles(
         ymax,
     )
     ax.set_title(f"{field.title()} percentiles during the {ensemble.upper()} run")
-    ax.set_xlabel("Time [fs]")
+    ax.set_xlabel("Time [ps]")
     ax.set_ylabel(f"{field.title()} [{unitstr}]")
 
 
