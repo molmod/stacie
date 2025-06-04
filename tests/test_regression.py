@@ -70,10 +70,7 @@ def register_result(regtest, res: Result):
     with regtest:
         print(f"acint = {res.acint:.5e} ± {res.acint_std:.5e}")
         if "corrtime_exp" in res.props:
-            print(
-                f"corrtime exp = {res.props['corrtime_exp']:.5e} "
-                f"± {res.props['corrtime_exp_std']:.5e}"
-            )
+            print(f"corrtime exp = {res.corrtime_exp:.5e} ± {res.corrtime_exp_std:.5e}")
         print(f"corrtime int = {res.corrtime_int:.5e} ± {res.corrtime_int_std:.5e}")
         print("---")
 

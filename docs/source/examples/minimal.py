@@ -238,8 +238,8 @@ if abs(result_pade.acint - 1.0) > 0.03:
     raise ValueError(f"Wrong acint: {result_pade.acint:.4e}")
 if abs(result_pade.corrtime_int - 16.0) > 0.5:
     raise ValueError(f"Wrong corrtime_int: {result_pade.corrtime_int:.4e}")
-if abs(result_pade.props["corrtime_exp"] - 16.0) > 0.5:
-    raise ValueError(f"Wrong corrtime_exp: {result_pade.props['corrtime_exp']:.4e}")
+if abs(result_pade.corrtime_exp - 16.0) > 0.5:
+    raise ValueError(f"Wrong corrtime_exp: {result_pade.corrtime_exp:.4e}")
 
 # %% [markdown]
 # ## Derivation of the Autocorrelation Integral

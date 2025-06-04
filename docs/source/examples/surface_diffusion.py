@@ -421,7 +421,7 @@ result_1 = demo_stacie()
 # as they are not the same in this case.
 
 # %%
-print(f"corrtime_exp = {result_1.props['corrtime_exp'] / PICOSECOND:.3f} ps")
+print(f"corrtime_exp = {result_1.corrtime_exp / PICOSECOND:.3f} ps")
 print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 
 # %% [markdown]
@@ -449,7 +449,7 @@ print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 # In this example, the block size is determined by the following guideline:
 
 # %%
-print(np.pi * result_1.props["corrtime_exp"] / (10 * TIMESTEP))
+print(np.pi * result_1.corrtime_exp / (10 * TIMESTEP))
 
 # %% [markdown]
 # Let's use a block size of 60 to stay on the safe side.
@@ -463,7 +463,7 @@ result_60 = demo_stacie(60)
 # It is again interesting to compare the integrated and exponential autocorrelation times.
 
 # %%
-print(f"corrtime_exp = {result_60.props['corrtime_exp'] / PICOSECOND:.3f} ps")
+print(f"corrtime_exp = {result_60.corrtime_exp / PICOSECOND:.3f} ps")
 print(f"corrtime_int = {result_60.corrtime_int / PICOSECOND:.3f} ps")
 
 # %% [markdown]

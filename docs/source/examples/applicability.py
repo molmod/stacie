@@ -167,9 +167,7 @@ print(f"Error of the mean: {error_mean:.3e}")
 # are very similar:
 
 # %%
-print(
-    f"corrtime_exp = {result.props['corrtime_exp']:.3f} ± {result.props['corrtime_exp_std']:.3f}"
-)
+print(f"corrtime_exp = {result.corrtime_exp:.3f} ± {result.corrtime_exp_std:.3f}")
 print(f"corrtime_int = {result.corrtime_int:.3f} ± {result.corrtime_int_std:.3f}")
 
 # %%  [markdown]
@@ -181,5 +179,5 @@ print(f"corrtime_int = {result.corrtime_int:.3f} ± {result.corrtime_int_std:.3f
 # %%
 if abs(result.acint - 2.47e-4) > 2e-5:
     raise ValueError(f"Wrong acint: {result.acint:.4e}")
-if abs(result.props["corrtime_exp"] - 10.018) > 1e-1:
-    raise ValueError(f"Wrong corrtime_exp: {result.props['corrtime_exp']:.4e}")
+if abs(result.corrtime_exp - 10.018) > 1e-1:
+    raise ValueError(f"Wrong corrtime_exp: {result.corrtime_exp:.4e}")

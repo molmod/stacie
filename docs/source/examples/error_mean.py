@@ -285,9 +285,7 @@ print(f"Estimated MC error = {error_mc:8.5f}")
 
 # %%
 print("Autocorrelation times:")
-print(
-    f"exponential: {result.props['corrtime_exp']:5.2f} ± {result.props['corrtime_exp_std']:5.2f}"
-)
+print(f"exponential: {result.corrtime_exp:5.2f} ± {result.corrtime_exp_std:5.2f}")
 print(f"integrated:  {result.corrtime_int:5.2f} ± {result.corrtime_int_std:5.2f}")
 
 # %% [markdown]
