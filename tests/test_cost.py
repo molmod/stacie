@@ -24,7 +24,7 @@ from conftest import check_curv, check_deriv, check_gradient, check_hessian
 from scipy import stats
 
 from stacie.cost import LowFreqCost, entropy_gamma, logpdf_gamma
-from stacie.model import ExpTailModel
+from stacie.model import PadeModel
 
 LOGPDF_GAMMA_CASES = [
     (1.0, 1.0, 2.0),
@@ -71,7 +71,7 @@ def test_entropy():
 @pytest.fixture
 def mycost():
     freqs = np.linspace(0, 4.0, 10)
-    model = ExpTailModel()
+    model = PadeModel([0, 2], [2])
     model.configure_scales(1.0, freqs, np.ones_like(freqs))
     amplitudes = np.array([1.5, 1.4, 1.1, 0.9, 0.8, 1.0, 0.9, 0.9, 0.8, 1.1])
     ndofs = np.array([5, 10, 10, 10, 10, 10, 10, 10, 10, 5])
@@ -79,7 +79,7 @@ def mycost():
     return LowFreqCost(freqs, ndofs, amplitudes, weights, model)
 
 
-PARS_REF_EXP_TAIL = [
+PARS_REF_PADE = [
     [1.2, 0.9, 2.2],
     [3.0, 0.5, 2.5],
     [0.1, 4.0, 2.7],
@@ -87,15 +87,15 @@ PARS_REF_EXP_TAIL = [
 ]
 
 
-def test_vectorize_exptail(mycost):
+def test_vectorize_pade(mycost):
     """Check that the model is vectorized."""
-    results = mycost(PARS_REF_EXP_TAIL, deriv=2)
+    results = mycost(PARS_REF_PADE, deriv=2)
     assert len(results) == 3
-    nvec = len(PARS_REF_EXP_TAIL)
+    nvec = len(PARS_REF_PADE)
     assert results[0].shape == (nvec,)
     assert results[1].shape == (nvec, 3)
     assert results[2].shape == (nvec, 3, 3)
-    for i, one_pars_ref in enumerate(PARS_REF_EXP_TAIL):
+    for i, one_pars_ref in enumerate(PARS_REF_PADE):
         one_results = mycost(one_pars_ref, deriv=2)
         assert one_results[0].shape == ()
         assert one_results[1].shape == (3,)
@@ -105,11 +105,11 @@ def test_vectorize_exptail(mycost):
         assert (one_results[2] == results[2][i]).all()
 
 
-@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
-def test_gradient_exptail(mycost, pars_ref):
+@pytest.mark.parametrize("pars_ref", PARS_REF_PADE)
+def test_gradient_pade(mycost, pars_ref):
     check_gradient(mycost, pars_ref)
 
 
-@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
-def test_hessian_exptail(mycost, pars_ref):
+@pytest.mark.parametrize("pars_ref", PARS_REF_PADE)
+def test_hessian_pade(mycost, pars_ref):
     check_hessian(mycost, pars_ref)

@@ -22,7 +22,7 @@ import numpy as np
 import pytest
 from conftest import check_gradient, check_hessian
 
-from stacie.model import ExpPolyModel, ExpTailModel, PadeModel, guess
+from stacie.model import ExpPolyModel, PadeModel, guess
 
 NFREQ = 10
 FREQS = np.linspace(0, 0.5, NFREQ)
@@ -84,57 +84,6 @@ def check_vectorize_prior(model, pars_ref):
         assert (one_prior[0] == prior[0][i]).all()
         assert (one_prior[1] == prior[1][i]).all()
         assert (one_prior[2] == prior[2][i]).all()
-
-
-def test_vectorize_exptail_compute():
-    check_vectorize_compute(ExpTailModel(), PARS_REF_EXP_TAIL)
-
-
-def test_vectorize_exptail_prior():
-    check_vectorize_prior(ExpTailModel(), PARS_REF_EXP_TAIL)
-
-
-@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
-def test_gradient_exptail_compute(pars_ref):
-    pars_ref = np.array(pars_ref)
-    model = ExpTailModel()
-    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_gradient(lambda pars, *, deriv=0: model.compute(FREQS, pars, deriv=deriv), pars_ref)
-
-
-@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
-def test_hessian_exptail_compute(pars_ref):
-    pars_ref = np.array(pars_ref)
-    model = ExpTailModel()
-    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_hessian(lambda pars, *, deriv=0: model.compute(FREQS, pars, deriv=deriv), pars_ref)
-
-
-@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
-def test_gradient_exptail_prior(pars_ref):
-    pars_ref = np.array(pars_ref)
-    model = ExpTailModel()
-    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_gradient(lambda pars, *, deriv=0: model.neglog_prior(pars, deriv=deriv), pars_ref)
-
-
-@pytest.mark.parametrize("pars_ref", PARS_REF_EXP_TAIL)
-def test_hessian_exptail_prior(pars_ref):
-    pars_ref = np.array(pars_ref)
-    model = ExpTailModel()
-    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    check_hessian(lambda pars, *, deriv=0: model.neglog_prior(pars, deriv=deriv), pars_ref)
-
-
-def test_guess_exptail():
-    model = ExpTailModel()
-    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
-    rng = np.random.default_rng(734)
-    amplitudes = rng.normal(size=len(FREQS)) ** 2
-    ndofs = np.full(len(FREQS), 2)
-    pars_init = guess(FREQS, ndofs, amplitudes, WEIGHTS, model, rng, 10)
-    assert len(pars_init) == 3
-    assert np.isfinite(pars_init).all()
 
 
 def test_exppoly_npar():

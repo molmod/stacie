@@ -20,7 +20,7 @@
 
 from .cutoff import CV2LCriterion
 from .estimate import estimate_acint
-from .model import ExpPolyModel, ExpTailModel, PadeModel
+from .model import ExpPolyModel, PadeModel
 from .plot import plot_results
 from .spectrum import compute_spectrum
 from .utils import UnitConfig
