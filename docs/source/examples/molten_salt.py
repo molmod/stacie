@@ -193,7 +193,7 @@ BOLTZMANN_CONSTANT = sc.value("Boltzmann constant")  # J/K
 
 
 def analyze(model: SpectrumModel, npart: int = 1, ntraj: int = 100) -> float:
-    """Analyze MD trajectories to compute the self-diffusivity or ionic conductivity.
+    """Analyze MD trajectories to compute the ionic conductivity.
 
     Parameters
     ----------
@@ -206,7 +206,7 @@ def analyze(model: SpectrumModel, npart: int = 1, ntraj: int = 100) -> float:
     Returns
     -------
     acint
-        The estimated transport property, mainly used for regression testing.
+        The estimated ionic conductivity, mainly used for regression testing.
     """
     # Get the time step from the first NPZ file.
     time = np.load(DATA_ROOT / "sim0000_part00_nve_traj.npz")["time"]
@@ -265,7 +265,7 @@ def analyze(model: SpectrumModel, npart: int = 1, ntraj: int = 100) -> float:
     _, axs = plt.subplots(2, 2, num=f"{prefix}_extras")
     plot_extras(axs, uc, result)
 
-    # Return the diffusivity
+    # Return the ionic conductivity.
     return result.acint
 
 

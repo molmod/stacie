@@ -175,12 +175,11 @@ plot_equilibration()
 # %% [markdown]
 # ## Analysis of the Initial Production Simulations
 #
-# The following code cell defines several analysis functions:
+# The following code cell defines analysis functions:
 #
 # - `get_indep_paniso` transforms the pressure tensor components
 #   into five independent anisotropic contributions,
 #   as explained in the [](../properties/shear_viscosity.md) theory section.
-# - `plot_temperature` plots the instantaneous temperature and compares it to the desired temperature.
 # - `estimate_viscosity` calculates the viscosity and plots the results.
 #   It also prints recommendations for data reduction (block averaging) and simulation time,
 #   as explained in the following two sections of the documentation:
@@ -202,22 +201,6 @@ def get_indep_paniso(pcomps):
             pcomps[5],
         ]
     )
-
-
-def plot_temperature(name, time, temperatures, de_temperature):
-    av_temperature = np.mean(temperatures)
-    plt.close(f"{name}_temp")
-    _, ax = plt.subplots(num=f"{name}_temp")
-    for temperature in temperatures:
-        ax.plot(time, temperature, alpha=0.5, label="__nolegend__")
-    ax.axhline(de_temperature, color="black", label=f"Desired: {de_temperature:.3f}")
-    ax.axhline(
-        av_temperature, color="black", ls=":", label=f"Average {av_temperature:.3f}"
-    )
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Temperature")
-    ax.legend()
-    return av_temperature
 
 
 def estimate_viscosity(name, pcomps, av_temperature, volume, timestep, verbose=True):
@@ -256,9 +239,8 @@ def estimate_viscosity(name, pcomps, av_temperature, volume, timestep, verbose=T
 # %% [markdown]
 # The next cell performs the analysis of the initial simulations.
 # It prints the recommended block size and the simulation time for the production runs,
-# and then generates the following figures:
+# and then generates two figures:
 #
-# - The time-dependence of the instantaneous temperature.
 # - The spectrum of the off-diagonal pressure fluctuations, and the model fitted to the spectrum.
 # - Additional intermediate results.
 
@@ -301,15 +283,7 @@ def demo_production(npart: int, ntraj: int = 100, select: int | None = None):
             pcomps_full[-1].append(np.loadtxt(prod_dir / "nve_pressure_blav.txt"))
     thermos = [np.concatenate(parts).T for parts in thermos]
     pcomps_full = [np.concatenate(parts).T for parts in pcomps_full]
-
-    if select is None:
-        # Plot the instantaneous and desired temperature.
-        time = thermos[0][0] * info["timestep"]
-        av_temperature = plot_temperature(
-            f"part{npart}", time, [thermo[1] for thermo in thermos], info["temperature"]
-        )
-    else:
-        av_temperature = np.mean([thermo[1] for thermo in thermos])
+    av_temperature = np.mean([thermo[1] for thermo in thermos])
 
     # Compute the viscosity.
     pcomps_aniso = np.concatenate([get_indep_paniso(p[1:]) for p in pcomps_full])
@@ -332,8 +306,6 @@ eta_production_init = demo_production(1).acint
 
 # %% [markdown]
 # Several things can be observed in the analysis of the initial production runs:
-#
-# - The average temperature of the NVE runs matched the desired temperature.
 #
 # - The recommendations based on the exponential correlation time were met by the initial simulation settings.
 #
