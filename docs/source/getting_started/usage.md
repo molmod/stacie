@@ -3,13 +3,13 @@
 This section provides an overview of how to use STACIE.
 More detailed information can be found in the remaining sections of the documentation.
 
-The STACIE algorithm is robust and provides reliable estimates of autocorrelation integrals
-without requiring user intervention.
-There is no need for extensive tweaking of settings through a graphical user interface.
-Instead, you provide the time-correlated input data as a NumPy array,
-along with a few additional parameters (such as the time step),
-to the functions implemented in the `stacie` library.
-You can do this in a Jupyter Notebook for interactive work or in a Python script.
+The STACIE algorithm provides robust and reliable estimates of autocorrelation integrals
+without requiring extensive adjustment of its settings.
+Users simply provide the relevant inputs to STACIE:
+the time-correlated sequences in the form of a NumPy array,
+a few physical parameters (such as the time step),
+and a model to fit to the spectrum.
+This can be done in a Jupyter notebook for interactive work or in a Python script.
 
 The most important inputs for STACIE are time series data on an equidistant time grid.
 You can provide multiple independent sequences of the same length to reduce uncertainties.
