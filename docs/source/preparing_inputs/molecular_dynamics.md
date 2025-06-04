@@ -1,6 +1,6 @@
-# Recommendations for MD simulations
+# Recommendations for MD Simulations
 
-## Finite size effects
+## Finite Size Effects
 
 Transport properties derived from {term}`MD` simulations of periodic systems
 can be affected by finite-size effects.
@@ -11,7 +11,7 @@ The $1/L$ dependence allows for extrapolation to infinite box size by linear reg
 or by applying analytical corrections, such as the Yeh-Hummer correction
 {cite:p}`yeh_2004_system,maginn_2020_best`.
 
-## Choice of ensemble
+## Choice of Ensemble
 
 The {term}`NVE` ensemble is generally recommended for computing transport coefficients,
 as thermostats and barostats (used for simulations in the {term}`NVT` and {term}`NpT` ensembles)
@@ -45,7 +45,7 @@ with restarts in different ensembles and multiple independent runs.
 All examples in the STACIE documentation work with NVE production runs,
 show how to manage the workflow and validate the temperature distribution in detail.
 
-## Thermostat and barostat settings
+## Thermostat and Barostat Settings
 
 For the equilibration runs discussed above,
 the choice of thermostat and barostat time constants is not critical,
@@ -65,7 +65,7 @@ and continuous rescaling (as opposed to random force contributions) {cite:p}`bas
 A drawback of slow relaxation times is that longer simulations are required
 to fully sample the correct ensemble.
 
-## Block averages
+## Block Averages
 
 As discussed in the [block averages](block_averages.md) section,
 the use of block averages is recommended for storing simulation data.

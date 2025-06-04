@@ -1,5 +1,5 @@
 # %% [markdown]
-# # Utility module for plots reused in several examples.
+# # Utility Module for Plots Reused in Multiple Examples.
 
 # %%
 import matplotlib.pyplot as plt

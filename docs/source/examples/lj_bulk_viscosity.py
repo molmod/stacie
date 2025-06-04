@@ -1,5 +1,5 @@
 # %% [markdown]
-# # Bulk viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)
+# # Bulk Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)
 #
 # This example demonstrates how to compute the bulk viscosity
 # of a Lennard-Jones liquid near its triple point using LAMMPS.

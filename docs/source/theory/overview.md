@@ -1,4 +1,4 @@
-# Overview
+# STACIE Algorithm Overview
 
 The goal of STACIE is to estimate the integral of the {term}`ACF`
 of a physical, continuous, time-dependent function with an infinite domain.

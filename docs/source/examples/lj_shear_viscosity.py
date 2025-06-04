@@ -1,5 +1,5 @@
 # %% [markdown]
-# # Shear viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)
+# # Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)
 #
 # This example shows how to calculate viscosity of argon
 # from pressure tensor data obtained from {term}`LAMMPS` {term}`MD` simulations.

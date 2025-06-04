@@ -28,7 +28,6 @@ from .utils import UnitConfig
 __all__ = (
     "CV2LCriterion",
     "ExpPolyModel",
-    "ExpTailModel",
     "PadeModel",
     "UnitConfig",
     "__version__",

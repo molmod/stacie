@@ -30,17 +30,6 @@ AMPLITUDES_REF = np.linspace(2, 1, NFREQ)
 WEIGHTS = 1 - FREQS**2
 TIMESTEP = 1.2
 
-PARS_REF_EXP_TAIL = [
-    [1.2, 0.9, 1.1],
-    [-0.3, 0.5, 1.4],
-    [0.1, -7.7, 1.4],
-    [-3.1, 0.0, 1.6],
-    [0.0, 0.0, 1.5],
-    [0.0, 15.0, 0.6],
-    [-108.0, -77.7, 1.5],
-    [108.0, 70.7, 1.2],
-]
-
 
 def check_vectorize_compute(model, pars_ref, broadcast=False):
     model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)

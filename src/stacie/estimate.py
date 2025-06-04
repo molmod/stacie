@@ -393,11 +393,11 @@ def fit_model_spectrum(
     If the model can derive the exponential correlation time,
     The following properties are also included:
 
-    - ``corrtime_exp``: estimate of the slowest time scale in the sequences
-    - ``corrtime_exp_var``: variance of the estimate of the slowest time scale
-    - ``corrtime_exp_std``: standard error of the estimate of the slowest time scale
-    - ``exp_simulation_time``: recommended simulation time based on the ExpTail model
-    - ``exp_block_time``: recommended block time based on the ExpTail model
+    - ``corrtime_exp``: exponential correlation time, the slowest time scale in the sequences
+    - ``corrtime_exp_var``: variance of the estimated exponential correlation time
+    - ``corrtime_exp_std``: standard error of the estimated exponential correlation time
+    - ``exp_simulation_time``: recommended simulation time based on the exponential correlation time
+    - ``exp_block_time``: recommended block time based on the exponential correlation time
 
     The ``ExpPolyModel`` has the following additional properties:
 
