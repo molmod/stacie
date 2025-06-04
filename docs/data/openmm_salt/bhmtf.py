@@ -38,7 +38,7 @@ The model parameters are taken from the second paper.
 import numpy as np
 import pytest
 from numpy.typing import NDArray
-from openmm import CustomNonbondedForce, NonbondedForce, System, unit
+from openmm import CMMotionRemover, CustomNonbondedForce, NonbondedForce, System, unit
 from openmm.app import Element, PDBFile, Simulation, Topology
 
 __all__ = ("add_nacl_forces", "build_nacl", "build_nacl_lattice", "load_nacl")
@@ -56,9 +56,7 @@ C8_UNIT = 1e-99 * unit.joule * unit.AVOGADRO_CONSTANT_NA * unit.meter**8
 # Define all parameters for the NaCl Born-Huggins-Mayer-Tosi-Fumi simulation.
 PARS = {
     # Physical properties
-    "na_mass": 22.99 * unit.dalton,
     "na_charge": 1 * unit.elementary_charge,
-    "cl_mass": 35.45 * unit.dalton,
     "cl_charge": -1 * unit.elementary_charge,
     # Born-Huggins-Mayer-Tosi-Fumi potential from the Lewis paper for NaCl.
     # Note that OpenMM expects energy units per mole, not per atom or atom pair.
@@ -112,9 +110,11 @@ def build_nacl_lattice(
     npair = natom // 2
 
     # Compute the cell size.
+    na_element = Element.getByAtomicNumber(11)
+    cl_element = Element.getByAtomicNumber(17)
     total_mass = (
         npair
-        * (PARS["na_mass"] + PARS["cl_mass"])
+        * (na_element.mass + cl_element.mass)
         / unit.dalton
         * unit.gram
         / unit.mole
@@ -162,10 +162,10 @@ def build_nacl(atnums: NDArray[int], cell_vecs: NDArray) -> tuple[System, Topolo
         residue = topology.addResidue("ion", chain)
         if atnum == 11:
             topology.addAtom("Na", na_element, residue)
-            system.addParticle(PARS["na_mass"])
+            system.addParticle(na_element.mass)
         elif atnum == 17:
             topology.addAtom("Cl", cl_element, residue)
-            system.addParticle(PARS["cl_mass"])
+            system.addParticle(cl_element.mass)
         else:
             raise ValueError(f"Unsupported atomic number {atnum}")
     return system, topology
@@ -181,11 +181,10 @@ def load_nacl(path_pdb: str):
     for chain in topology.chains():
         for residue in chain.residues():
             for atom in residue.atoms():
+                system.addParticle(atom.element.mass)
                 if atom.element.symbol == "Na":
-                    system.addParticle(PARS["na_mass"])
                     atnums.append(11)
                 elif atom.element.symbol == "Cl":
-                    system.addParticle(PARS["cl_mass"])
                     atnums.append(17)
                 else:
                     raise ValueError(f"Unsupported element {atom.element.symbol}")
@@ -309,6 +308,9 @@ def add_nacl_forces(
         else:
             raise ValueError(f"Unsupported element {atom.element}")
     system.addForce(force_r)
+
+    # Not really a force, but important enough anyway...
+    system.addForce(CMMotionRemover())
 
     return cutoff
 

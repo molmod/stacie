@@ -1,6 +1,7 @@
 backend: SVG
-font.family: IBM Plex Sans
-figure.figsize: 7.5, 4.21875
-figure.constrained_layout.use: True
 axes.spines.top: False
 axes.spines.right: False
+figure.figsize: 7.5, 4.21875
+figure.constrained_layout.use: True
+font.family: IBM Plex Sans
+savefig.format: svg

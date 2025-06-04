@@ -13,7 +13,7 @@ python -m venv venv
 echo 'source venv/bin/activate' > .envrc
 direnv allow
 pip install -U pip
-pip install -e .[docs,tests,tools]
+pip install -e .[docs,tests]
 pytest -vv
 cd docs
 make html
@@ -28,7 +28,8 @@ Edit the documentation Markdown files with a live preview
 by running the following command *in the root* of the repository:
 
 ```bash
-sphinx-autobuild docs/source docs/build/html --watch docs/source/ --watch src/stacie/
+cd docs
+./preview_html.sh
 ```
 
 Keep this running.

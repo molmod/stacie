@@ -120,6 +120,7 @@ def plot_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, s: Spectrum, nplot: int | N
         s.freqs[:nplot] / uc.freq_unit,
         s.amplitudes[:nplot] / uc.acint_unit,
         "C0.",
+        mew=0,
     )
     _plot_ref_spectrum(ax, uc, s, nplot)
     fmax = s.freqs[:nplot].max() / uc.freq_unit
@@ -227,8 +228,8 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result, *, legend
     ax.set_title("")
     ax.set_title(fixformat(FIT_LEFT_TITLE_TEMPLATE.format(**fields)), loc="left")
     if "corrtime_exp" in r.props:
-        fields["corrtime_exp"] = r.props["corrtime_exp"] / uc.time_unit
-        fields["corrtime_exp_std"] = r.props["corrtime_exp_std"] / uc.time_unit
+        fields["corrtime_exp"] = r.corrtime_exp / uc.time_unit
+        fields["corrtime_exp_std"] = r.corrtime_exp_std / uc.time_unit
         ax.set_title(
             fixformat(
                 FIT_RIGHT_TITLE_TEMPLATE_EXP.format(**fields)

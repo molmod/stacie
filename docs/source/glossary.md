@@ -5,9 +5,29 @@ ACF
     Autocorrelation function.
     A measure of the correlation of a signal with itself at different time lags.
 
+LAMMPS
+    Large-scale atomic/molecular massively parallel simulator.
+    A software package for simulating molecular dynamics.
+    See https://www.lammps.org/
+
 MD
     Molecular dynamics.
     A computational method used to simulate the physical movements of atoms and molecules.
+
+NpT
+    Isothermal-isobaric ensemble.
+    A statistical ensemble that represents a system in thermal equilibrium
+    with a heat bath at constant temperature (T), pressure (p), and number of particles (N).
+
+NVE
+    Microcanonical ensemble.
+    A statistical ensemble that represents a closed system
+    with fixed energy (E), volume (V), and number of particles (N).
+
+NVT
+    Canonical ensemble.
+    A statistical ensemble that represents a system in thermal equilibrium
+    with a heat bath at constant temperature (T), volume (V), and number of particles (N).
 
 PSD
     Power spectral density.

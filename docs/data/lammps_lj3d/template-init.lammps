@@ -1,0 +1,136 @@
+# Equilibrium MD simulation of Lennard-Jones fluid in 3D: (initial) production
+
+# Reduced Lennard-Jones units are used throughout.
+# The system is first equilibrated with two NVT runs, followed by an NVE production run.
+
+echo            none
+units           lj
+
+# 1. Simulation settings
+# ----------------------
+
+# These settings are based on the choices in
+# https://doi.org/10.1063/1.1770695
+
+# Number of FCC cells in each direction, results in 1372 atoms.
+variable        nrepx equal 7
+variable        nrepy equal 7
+variable        nrepz equal 7
+
+# This point is close to the critical point and thus features slowly decaying correlation functions,
+# making it challenging to converge transport properties.
+variable        density equal 0.8442
+variable        temperature1 equal 1.5  # High temperature for melting
+variable        temperature2 equal 0.722  # Target temperature for equilibration
+variable        cutoff_radius equal 2.5
+
+# Time-related settings
+variable        timestep equal 0.003
+variable        nvt_tau equal 0.5
+variable        nvt_steps equal 5000
+variable        nve_steps equal 12000
+variable        block_size equal 10
+
+# 2. System setup in LAMMPS
+# -------------------------
+
+# Initial geometry
+lattice         fcc ${density}
+region          box block 0 ${nrepx} 0 ${nrepy} 0 ${nrepz}
+create_box      1 box
+create_atoms    1 box
+mass            1 1.0
+
+# Initial velocities
+velocity        all create ${temperature1} {{ seed }}
+
+# Lennard-Jones potential
+pair_style      lj/cut ${cutoff_radius}
+pair_coeff      1 1 1.0 1.0
+neighbor        0.3 bin
+neigh_modify    delay 0 every 10
+
+# MD settings
+timestep        ${timestep}
+
+# Print a few settings and system parameters to a YAML file for ease of post-processing
+print """
+lammps_version: $(version)
+volume: $(vol)
+density: ${density}
+temperature: ${temperature2}
+cutoff_radius: ${cutoff_radius}
+natom: $(atoms)
+timestep: ${timestep}
+nstep: ${nve_steps}
+block_size: ${block_size}
+""" file info.yaml screen no
+
+
+# 3. NVT Equilibration runs
+# -------------------------
+
+# Convenient progress information
+thermo          100
+thermo_style    custom step time temp press pe ke etotal cpuremain
+
+# Dump images for a quick visual sanity check
+dump            vis all image ${nvt_steps} nvt_*.png type type
+
+# Subsampled instantaneous thermo output
+fix             thtxt all print ${block_size} &
+                "$(step) $(c_thermo_temp:%12.5e) $(ke:%12.5e) $(pe:%12.5e)" &
+                file nvt_thermo.txt &
+                screen no
+
+# High temperature to efficiently melt the fcc lattice
+fix             mdnve all nve
+fix             lgv1 all langevin &
+                ${temperature1} ${temperature1} ${nvt_tau} {{ seed + 12345 }} zero yes
+run             ${nvt_steps}
+unfix           lgv1
+
+# Target temperature to equilibrate the system
+fix             lgv1 all langevin &
+                ${temperature2} ${temperature2} ${nvt_tau} {{ seed + 67890 }} zero yes
+run             ${nvt_steps}
+unfix           lgv1
+undump          vis
+unfix           thtxt
+velocity        all zero linear
+
+
+# 4. NVE Production run
+# ---------------------
+
+# Note that the `fix print` commands intentionally mimic the output of `fix ave/time`,
+# so they can be loaded with the same post-processing scripts.
+
+reset_timestep  0
+
+# Subsampled instantaneous thermo output
+fix             thtxt all print ${block_size} &
+                "$(step) $(c_thermo_temp:%12.5e) $(ke:%12.5e) $(pe:%12.5e)" &
+                file nve_thermo.txt &
+                screen no
+
+# Block-averaged pressure output (xx, yy, zz, xy, xz, yz)
+fix             blpress all ave/time 1 ${block_size} ${block_size} c_thermo_press[*] &
+                ave one format ' %12.5e' file nve_pressure_blav.txt
+
+# Block-averaged heat flux output
+compute         atom_ke all ke/atom
+compute         atom_pe all pe/atom
+compute         atom_stress all stress/atom NULL virial
+compute         flux all heat/flux atom_ke atom_pe atom_stress
+fix             blheat all ave/time 1 ${block_size} ${block_size} c_flux[*] &
+                ave one format ' %12.5e' file nve_heatflux_blav.txt
+
+# Dump images for a quick visual sanity check
+dump            vis all image ${nve_steps} nve_*.png type type
+
+# Run the production simulation
+run             ${nve_steps}
+
+# Write restart file with final state, in case we want to extend the simulation
+write_restart   nve_final.restart

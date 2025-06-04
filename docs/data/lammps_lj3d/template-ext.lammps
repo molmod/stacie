@@ -1,0 +1,62 @@
+# Equilibrium MD simulation of Lennard-Jones fluid in 3D: Extended production
+
+# This is a template for the extension of the production runs with additional steps.
+# The settings in this file are based on the analysis of the exploration run.
+
+# The simulation consists only of additional NVE steps.
+# Velocities are not rescaled!
+
+# Reduced Lennard-Jones units are used throughout.
+
+echo            none
+read_restart    '{{ previous_dir }}/nve_final.restart'
+
+# 1. Settings
+# -----------
+
+# Time-related settings
+variable        nve_steps equal {{ additional_steps }}
+
+# Block averaging
+variable        block_size equal 10
+
+# Print a few settings and system parameters to a YAML file for ease of post-processing
+print """
+lammps_version: $(version)
+volume: $(vol)
+natom: $(atoms)
+nstep: ${nve_steps}
+block_size: ${block_size}
+""" file info.yaml screen no
+
+# 2. NVE Production run
+# ---------------------
+
+fix             1 all nve
+
+# Subsampled instantaneous thermo output
+fix             2 all print ${block_size} &
+                "$(step) $(c_thermo_temp:%12.5e) $(ke:%12.5e) $(pe:%12.5e)" &
+                file nve_thermo.txt &
+                screen no
+
+# Block-averaged pressure output (xx, yy, zz, xy, xz, yz)
+fix             3 all ave/time 1 ${block_size} ${block_size} c_thermo_press[*] &
+                ave one format ' %12.5e' file nve_pressure_blav.txt
+
+# Block-averaged heat flux output
+compute         atom_ke all ke/atom
+compute         atom_pe all pe/atom
+compute         atom_stress all stress/atom NULL virial
+compute         flux all heat/flux atom_ke atom_pe atom_stress
+fix             4 all ave/time 1 ${block_size} ${block_size} c_flux[*] &
+                ave one format ' %12.5e' file nve_heatflux_blav.txt
+
+# Dump images for a quick visual sanity check
+dump            vis all image ${nve_steps} nve_*.png type type
+
+# Run the production simulation
+run             ${nve_steps}
+
+# Write restart file with final state
+write_restart   nve_final.restart

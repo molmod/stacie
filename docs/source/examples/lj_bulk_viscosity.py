@@ -1,21 +1,33 @@
-#!/usr/bin/env python
-
 # %% [markdown]
 # # Bulk viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)
 #
 # This example demonstrates how to compute the bulk viscosity
 # of a Lennard-Jones liquid near its triple point using LAMMPS.
-# It is based on the previous notebook [Shear viscosity of the Lennard-Jones liquid](lj_shear_viscosity.py),
-# but skips the exploration phase to avoid repetition, focusing only on production simulations.
-# In this case, isotropic pressure is used to determine the bulk viscosity.
+# It uses the same production runs and conventions
+# as in the [Shear viscosity example](lj_shear_viscosity.py).
+# The required theoretical background is explained the section
+# [](../properties/bulk_viscosity.md).
+# In essence, it is computed in the same way as the shear viscosity,
+# except that the isotropic pressure fluctuations are used as input.
+#
+# :::{note}
+# The results in this example were obtained using
+# [LAMMPS version 4 Feb 2025](https://github.com/lammps/lammps/releases/tag/patch_4Feb2025).
+# Minor differences may arise when using a different version of LAMMPS,
+# or even the same version compiled with a different compiler.
+# :::
+
+# %% [markdown]
+# ## Library Imports and Matplotlib Configuration
 
 # %%
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from path import Path
 from yaml import safe_load
-from stacie import UnitConfig, compute_spectrum, estimate_acint, ExpTailModel
+from stacie import UnitConfig, compute_spectrum, estimate_acint, PadeModel
 from stacie.plot import plot_fitted_spectrum, plot_extras
 from IPython.display import display, HTML
 
@@ -23,19 +35,26 @@ display(HTML("<style> .note { text-align: justify; } </style>"))
 
 # %%
 mpl.rc_file("matplotlibrc")
+# %config InlineBackend.figure_formats = ["svg"]
+
+# %%
+# You normally do not need to change this path.
+# It only needs to be overriden when building the documentation.
+DATA_ROOT = Path(os.getenv("DATA_ROOT", "./")) / "lammps_lj3d/sims/"
 
 # %% [markdown]
-# The following code cells define key analysis functions used in
-# production simulations.
+# ## Analysis of the Production Simulations
+#
+# The following code cells define analysis functions used below.
 #
 # - `get_piso`: Computes the isotropic pressure from the diagonal components
 #   of the time-dependent pressure tensor ($P_{xx}$, $P_{yy}$, and $P_{zz}$),
-#   as explained in the [bulk viscosity](../theory/properties/bulk_viscosity.md) theory section.
+#   as explained in the [bulk viscosity](../properties/bulk_viscosity.md) theory section.
 # - `estimate_bulk_viscosity`: Computes the bulk viscosity, visualizes the results,
 #   and provides recommendations for data reduction (block averaging) and simulation time,
 #   as explained in the following two sections of the documentation:
-#     - [Autocorrelation Time](../theory/properties/autocorrelation_time.md)
-#     - [Block Averages](../theory/preparing_inputs/block_averages.md)
+#     - [](../properties/autocorrelation_time.md)
+#     - [](../preparing_inputs/block_averages.md)
 
 
 # %%
@@ -62,7 +81,7 @@ def estimate_bulk_viscosity(name, pcomps, av_temperature, volume, timestep):
     )
 
     # Estimate the bulk viscosity from the spectrum.
-    result = estimate_acint(spectrum, ExpTailModel(), verbose=True, uc=uc)
+    result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True, uc=uc)
 
     # Plot some basic analysis figures.
     plt.close(f"{name}_spectrum")
@@ -77,45 +96,47 @@ def estimate_bulk_viscosity(name, pcomps, av_temperature, volume, timestep):
 
 
 # %% [markdown]
-# ::: {note}
+# :::{note}
 # When computing bulk viscosity, the `include_zero_freq` argument in
 # the `compute_spectrum` function must be set to `False`,
 # as the average pressure is nonzero.
 # This ensures the DC component is excluded from the spectrum.
-# See the [bulk viscosity](../theory/properties/bulk_viscosity.md) theory section for more details.
+# See the [bulk viscosity](../properties/bulk_viscosity.md) theory section for more details.
+# :::
 
 
 # %%
-def demo_production():
-    lammps = Path("../../data/lammps_lj3d")
+def demo_production(npart: int = 3, ntraj: int = 100):
+    """
+    Perform the analysis of the production runs.
 
+    Parameters
+    ----------
+    npart
+        Number of parts in the production runs.
+        For the initial production runs, this is 1.
+    ntraj
+        Number of trajectories in the production runs.
+
+    Returns
+    -------
+    eta_bulk
+        The estimated bulk viscosity.
+    """
     # Load the configuration from the YAML file.
-    with open(lammps / "exploration/info.yaml") as fh:
+    with open(DATA_ROOT / "replica_0000_part_00/info.yaml") as fh:
         info = safe_load(fh)
-    name = "production"
-    with open(lammps / f"{name}/replica_0000_part_00/info.yaml") as fh:
-        info.update(safe_load(fh))
 
-    # Load trajectory data, without hardcoding the number of runs and parts.
-    # - `part_00` corresponds to the initial production run (4000 steps).
-    # - `part_01` corresponds to the first extension of the production run
-    #   (4000 extra steps).
+    # Load trajectory data.
     thermos = []
     pressures = []
-    last_replica = -1
-    for prod_dir in sorted(Path(lammps / name).glob("replica_*_part_*/")):
-        replica = prod_dir.split("/")[-2].split("_")[1]
-        run_thermo = np.loadtxt(prod_dir / "nve_thermo.txt")
-        run_pressures = np.loadtxt(prod_dir / "nve_pressure_blav.txt")
-        if replica == last_replica:
-            thermos[-1].append(run_thermo)
-            pressures[-1].append(run_pressures)
-        else:
-            # In case of thermo, which was created `fix print`, the first row
-            # repeats the last one of the previous run.
-            thermos.append([run_thermo[1:]])
-            pressures.append([run_pressures])
-            last_replica = replica
+    for itraj in range(ntraj):
+        thermos.append([])
+        pressures.append([])
+        for ipart in range(npart):
+            prod_dir = DATA_ROOT / f"replica_{itraj:04d}_part_{ipart:02d}/"
+            thermos[-1].append(np.loadtxt(prod_dir / "nve_thermo.txt"))
+            pressures[-1].append(np.loadtxt(prod_dir / "nve_pressure_blav.txt"))
     thermos = [np.concatenate(parts).T for parts in thermos]
     pressures = [np.concatenate(parts).T for parts in pressures]
 
@@ -125,7 +146,7 @@ def demo_production():
     # Compute the bulk viscosity
     pcomps = np.concatenate([get_piso(pressure[1:]) for pressure in pressures])
     return estimate_bulk_viscosity(
-        name,
+        f"part{npart}",
         pcomps,
         av_temperature,
         info["volume"],
@@ -133,7 +154,7 @@ def demo_production():
     )
 
 
-eta_bulk_production = demo_production()
+eta_bulk_production = demo_production(3)
 
 # %% [markdown]
 # ## Comparison to Literature Results
@@ -144,19 +165,15 @@ eta_bulk_production = demo_production()
 # are identical to those used in this notebook, the reported values should be directly comparable.
 #
 # | Method                     | Simulation time [τ\*] | Bulk viscosity [η$_b$\*] | Reference |
-# |----------------------------|-----------------------|-----------------|-----------|
-# | EMD NVE (STACIE)           | 2400                  | 1.138 ± 0.062   | This notebook |
-# | EMD NVE (Helfand-Einstein) | 300000                | 1.186 ± 0.084   | {cite:p}`meier_2004_transport_III` |
+# | -------------------------- | --------------------: | -----------------------: | --------- |
+# | EMD NVE (STACIE)           | 3600                  | 1.190 ± 0.073            | (here) initial |
+# | EMD NVE (STACIE)           | 10800                 | 1.161 ± 0.032            | (here) extension 1 |
+# | EMD NVE (STACIE)           | 30000                 | 1.195 ± 0.023            | (here) extension 2 |
+# | EMD NVE (Helfand-Einstein) | 300000                | 1.186 ± 0.084            | {cite:p}`meier_2004_transport_III` |
 #
 # This comparison demonstrates that STACIE accurately reproduces bulk viscosity results
 # while achieving lower statistical uncertainty with significantly less data than existing methods.
 #
-# ::: {note}
-# The results in this study were obtained using
-# [LAMMPS version 19 Nov 2024](https://github.com/lammps/lammps/releases/tag/patch_19Nov2024).
-# Note that minor differences may arise when using a different version of LAMMPS,
-# or even the same version compiled with a different compiler.
-# :::
 
 # %%  [markdown]
 # ## Regression Tests
@@ -165,5 +182,5 @@ eta_bulk_production = demo_production()
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(eta_bulk_production - 1.14) > 0.1:
+if abs(eta_bulk_production - 1.195) > 0.1:
     raise ValueError(f"wrong viscosity (production): {eta_bulk_production:.3e}")

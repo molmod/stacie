@@ -42,7 +42,7 @@ repos:
   rev: "4.0.1"
   hooks:
     - id: nb-clean
-      args: ["--remove-empty-cells"]
+      args: ["--remove-empty-cells", "--preserve-cell-metadata", "tags", "--"]
 - repo: https://github.com/DavidAnson/markdownlint-cli2
   rev: v0.17.2
   hooks:

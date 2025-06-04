@@ -1,6 +1,12 @@
+% This file has a txt extension (while it is a tex file) to not confuse latexmk.
+
+% These need to be synced with mathjax settings in conf.py
 \newcommand{\mean}{\operatorname{E}}
 \newcommand{\var}{\operatorname{VAR}}
 \newcommand{\cov}{\operatorname{COV}}
+\newcommand{\std}{\operatorname{STD}}
 \newcommand{\gdist}{\operatorname{Gamma}}
+
+% These are not needed in conf.py
 \newcommand{\lt}{\ensuremath <}
 \newcommand{\gt}{\ensuremath >}

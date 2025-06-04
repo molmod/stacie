@@ -9,14 +9,14 @@ import argparse
 import subprocess
 
 from path import Path
-from stepup.core.api import amend, step
+from stepup.core.api import amend, runpy
 
 __all__ = ("runlammps",)
 
 
 def runlammps(workdir: str, inp: list[str] = ()):
     workdir = Path(workdir)
-    step(
+    runpy(
         f"./runlammps.py {workdir}",
         inp=["runlammps.py", workdir / "in.lammps", *inp],
         out=[workdir / "log.txt"],

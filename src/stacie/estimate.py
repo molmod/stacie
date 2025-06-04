@@ -96,6 +96,20 @@ class Result:
         """The uncertainty of the integrated correlation time."""
         return self.props["acint_std"] / self.spectrum.variance
 
+    @property
+    def corrtime_exp(self) -> float:
+        """The exponential correlation time."""
+        if "corrtime_exp" not in self.props:
+            raise ValueError("The model does not provide an exponential correlation time.")
+        return self.props["corrtime_exp"]
+
+    @property
+    def corrtime_exp_std(self) -> float:
+        """The uncertainty of the exponential correlation time."""
+        if "corrtime_exp_std" not in self.props:
+            raise ValueError("The model does not provide an exponential correlation time.")
+        return self.props["corrtime_exp_std"]
+
 
 def estimate_acint(
     spectrum: Spectrum,
@@ -180,10 +194,10 @@ def estimate_acint(
         Set this to ``True`` to print progress information of the frequency cutoff search
         to the standard output.
     uc
-        Unit configuration object used to format the output.
+        Unit configuration object used to format the screen output.
         If not provided, the default unit configuration is used.
         See :py:class:`stacie.utils.UnitConfig` for details.
-        This is only affects the screen output (if any) and not the results.
+        This only affects the screen output (if any) and not the results!
 
     Returns
     -------
