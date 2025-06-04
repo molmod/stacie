@@ -1,4 +1,4 @@
-# How to Use
+# Usage Overview
 
 This section provides an overview of how to use STACIE.
 More detailed information can be found in the remaining sections of the documentation.
