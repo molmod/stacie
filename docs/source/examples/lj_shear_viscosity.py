@@ -94,7 +94,7 @@ from yaml import safe_load
 from scipy.stats import chi2
 from stacie import UnitConfig, compute_spectrum, estimate_acint, PadeModel
 from stacie.plot import plot_fitted_spectrum, plot_extras
-from utils import plot_instantaneous_percentiles
+from utils import plot_instantaneous_percentiles, plot_cumulative_temperature_histogram
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -409,7 +409,7 @@ eta_production_ext = demo_production(3).acint
 
 
 # %%
-def demo_temperature():
+def validate_temperature():
     """Plot cumulative distributions of the instantaneous temperature."""
     # Load the configuration from the YAML file.
     with open(DATA_ROOT / "replica_0000_part_00/info.yaml") as fh:
@@ -426,45 +426,13 @@ def demo_temperature():
             temps[-1].append(np.loadtxt(prod_dir / "nve_thermo.txt")[:, 1])
     temps = [np.concatenate(temp).T for temp in temps]
 
-    # Plot the instantaneous and desired temperature.
+    # Plot the instantaneous and desired temperature distribution.
     plt.close("tempprod")
     _, ax = plt.subplots(num="tempprod")
-    temps = sorted(temps, key=lambda x: np.mean(x))
-    label = "Individual NVE"
-    for temp in temps:
-        temp.sort()
-        ax.plot(
-            temp,
-            (np.arange(len(temp)) - 0.5) / len(temp),
-            alpha=0.2,
-            color="C0",
-            label=label,
-        )
-        label = "__nolegend__"
-    all_temp = np.concatenate(temps)
-    all_temp.sort()
-    ax.plot(
-        all_temp,
-        (np.arange(len(all_temp)) - 0.5) / len(all_temp),
-        color="black",
-        label="Combined NVE",
-    )
-    temp_axis = np.linspace(all_temp[0], all_temp[-1], 100)
-    ax.plot(
-        temp_axis,
-        chi2.cdf(temp_axis * ndof / temp_d, ndof),
-        color="C3",
-        ls=":",
-        lw=4,
-        label="NVT exact",
-    )
-    ax.legend()
-    ax.set_title("Cumulative Distribution of the Instantaneous Temperature")
-    ax.set_xlabel("Temperature")
-    ax.set_ylabel("Cumulative Probability")
+    plot_cumulative_temperature_histogram(ax, temps, temp_d, ndof, "τ*")
 
 
-demo_temperature()
+validate_temperature()
 
 # %% [markdown]
 #

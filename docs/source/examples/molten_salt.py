@@ -59,7 +59,7 @@ from scipy.stats import chi2
 from stacie import ExpPolyModel, PadeModel, UnitConfig, compute_spectrum, estimate_acint
 from stacie.model import SpectrumModel
 from stacie.plot import plot_fitted_spectrum, plot_extras
-from utils import plot_instantaneous_percentiles
+from utils import plot_instantaneous_percentiles, plot_cumulative_temperature_histogram
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -456,6 +456,7 @@ convert_molar_conductivity()
 # %%
 def plot_temperature_production(npart: int = 3, ntraj: int = 100):
     """Plot cumulative distributions of the instantaneous temperature."""
+    # Load the temperature data from the NVE production runs.
     time = None
     natom = None
     temps = []
@@ -474,44 +475,12 @@ def plot_temperature_production(npart: int = 3, ntraj: int = 100):
     time = np.concatenate(time)
     temps = np.array([np.concatenate(t) for t in temps])
 
-    # Plot the instantaneous and desired temperature.
+    # Plot the instantaneous and desired temperature distribution.
     plt.close("tempprod")
     _, ax = plt.subplots(num="tempprod")
     ndof = 3 * natom - 3
     temp_d = 1100
-    temps = sorted(temps, key=lambda x: np.mean(x))
-    label = "Individual NVE"
-    for temp in temps:
-        temp.sort()
-        ax.plot(
-            temp,
-            (np.arange(len(temp)) - 0.5) / len(temp),
-            alpha=0.2,
-            color="C0",
-            label=label,
-        )
-        label = "__nolegend__"
-    all_temp = np.concatenate(temps)
-    all_temp.sort()
-    ax.plot(
-        all_temp,
-        (np.arange(len(all_temp)) - 0.5) / len(all_temp),
-        color="black",
-        label="Combined NVE",
-    )
-    temp_axis = np.linspace(all_temp[0], all_temp[-1], 100)
-    ax.plot(
-        temp_axis,
-        chi2.cdf(temp_axis * ndof / temp_d, ndof),
-        color="C3",
-        ls=":",
-        lw=4,
-        label="NpT exact",
-    )
-    ax.legend()
-    ax.set_title("Cumulative Distribution of the Instantaneous Temperature")
-    ax.set_xlabel("Temperature")
-    ax.set_ylabel("Cumulative Probability")
+    plot_cumulative_temperature_histogram(ax, temps, temp_d, ndof, "K")
 
 
 plot_temperature_production()

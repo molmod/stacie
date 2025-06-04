@@ -2,9 +2,16 @@
 # # Utility module for plots reused in several examples.
 
 # %%
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-import matplotlib.pyplot as plt
+from scipy.stats import chi2
+
+
+__all__ = (
+    "plot_instantaneous_percentiles",
+    "plot_cumulative_temperature_histogram",
+)
 
 
 def plot_instantaneous_percentiles(
@@ -43,3 +50,64 @@ def plot_instantaneous_percentiles(
     ax.set_ylim(bottom=ymin, top=ymax)
     ax.set_title("Percentiles during the equilibration run")
     ax.legend()
+
+
+def plot_cumulative_temperature_histogram(
+    ax: plt.Axes,
+    temps: NDArray[float],
+    temp_d: float,
+    ndof: int,
+    temp_unit_str: str,
+    nbin: int = 100,
+):
+    """Plot a cumulative histogram of the temperature.
+
+    Parameters
+    ----------
+    ax
+        The axes to plot on.
+    temps
+        The temperature data to plot.
+        This is expected to be a 2D array with shape (ntraj, nstep).
+        Cumulative histograms of individual trajectories will be plotted,
+        together with the combined and theoretical cumulative histogram.
+    temp_d
+        The desired temperature for the theoretical cumulative histogram.
+    ndof
+        The number of degrees of freedom for the system.
+    temp_unit_str
+        A string representing the unit of temperature.
+    nbin
+        The number of bins for the histogram.
+    """
+    label = "Individual NVE"
+    quantiles = (np.arange(nbin) + 0.5) / nbin
+    for temp in temps:
+        temp.sort()
+        ax.plot(
+            np.quantile(temp, quantiles),
+            quantiles,
+            alpha=0.2,
+            color="C0",
+            label=label,
+        )
+        label = "__nolegend__"
+    ax.plot(
+        np.quantile(temps, quantiles),
+        quantiles,
+        color="black",
+        label="Combined NVE",
+    )
+    temp_axis = np.linspace(np.min(temps), np.max(temps), 100)
+    ax.plot(
+        temp_axis,
+        chi2.cdf(temp_axis * ndof / temp_d, ndof),
+        color="C3",
+        ls=":",
+        lw=4,
+        label="NVT exact",
+    )
+    ax.legend()
+    ax.set_title("Cumulative Distribution of the Instantaneous Temperature")
+    ax.set_xlabel(f"Temperature [{temp_unit_str}]")
+    ax.set_ylabel("Cumulative Probability")
