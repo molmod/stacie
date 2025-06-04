@@ -107,7 +107,7 @@ latex_elements = {
 \usepackage{fontspec}
 \setmainfont[Scale=1.2]{Libertinus Serif}
 \setsansfont[Scale=1.2]{Libertinus Sans}
-\setmonofont[Scale=0.85]{IBM Plex Mono}
+\setmonofont[Scale=0.85]{Cascadia Code}
 \setmathfont[Scale=1.2]{XITS Math}
 \setmathfont[Scale=1.2,range={\mathcal,\mathbfcal},StylisticSet=1]{XITS Math}
 """,
