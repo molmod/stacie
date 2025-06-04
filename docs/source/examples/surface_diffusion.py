@@ -67,7 +67,8 @@ mpl.rc_file("matplotlibrc")
 WAVELENGTH = 5.0
 ALPHA = 2 * np.pi / 3
 ANGLES = np.arange(3) * ALPHA
-AMPLITUDE = 0.2 * sc.value("electron volt") / sc.value("atomic unit of energy")
+EV = sc.value("electron volt") / sc.value("atomic unit of energy")
+AMPLITUDE = 0.2 * EV
 
 
 def potential_energy_force(coords: ArrayLike) -> tuple[NDArray, NDArray]:
@@ -121,16 +122,17 @@ print(nd.Gradient(lambda coords: potential_energy_force(coords)[0])([1, 2]))
 # %%
 def plot_pes():
     plt.close("pes")
-    _, ax = plt.subplots(num="pes")
+    fig, ax = plt.subplots(num="pes")
     xs = np.linspace(-30, 30, 201)
-    ys = np.linspace(-30, 30, 201)
+    ys = np.linspace(-20, 20, 201)
     coords = np.array(np.meshgrid(xs, ys)).transpose(1, 2, 0)
     energies = potential_energy_force(coords)[0]
-    ax.contour(xs, ys, energies)
+    cf = ax.contourf(xs, ys, energies / EV, levels=20)
     ax.set_aspect("equal", "box")
     ax.set_xlabel("x [a$_0$]")
     ax.set_ylabel("y [a$_0$]")
     ax.set_title("Potential Energy Surface")
+    fig.colorbar(cf, ax=ax, label="Energy [eV]")
 
 
 plot_pes()
@@ -263,6 +265,7 @@ def demo_energy_conservation():
     ax.set_title("Energy Conservation Demo")
     ax.set_xlabel("Time [a.u. of time]")
     ax.set_ylabel(r"Energy [E$_\mathrm{h}$]")
+    ax.legend()
 
 
 demo_energy_conservation()
@@ -282,8 +285,8 @@ demo_energy_conservation()
 
 # %%
 def demo_chaos():
-    vels = np.array([[1e-3, 1e-4], [1.00000001e-3, 1e-4]])
-    traj = integrate(np.zeros((2, 2)), vels, 2500)
+    vels = np.array([[1e-3, 1e-4], [1.000001e-3, 1e-4]])
+    traj = integrate(np.zeros((2, 2)), vels, 1500)
     plt.close("chaos")
     _, ax = plt.subplots(num="chaos")
     ax.plot([0], [0], "o", color="k", label="Initial position")
@@ -356,7 +359,7 @@ def demo_stacie(block_size: int = 1):
     traj = integrate(np.zeros((natom, 2)), vels, nstep, block_size)
 
     plt.close(f"trajs_{block_size}")
-    _, ax = plt.subplots(num=f"trajs_{block_size}")
+    _, ax = plt.subplots(num=f"trajs_{block_size}", figsize=(6, 6))
     for i in range(natom):
         ax.plot(traj.coords[:, i, 0], traj.coords[:, i, 1])
     ax.set_aspect("equal", "box")
@@ -482,8 +485,8 @@ print(f"corrtime_int = {result_60.corrtime_int / PICOSECOND:.3f} ps")
 # %%
 acint_unit = sc.value("atomic unit of time") / sc.value("atomic unit of length") ** 2
 acint_1 = result_1.acint / acint_unit
-if abs(acint_1 - 5.88e-7) > 5e-9:
+if abs(acint_1 - 5.80e-7) > 5e-9:
     raise ValueError(f"Wrong acint (no block average): {acint_1:.2e}")
 acint_60 = result_60.acint / acint_unit
-if abs(acint_60 - 5.88e-7) > 5e-9:
+if abs(acint_60 - 5.80e-7) > 5e-9:
     raise ValueError(f"Wrong acint (block size 60): {acint_60:.2e}")

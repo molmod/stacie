@@ -155,12 +155,13 @@ print(f"Monte Carlo E[r] ≈ {mean_mc:.5f} > R0 = {R0:.5f}")
 def plot_chains():
     plt.close("chains")
     _, ax = plt.subplots(num="chains")
-    ax.plot(sequences[0][:500])
-    ax.plot(sequences[1][:500])
-    ax.plot(sequences[2][:500])
+    ax.plot(sequences[0][:500], label="Chain 1")
+    ax.plot(sequences[1][:500], label="Chain 2")
+    ax.plot(sequences[2][:500], label="Chain 3")
     ax.set_xlabel("Step")
     ax.set_ylabel(r"Bond length [a$_0$]")
     ax.set_title("Markov Chain samples")
+    ax.legend()
 
 
 plot_chains()

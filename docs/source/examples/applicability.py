@@ -76,7 +76,27 @@ def time_derivatives(state: ArrayLike, b: float) -> NDArray:
 
 
 def integrate(state: ArrayLike, nstep: int, h: float, b: float) -> NDArray:
-    """Integrate the System with Ralston's method, using a fixed time step h."""
+    """Integrate the System with Ralston's method, using a fixed time step h.
+
+    Parameters
+    ----------
+    state
+        The initial state of the system, shape `(ndim, nsys)`,
+        where `ndim` is the number of dimensions and `nsys` systems to integrate in parallel.
+    nstep
+        The number of time steps to integrate.
+    h
+        The time step size.
+    b
+        The parameter $b$ in the differential equations.
+
+    Returns
+    -------
+    trajectory
+        The trajectory of the system, shape `(nstep, ndim, nsys)`.
+        The first dimension is the time step, the second dimension is the state variable,
+        and the third dimension is the system index.
+    """
     trajectory = np.zeros((nstep, *state.shape))
     for istep in range(nstep):
         k1 = time_derivatives(state, b)
@@ -106,10 +126,13 @@ def plot_traj(nplot=500):
     plt.close("traj")
     _, ax = plt.subplots(num="traj")
     times = np.arange(nplot) * TIMESTEP
-    ax.plot(times, trajectory[:nplot, 0, :10])
-    ax.set_xlabel("Time [1]")
-    ax.set_ylabel("$x(t)$")
-    ax.set_title("Solutions")
+    ax.plot(times, trajectory[:nplot, 0, 0], label="$x(t)$")
+    ax.plot(times, trajectory[:nplot, 1, 0], label="$y(t)$")
+    ax.plot(times, trajectory[:nplot, 2, 0], label="$z(t)$")
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Position")
+    ax.set_title(f"Example solutions (first {nplot} steps)")
+    ax.legend()
 
 
 plot_traj()
@@ -123,7 +146,7 @@ plot_traj()
 # becomes the [variance of the mean](../properties/error_estimates.md).
 
 # %%
-uc = UnitConfig(acint_fmt=".2e", acint_unit_str="1", time_unit_str="1", freq_unit_str="1")
+uc = UnitConfig(acint_fmt=".2e")
 sequences = trajectory[:, 0, :].T
 spectrum = compute_spectrum(
     sequences,
