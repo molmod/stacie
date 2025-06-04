@@ -384,7 +384,9 @@ class PadeModel(SpectrumModel):
 
     @property
     def name(self):
-        return f"pade({self.numer_degrees},{self.denom_degrees})"
+        numer_str = ", ".join(map(str, self.numer_degrees))
+        denom_str = ", ".join(map(str, self.denom_degrees))
+        return f"pade({numer_str}; {denom_str})"
 
     def bounds(self) -> list[tuple[float, float]]:
         """Return parameter bounds for the optimizer."""

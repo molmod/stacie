@@ -7,11 +7,11 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
    it is an exponential function of a linear combination of simple monomials of the frequency.
    You can specify the degrees of the monomials, and typically a low degree works fine:
 
-    - Degree `[0]` is suitable for a white noise spectrum.
-    - Degrees `[0, 1]` can be used to extract useful information from a noisy spectrum.
-    - Degrees `[0, 1, 2]` are applicable to spectra with low statistical uncertainty,
+    - Degree $0$ is suitable for a white noise spectrum.
+    - Degrees $\{0, 1\}$ can be used to extract useful information from a noisy spectrum.
+    - Degrees $\{0, 1, 2\}$ are applicable to spectra with low statistical uncertainty,
       e.g., averaged over $>100$ inputs.
-    - An even polynomial with degrees `[0, 2]` is suitable for spectra
+    - An even polynomial with degrees $\{0, 2\}$ is suitable for spectra
       that are expected to have a vanishing derivative at zero frequency.
 
     The main advantage of this model is its broad applicability,
@@ -58,9 +58,11 @@ $$
 To construct this model, you can create an instance of the `ExpPolyModel` class as follows:
 
 ```python
-from stacie.model import ExpPolyModel
-model = ExpPolyModel(degrees=[0, 1, 2])
+from stacie import ExpPolyModel
+model = ExpPolyModel([0, 1, 2])
 ```
+
+This model is identified as `exppoly(0, 1, 2)` in STACIE's screen output and plots.
 
 (section-pade-target)=
 
@@ -138,9 +140,8 @@ and features in the PSD at higher frequencies, which will be ignored by STACIE.
 To construct this model, you can create an instance of the `PadeModel` class as follows:
 
 ```python
-from stacie.model import PadeModel
-model = PadeModel(
-    numerator=[0, 2],
-    denominator=[2],
-)
+from stacie import PadeModel
+model = PadeModel([0, 2], [2])
 ```
+
+This model is identified as `pde(0, 2; 2)` in STACIE's screen output and plots.
