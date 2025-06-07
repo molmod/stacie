@@ -105,6 +105,9 @@ and repeating the analysis with STACIE:
   should be larger than 20 times the number of model parameters.
 - The Z-score computed for the regression cost and the cutoff criterion
   should be smaller than 2.
+  Note that the Z-scores may also be large for other reasons than insufficient data.
+  This may also occur when the functional form of the model can never match the data,
+  e.g. fitting a white noise model to a spectrum that has a non-zero slope.
 - When using the Pade model, the total simulation time should be sufficient
   to resolve the zero-frequency peak of the spectrum.
   The width of the peak can be derived from
