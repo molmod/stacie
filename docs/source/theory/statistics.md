@@ -262,7 +262,19 @@ The hyperparameter $\beta$ controls the steepness of the transition and is 8 by 
 (This should be fine for most applications.)
 This value can be set with the `switch_exponent` argument
 of the [estimate_acint()](#stacie.estimate.estimate_acint) function.
-We will derive how to fit parameters for a given frequency cut-off $f_\text{cut}$.
+One can better appreciate the advantage of this switching function by rewriting with a hyperbolic tangent:
+
+$$
+    w(f_k|f_\text{cut}) = \frac{1}{2}\left[
+        1 - \tanh\left(\frac{\beta}{2}\ln\frac{f_k}{f_\text{cut}}\right)
+    \right]
+$$
+
+This shows that the switching is scale invariant, i.e., it does not depend on the unit of the frequency,
+because the frequency appears only in a logarithm.
+The parameter $\beta$ controls the width of the transition region on a logarithmic scale.
+
+We derive below how to fit parameters for a given frequency cut-off $f_\text{cut}$.
 The [next section](cutoff.md) describes how to find suitable cutoffs.
 
 To fit the model, we use a form of local regression
@@ -306,12 +318,15 @@ but it is important to keep in mind when searching for suitable cutoffs.
 :::
 
 For compatibility with the SciPy optimizers,
-the cost function $\ell(\mathbf{b}) = -\ln \mathcal{L}(\mathbf{b})$ is minimized.
-STACIE implements first and second derivatives of $\ell(\mathbf{b})$,
+the cost function $\operatorname{cost}(\mathbf{b}) = -\ln \mathcal{L}(\mathbf{b})$ is minimized.
+STACIE implements first and second derivatives of $\operatorname{cost}(\mathbf{b})$,
 and also a good initial guess of the parameters, using efficient vectorized NumPy code.
 These features make the optimization of the parameters both efficient and reliable.
+The optimized parameters are denoted as $\hat{\mathbf{b}}$.
+The hats indicate that these are statistical estimates because
+they are derived from data statistical uncertainties.
 
-The Hessian computed with the estimated parameters, $\ell(\hat{\mathbf{b}})$,
+The Hessian computed with the estimated parameters, $\operatorname{cost}(\hat{\mathbf{b}})$,
 must be positive definite.
 (If non-positive eigenvalues are found, the optimization is treated as failed.)
 
@@ -320,7 +335,7 @@ $$
     \quad
     \hat{H}_{ij} =
         \left.
-        \frac{\partial^2 \ell}{\partial b_i \partial b_j}
+        \frac{\partial^2 \operatorname{cost}}{\partial b_i \partial b_j}
         \right|_{\mathbf{b}=\hat{\mathbf{b}}}
 $$
 
@@ -351,3 +366,168 @@ of which the standard deviation is not known *a priori* {cite:p}`millar_2011_max
 Here, the amplitudes are Gamma-distributed with a known shape parameter.
 Only the scale parameter at each frequency is predicted by the model.
 :::
+
+## Regression Cost Z-score
+
+When a model is too simple to explain the data,
+the regression cost [Z-score](https://en.wikipedia.org/wiki/Standard_score)
+can be used to quantify the goodness of fit.
+This is implemented in STACIE to facilitate the detection of poorly fitted models,
+which can sometimes occur if the selected model cannot explain the data for any cutoff frequency.
+This Z-score is defined as:
+
+$$
+    Z_\text{cost}(\mathbf{b}) = \frac{
+        \operatorname{cost}(\mathbf{b}) - \mean\left[\hat{\operatorname{cost}}(\mathbf{b})\right]
+    }{
+        \std\left[\hat{\operatorname{cost}}(\mathbf{b})\right]
+    }
+$$
+
+The mean $\mean\left[\hat{\operatorname{cost}}(\mathbf{b})\right]$
+and standard deviation $\std\left[\hat{\operatorname{cost}}(\mathbf{b})\right]$
+are computed as expectation values over all possible spectra sampled
+from the Gamma distribution corresponding to the model parameters $\mathbf{b}$.
+For both expectation values STACIE implements computationally efficient closed-form solutions.
+
+The Z-score is easily interpretable as a goodness of fit measure.
+When the model fits the data well, the Z-score has a zero mean and unit standard deviation.
+When the model is too simple and underfits the data,
+the Z-score is positive and quickly exceeds the standard deviation.
+For example a Z-score of 2 indicates that the model cost is two standard deviations above its mean,
+suggesting that the model is too simple.
+
+The mean is derived as follows:
+
+$$
+    \mean\left[\hat{\operatorname{cost}}(\mathbf{b})\right]
+    = \sum_{k\in K}
+        w(f_k|f_\text{cut})
+        \mean\left[-\ln p_{\gdist(\alpha_k,\theta_k)}(\hat{C}_k)\right]
+$$
+
+where the mean is computed by sampling $\hat{C}_k$ from the distribution
+$\gdist(\alpha_k,\theta_k)$.
+This mean is also known as the entropy of the distribution,
+with a well-known closed-form solution.
+Inserting this solution into the previous equation gives:
+
+$$
+    \mean\left[\hat{\operatorname{cost}}(\mathbf{b})\right]
+    = \sum_{k\in K}
+        w(f_k|f_\text{cut})
+        \Bigl(
+            \alpha_k
+            - \ln\bigl(\theta_k(\mathbf{b})\bigr)
+            + \ln \Gamma(\alpha_k)
+            + (1 - \alpha_k)\psi(\alpha_k)
+        \Bigr)
+$$
+
+where $\psi(\alpha)$ is the [digamma](https://en.wikipedia.org/wiki/Digamma_function) function.
+
+The standard deviation is best derived by first computing the variance of the cost function:
+
+$$
+    \var\left[\hat{\operatorname{cost}}(\mathbf{b})\right]
+    = \sum_{k\in K}
+        w(f_k|f_\text{cut})^2
+        \var\left[-\ln p_{\gdist(\alpha_k,\theta_k)}(\hat{C}_k)\right]
+$$
+
+The variance of the cost function is also defined as an expectation value
+over $\hat{C}_k$ from the distribution $\gdist(\alpha_k,\theta_k)$.
+This variance can also be derived analytically, but the result is not as well-known,
+so we will work it out here.
+The logarithm of the probability density has only two terms that depend on the random variable $\hat{C}_k$,
+which are relevant for the variance:
+
+$$
+    \begin{aligned}
+        &\hspace{-1em}\var\left[-\ln p_{\gdist(\alpha_k,\theta_k)}(\hat{C}_k)\right]
+        \\
+        &= \var\left[
+            (\alpha_k - 1)\ln(\hat{C}_k)
+            - \frac{\hat{C}_k}{\theta_k(\mathbf{b})}
+        \right]
+        \\
+        &= (\alpha_k - 1)^2 \var\left[\ln(\hat{C}_k)\right]
+            + \frac{1}{\theta_k^2(\mathbf{b})} \var\left[\hat{C}_k\right]
+            - 2\frac{\alpha_k - 1}{\theta_k(\mathbf{b})} \cov\left[\ln(\hat{C}_k),\hat{C}_k\right]
+    \end{aligned}
+$$
+
+The first two terms are well-known results,
+i.e. [the variance of the log-Gamma and Gamma distributions](https://en.wikipedia.org/wiki/Gamma_distribution#Properties),
+respectively.
+
+$$
+    \begin{aligned}
+        \var\left[\ln(\hat{C}_k)\right] &= \psi_1(\alpha_k)
+        \\
+        \var\left[\hat{C}_k\right] &= \alpha_k\, \theta_k^2(\mathbf{b})
+    \end{aligned}
+$$
+
+where $\psi_1(\alpha)$ is the [trigamma](https://en.wikipedia.org/wiki/Trigamma_function) function.
+The only term that requires some more work is the third term:
+
+$$
+    \cov\left[\ln(\hat{C}_k),\hat{C}_k\right]
+    = \mean\left[\ln(\hat{C}_k)\,\hat{C}_k\right]
+      - \mean\left[\ln(\hat{C}_k)\right]\,\mean\left[\hat{C}_k\right]
+$$
+
+A [derivation of the first term](https://statproofbook.github.io/P/gam-xlogx) can be found in the
+wonderful online [book of statistical proofs](https://statproofbook.github.io/).
+The second term contains well-known [expectation values of the Gamma distribution](https://en.wikipedia.org/wiki/Gamma_distribution#Properties).
+The results are:
+
+$$
+    \begin{aligned}
+        \mean\left[\ln(\hat{C}_k)\,\hat{C}_k\right]
+        &= \alpha_k\,\theta_k(\mathbf{b})
+           \Bigl(\psi(\alpha_k+1) + \ln\bigl(\theta_k(\mathbf{b})\bigr)\Bigr)
+        \\
+        \mean\left[\ln(\hat{C}_k)\right]
+        &= \psi(\alpha_k) + \ln\bigl(\theta_k(\mathbf{b})\bigr)
+        \\
+        \mean\left[\hat{C}_k\right]
+        &= \alpha_k\, \theta_k(\mathbf{b})
+    \end{aligned}
+$$
+
+The covariance can now be worked out by making using of the
+[well-known recurrence relation of the digamma function](https://en.wikipedia.org/wiki/Digamma_function#Recurrence_formula_and_characterization):
+
+$$
+    \begin{aligned}
+        \cov\left[\ln(\hat{C}_k),\hat{C}_k\right]
+        &= \alpha_k\,\theta_k(\mathbf{b})
+           \bigl(\psi(\alpha_k+1) - \psi(\alpha_k)\bigr)
+        \\
+        &= \theta_k(\mathbf{b})
+    \end{aligned}
+$$
+
+Putting it all together,
+we find the variance of the logarithm of the probability density of the Gamma distribution:
+
+$$
+    \var\left[-\ln p_{\gdist(\alpha_k,\theta_k)}(\hat{C}_k)\right]
+    = (\alpha_k - 1)^2 \psi_1(\alpha_k) - \alpha_k + 2
+$$
+
+The standard devation in the Z-score finally becomes:
+
+$$
+    \std\left[\hat{\operatorname{cost}}(\mathbf{b})\right]
+    = \sqrt{\sum_{k\in K}
+        w(f_k|f_\text{cut})^2
+        \Bigl(
+            (\alpha_k - 1)^2 \psi_1(\alpha_k) - \alpha_k + 2
+        \Bigr)
+    }
+$$
+
+It is noteworthy that the standard deviation is independent of the model parameters $\mathbf{b}$.

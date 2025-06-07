@@ -25,7 +25,7 @@
 # As a result, the system looses memory of its initial conditions rather quickly,
 # and the autocorrelation function tends to decay exponentially.
 # At the boundary, $b=0.208186$, the exponential decay is no longer valid and the spectrum deviates from the Lorentzian shape.
-# In practice, the Pade model is applicable for smaller values, $0 < b < 0.2$.
+# In practice, the Pade model is applicable for smaller values, $0 < b < 0.17$.
 #
 # For $b=0$, the solutions become random walks with anomalous diffusion
 # {cite:p}`rowlands_2008_simple`.
@@ -62,6 +62,8 @@ mpl.rc_file("matplotlibrc")
 # The following cell implements the numerical integration of the oscillator
 # using [Ralston's method](https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods#Ralston's_method)
 # for 100 different initial configurations.
+# The parameter $b$ is given as an argument to the `generate()` function
+# at the last line of the next cell.
 
 # %%
 NSYS = 100
@@ -147,7 +149,7 @@ plot_traj()
 
 # %%
 uc = UnitConfig(acint_fmt=".2e")
-sequences = trajectory[:, 0, :].T
+sequences = trajectory[:, 0, :].T  # use x(t) only
 spectrum = compute_spectrum(
     sequences,
     timestep=TIMESTEP,
@@ -159,6 +161,11 @@ _, ax = plt.subplots(num="spectrum")
 plot_spectrum(ax, uc, spectrum, nplot=500)
 
 # %% [markdown]
+# Note that we only use component 0, i.e. $x(t)$, of each system as input for the spectra.
+# This ensures that fully independent sequences are used in the analysis below,
+# which is assumed by the statistical model of the spectrum used by STACIE.
+
+# %% [markdown]
 # ## Error of the Mean
 #
 # The following cells fit the Pade model to the spectrum
@@ -166,16 +173,11 @@ plot_spectrum(ax, uc, spectrum, nplot=500)
 
 # %%
 result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True)
-plt.close("fitted")
-fig, ax = plt.subplots(num="fitted")
-plot_fitted_spectrum(ax, uc, result)
-plt.close("extras")
-fig, axs = plt.subplots(2, 2, num="extras")
-plot_extras(axs, uc, result)
 
 # %% [markdown]
 # Due to the symmetry of the oscillator, the mean of the solutions should be zero.
-# Within the uncertainty, this is indeed the case for the numerical solutions.
+# Within the uncertainty, this is indeed the case for the numerical solutions,
+# as shown below.
 
 # %%
 mean = sequences.mean()
@@ -184,14 +186,41 @@ error_mean = np.sqrt(result.acint)
 print(f"Error of the mean: {error_mean:.3e}")
 
 # %% [markdown]
-# For sufficiently small values of $b$, the autocorrelation function is a simple
-# exponentially decaying function, so that the two
+# For sufficiently small values of $b$, the autocorrelation function
+# decays exponentially, so that the two
 # [autocorrelation times](../properties/autocorrelation_time.md)
 # are very similar:
 
 # %%
 print(f"corrtime_exp = {result.corrtime_exp:.3f} ± {result.corrtime_exp_std:.3f}")
 print(f"corrtime_int = {result.corrtime_int:.3f} ± {result.corrtime_int_std:.3f}")
+
+# %% [markdown]
+# To further gauge the applicability of the Pade model,
+# it is useful to plot the fitted spectrum and the intermediate results
+# as a function of the cutoff frequency, as shown below.
+
+# %%
+plt.close("fitted")
+fig, ax = plt.subplots(num="fitted")
+plot_fitted_spectrum(ax, uc, result)
+plt.close("extras")
+fig, axs = plt.subplots(2, 2, num="extras")
+plot_extras(axs, uc, result)
+
+# %% [markdown]
+# It is clear that at higher cutoff frequencies, which are given a negligible weight,
+# the spectrum deviates from the Lorentzian shape.
+# Hence, at shorter time scales, the autocorrelation function does not decay exponentially.
+# This was to be expected, as the input sequences are smooth functions.
+# To further confirm this, we recommend rerunning this notebook with different values of $b$:
+#
+# - For lower value, such as $b=0.05$, the Pade model will fit the spectrum better,
+#   which is reflected in lower Z-score values.
+# - Up to $b=0.17$, the Pade model is still applicable, but the Z-scores will increase.
+# - For $b=0.2$, the Pade model will not be able to assign an exponential correlation time.
+#   To be able to run the notebook until the last plot, you need to comment out the line
+#   that prints the exponential correlation time.
 
 # %%  [markdown]
 # ## Regression Tests

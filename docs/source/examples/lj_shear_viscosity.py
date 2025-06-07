@@ -365,8 +365,13 @@ eta_production_ext = demo_production(3).acint
 #   slightly lower compared to points at higher frequencies.
 #   This is (most likely) a statistical artifact.
 #   To reduce the risk that such artifacts affect the final result,
-#   one can increase the parameter `neff_min`, which is $5\times P$ by default.
-#   Hence, at the lowest frequency cutoff, the effective number of points is 15.
+#   one can increase the parameter `neff_min` of the `estimate_acint()` function.
+#   Its default value is $5\times P$, so in this case 15.
+#
+# - For higher frequency cutoffs, both Z-scores increase, showing that the
+#   autocorrelation function only decays exponentially in the limit of large lag times.
+#   This is expected, since at sufficiently short time scales,
+#   the pressure tensor fluctuations are smooth functions.
 
 
 # %% [markdown]

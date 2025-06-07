@@ -107,6 +107,18 @@ def test_single():
     assert spectrum2.amplitudes_ref is None
 
 
+def test_mixed():
+    sequences = [
+        np.array([0.66134257, 1.69596962, 2.08533685, 0.62396761, -0.21445517, 1.2226847]),
+        np.array([-0.66384362, -0.55499254, -1.84284631, 0.3352769, 0.86237774, 0.1605811]),
+    ]
+    prefactors1 = 3.1
+    prefactors2 = [3.1, 3.1]
+    spectrum1 = compute_spectrum(sequences, prefactors=prefactors1, timestep=2.5)
+    spectrum2 = compute_spectrum(sequences, prefactors=prefactors2, timestep=2.5)
+    assert spectrum1.amplitudes == pytest.approx(spectrum2.amplitudes)
+
+
 def test_variance():
     sequences = np.array(
         [

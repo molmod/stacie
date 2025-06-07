@@ -391,9 +391,9 @@ density = estimate_density()
 # | NpT+NVE  | 8                   | 1.454 ± 0.014              | 354 ± 8.0          | ext1 expoly(0,1) |
 # | NpT+NVE  | 100                 | 1.454 ± 0.014              | 353 ± 3.7          | ext2 expoly(0,1) |
 # | NpT+NVE  | 100                 | 1.454 ± 0.014              | 353 ± 3.8          | ext2 expoly(0) |
-# | NpT+NVE  | 4                   | 1.454 ± 0.014              | 343 ± 5.4          | init pade([0, 2], [2]) |
-# | NpT+NVE  | 8                   | 1.454 ± 0.014              | 346 ± 3.7          | ext1 pade([0, 2], [2]) |
-# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 349 ± 1.3          | ext2 pade([0, 2], [2]) |
+# | NpT+NVE  | 4                   | 1.454 ± 0.014              | 343 ± 5.4          | init pade(0, 2; 2) |
+# | NpT+NVE  | 8                   | 1.454 ± 0.014              | 346 ± 3.7          | ext1 pade(0, 2; 2) |
+# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 349 ± 1.3          | ext2 pade(0, 2; 2) |
 # | NpT+NVT  | 6                   | 1.456                      | 348 ± 7    | {cite:p}`wang_2020_comparison` |
 # | NpT+NVT  | > 5                 | 1.444                      | ≈ 310      | {cite:p}`wang_2014_molecular` |
 # | Experiment | N.A.              | 1.542 ± 0.006              | 366 ± 3            | {cite:p}`janz_1968_molten` {cite:p}`bockris_1961_self` |
@@ -434,7 +434,6 @@ def convert_molar_conductivity():
     molar_conductivity_std = 3 * 1e-4  # S m²/mol
     density = 1.456 * 1e3  # kg/m³
     molar_mass = (22.990 + 35.45) * 1e-3  # kg/mol
-    # avogadro = 6.02214076e23  # 1/mol
     molar_volume = molar_mass / density  # m³/mol
     conductivity = molar_conductivity / molar_volume
     conductivity_std = molar_conductivity_std / molar_volume

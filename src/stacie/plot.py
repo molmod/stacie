@@ -243,23 +243,45 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result, *, legend
 
 
 def plot_extras(axs: NDArray[mpl.axes.Axes], uc: UnitConfig, r: Result):
-    plot_criterion(axs[0, 0], uc, r)
+    plot_cutoff_weight(axs[0, 0], uc, r)
+    plot_sanity(axs[1, 0], uc, r)
+    axs[0, 0].sharex(axs[1, 0])
+    axs[0, 0].set_xlabel(None)
     plot_uncertainty(axs[0, 1], uc, r)
-    plot_spectrum(axs[1, 0], uc, r.spectrum, nplot=8 * r.ncut)
     plot_evals(axs[1, 1], uc, r)
+    axs[0, 1].sharex(axs[1, 1])
+    axs[0, 1].set_xlabel(None)
 
 
-def plot_criterion(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+def plot_cutoff_weight(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     """Plot the cutoff criterion as a function of cutoff frequency."""
     fcuts = np.array([props["fcut"] for props in r.history])
     criteria = np.array([props["criterion"] for props in r.history])
     criteria -= criteria.min()
     probs = np.exp(-criteria)
     probs /= probs.sum()
-    ax.plot(fcuts / uc.freq_unit, probs, color="C1", lw=1)
+    ax.plot(fcuts / uc.freq_unit, probs, color="C1")
+    ax.set_xscale("log")
     ax.set_xlabel(label_unit("Cutoff frequency", uc.freq_unit_str))
-    ax.set_ylabel("Cutoff weight")
-    ax.set_title("Cutoff criterion " + r.cutoff_criterion.name, wrap=True)
+    ax.set_ylabel(f"{r.cutoff_criterion.name} weight")
+
+
+def plot_sanity(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
+    fcuts = np.array([props["fcut"] for props in r.history])
+    low = -1
+    high = 4
+    for key, color in ("cost", "C0"), ("criterion", "C2"):
+        zscore = np.array([props[f"{key}_zscore"] for props in r.history])
+        ax.plot(fcuts / uc.freq_unit, zscore, color=color, label=key.title())
+        low = min(low, zscore.min())
+        high = max(high, r.props[f"{key}_zscore"] * 1.2)
+    ax.set_xscale("log")
+    ax.set_xlabel(label_unit("Cutoff frequency", uc.freq_unit_str))
+    ax.set_ylabel("Z-score")
+    ax.axhline(0, color="k", ls="--")
+    ax.axhline(2, color="k", ls="--")
+    ax.set_ylim(low - 0.2, high)
+    ax.legend()
 
 
 def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
@@ -301,9 +323,9 @@ def plot_uncertainty(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
     if r.spectrum.amplitudes_ref is not None:
         limit = r.spectrum.amplitudes_ref[0]
         ax.axhline(limit / uc.acint_unit, **REF_PROPS)
-    ax.set_title(f"AC integral ({uc.clevel:.0%} CI)", wrap=True)
+    ax.set_xscale("log")
     ax.set_xlabel(label_unit("Cutoff frequency", uc.freq_unit_str))
-    ax.set_ylabel(label_unit(f"${uc.acint_symbol}$", uc.acint_unit_str))
+    ax.set_ylabel(label_unit(f"${uc.acint_symbol}$ ({uc.clevel:.0%} CI)", uc.acint_unit_str))
 
 
 def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
@@ -327,9 +349,9 @@ def plot_evals(ax: mpl.axes.Axes, uc: UnitConfig, r: Result):
             vmin=0,
             vmax=1,
         )
-    ax.set_title("Conditioned Hessian", wrap=True)
+    ax.set_xscale("log")
     ax.set_xlabel(label_unit("Cutoff frequency", uc.freq_unit_str))
-    ax.set_ylabel("Eigenvalue")
+    ax.set_ylabel("Hessian Eigenvalues")
     ax.set_yscale("log")
 
 

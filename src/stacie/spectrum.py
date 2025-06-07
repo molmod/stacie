@@ -19,6 +19,7 @@
 """Utility to prepare the spectrum and other inputs for given sequences."""
 
 from collections.abc import Iterable
+from itertools import repeat
 from typing import Self
 
 import attrs
@@ -170,7 +171,12 @@ def compute_spectrum(
         amplitudes = 0
         total = 0
         total_sq = 0
-        iterator = sequences if prefactors is None else zip(prefactors, sequences, strict=True)
+        if prefactors is None:
+            iterator = sequences
+        elif isinstance(prefactors, Iterable):
+            iterator = zip(prefactors, sequences, strict=True)
+        else:
+            iterator = zip(repeat(prefactors), sequences, strict=False)
         for item_prefactors, item_sequences in iterator:
             nstep, item_nindep, item_amplitudes, item_total, item_total_sq = _process_sequences(
                 item_sequences, item_prefactors, nstep

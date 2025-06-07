@@ -16,8 +16,8 @@ pip install -U pip
 pip install -e .[docs,tests]
 pytest -vv
 cd docs
-make html
-make latexpdf
+./compile_html.sh
+./compile_pdf.sh
 ```
 
 ## Documentation Live Preview

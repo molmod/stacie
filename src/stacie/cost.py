@@ -21,7 +21,7 @@
 import attrs
 import numpy as np
 from numpy.typing import NDArray
-from scipy.special import digamma, gammaln
+from scipy.special import digamma, gammaln, polygamma
 
 from .model import SpectrumModel
 
@@ -117,6 +117,29 @@ class LowFreqCost:
             )
         return results
 
+    def expected(self, pars: NDArray[float]) -> NDArray[float]:
+        """Compute the expected value and variance of the cost function.
+
+        Parameters
+        ----------
+        pars
+            The model parameters.
+            Vectorization is not supported yet.
+
+        Returns
+        -------
+        expected, variance
+            The expected value and variance of the cost function.
+        """
+        pars = np.asarray(pars)
+        amplitudes_model = self.model.compute(self.freqs, pars)
+        alphas = 0.5 * self.ndofs
+        thetas = amplitudes_model[0] / alphas
+        return (
+            np.dot(entropy_gamma(alphas, thetas)[0], self.weights),
+            np.dot(varlogp_gamma(alphas), self.weights**2),
+        )
+
 
 def logpdf_gamma(
     x: NDArray[float], alpha: NDArray[float], theta: NDArray[float], *, deriv: int = 0
@@ -184,3 +207,21 @@ def entropy_gamma(alpha: NDArray[float], theta: NDArray[float], *, deriv: int = 
     if deriv >= 3:
         raise ValueError("Third or higher derivatives are not supported.")
     return results
+
+
+def varlogp_gamma(alpha: NDArray[float]) -> NDArray[float]:
+    """Compute the variance of the log-probability density function of the Gamma distribution.
+
+    Parameters
+    ----------
+    alpha
+        The shape parameter.
+
+    Returns
+    -------
+    var
+        The variance of the log-probability density function.
+        Array with shape ``(alpha,)``.
+    """
+    alpha = np.asarray(alpha)
+    return (alpha - 1) ** 2 * polygamma(1, alpha) - alpha + 2

@@ -77,9 +77,13 @@ class CutoffCriterion:
         Returns
         -------
         results
-            A dictionary with "criterion" and other fields.
-            It may also contain a ``"msg"`` if it fails to compute the criterion.
-            If the "stop" field is present and set to True, the cutoff scan can be stopped.
+            A dictionary with at least the following fields:
+
+            - "criterion": minus the logarithm of a likelihood of "a good fit".
+            - "criterion_expected": expected value of the negative log likelihood.
+            - "criterion_var": expected variance of the negative log likelihood.
+            - "msg": optional message explaining failure to compute the criterion.
+            - "stop": optional flag to terminate the cutoff scan early.
         """
         raise NotImplementedError
 
@@ -232,18 +236,22 @@ class CV2LCriterion(CutoffCriterion):
 
         # Compute the negative log likelihood of the difference in parameters.
         delta = np.dot(evecs.T, xd / scales)
-        nll = (
+        criterion = (
             0.5 * (delta**2 / evals).sum()
             + 0.5 * np.log(2 * np.pi * evals).sum()
             + np.log(scales).sum()
         )
+        expected = 0.5 * np.log(2 * np.pi * np.exp(1) * evals).sum() + np.log(scales).sum()
+        variance = len(evals) / 2
         if self.regularize:
-            nll -= (
+            penalty = -(
                 np.log(props["cost_hess_scales"]).sum()
                 + 0.5 * np.log(props["cost_hess_rescaled_evals"]).sum()
             )
+            criterion += penalty
+            expected += penalty
 
-        return {"criterion": nll}
+        return {"criterion": criterion, "criterion_expected": expected, "criterion_var": variance}
 
 
 def linear_weighted_regression(

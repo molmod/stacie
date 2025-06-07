@@ -199,6 +199,7 @@ spectrum = compute_spectrum(
 
 # %%
 uc = UnitConfig(
+    time_fmt=".1f",
     acint_fmt=".1e",
     acint_unit_str=r"a$^2_0$",
 )
@@ -228,35 +229,60 @@ result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True, uc=uc)
 error_mc = np.sqrt(result.acint)
 print(f"Error of the mean = {error_mc:.5f}")
 error_of_error_mc = 0.5 * result.acint_std / error_mc
-print(f"Uncertainty of the error of mean = {error_of_error_mc:.5f}")
+print(f"Uncertainty of the error of the mean = {error_of_error_mc:.5f}")
 
 # %% [markdown]
-# The error of the mean is about $8.0 \times 10^{-3}\,\mathrm{a}_0$.
 # It is also interesting to visualize the fitted spectrum and some intermediate results.
 
 # %%
-# Plot of the empirical and fitted model spectrum.
+# Plot of the sampling and fitted model spectrum.
 plt.close("fitted")
 _, ax = plt.subplots(num="fitted")
 plot_fitted_spectrum(ax, uc, result)
 
+# %% [markdown]
+# The Pade model can clearly explain the spectrum,
+# even well beyond the width of the peak at zero frequency.
+
 # %%
-# Plot additional intermediate results
-# as a function of the frequency cutoff.
+# Plot additional intermediate results as a function of the frequency cutoff.
 plt.close("extras")
 _, axs = plt.subplots(2, 2, num="extras")
 plot_extras(axs, uc, result)
 
 # %% [markdown]
-# The cutoff criterion remains high for the entire range of frequencies,
-# meaning that the data are extremely well described by the Pade model,
-# resulting in precise error estimates.
-# This result is somewhat fortuitous and is typically not encountered for data from complex systems.
+# The extra plots reveal several interesting challenges of the analysis:
+#
+# - The cutoff weight (top left panel) remains high up to the highest cutoff frequency considered.
+#   If one is only interested in the zero-frequency limit of the spectrum,
+#   there is little to be gained by including many data points in the fit at high frequencies,
+#   well past the width of the peak at zero frequency.
+#   These will not make the autocorrelation integral more precise,
+#   but bear the risk of introducing some bias due to underfitting.
+#   One may manually impose a maximum frequency cutoff with the `fcut_max` argument
+#   of the `estimate_acint()` function.
+#
+# - The risk for some bias at high cutoff frequencies is also visible in the Z-score
+#   associated with the cutoff criterion (green curve in the lower left panel).
+#   For higher cutoff frequencies, the Z-score slowly increases to values above 2,
+#   where the cutoff weight is still significant.
+#
+#   The reason for the higher Z-score is that the input time series is not normally distributed,
+#   due to the asymmetry of the Kratzer--Fues potential.
+#   As a result, the MC chain cannot be described by a Gaussian process,
+#   and the uncertainty of the spectrum amplitudes is not exactly Gamma-distributed.
+#   You can verify this hypothesis by rerunning this example with `TEMPERATURE = 100`
+#   and `PROPOSAL_STEP = 0.03`.
+#   This will result in a more symmetric distribution of bond lengths.
+#   By lowering the proposal step, the correlation time remains about the same.
+#   With these settings, a lower criterion Z-score is obtained at high cutoff frequencies.
+#
+#
 
 # %% [markdown]
 # ## Precise Mean With Numerical Quadrature
 #
-# Because the probability density is one-dimensional,
+# Because the probability density sampled by the MC chain is one-dimensional,
 # it is feasible to compute the mean using numerical quadrature,
 # which is much more accurate than the Monte Carlo estimate.
 # (For production simulations,

@@ -54,7 +54,7 @@ From our practical experience, $M=10$ is a low number and $M=500$ is quite high.
 For $M<10$, the results are often rather poor and possibly a bit confusing.
 In this low-data regime, the sampling PSD is extremely noisy.
 While we have validated STACIE in this low-data regime with the ACID test set,
-the visualization of the spectrum is not very informative.
+the visualization of the spectrum will not be very informative for low $M$.
 
 A single molecular dynamics simulation often provides more than one independent sequence.
 The following table lists $M$ (for a single simulation) for the transport properties discussed
@@ -70,13 +70,22 @@ in the [Properties](../properties/index.md) section.
 
 This means that in most cases (except for diffusivity), multiple independent simulations
 are required to achieve a good estimate of the transport property.
+While diffusivity may seem to be a very forgiving case,
+it is important to note that displacements of particles in a liquid are often highly correlated.
+STACIE assumes its inputs to be independent, which is in principle not the case for diffusivity.
+However, at the lowest frequencies, molecules in a liquid show essentially uncorrelated motion,
+which is why STACIE can still provide a good estimate of the diffusivity.
 
 ## Step 2: Test the Sufficiency of the Number of Steps and Increase if Necessary
 
 There is no simple way to know *a priori* the required number of steps in the input sequences.
 Hence, we recommend first generating inputs with about $400\,P$ steps,
 where $P$ is the number of model parameters, and analyzing these inputs with STACIE.
-This will provide a first estimate of the autocorrelation integral and its relative error.
+With this choice, the first $20 P$ points that are ideally used for fitting
+will be a factor $10$ below the Nyquist frequency,
+which is a minimal first attempt to identify the low-frequency part of the spectrum.
+Using these data as inputs, you will obtain a first estimate
+of the autocorrelation integral and its relative error.
 If the relative error is larger than the desired value,
 you can extend the input sequences with additional steps and repeat the analysis.
 
@@ -87,10 +96,15 @@ It is not uncommon to run into problems with storage quota in this scenario.
 To reduce the storage requirements, [block averages](block_averages.md) can be helpful.
 
 In addition to the relative error, there are other indicators to monitor
-the quality of the results:
+the quality of the results.
+If any of the following criteria are not met,
+we recommend extending the input sequences with additional steps
+and repeating the analysis with STACIE:
 
 - The effective number of points used in the fit, which is determined by the cutoff frequency,
   should be larger than 20 times the number of model parameters.
+- The Z-score computed for the regression cost and the cutoff criterion
+  should be smaller than 2.
 - When using the Pade model, the total simulation time should be sufficient
   to resolve the zero-frequency peak of the spectrum.
   The width of the peak can be derived from
@@ -114,7 +128,7 @@ the quality of the results:
 
 Finally, it is recommended that you use sequences whose length is a power of two,
 or at least a product of small prime numbers.
-The FFT algorithm used in STACIE is optimized for such sequences
+NumPy's FFT algorithm used in STACIE is optimized for such sequences
 and becomes significantly slower for sequence lengths with large prime factors.
 A good strategy for adhering to this recommendation is to start with a sequence length
 equal to the first power of two greater than $400 P$, where $P$ is the number of model parameters.

@@ -180,8 +180,15 @@ plot_extras(axs, uc, result_exppoly)
 #      However, if you want to exclude them from the analysis,
 #      you can increase the `neff_min` option of
 #      [`estimate_acint()`](#stacie.estimate.estimate_acint).
-# 3. The **bottom left panel** shows the sampling spectrum up to higher frequencies.
-#    This can be useful for getting an idea of the structure of the spectrum.
+# 3. The **bottom left panel** the Z-scores of the regression cost and the cutoff criterion,
+#    as a function of the cutoff frequency.
+#    The Z-score is the number of standard deviations a value deviates from its mean.
+#    For ill-behaved fits, the Z-scores easily exceed 2.
+#    When providing sufficient inputs, high Z-scores should only occur where the cutoff weight is low.
+#    If the Z-scores are high for cutoff frequencies with high cutoff weights,
+#    the input data is insufficient for reliable error estimation or the model is not appropriate.
+#    In this case, it is recommended to use a different model
+#    or to increase the length of the input sequences.
 # 4. The **bottom right panel** shows the eigenvalues of the Hessian matrix of the fit,
 #    in a preconditioned parameter space, at each cutoff frequency.
 #    A large spread of the eigenvalues indicates that the fit is not well constrained.

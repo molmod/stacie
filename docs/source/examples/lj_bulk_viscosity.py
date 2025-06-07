@@ -58,11 +58,7 @@ DATA_ROOT = Path(os.getenv("DATA_ROOT", "./")) / "lammps_lj3d/sims/"
 
 
 # %%
-def get_piso(pcomps):
-    return np.array([(pcomps[0] + pcomps[1] + pcomps[2]) / 3])
-
-
-def estimate_bulk_viscosity(name, pcomps, av_temperature, volume, timestep):
+def estimate_bulk_viscosity(name, p_iso, av_temperature, volume, timestep):
     # Compute spectrum of the isotropic pressure fluctuations.
     # Note that the Boltzmann constant is 1 in reduced LJ units.
     uc = UnitConfig(
@@ -74,7 +70,7 @@ def estimate_bulk_viscosity(name, pcomps, av_temperature, volume, timestep):
         time_unit_str="τ*",
     )
     spectrum = compute_spectrum(
-        pcomps,
+        p_iso,
         prefactors=volume / av_temperature,
         timestep=timestep,
         include_zero_freq=False,
@@ -129,25 +125,27 @@ def demo_production(npart: int = 3, ntraj: int = 100):
 
     # Load trajectory data.
     thermos = []
-    pressures = []
+    p_isos = []
     for itraj in range(ntraj):
         thermos.append([])
-        pressures.append([])
+        p_isos.append([])
         for ipart in range(npart):
             prod_dir = DATA_ROOT / f"replica_{itraj:04d}_part_{ipart:02d}/"
             thermos[-1].append(np.loadtxt(prod_dir / "nve_thermo.txt"))
-            pressures[-1].append(np.loadtxt(prod_dir / "nve_pressure_blav.txt"))
+            # The average over columns 2, 3 and 4 of parts corresponds
+            # to the time-dependent isotropic pressure.
+            p_comps = np.loadtxt(prod_dir / "nve_pressure_blav.txt")
+            p_isos[-1].append(p_comps[:, 1:4].mean(axis=1))
     thermos = [np.concatenate(parts).T for parts in thermos]
-    pressures = [np.concatenate(parts).T for parts in pressures]
+    p_iso = [np.concatenate(parts) for parts in p_isos]
 
     # Compute the average temperature
     av_temperature = np.mean([thermo[1] for thermo in thermos])
 
     # Compute the bulk viscosity
-    pcomps = np.concatenate([get_piso(pressure[1:]) for pressure in pressures])
     return estimate_bulk_viscosity(
         f"part{npart}",
-        pcomps,
+        p_iso,
         av_temperature,
         info["volume"],
         info["timestep"] * info["block_size"],
@@ -155,6 +153,29 @@ def demo_production(npart: int = 3, ntraj: int = 100):
 
 
 eta_bulk_production = demo_production(3)
+
+# %% [markdown]
+# As opposed to the shear viscosity, the cutoff criterion Z-score is relatively high, around 2.
+# This suggests that the fits on the two halves deviate more from each other
+# than what would be expected from the uncertainty of the spectrum.
+# There are multiple potential explanations for this observation:
+#
+# - One potential explanation is that the isotropic pressure fluctuations
+#   are not perfectly Gaussian.
+#   This is expected for a Lennard-Jones fluid,
+#   as expansion of the system will result in slightly lower restoring forces than compression.
+#   Such a slightly non-Gaussian distribution of the pressure fluctuations
+#   can result in a distribution of spectral data
+#   that deviates from the Gamma distribution employed by STACIE.
+#
+# - Another potential cause is that there is not yet sufficient data to fix the cutoff frequency.
+#   This can be addressed by generating more trajectory data,
+#   which will make it easier to determine the suitable range of cutoff frequencies.
+#   We have not further expanded the production runs in this example,
+#   to keep the computational cost low.
+#   Furthermore, as shown in the comparison below,
+#   we already obtained a good agreement with the literature results
+#   and relatively small uncertainties.
 
 # %% [markdown]
 # ## Comparison to Literature Results

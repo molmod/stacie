@@ -195,13 +195,24 @@ As the cutoff frequency and the effective number of fitting points increase,
 the model becomes better constrained.
 The second term will decrease, but as soon as the model underfits the data,
 the third term (the bias term) will steeply increase.
-Practically, the cutoff scan is interrupted when the criterion exceeds the incumbent by $g_\text{incr}$.
+Practically, the cutoff scan is interrupted
+when the criterion exceeds the incumbent by $g_\text{incr}$.
 The default value is $g_\text{incr} = 100$,
 but this can be changed using the `criterion_high` option
 in the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
 
 A good cutoff frequency is the one that minimizes the criterion,
 thereby finding a good compromise between bias and variance.
+
+```{note}
+In the description above, we assume that a cutoff exists
+for which the model can explain the spectrum.
+With unfortunate model choices, this may not be the case.
+The cutoff scan will then try to find a compromise between the bias and variance,
+but this will not be useful if the model can not be describe the spectrum at all.
+This situation can be detected by checking the Regression Cost Z-score,
+derived in the previous section.
+```
 
 ## Marginalization Over the Cutoff Frequency
 
@@ -210,7 +221,8 @@ whether it is human judgment or an automated algorithm,
 introduces some uncertainty in the final result
 because the cutoff is based on a sampling PSD spectrum with statistical uncertainty.
 
-In STACIE, this uncertainty is accounted for by marginalizing the model parameters over the cutoff frequency,
+In STACIE, this uncertainty is accounted for
+by marginalizing the model parameters over the cutoff frequency,
 using $\mathcal{L}^\text{CV2L}$ as a model for the likelihood.
 This approach naturally incorporates the uncertainty in the cutoff frequency
 and is preferred over fixing the cutoff frequency at a single value.
@@ -232,3 +244,94 @@ $$
 Here, $\hat{\mathbf{b}}^{(j)}$ and $\hat{C}_{\mathbf{b}^{(j)},\mathbf{b}^{(j)}}$ represent
 the parameters and their covariance, respectively, for cutoff $j$.
 The weights $W_j$ sum to 1 and are proportional to $\mathcal{L}^\text{CV2L}$.
+
+Note that STACIE also computes weighted averages of other quantities in the same way,
+including:
+
+- The effective number of fitting points, $N_\text{eff}$
+- The cutoff frequency, $f_\text{cut}$
+- The switching function, $w(f|f_\text{cut})$
+- The regression cost Z-score, $Z_\text{cost}$
+- The cutoff criterion Z-score, $Z_\text{criterion}$ (defined below)
+
+## Cutoff Criterion Z-score
+
+In the far majority of cases, the cutoff criterion will be dominated by the bias term:
+it typically increases steeply as soon as the model underfits the data.
+In contrast, the variance term decreases relatively slowly.
+As a result, the minimum of the cutoff criterion is well-defined at the onset of underfitting.
+This works particularly well when the spectrum can be computed with a high frequency resolution.
+Unfortunately, there are cases where this ideal pattern does not hold,
+usually when providing too little data to STACIE,
+in which the cutoff criterion exhibits statistical fluctuations.
+To detect such ill-constrained cases, STACIE computes a Z-score for the cutoff criterion.
+This Z-score is defined as in the same spirit as the Regression Cost Z-score,
+but now using $\operatorname{criterion}^\text{CV2L}$ instead of the regression cost function.
+
+The cutoff criterion Z-score is defined as:
+
+$$
+    Z_\text{criterion} = \frac{
+        \operatorname{criterion}^\text{CV2L} - \mean\left[
+            \hat{\operatorname{criterion}}^\text{CV2L}
+        \right]
+    }{
+        \std\left[
+            \hat{\operatorname{criterion}}^\text{CV2L}
+        \right]
+    }
+$$
+
+The mean and standard deviation are computed by averaging over all vectors $\mathbf{d}$
+from the likelihood $\mathcal{L}^\text{CV2L}$.
+
+For cutoff frequencies that minimize the criterion, the Z-score should be close to zero,
+because the difference between two parameters fitted to the left and right halves of the spectrum
+should be zero within the statistical uncertainty.
+When the bias term in the cutoff criterion is noisy,
+it may feature minima dominated by the variance term,
+which are not useful and may produce unreliable estimates (with misleading error bars).
+In such cases, the cutoff criterion Z-score will be significantly larger than zero.
+
+The mean in the Z-score can be worked out easily
+because it corresponds to the entropy of a multivariate normal distribution:
+
+$$
+    \mean\left[
+        \hat{\operatorname{criterion}}^\text{CV2L}
+    \right]
+    = \mean_{\mathbf{d}}\left[
+        -\ln \mathcal{L}^\text{CV2L}\left(
+            \hat{\mathbf{d}},
+            \hat{\mathbf{C}}_{\mathbf{d},\mathbf{d}}
+        \right)
+    \right]
+    = \frac{P}{2}\ln(2\pi e) + \frac{1}{2}\ln|\hat{\mathbf{C}}_{\mathbf{d},\mathbf{d}}|
+$$
+
+For the standard deviation, we first work out the variance of the cutoff criterion:
+
+$$
+    \var\left[
+        \hat{\operatorname{criterion}}^\text{CV2L}
+    \right]
+    = \var_{\mathbf{d}} \left[
+        -\ln \mathcal{L}^\text{CV2L}\left(
+            \hat{\mathbf{d}},
+            \hat{\mathbf{C}}_{\mathbf{d},\mathbf{d}}
+        \right)
+    \right]
+$$
+
+Only the bias term contributes to the variance of the cutoff criterion.
+This term can be rewritten as one half the sum of $P$ squared standard normal distributed variables.
+By making use of the properties of the chi-squared distribution,
+we can work out the variance of the bias term
+and take the square root to obtain the standard deviation:
+
+$$
+    \std\left[
+        \hat{\operatorname{criterion}}^\text{CV2L}
+    \right]
+    = \sqrt{\frac{P}{2}}
+$$

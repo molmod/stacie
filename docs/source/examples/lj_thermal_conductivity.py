@@ -149,6 +149,12 @@ kappa_production = demo_production(3)
 # than that of the pressure tensor fluctuations.
 # This means that the thermal conductivity is a bit easier to compute than the viscosity.
 # Note that the selected block size is still compatible with this shorter time scale.
+#
+# Similarly to the bulk viscosity, the Z-scores are clearly positive.
+# This could be for the same reasons as in the bulk viscosity example.
+# In addition, the block size of 0.03 τ* is slightly larger than the recommended 0.028 τ*,
+# meaning that the spectrum might be perturbed by (very) small aliasing effects
+# that could distort the fit.
 
 # %% [markdown]
 # ## Comparison to Literature Results

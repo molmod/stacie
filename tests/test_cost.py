@@ -23,7 +23,7 @@ import pytest
 from conftest import check_curv, check_deriv, check_gradient, check_hessian
 from scipy import stats
 
-from stacie.cost import LowFreqCost, entropy_gamma, logpdf_gamma
+from stacie.cost import LowFreqCost, entropy_gamma, logpdf_gamma, varlogp_gamma
 from stacie.model import PadeModel
 
 LOGPDF_GAMMA_CASES = [
@@ -66,6 +66,17 @@ def test_entropy():
     assert logpdf1 == pytest.approx(logpdf2, rel=1e-8)
     check = -np.mean(logpdf1)
     assert entropy == pytest.approx(check, rel=1e-2)
+
+
+def test_varlogp_gamma():
+    """Check the variance of the log PDF of the gamma distribution."""
+    alpha = 2.5
+    theta = 6.0
+    varlogp = varlogp_gamma(alpha)
+    rng = np.random.default_rng(1234)
+    x = stats.gamma.rvs(alpha, scale=theta, size=100000, random_state=rng)
+    logpdf = stats.gamma.logpdf(x, alpha, scale=theta)
+    assert varlogp == pytest.approx(np.var(logpdf), rel=1e-2)
 
 
 @pytest.fixture

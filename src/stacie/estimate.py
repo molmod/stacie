@@ -68,12 +68,12 @@ class Result:
 
     @property
     def fcut(self) -> int:
-        """The (ensemble average) of the cutoff frequency."""
+        """The weighted average of the cutoff frequency."""
         return self.props["fcut"]
 
     @property
     def neff(self) -> int:
-        """The effective number of frequencies used in the fit."""
+        """The weighted average of the effective number of frequencies used in the fit."""
         return self.props["weights"].sum()
 
     @property
@@ -306,10 +306,14 @@ def estimate_acint(
     weights = weights[:ncut]
 
     props = {
-        "fcut": np.dot(fcut_weights, [props["fcut"] for props in history]),
+        # Fixed parameters
         "ncut": ncut,
         "weights": weights,
         "switch_exponent": switch_exponent,
+        # Some properties can only be mixed directly.
+        "fcut": np.dot(fcut_weights, [props["fcut"] for props in history]),
+        "cost_zscore": np.dot(fcut_weights, [props["cost_zscore"] for props in history]),
+        "criterion_zscore": np.dot(fcut_weights, [props["criterion_zscore"] for props in history]),
     }
     # Use fcut_weights to mix model parameters and their covariance
     props["pars"], props["pars_covar"] = mixture_stats(
@@ -340,7 +344,7 @@ def fit_model_spectrum(
     rng: np.random.Generator,
     nonlinear_budget: int,
 ) -> dict[str, NDArray | float]:
-    """Optimize the parameter of a model for a given spectrum.
+    """Optimize the parameter of a model for a given spectrum and cutoff frequency.
 
     Parameters
     ----------
@@ -383,8 +387,14 @@ def fit_model_spectrum(
     - ``cost_hess_scales``: Hessian rescaling vector, see ``robust_posinv``.
     - ``cost_hess_rescaled_evals``: Rescaled Hessian eigenvalues
     - ``cost_hess_rescaled_evecs``: Rescaled hessian eigenvectors
+    - ``cost_expected``: expected value of the cost function
+    - ``cost_var``: expected variance of the cost function
+    - ``cost_zscore``: z-score of the cost function
     - ``switch_exponent``: exponent used to construct the cutoff
     - ``criterion``: value of the criterion whose minimizer determines the frequency cutoff
+    - ``criterion_expected``: expected value of the criterion
+    - ``criterion_var``: expected variance of the criterion
+    - ``criterion_zscore``: z-score of the criterion
     - ``ll``: log likelihood
     - ``pars_init``: initial guess of the parameters
     - ``pars``: optimized parameters
@@ -472,6 +482,19 @@ def fit_model_spectrum(
     # Compute the cutoff criterion
     props.update(cutoff_criterion(spectrum, model, props))
 
+    # Compute the z-scores
+    props["cost_expected"], props["cost_var"] = cost.expected(pars_opt)
+    props["cost_zscore"] = (
+        (props["cost_value"] - props["cost_expected"]) / np.sqrt(props["cost_var"])
+        if np.isfinite(props["cost_value"])
+        else np.inf
+    )
+    props["criterion_zscore"] = (
+        (props["criterion"] - props["criterion_expected"]) / np.sqrt(props["criterion_var"])
+        if np.isfinite(props["criterion"])
+        else np.inf
+    )
+
     _finalize_props(props, model)
 
     # Done
@@ -502,6 +525,7 @@ def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
             model=r.model.name,
             cutoff_criterion=r.cutoff_criterion.name,
             timestep=r.spectrum.timestep / uc.time_unit,
+            simtime=r.spectrum.nstep * r.spectrum.timestep / uc.time_unit,
             acint=r.acint / uc.acint_unit,
             acint_std=r.acint_std / uc.acint_unit,
             corrtime_int=r.corrtime_int / uc.time_unit,
@@ -509,6 +533,9 @@ def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
             npar=len(r.props["pars"]),
             maxdof=r.spectrum.ndofs.max(),
             fcut=r.fcut / uc.freq_unit,
+            neff_threshold=20 * len(r.props["pars"]),
+            cost_zscore=r.props["cost_zscore"],
+            criterion_zscore=r.props["criterion_zscore"],
         )
         if "corrtime_exp" in r.props:
             text += EXPONENTIAL_TEMPLATE.format(
@@ -525,8 +552,9 @@ def summarize_results(res: Result | list[Result], uc: UnitConfig | None = None):
 
 
 GENERAL_TEMPLATE = """\
-SPECTRUM SETTINGS
+INPUT TIME SERIES
     Time step:                     {timestep:{uc.time_fmt}} {uc.time_unit_str}
+    Simulation time:               {simtime:{uc.time_fmt}} {uc.time_unit_str}
     Maximum degrees of freedom:    {maxdof}
 
 MAIN RESULTS
@@ -535,9 +563,13 @@ MAIN RESULTS
     Integrated correlation time:   {corrtime_int:{uc.time_fmt}} ± {corrtime_int_std:{uc.time_fmt}} \
 {uc.time_unit_str}
 
+SANITY CHECKS
+    Effective number of points:    {r.neff:.1f} (above {neff_threshold:d} is recommended)
+    Regression cost Z-score:       {cost_zscore:.1f} (below 2 is recommended)
+    Cutoff criterion Z-score:      {criterion_zscore:.1f} (below 2 is recommended)
+
 MODEL {model} | CUTOFF CRITERION {cutoff_criterion}
     Number of parameters:          {npar}
-    Average effective points:      {r.neff:.1f}
     Average cutoff frequency:      {fcut:{uc.freq_fmt}} {uc.freq_unit_str}
 """
 
@@ -546,8 +578,8 @@ EXPONENTIAL_TEMPLATE = """\
 {uc.time_unit_str}
 
 RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL CORR. TIME)
-    Simulation time:               {exp_simulation_time:{uc.time_fmt}} ± \
-{exp_simulation_time_std:{uc.time_fmt}} {uc.time_unit_str}
     Block time:                    {exp_block_time:{uc.time_fmt}} ± \
 {exp_block_time_std:{uc.time_fmt}} {uc.time_unit_str}
+    Simulation time:               {exp_simulation_time:{uc.time_fmt}} ± \
+{exp_simulation_time_std:{uc.time_fmt}} {uc.time_unit_str}
 """
