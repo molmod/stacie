@@ -563,10 +563,10 @@ MAIN RESULTS
     Integrated correlation time:   {corrtime_int:{uc.time_fmt}} ± {corrtime_int_std:{uc.time_fmt}} \
 {uc.time_unit_str}
 
-SANITY CHECKS
-    Effective number of points:    {r.neff:.1f} (above {neff_threshold:d} is recommended)
-    Regression cost Z-score:       {cost_zscore:.1f} (below 2 is recommended)
-    Cutoff criterion Z-score:      {criterion_zscore:.1f} (below 2 is recommended)
+SANITY CHECKS (weighted averages over cutoff grid)
+    Effective number of points:    {r.neff:.1f} (ideally > {neff_threshold:d})
+    Regression cost Z-score:       {cost_zscore:.1f} (ideally < 2)
+    Cutoff criterion Z-score:      {criterion_zscore:.1f} (ideally < 2)
 
 MODEL {model} | CUTOFF CRITERION {cutoff_criterion}
     Number of parameters:          {npar}
