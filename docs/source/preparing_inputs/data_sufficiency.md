@@ -129,6 +129,13 @@ and repeating the analysis with STACIE:
         N \approx 20\pi\tau_\text{exp}/h
   $$
 
+  When STACIE estimates a large exponential correlation time, e.g. $\tau_\text{exp} > T/(20 \pi)$,
+  it has derived this value from a very sharp spectral peak at zero frequency.
+  In this case, the peak width is artificially broadened due to
+  [spectral leakage](https://en.wikipedia.org/wiki/Spectral_leakage),
+  which results in an underestimation of the correlation time.
+  Hence, the true exponential correlation time is then even larger than the estimated value.
+
 Finally, it is recommended that you use sequences whose length is a power of two,
 or at least a product of small prime numbers.
 NumPy's FFT algorithm used in STACIE is optimized for such sequences
