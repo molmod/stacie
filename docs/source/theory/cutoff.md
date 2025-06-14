@@ -58,7 +58,7 @@ The following parameters define the grid:
 - The lowest cutoff is determined by solving:
 
     $$
-        N_{\text{eff}}(f_{\text{cut,min}}) = N_{\text{eff, min}} P
+        N_{\text{eff}}(f_{\text{cut,min}}) = N_{\text{eff, min}}
     $$
 
     where $N_{\text{eff, min}}$ is a user-defined parameter, and $P$ is the number of model parameters.
