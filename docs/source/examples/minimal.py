@@ -124,7 +124,7 @@ plot_fitted_spectrum(ax, uc, result_exppoly)
 #   Its parameters are the weighted average over multiple cutoff frequencies.
 # - The **red dotted line** shows the weighted average of the switching functions,
 #   used to identify the low-frequency region of the spectrum.
-# - The **green band** shows the expected uncertainty of the sampling spectrum,
+# - The **green band** shows the expected {term}`uncertainty` of the sampling spectrum,
 #   as a 95% confidence interval.
 #   Most of the blue data points should fall within this band,
 #   at least in the region where the model is fitted to the data

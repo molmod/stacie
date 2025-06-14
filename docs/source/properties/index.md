@@ -7,7 +7,7 @@ All skeletons assume that you can load the relevant input data into NumPy arrays
 
 First, we discuss a few properties that may be relevant to multiple scientific disciplines:
 
-- [The standard error of the mean of time-correlated data](error_estimates.md)
+- [The uncertainty of the mean of time-correlated data](error_estimates.md)
 - The exponential and integrated [autocorrelation time](autocorrelation_time.md)
 
 The following physicochemical transport properties can be computed

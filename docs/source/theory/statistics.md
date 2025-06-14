@@ -8,7 +8,7 @@ we can derive the likelihood that certain model parameters explain the observed 
 ## Statistics of the Sampling Power Spectral Distribution
 
 When constructing an estimate of a discrete PSD from a finite amount of data,
-it is bound to contain some uncertainty, which will be characterized below.
+it is bound to contain some {term}`uncertainty`, which will be characterized below.
 The estimate of the PSD is sometimes also called
 the [periodogram](https://en.wikipedia.org/wiki/Periodogram) or the (empirical) power spectrum.
 
