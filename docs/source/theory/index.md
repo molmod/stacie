@@ -14,7 +14,7 @@ The derivation comprises three main parts:
 
 - A [model](model.md) for the low-frequency part of the power spectrum,
 - an algorithm to [estimate the parameters](statistics.md) of this model,
-  from which the autocorrelation integral and its uncertainty can be derived,
+  from which the autocorrelation integral and its {term}`uncertainty` can be derived,
 - and an algorithm to determine the [frequency cutoff](cutoff.md) used
   to identify the low-frequency part of the spectrum.
 

@@ -1,5 +1,5 @@
 # %% [markdown]
-# # Standard Error of the Mean of Time-Correlated Data
+# # Uncertainty of the Mean of Time-Correlated Data
 #
 # This notebook shows how to use STACIE to compute the error of the mean
 # of a time-correlated input sequence,
@@ -170,7 +170,7 @@ plot_chains()
 #
 # The sequences in the plot are clearly time-correlated.
 # The following cells show how STACIE can be used
-# to compute the uncertainty of this average,
+# to compute the {term}`uncertainty` of this average,
 # taking into account that not all samples
 # are independent due to time correlations.
 

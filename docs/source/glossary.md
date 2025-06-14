@@ -29,6 +29,11 @@ NVT
     A statistical ensemble that represents a system in thermal equilibrium
     with a heat bath at constant temperature (T), volume (V), and number of particles (N).
 
+Uncertainty
+    An estimate of the standard deviation of a result
+    if the analysis would have been repeated many times with independent inputs.
+    This is also known as the standard error.
+
 PSD
     Power spectral density.
     A measure of the power of a signal as a function of frequency.

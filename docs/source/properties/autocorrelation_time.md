@@ -127,9 +127,9 @@ timestep = ...
 spectrum = compute_spectrum(sequences, timestep=timestep)
 result = estimate_acint(spectrum, PadeModel([0, 2], [2]))
 print("Exponential autocorrelation time", result.corrtime_exp)
-print("Standard error of the exponential autocorrelation time", result.corrtime_exp_std)
+print("Uncertainty of the exponential autocorrelation time", result.corrtime_exp_std)
 print("Integrated autocorrelation time", result.corrtime_int)
-print("Standard error of the integrated autocorrelation time", result.corrtime_int_std)
+print("Uncertainty of the integrated autocorrelation time", result.corrtime_int_std)
 ```
 
 A worked example can be found in the notebook

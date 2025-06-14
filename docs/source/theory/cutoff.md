@@ -58,23 +58,23 @@ The following parameters define the grid:
 - The lowest cutoff is determined by solving:
 
     $$
-        N_{\text{eff}}(f_{\text{cut,min}}) = g_\text{min} P
+        N_{\text{eff}}(f_{\text{cut,min}}) = N_{\text{eff, min}}
     $$
 
-    where $g_\text{min}$ is a user-defined parameter, and $P$ is the number of model parameters.
-    In STACIE, the default value is $g_\text{min} = 5$,
+    where $N_{\text{eff, min}}$ is a user-defined parameter, and $P$ is the number of model parameters.
+    In STACIE, the default value is $N_{\text{eff, min}} = 5P$,
     which reduces the risk of numerical issues in the regression.
-    The value of $g_\text{min} P$ can be adjusted using the `neff_min` option
+    The value of $N_{\text{eff, min}}$ can be adjusted using the `neff_min` option
     in the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
 
 - The maximum cutoff frequency is determined by solving:
 
     $$
-        N_{\text{eff}}(f_{\text{cut,max}}) = g_\text{max}
+        N_{\text{eff}}(f_{\text{cut,max}}) = N_{\text{eff, max}}
     $$
 
-    where $g_\text{max}$ is a user-defined parameter.
-    In STACIE, the default value is $g_\text{max} = 1000$.
+    where $N_{\text{eff, min}}$ is a user-defined parameter.
+    In STACIE, the default value is $N_{\text{eff, min}} = 1000$.
     This value can be modified using the `neff_max` option
     in the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
     The purpose of this parameter is to limit the computational cost of the regression.
@@ -218,7 +218,7 @@ derived in the previous section.
 
 Any method to deduce the cutoff frequency from the spectrum,
 whether it is human judgment or an automated algorithm,
-introduces some uncertainty in the final result
+introduces some {term}`uncertainty` in the final result
 because the cutoff is based on a sampling PSD spectrum with statistical uncertainty.
 
 In STACIE, this uncertainty is accounted for

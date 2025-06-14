@@ -393,9 +393,9 @@ eta_production_ext = demo_production(3).acint
 #
 # This comparison confirms that STACIE can reproduce a well-known viscosity result,
 # in line with literature results.
-# To achieve a state-of-the-art statistical uncertainty, it requires far less simulation time.
+# To achieve a state-of-the-art statistical {term}`uncertainty`, it requires far less simulation time.
 # Even our longest production runs are still less than half as long as in the cited papers,
-# and we achieve a much smaller standard error.
+# and we achieve a much smaller uncertainties.
 #
 # To be fair, the simulation time only accounts for production runs.
 # Our setup also includes a significant amount of equilibration runs (3000 τ* in total)

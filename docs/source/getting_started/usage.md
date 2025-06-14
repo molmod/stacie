@@ -19,7 +19,7 @@ The analysis returns a `result` object including the following attributes:
 - `corrtime_int`: The *integrated* autocorrelation time.
 - `corrtime_exp`: The *exponential* autocorrelation time (if supported by the selected model).
 
-The estimated standard errors are accessible through the
+The estimated uncertainties are accessible through the
 `acint_std`, `corrtime_int_std`, and `corrtime_exp_std` attributes, respectively.
 In addition, intermediate results of the analysis can be accessed,
 e.g., to create plots using the built-in plotting functions.
