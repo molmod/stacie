@@ -157,7 +157,7 @@ eta_bulk_production = demo_production(3)
 # %% [markdown]
 # As opposed to the shear viscosity, the cutoff criterion Z-score is relatively high, around 2.
 # This suggests that the fits on the two halves deviate more from each other
-# than what would be expected from the uncertainty of the spectrum.
+# than what would be expected from the {term}`uncertainty` of the spectrum.
 # There are multiple potential explanations for this observation:
 #
 # - One potential explanation is that the isotropic pressure fluctuations

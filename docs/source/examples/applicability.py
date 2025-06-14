@@ -176,7 +176,7 @@ result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True)
 
 # %% [markdown]
 # Due to the symmetry of the oscillator, the mean of the solutions should be zero.
-# Within the uncertainty, this is indeed the case for the numerical solutions,
+# Within the {term}`uncertainty`, this is indeed the case for the numerical solutions,
 # as shown below.
 
 # %%

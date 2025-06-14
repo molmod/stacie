@@ -41,7 +41,7 @@ six off-diagonal and diagonal traceless pressure tensor elements
 {cite:p}`daivis_1994_comparison`.
 However, by subtracting the isotropic term, the six components of the traceless pressure tensor
 become statistically correlated.
-For a proper uncertainty analysis of the estimated viscosity,
+For a proper {term}`uncertainty` analysis of the estimated viscosity,
 STACIE requires the inputs to be statistically independent,
 so the Daivis and Evans equation cannot be directly used.
 Here, we provide a transformation of the pressure tensor

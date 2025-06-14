@@ -218,7 +218,7 @@ derived in the previous section.
 
 Any method to deduce the cutoff frequency from the spectrum,
 whether it is human judgment or an automated algorithm,
-introduces some uncertainty in the final result
+introduces some {term}`uncertainty` in the final result
 because the cutoff is based on a sampling PSD spectrum with statistical uncertainty.
 
 In STACIE, this uncertainty is accounted for
