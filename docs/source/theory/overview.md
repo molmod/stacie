@@ -197,7 +197,7 @@ In summary, STACIE introduces a few [models](model.md) for the low-frequency spe
 The parameters in such a model are estimated with likelihood maximization,
 and the parameter covariance is estimated with the Laplace approximation {cite:p}`mackay_2005_information`.
 To write out the likelihood function,
-the [statistics](statistics.md) of the estimated spectrum must be characterized.
+the [statistical distribution](statistics.md) of the sampling PSD amplitudes must be derived.
 Finally, STACIE determines up to which [cutoff](cutoff.md) frequency the model will be fitted.
 For cutoffs that are too high,
 the model becomes too simple to describe all the features in the spectrum,
