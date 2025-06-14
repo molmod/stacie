@@ -135,9 +135,9 @@ plot_fitted_spectrum(ax, uc, result_exppoly)
 #   of the cutoff frequencies used in the fit.
 # - The **plot title** summarizes key information about the analysis, including:
 #     - The model used to fit the data.
-#     - The confidence level used for plotting.
 #     - The autocorrelation integral and its uncertainty.
 #     - The integrated correlation time and its uncertainty.
+# - The **legend** shows to the confidence level used for plotting.
 #
 # The next plot shows some intermediate results,
 # which can help you understand the fitting process or detect problems.
