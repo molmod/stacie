@@ -144,4 +144,4 @@ from stacie import PadeModel
 model = PadeModel([0, 2], [2])
 ```
 
-This model is identified as `pde(0, 2; 2)` in STACIE's screen output and plots.
+This model is identified as `pade(0, 2; 2)` in STACIE's screen output and plots.
