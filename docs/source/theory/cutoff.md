@@ -62,7 +62,7 @@ The following parameters define the grid:
     $$
 
     where $N_{\text{eff, min}}$ is a user-defined parameter, and $P$ is the number of model parameters.
-    In STACIE, the default value is $N_{\text{eff, min}} = 5$,
+    In STACIE, the default value is $N_{\text{eff, min}} = 5P$,
     which reduces the risk of numerical issues in the regression.
     The value of $N_{\text{eff, min}} P$ can be adjusted using the `neff_min` option
     in the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
