@@ -20,8 +20,15 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from stacie import compute_spectrum, estimate_acint, ExpPolyModel, PadeModel, UnitConfig
-from stacie.plot import plot_extras, plot_fitted_spectrum
+from stacie import (
+    compute_spectrum,
+    estimate_acint,
+    ExpPolyModel,
+    PadeModel,
+    UnitConfig,
+    plot_extras,
+    plot_fitted_spectrum,
+)
 
 # %%
 mpl.rc_file("matplotlibrc")

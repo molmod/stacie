@@ -18,7 +18,7 @@
 #
 # :::{note}
 # The results in this example were obtained using
-# [LAMMPS version 4 Feb 2025](https://github.com/lammps/lammps/releases/tag/patch_4Feb2025).
+# [LAMMPS 29 Aug 2024 Update 3](https://github.com/lammps/lammps/releases/tag/stable_29Aug2024_update3).
 # Minor differences may arise when using a different version of LAMMPS,
 # or even the same version compiled with a different compiler.
 # :::
@@ -33,8 +33,14 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from path import Path
 from yaml import safe_load
-from stacie import UnitConfig, compute_spectrum, estimate_acint, PadeModel
-from stacie.plot import plot_fitted_spectrum, plot_extras
+from stacie import (
+    UnitConfig,
+    compute_spectrum,
+    estimate_acint,
+    PadeModel,
+    plot_fitted_spectrum,
+    plot_extras,
+)
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -42,7 +48,7 @@ mpl.rc_file("matplotlibrc")
 
 # %%
 # You normally do not need to change this path.
-# It only needs to be overriden when building the documentation.
+# It only needs to be overridden when building the documentation.
 DATA_ROOT = Path(os.getenv("DATA_ROOT", "./")) / "lammps_lj3d/sims/"
 
 # %% [markdown]

@@ -44,6 +44,12 @@
 # and $M = 100 \times 3$ is the number of independent input sequences.
 # (100 trajectories, 3 Cartesian components of the charge current per trajectory)
 #
+# :::{note}
+# The results in this example were obtained using
+# [OpenMM 8.2.0](https://github.com/openmm/openmm/releases/tag/8.2.0).
+# Minor differences may arise when using a different version of OpenMM,
+# or even the same version compiled with a different compiler.
+# :::
 
 # %% [markdown]
 # ## Library Imports and Configuration
@@ -56,9 +62,15 @@ import matplotlib as mpl
 from path import Path
 import scipy.constants as sc
 from scipy.stats import chi2
-from stacie import ExpPolyModel, PadeModel, UnitConfig, compute_spectrum, estimate_acint
-from stacie.model import SpectrumModel
-from stacie.plot import plot_fitted_spectrum, plot_extras
+from stacie import (
+    ExpPolyModel,
+    PadeModel,
+    UnitConfig,
+    compute_spectrum,
+    estimate_acint,
+    plot_fitted_spectrum,
+    plot_extras,
+)
 from utils import plot_instantaneous_percentiles, plot_cumulative_temperature_histogram
 
 # %%
@@ -67,7 +79,7 @@ mpl.rc_file("matplotlibrc")
 
 # %%
 # You normally do not need to change this path.
-# It only needs to be overriden when building the documentation.
+# It only needs to be overridden when building the documentation.
 DATA_ROOT = Path(os.getenv("DATA_ROOT", "./")) / "openmm_salt/output/"
 
 # %% [markdown]
@@ -192,7 +204,7 @@ plot_openmm_percentiles("npt", "volume", "nm$^3$", unit=1e-27, expected="last")
 BOLTZMANN_CONSTANT = sc.value("Boltzmann constant")  # J/K
 
 
-def analyze(model: SpectrumModel, npart: int = 1, ntraj: int = 100) -> float:
+def analyze(model, npart: int = 1, ntraj: int = 100) -> float:
     """Analyze MD trajectories to compute the ionic conductivity.
 
     Parameters

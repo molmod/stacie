@@ -76,7 +76,7 @@
 #
 # :::{note}
 # The results in this example were obtained using
-# [LAMMPS version 4 Feb 2025](https://github.com/lammps/lammps/releases/tag/patch_4Feb2025).
+# [LAMMPS 29 Aug 2024 Update 3](https://github.com/lammps/lammps/releases/tag/stable_29Aug2024_update3).
 # Minor differences may arise when using a different version of LAMMPS,
 # or even the same version compiled with a different compiler.
 # :::
@@ -92,8 +92,14 @@ import matplotlib as mpl
 from path import Path
 from yaml import safe_load
 from scipy.stats import chi2
-from stacie import UnitConfig, compute_spectrum, estimate_acint, PadeModel
-from stacie.plot import plot_fitted_spectrum, plot_extras
+from stacie import (
+    UnitConfig,
+    compute_spectrum,
+    estimate_acint,
+    PadeModel,
+    plot_fitted_spectrum,
+    plot_extras,
+)
 from utils import plot_instantaneous_percentiles, plot_cumulative_temperature_histogram
 
 # %%
@@ -102,7 +108,7 @@ mpl.rc_file("matplotlibrc")
 
 # %%
 # You normally do not need to change this path.
-# It only needs to be overriden when building the documentation.
+# It only needs to be overridden when building the documentation.
 DATA_ROOT = Path(os.getenv("DATA_ROOT", "./")) / "lammps_lj3d/sims/"
 
 # %% [markdown]
@@ -118,7 +124,7 @@ DATA_ROOT = Path(os.getenv("DATA_ROOT", "./")) / "lammps_lj3d/sims/"
 
 # %%
 def plot_equilibration(ntraj: int = 100):
-    """Plot cumulative distributions of the instantaneous temperature."""
+    """Plot percentiles of the instantaneous temperature."""
     # Load the configuration from the YAML file.
     with open(DATA_ROOT / "replica_0000_part_00/info.yaml") as fh:
         info = safe_load(fh)
