@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --job-name openmm
+#SBATCH --job-name lammps
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
@@ -8,6 +8,4 @@
 cd ../../../../../
 . activate
 cd ${SLURM_SUBMIT_DIR}
-export OPENMM_CPU_THREADS=1
-# export OPENMM_DEFAULT_PLATFORM=CPU
 time stepup boot -n ${SLURM_CPUS_PER_TASK}
