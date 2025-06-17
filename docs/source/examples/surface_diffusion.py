@@ -23,8 +23,14 @@ import numdifftools as nd
 import numpy as np
 import scipy.constants as sc
 from numpy.typing import ArrayLike, NDArray
-from stacie import UnitConfig, compute_spectrum, estimate_acint, PadeModel
-from stacie.plot import plot_extras, plot_fitted_spectrum
+from stacie import (
+    UnitConfig,
+    compute_spectrum,
+    estimate_acint,
+    PadeModel,
+    plot_extras,
+    plot_fitted_spectrum,
+)
 
 # %%
 mpl.rc_file("matplotlibrc")

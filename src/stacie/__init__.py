@@ -21,7 +21,7 @@
 from .cutoff import CV2LCriterion
 from .estimate import estimate_acint
 from .model import ExpPolyModel, PadeModel
-from .plot import plot_results
+from .plot import plot_extras, plot_fitted_spectrum, plot_results, plot_spectrum
 from .spectrum import compute_spectrum
 from .utils import UnitConfig
 
@@ -34,5 +34,8 @@ __all__ = (
     "__version_tuple__",
     "compute_spectrum",
     "estimate_acint",
+    "plot_extras",
+    "plot_fitted_spectrum",
     "plot_results",
+    "plot_spectrum",
 )

@@ -211,7 +211,7 @@ def plot_fitted_spectrum(ax: mpl.axes.Axes, uc: UnitConfig, r: Result, *, legend
         label=f"{uc.clevel:.0%} CI sampling PSD",
     )
     ax.axvline(r.fcut / uc.freq_unit, ymax=0.1, color="k")
-    ax.set_ylim(0, r.spectrum.amplitudes[: r.ncut].max() / uc.acint_unit * 1.1)
+    ax.set_ylim(top=r.spectrum.amplitudes[: r.ncut].max() / uc.acint_unit * 1.1)
     if legend:
         ax.legend(loc="best")
     # Info in title
