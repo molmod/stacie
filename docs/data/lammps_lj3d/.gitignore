@@ -5,4 +5,5 @@
 sims/
 .stepup
 *-old
-slurm-*.*
+slurm-*.out
+slurm-*.err
