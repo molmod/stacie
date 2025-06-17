@@ -5,3 +5,4 @@
 sims/
 .stepup
 *-old
+slurm-*.*
