@@ -48,7 +48,7 @@ class Spectrum:
     freqs: NDArray[float] = attrs.field()
     """The equidistant frequency axis of the spectrum."""
 
-    ndofs: NDArray[int] = attrs.field()
+    ndofs: NDArray[float] = attrs.field()
     """The number of independent contributions to each amplitude."""
 
     amplitudes: NDArray[float] = attrs.field()
@@ -193,7 +193,7 @@ def compute_spectrum(
     amplitudes *= timestep / nindep
 
     # Number of "degrees of freedom" (contributions) to each amplitude
-    ndofs = np.full(freqs.shape, 2 * nindep)
+    ndofs = np.full(freqs.shape, 2 * nindep, dtype=float)
     ndofs[0] = nindep
     if len(freqs) % 2 == 0:
         ndofs[-1] = nindep
