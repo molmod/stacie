@@ -37,9 +37,15 @@ The final state of each equilibration run then serves as a starting point for an
 since rescaling to the mean would artificially lower the variance in these quantities.
 
 Note that correctly simulating multiple independent NVE runs can be technically challenging.
-It is not a widely used approach, and not all MD codes are properly tested for it.
-Hence, one must always carefully check that the distributions, e.g., of the instantaneous temperature,
-over all NVE runs are consistent with the NVT or NpT ensemble.
+It is not a widely used approach, not all MD codes are properly tested for it,
+and have default settings that are not suitable for NVE simulations.
+Hence, one must always carefully check the validity of the simulations:
+
+- First check the conserved quantity (total energy) for drift or large fluctuations.
+  Compared to the fluctuations of the kinetic energy, these deviations should be small.
+- For the NVE simulations as a whole, the temperature distribution should be
+  consistent with the NVT or NpT ensemble.
+
 An additional challenge is the complexity of the MD workflow
 with restarts in different ensembles and multiple independent runs.
 All examples in the STACIE documentation work with NVE production runs,

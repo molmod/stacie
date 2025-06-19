@@ -252,7 +252,7 @@ def estimate_viscosity(name, pcomps, av_temperature, volume, timestep, verbose=T
 
 
 # %%
-def demo_production(npart: int, ntraj: int = 100, select: int | None = None):
+def analyze_production(npart: int, ntraj: int = 100, select: int | None = None):
     """
     Perform the analysis of the production runs.
 
@@ -307,7 +307,7 @@ def demo_production(npart: int, ntraj: int = 100, select: int | None = None):
     )
 
 
-eta_production_init = demo_production(1).acint
+eta_production_init = analyze_production(1).acint
 
 
 # %% [markdown]
@@ -358,7 +358,7 @@ eta_production_init = demo_production(1).acint
 # Here we just repeat the analysis, but now with extended production runs.
 
 # %%
-eta_production_ext = demo_production(3).acint
+eta_production_ext = analyze_production(3).acint
 
 # %% [markdown]
 # Some remarks about the final results:
@@ -411,12 +411,52 @@ eta_production_ext = demo_production(3).acint
 #
 
 # %% [markdown]
-# ## Analysis of the Temperature Distribution of the Production Runs
+# ## Validation of the Production Runs
 #
-# To further establish the validity of the claim that our NVE runs together represent the
-# NVT ensemble, the following cell analyzes the distribution of the instantaneous temperature.
-# For each individual NVE run and for the combined NVE runs, cumulative distributions are plotted.
-# The function also plots the expected cumulative distribution of the NVT ensemble.
+# To further establish that our NVE runs together represent the NVT ensemble,
+# the following two cells perform additional validation checks.
+#
+# - A plot of the conserved quantity of the separate NVE runs, to detect any drift.
+# - The distribution of the instantaneous temperature,
+#   which should match the desired NVT distribution.
+#   For each individual NVE run and for the combined NVE runs, cumulative distributions are plotted.
+#   The function also plots the expected cumulative distribution of the NVT ensemble.
+
+
+# %%
+def plot_total_energy():
+    # Load trajectory data.
+    time = None
+    energies = []
+    for itraj in range(100):
+        time_traj = []
+        energies_traj = []
+        for ipart in range(3):
+            prod_dir = DATA_ROOT / f"replica_{itraj:04d}_part_{ipart:02d}/"
+            data = np.loadtxt(prod_dir / "nve_thermo.txt")
+            if time is None:
+                time_traj.append(data[:, 0])
+            energies_traj.append(data[:, 2:])
+        if time is None:
+            time = np.concatenate(time_traj)
+        energies.append(energies_traj)
+    energies = [np.concatenate(energy).T for energy in energies]
+
+    # Plot the total energy of the NVE runs.
+    plt.close("energyprod")
+    _, ax = plt.subplots(num="energyprod")
+    for kes, pes in energies:
+        ax.plot(time, kes + pes)
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Total Energy")
+    ax.set_title("Total Energy of the NVE Runs")
+
+
+plot_total_energy()
+
+# %% [markdown]
+# There is no noticeable drift in the total energy of the NVE runs.
+# Apart from the usual (and acceptable) numerical noise, the total energy is conserved perfectly.
 
 
 # %%
@@ -518,7 +558,7 @@ validate_independence()
 # %%
 def validate_consistency():
     for i in range(5):
-        result = demo_production(3, select=i)
+        result = analyze_production(3, select=i)
         eta = result.acint
         eta_std = result.acint_std
         print(f"Anisotropic contribution {i + 1}: η = {eta:.3f} ± {eta_std:.3f} η*")
