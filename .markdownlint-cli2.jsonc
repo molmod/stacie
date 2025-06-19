@@ -6,9 +6,7 @@
       "code_block_line_length": 100
     },
     "MD007": { "indent": 4 },
-    "MD033": {
-      "allowed_elements": ["sup", "sub"]
-    },
+    "MD033": false,
     "MD046": false,
     "MD051": false
   }

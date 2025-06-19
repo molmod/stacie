@@ -6,6 +6,14 @@
 ![Version](https://img.shields.io/pypi/pyversions/stacie.svg)
 ![License](https://img.shields.io/github/license/molmod/stacie)
 
+<p align="center">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/source/static/stacie-logo-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="docs/source/static/stacie-logo-light.svg">
+      <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="docs/source/static/stacie-logo-light.svg">
+    </picture>
+</p>
+
 ## About
 
 STACIE is a *STable AutoCorrelation Integral Estimator*.

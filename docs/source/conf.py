@@ -60,9 +60,6 @@ nitpicky = True
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "furo"
-html_title = f"{project} {version}"
-
 
 def load_footer_icons():
     """Include SVG footer icons as recommended in Furo template.
@@ -83,7 +80,14 @@ def load_footer_icons():
     return footer_icons
 
 
+html_theme = "furo"
+html_static_path = ["static"]
+html_title = f"{project} {version}"
+html_css_files = ["custom.css"]
+html_favicon = "static/stacie-logo-black.svg"
 html_theme_options = {
+    "dark_logo": "stacie-logo-white.svg",
+    "light_logo": "stacie-logo-black.svg",
     "source_repository": "https://github.com/molmod/stacie",
     "source_branch": "main",
     "source_directory": "docs/",
@@ -137,6 +141,7 @@ latex_elements = {
     "sphinxsetup": "hmargin={2.2cm,2.2cm}, vmargin={3cm,3cm}",
 }
 latex_additional_files = ["macros.txt"]
+latex_logo = "static/stacie-logo-black.pdf"
 
 
 class DummyTransform(sphinx.builders.latex.transforms.BibliographyTransform):
