@@ -38,13 +38,16 @@ since rescaling to the mean would artificially lower the variance in these quant
 
 Note that correctly simulating multiple independent NVE runs can be technically challenging.
 It is not a widely used approach, not all MD codes are properly tested for it,
-and have default settings that are not suitable for NVE simulations.
+and the default settings of some MD codes are not suitable for NVE simulations.
 Hence, one must always carefully check the validity of the simulations:
 
 - First check the conserved quantity (total energy) for drift or large fluctuations.
   Compared to the fluctuations of the kinetic energy, these deviations should be small.
 - For the NVE simulations as a whole, the temperature distribution should be
   consistent with the NVT or NpT ensemble.
+- Even if the NVE runs are performed correctly,
+  one must ensure that the number of NVE runs is large enough
+  to obtain a representative sample of the total energy distribution.
 
 An additional challenge is the complexity of the MD workflow
 with restarts in different ensembles and multiple independent runs.
@@ -61,6 +64,7 @@ within the equilibration run.
 A local thermostat can be used to make the equilibration more efficient.
 
 In some cases, e.g., to remain consistent with historical results,
+or because of some of the challenges of NVE simulations cannot be overcome,
 one may still prefer to run production runs for transport properties in the NVT ensemble.
 When you start a new project, however, always consider using NVE production runs.
 If you must use NVT, studies suggest that well-tuned NVT simulations
@@ -68,6 +72,7 @@ yield comparable results to NVE simulations
 {cite:p}`fanourgakis_2012_determining, basconi_2013_effects, ke_2022_effects`.
 Basconi *et al.* recommended using a thermostat with slow relaxation times, global coupling,
 and continuous rescaling (as opposed to random force contributions) {cite:p}`basconi_2013_effects`.
+These are typically the opposite of the settings that are used for efficient equilibration runs.
 A drawback of slow relaxation times is that longer simulations are required
 to fully sample the correct ensemble.
 
