@@ -41,7 +41,7 @@ It is not a widely used approach, not all MD codes are properly tested for it,
 and the default settings of some MD codes are not suitable for NVE simulations.
 Hence, one must always carefully check the validity of the simulations:
 
-- First check the conserved quantity (total energy) for drift or large fluctuations.
+- First, check the conserved quantity (total energy) for drift or large fluctuations.
   Compared to the fluctuations of the kinetic energy, these deviations should be small.
 - For the NVE simulations as a whole, the temperature distribution should be
   consistent with the NVT or NpT ensemble.
