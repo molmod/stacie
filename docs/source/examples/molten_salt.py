@@ -456,34 +456,72 @@ def convert_molar_conductivity():
 convert_molar_conductivity()
 
 # %% [markdown]
-# ## Analysis of the Temperature Distribution of the Production Runs
+# ## Validation of the Production Runs
 #
-# To further validate that the NVE runs together represent the
-# NpT ensemble, the following cell analyzes the distribution of the instantaneous temperature.
-# For each individual NVE run and for the combined NVE runs, cumulative distributions are plotted.
-# The function also plots the expected cumulative distribution of the NVT ensemble.
+# To further establish that our NVE runs together represent the NpT ensemble,
+# the following two cells perform additional validation checks.
+#
+# - A plot of the conserved quantity of the separate NVE runs, to detect any drift.
+# - The distribution of the instantaneous temperature,
+#   which should match the desired NpT distribution.
+#   For each individual NVE run and for the combined NVE runs, cumulative distributions are plotted.
+#   The function also plots the expected cumulative distribution of the NpT ensemble.
 
 
 # %%
-def plot_temperature_production(npart: int = 3, ntraj: int = 100):
-    """Plot cumulative distributions of the instantaneous temperature."""
-    # Load the temperature data from the NVE production runs.
+def plot_total_energy(npart: int = 3, ntraj: int = 100):
     time = None
-    natom = None
-    temps = []
+    energies = []
     for itraj in range(ntraj):
-        temps.append([])
-        time = []
+        if itraj == 0:
+            time = []
+        energies_traj = []
         for ipart in range(npart):
             path_npz = DATA_ROOT / f"sim{itraj:04d}_part{ipart:02d}_nve_traj.npz"
             if not path_npz.exists():
                 print(f"File {path_npz} not found, skipping.")
                 continue
             data = np.load(path_npz)
-            time.append(data["time"])
+            if itraj == 0:
+                time.append(data["time"])
+            energies_traj.append(data["total_energy"])
+        if itraj == 0:
+            time = np.concatenate(time)
+        energies.append(np.concatenate(energies_traj))
+
+    num = "total_energy"
+    plt.close(num)
+    _, ax = plt.subplots(num=num)
+    for energies_traj in energies:
+        plt.plot(time, energies_traj)
+    plt.title("Total energy of the NVE production runs")
+    plt.xlabel("Time [ps]")
+    plt.ylabel("Total energy [kJ/mol]")
+
+
+plot_total_energy()
+
+# %% [markdown]
+# There is no noticeable drift in the total energy of the NVE runs.
+# Apart from the usual (and acceptable) numerical noise, the total energy is conserved perfectly.
+
+
+# %%
+def plot_temperature_production(npart: int = 3, ntraj: int = 100):
+    """Plot cumulative distributions of the instantaneous temperature."""
+    # Load the temperature data from the NVE production runs.
+    natom = None
+    temps = []
+    for itraj in range(ntraj):
+        temps.append([])
+        for ipart in range(npart):
+            path_npz = DATA_ROOT / f"sim{itraj:04d}_part{ipart:02d}_nve_traj.npz"
+            if not path_npz.exists():
+                print(f"File {path_npz} not found, skipping.")
+                continue
+            data = np.load(path_npz)
             natom = len(data["atnums"])
             temps[-1].append(data["temperature"])
-    time = np.concatenate(time)
     temps = np.array([np.concatenate(t) for t in temps])
 
     # Plot the instantaneous and desired temperature distribution.
