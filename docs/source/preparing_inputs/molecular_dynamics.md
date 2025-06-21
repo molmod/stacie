@@ -64,7 +64,7 @@ within the equilibration run.
 A local thermostat can be used to make the equilibration more efficient.
 
 In some cases, e.g., to remain consistent with historical results,
-or because of some of the challenges of NVE simulations cannot be overcome,
+or because some of the challenges of NVE simulations cannot be overcome,
 one may still prefer to run production runs for transport properties in the NVT ensemble.
 When you start a new project, however, always consider using NVE production runs.
 If you must use NVT, studies suggest that well-tuned NVT simulations
