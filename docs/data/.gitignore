@@ -5,3 +5,4 @@ matplotlibrc
 *.ipynb
 preprocessed
 utils.py
+README.pdf
