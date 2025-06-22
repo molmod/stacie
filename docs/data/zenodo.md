@@ -1,29 +1,10 @@
-# Examples in the STACIE documentation
+# Output files of simulations analyzed in the examples in STACIE's documentation
 
-This archive contains:
-
-- Jupyter notebooks with examples of how to use STACIE.
-- The output files needed to execute the example notebooks.
-
-To run the examples, you need to:
-
-1. Install STACIE and Jupyter Lab
-
-    ```bash
-    pip install stacie jupyterlab
-    ```
-
-2. Download and unpack the archive with notebooks and trajectory data.
-
-    ```bash
-    unzip examples.zip
-    ```
-
-3. Finally, you should be able to start Jupyter Lab and run the notebooks.
-
-    ```bash
-    jupyter lab
-    ```
-
+This archive contains
+(i) Jupyter notebooks with examples of how to use [STACIE](https://github.com/molmod/stacie).
+(ii) The output files needed to execute the example notebooks.
 Detailed descriptions and input files with which trajectories can be reproduced
 are provided in STACIE's Git repository: <https://github.com/molmod/stacie/>.
+Instructions for running the examples can be found in the `README.md` file included in this archive.
+
+**Keywords**: STACIE, molecular dynamics, Jupyter notebooks, examples, tutorials

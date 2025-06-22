@@ -3,7 +3,7 @@
 
 from path import Path
 from stepup.core.api import copy, glob, mkdir, runpy, runsh, static
-from stepup.reprep.api import make_inventory, sync_zenodo, zip_inventory
+from stepup.reprep.api import compile_typst, make_inventory, sync_zenodo, zip_inventory
 
 # Convert JupyText files to Jupyter notebooks
 static("../source/", "../source/examples/", "../source/examples/matplotlibrc", "preprocess.py")
@@ -32,6 +32,11 @@ lammps_paths_yaml = glob("lammps_lj3d/sims/replica_????_part_??/info.yaml")
 # OpenMM Molten Salt example
 static("openmm_salt/", "openmm_salt/output/")
 openmm_paths_npz = glob("openmm_salt/output/*.npz")
+
+# Compile the README
+
+static("README.typ")
+compile_typst("README.typ")
 
 # Create inventory and zip file
 paths = [
