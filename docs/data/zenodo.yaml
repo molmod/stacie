@@ -2,12 +2,13 @@ path_versions: .zenodo-versions.json
 endpoint: https://zenodo.org/api
 path_token: ~/.config/zenodo-org-token.txt
 metadata:
-  title: 'Output files of simulations analyzed in the examples in the STACIE documentation'
+  title: Output files of simulations analyzed in the examples in STACIE's documentation
   version: '1.0.0'
   license: cc-by-nc-sa-4.0
   upload_type: dataset
   creators:
     - name: 'Gozdenur Toraman'
+      orcid: '0000-0001-6785-333X'
       affiliation: >-
         Labo Soete,
         Ghent University,
@@ -16,6 +17,7 @@ metadata:
         Ghent,
         Belgium
     - name: 'Toon Verstraelen'
+      orcid: '0000-0001-9288-5608'
       affiliation: >-
         Center for Molecular Modeling (CMM),
         Ghent University,
@@ -25,4 +27,5 @@ metadata:
         Belgium
 path_readme: zenodo.md
 paths:
+  - README.pdf
   - examples.zip
