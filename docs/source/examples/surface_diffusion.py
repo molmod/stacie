@@ -27,7 +27,7 @@ from stacie import (
     UnitConfig,
     compute_spectrum,
     estimate_acint,
-    PadeModel,
+    LorentzModel,
     plot_extras,
     plot_fitted_spectrum,
 )
@@ -396,9 +396,9 @@ def demo_stacie(block_size: int = 1):
     # The maximum cutoff frequency is chosen to be 1 THz,
     # by inspecting the first spectrum plot.
     # Beyond the cutoff frequency, the spectrum has resonance peaks that
-    # the Pade model is not designed to handle.
+    # the Lorentz model is not designed to handle.
     result = estimate_acint(
-        spectrum, PadeModel([0, 2], [2]), fcut_max=TERAHERTZ, verbose=True, uc=uc
+        spectrum, LorentzModel(), fcut_max=TERAHERTZ, verbose=True, uc=uc
     )
 
     # Plotting
@@ -441,7 +441,7 @@ print(f"corrtime_int = {result_1.corrtime_int / PICOSECOND:.3f} ps")
 #
 # Finally, it is well known that the velocity autocorrelation function
 # of molecules in a liquid decays according to a power law {cite:p}`alder_1970_decay`.
-# One might wonder why the Pade model can be used here since it implies that diffusion
+# One might wonder why the Lorentz model can be used here since it implies that diffusion
 # can be described with an exponentially decaying autocorrelation function.
 # The system in this notebook exhibits exponential decay
 # because every particle only interacts with the surface,

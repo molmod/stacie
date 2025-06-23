@@ -31,7 +31,7 @@ from stacie import (
     UnitConfig,
     compute_spectrum,
     estimate_acint,
-    PadeModel,
+    LorentzModel,
     plot_fitted_spectrum,
     plot_extras,
 )
@@ -80,7 +80,7 @@ def estimate_bulk_viscosity(name, p_iso, av_temperature, volume, timestep):
     )
 
     # Estimate the bulk viscosity from the spectrum.
-    result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True, uc=uc)
+    result = estimate_acint(spectrum, LorentzModel(), verbose=True, uc=uc)
 
     # Plot some basic analysis figures.
     plt.close(f"{name}_spectrum")

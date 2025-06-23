@@ -24,7 +24,7 @@ from numpy.typing import ArrayLike, NDArray
 from scipy.optimize import brentq
 from scipy.special import polygamma
 
-__all__ = ("ExpPolyModel", "PadeModel", "SpectrumModel", "guess")
+__all__ = ("ExpPolyModel", "LorentzModel", "PadeModel", "SpectrumModel", "guess")
 
 
 @attrs.define
@@ -523,19 +523,51 @@ class PadeModel(SpectrumModel):
         self, pars: NDArray[float], covar: NDArray[float]
     ) -> dict[str, NDArray[float]]:
         """Derive the autocorrelation integral from the parameters."""
-        acint = pars[0]
-        acint_var = covar[0, 0]
-        props = {
-            "acint": acint,
-            "acint_var": acint_var,
+        return {
+            "acint": pars[0],
+            "acint_var": covar[0, 0],
         }
+
+
+@attrs.define
+class LorentzModel(PadeModel):
+    """A model for the spectrum with a single Lorentzian peak at zero frequency.
+
+    This is a special case of the PadeModel with
+    `numer_degrees` = [0, 2] and `denom_degrees` = [2].
+    Furthermore, it will only accept parameters that correspond
+    to a well-defined exponential correlation time.
+    """
+
+    relerr_threshold: float = attrs.field(default=0.1)
+    """A threshold for the relative error on the exponential correlation time.
+
+    The relative error is defined as ratio of the standard deviation
+    to the mean of the correlation time.
+
+    To accept the current cutoff frequency, the relative error must be below this threshold.
+    This eliminates high-variance cases for which the maximum a posteriori estimate
+    tends to be a poor approximation.
+    """
+
+    numer_degrees: list[int] = attrs.field(init=False, factory=lambda: np.array([0, 2]))
+    denom_degrees: list[int] = attrs.field(init=False, factory=lambda: np.array([2]))
+
+    @property
+    def name(self):
+        return "lorentzian"
+
+    def derive_props(
+        self, pars: NDArray[float], covar: NDArray[float]
+    ) -> dict[str, NDArray[float]]:
+        """Derive the autocorrelation integral from the parameters."""
+        result = super().derive_props(pars, covar)
+        # Try to deduce the exponential correlation time from the parameters.
         if (
-            self.numer_degrees.shape == (2,)
-            and (self.numer_degrees == [0, 2]).all()
-            and self.denom_degrees.shape == (1,)
-            and (self.denom_degrees == [2]).all()
-            and pars[2] > 0  # real correlation time
-            and pars[0] * pars[2] > pars[1]  # positive lorentzian amplitude, maximum in the origin
+            # real correlation time
+            pars[2] > 0
+            # positive lorentzian amplitude, maximum in the origin
+            and pars[0] * pars[2] > pars[1]
         ):
             # The following estimates of the exponential correlation time and its variance
             # are only valid for small variances.
@@ -550,8 +582,16 @@ class PadeModel(SpectrumModel):
                 "exp_simulation_time": 20 * tau * np.pi,
                 "exp_simulation_time_var": 20 * tau_var * np.pi,
             }
-            props.update(tau_props)
-        return props
+            result.update(tau_props)
+        # If we fail to find the exponential correlation time with a decent relative error,
+        # we discard the entire estimate at this cutoff frequency.
+        if "corrtime_exp" not in result:
+            result["criterion"] = np.inf
+            result["msg"] = "No correlation time estimate available."
+        elif result["corrtime_exp_var"] ** 0.5 > result["corrtime_exp"] * self.relerr_threshold:
+            result["criterion"] = np.inf
+            result["msg"] = "Variance of the correlation time estimate is too large."
+        return result
 
 
 def guess(

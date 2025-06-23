@@ -28,7 +28,7 @@
 # To obtain sufficient data for all three properties, we performed 100 independent runs,
 # for which the [guesstimated relative error](../preparing_inputs/data_sufficiency.md)
 # is tabulated below.
-# The [Pade model](#section-pade-target) is used to fit the spectrum,
+# The [Lorentz model](#section-lorentz-target) is used to fit the spectrum,
 # with degrees $S_\text{num}=\{0, 2\}$ and $S_\text{den}=\{2\}$, corresponding to $P=3$ parameters.
 #
 # | Property             | $M$ | Guess rel. error |
@@ -96,7 +96,7 @@ from stacie import (
     UnitConfig,
     compute_spectrum,
     estimate_acint,
-    PadeModel,
+    LorentzModel,
     plot_fitted_spectrum,
     plot_extras,
 )
@@ -227,7 +227,7 @@ def estimate_viscosity(name, pcomps, av_temperature, volume, timestep, verbose=T
     )
 
     # Estimate the viscosity from the spectrum.
-    result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=verbose, uc=uc)
+    result = estimate_acint(spectrum, LorentzModel(), verbose=verbose, uc=uc)
 
     if verbose:
         # Plot some basic analysis figures.
@@ -325,7 +325,7 @@ eta_production_init = analyze_production(1).acint
 #   which is larger than the guesstimated value 0.5%.
 #   This is fine and somewhat expected, since this guess is known to be crude.
 #
-# - The Pade model used to fit the spectrum was a fair choice, but for higher frequencies,
+# - The Lorentz model used to fit the spectrum was a fair choice, but for higher frequencies,
 #   the sampling PSD clearly decays faster than the fitted model.
 #   For the case of viscosity, there is (to the best of our knowledge) no solid theoretical argument
 #   to support the exponential decay of the ACF of the pressure tensor.
@@ -348,7 +348,7 @@ eta_production_init = analyze_production(1).acint
 # which resulted in a total simulation time of 300 τ\* per run.
 #
 # The difficulty of increasing the effective number of fitted points can be understood as follows.
-# The Pade model is not capable of fitting the spectrum to higher frequencies.
+# The Lorentz model is not capable of fitting the spectrum to higher frequencies.
 # By including more data points, the limitations of the approximating model also become clearer,
 # and the cutoff criterion will detect some underfitting (and thus risk for bias) at lower cutoffs.
 

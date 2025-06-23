@@ -27,7 +27,7 @@ from stacie import (
     UnitConfig,
     compute_spectrum,
     estimate_acint,
-    PadeModel,
+    LorentzModel,
     plot_extras,
     plot_fitted_spectrum,
     plot_spectrum,
@@ -222,7 +222,7 @@ plot_spectrum(ax, uc, spectrum, 180)
 # In the following cell, a model is fitted to the spectrum to get a more precise estimate.
 
 # %%
-result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True, uc=uc)
+result = estimate_acint(spectrum, LorentzModel(), verbose=True, uc=uc)
 
 # %% [markdown]
 # The spectrum is normalized such that the integral of the autocorrelation function
@@ -248,7 +248,7 @@ _, ax = plt.subplots(num="fitted")
 plot_fitted_spectrum(ax, uc, result)
 
 # %% [markdown]
-# The Pade model can clearly explain the spectrum,
+# The Lorentz model can clearly explain the spectrum,
 # even well beyond the width of the peak at zero frequency.
 
 # %%
@@ -311,7 +311,7 @@ print(f"Estimated MC error = {error_mc:8.5f}")
 # %% [markdown]
 # ## Autocorrelation time
 #
-# The Pade model estimates the *exponential correlation time* {cite:p}`sokal_1997_monte`
+# The Lorentz model estimates the *exponential correlation time* {cite:p}`sokal_1997_monte`
 # from the width of the peak at zero frequency in the spectrum.
 # It may differ from the *integrated autocorrelation time*.
 # Only if the autocorrelation function is nothing but an exponentially decaying function,
