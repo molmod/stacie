@@ -37,13 +37,14 @@ STACIE's documentation is distributed under the
 
 ## Citation
 
-If you use this dataset in your research, please cite the following paper:
+If you use STACIE in your research, please cite the following paper:
 
 > TODO
 
 ## Installation
 
-Assuming you have Python and Pip installed, the following shell command will install STACIE in your Python environment.
+Assuming you have Python and Pip installed,
+the following shell command will install STACIE in your Python environment.
 
 ```bash
 python -m pip install stacie

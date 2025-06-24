@@ -230,7 +230,7 @@ class SpectrumModel:
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
     ) -> dict[str, NDArray[float]]:
-        """Return additional properties derived from model-specific parameters.
+        """Return autocorrelation integral (and other properties) derived from the parameters.
 
         Parameters
         ----------
@@ -351,7 +351,7 @@ class ExpPolyModel(SpectrumModel):
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
     ) -> dict[str, NDArray[float]]:
-        """Return additional properties derived from model-specific parameters."""
+        """Return autocorrelation integral (and other properties) derived from the parameters."""
         # The logarithm of the autocorrelation integral is the first parameter,
         # which is assumed to be normally distributed.
         log_acint = pars[0]
@@ -526,7 +526,7 @@ class PadeModel(SpectrumModel):
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
     ) -> dict[str, NDArray[float]]:
-        """Derive the autocorrelation integral from the parameters."""
+        """Return autocorrelation integral (and other properties) derived from the parameters."""
         return {
             "acint": pars[0],
             "acint_var": covar[0, 0],
@@ -535,7 +535,7 @@ class PadeModel(SpectrumModel):
 
 @attrs.define
 class LorentzModel(PadeModel):
-    """A model for the spectrum with a single Lorentzian peak at zero frequency.
+    """A model for the spectrum with a Lorentzian peak at zero frequency plus some white noise.
 
     This is a special case of the PadeModel with
     `numer_degrees` = [0, 2] and `denom_degrees` = [2].
@@ -564,7 +564,13 @@ class LorentzModel(PadeModel):
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
     ) -> dict[str, NDArray[float]]:
-        """Derive the autocorrelation integral from the parameters."""
+        """Return autocorrelation integral (and other properties) derived from the parameters.
+
+        The exponential correlation time is derived from the parameters, if possible.
+        If not, or if the variance of the estimate is too large,
+        the "criterion" is set to infinity and the "msg" is set accordingly,
+        to discard the current fit from the average over the cutoff frequencies.
+        """
         result = super().derive_props(pars, covar)
         # Try to deduce the exponential correlation time from the parameters.
         if (
