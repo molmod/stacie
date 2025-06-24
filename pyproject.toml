@@ -9,14 +9,13 @@ authors = [
 ]
 description = "STable AutoCorrelation Integral Estimator"
 readme = "README.md"
-license = {file = "LICENSE.txt"}
+license = "LGPL-3.0-or-later"
 requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
@@ -62,7 +61,7 @@ docs = [
     "sphinxcontrib-bibtex",
     "sphinxcontrib-svg2pdfconverter",
     "stepup>=3.0.3",
-    "stepup-reprep>=3.0.5",
+    "stepup-reprep>=3.1.0",
 ]
 tests = [
     "pytest",
