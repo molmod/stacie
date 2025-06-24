@@ -372,10 +372,14 @@ class ExpPolyModel(SpectrumModel):
 class PadeModel(SpectrumModel):
     """A rational function model for the spectrum, a.k.a. a Padé approximation."""
 
-    numer_degrees: list[int] = attrs.field(converter=_convert_degrees, validator=_validate_degrees)
+    numer_degrees: NDArray[int] = attrs.field(
+        converter=_convert_degrees, validator=_validate_degrees
+    )
     """The degrees of the monomials in the numerator."""
 
-    denom_degrees: list[int] = attrs.field(converter=_convert_degrees, validator=_validate_degrees)
+    denom_degrees: NDArray[int] = attrs.field(
+        converter=_convert_degrees, validator=_validate_degrees
+    )
     """The degrees of the monomials in the denominator.
 
     Note that the leading term is always 1, and there is no need to include
@@ -550,8 +554,8 @@ class LorentzModel(PadeModel):
     tends to be a poor approximation.
     """
 
-    numer_degrees: list[int] = attrs.field(init=False, factory=lambda: np.array([0, 2]))
-    denom_degrees: list[int] = attrs.field(init=False, factory=lambda: np.array([2]))
+    numer_degrees: NDArray[int] = attrs.field(init=False, factory=lambda: np.array([0, 2]))
+    denom_degrees: NDArray[int] = attrs.field(init=False, factory=lambda: np.array([2]))
 
     @property
     def name(self):
