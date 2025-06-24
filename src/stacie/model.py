@@ -559,7 +559,7 @@ class LorentzModel(PadeModel):
 
     @property
     def name(self):
-        return "lorentzian"
+        return f"lorentz({self.relerr_threshold})"
 
     def derive_props(
         self, pars: NDArray[float], covar: NDArray[float]
