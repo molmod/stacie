@@ -205,9 +205,8 @@ plot_extras(axs, uc, result_exppoly)
 # ## Analysis With STACIE, Using the Lorentz Model
 #
 # In this example, we know *a priori* that the autocorrelation function decays exponentially.
-# Therefore, we can configure the `LorentzModel` to correspond to a Lorentzian peak,
-# in line with the analytical result.
-# This model is expected to fit the data perfectly.
+# Therefore, the `LorentzModel` should be able to perfectly explain the spectrum,
+# up to the statistical noise in the data.
 
 # %%
 # Analysis

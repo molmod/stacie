@@ -315,13 +315,13 @@ eta_production_init = analyze_production(1).acint
 #
 # - The recommendations based on the exponential correlation time were met by the initial simulation settings.
 #
-#     - The recommended simulation time is 27 τ\*, which about 9000 steps.
+#     - The recommended simulation time is 24 τ\*, which about 8000 steps.
 #       The initial production runs (12000 steps) were therefore sufficient.
 #
-#     - The recommended block size is 0.057 τ\*, which corresponds to about 45 steps.
+#     - The recommended block time is 0.118 τ\*, which corresponds to about 40 steps.
 #       The block size used in the initial production runs (10 steps) was sufficiently small.
 #
-# - The relative error of the viscosity estimate is 2.2%,
+# - The relative error of the viscosity estimate is about 2%,
 #   which is larger than the guesstimated value 0.5%.
 #   This is fine and somewhat expected, since this guess is known to be crude.
 #
@@ -331,11 +331,11 @@ eta_production_init = analyze_production(1).acint
 #   to support the exponential decay of the ACF of the pressure tensor.
 #   It just seems to be a reasonable choice for this case.
 #
-# - The effective number of points fitted to the spectrum is 19.4,
+# - The effective number of points fitted to the spectrum is 29.4,
 #   which is low for a 3 parameter model.
 #   For high-quality production simulations, it would be good to triple the simulation length,
 #   as to multiply the resolution of the frequency grid by 3.
-#   This should lead to approximately 60 effective points.
+#   This is hopefully sufficient to reach 60 effective points.
 #
 # As can be seen in the comparison to literature results below,
 # the results for the initial production runs were already quite good.
@@ -343,8 +343,8 @@ eta_production_init = analyze_production(1).acint
 # the production runs were extended by an additional 24000 steps each,
 # to triple the simulation time.
 # This revealed that the effective number of points fitted to the spectrum
-# did not increase accordingly (only up to 43 points).
-# Hence we decided to extend the production runs by another 64000 steps,
+# increase to 61, which is a sublinear increase, just enough to reach the target of 60.
+# For the sake of demonstration, we decided to extend the production runs by another 64000 steps,
 # which resulted in a total simulation time of 300 τ\* per run.
 #
 # The difficulty of increasing the effective number of fitted points can be understood as follows.
@@ -363,21 +363,14 @@ eta_production_ext = analyze_production(3).acint
 # %% [markdown]
 # Some remarks about the final results:
 #
-# - The effective number of points has increased to 94.2,
+# - The effective number of points has increased to 134.8,
 #   which is a fine number of data points for a model with $P=3$ parameters.
-#
-# - For the lowest frequency cutoffs the parameters show overfitting artifacts.
-#   Visually, one can also see that the first few data points in the spectrum are
-#   slightly lower compared to points at higher frequencies.
-#   This is (most likely) a statistical artifact.
-#   To reduce the risk that such artifacts affect the final result,
-#   one can increase the parameter `neff_min` of the `estimate_acint()` function.
-#   Its default value is $5\times P$, so in this case 15.
 #
 # - For higher frequency cutoffs, both Z-scores increase, showing that the
 #   autocorrelation function only decays exponentially in the limit of large lag times.
 #   This is expected, since at sufficiently short time scales,
-#   the pressure tensor fluctuations are smooth functions.
+#   the pressure tensor fluctuations are smooth functions,
+#   i.e. not featuring the cusp of a purely exponential ACF.
 
 
 # %% [markdown]
@@ -391,9 +384,9 @@ eta_production_ext = analyze_production(3).acint
 #
 # | Method                     | Simulation time [τ\*] | Shear viscosity [η\*] | Reference |
 # |----------------------------| --------------------: | --------------------: |-----------|
-# | EMD NVE (STACIE)           | 3600                  | 3.236 ± 0.072         | (here) initial |
-# | EMD NVE (STACIE)           | 10800                 | 3.232 ± 0.049         | (here) extension 1 |
-# | EMD NVE (STACIE)           | 30000                 | 3.257 ± 0.030         | (here) extension 2 |
+# | EMD NVE (STACIE)           | 3600                  | 3.205 ± 0.063         | (here) initial |
+# | EMD NVE (STACIE)           | 10800                 | 3.207 ± 0.040         | (here) extension 1 |
+# | EMD NVE (STACIE)           | 30000                 | 3.245 ± 0.026         | (here) extension 2 |
 # | EMD NVE (Helfand-Einstein) | 75000                 | 3.277 ± 0.098         | {cite:p}`meier_2004_transport_I` |
 # | EMD NVE (Helfand-moment)   | 600000                | 3.268 ± 0.055         | {cite:p}`viscardi_2007_transport1` |
 #
