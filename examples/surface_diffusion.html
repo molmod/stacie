@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+
+<html class="no-js" data-content_root="../" lang="en">
+<head><meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/><meta content="width=device-width, initial-scale=1" name="viewport">
+<link href="../genindex.html" rel="index" title="Index"/><link href="../search.html" rel="search" title="Search"/><link href="lj_shear_viscosity.html" rel="next" title="Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)"/><link href="applicability.html" rel="prev" title="Applicability of the Lorentz Model"/>
+<link as="image" href="../_static/stacie-logo-black.svg" rel="prefetch"/>
+<link as="image" href="../_static/stacie-logo-white.svg" rel="prefetch"/>
+<link href="../_static/stacie-logo-black.svg" rel="shortcut icon"/><!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+<title>Diffusion on a Surface with Newtonian Dynamics - STACIE 1.2</title>
+<link href="../_static/pygments.css?v=d111a655" rel="stylesheet" type="text/css">
+<link href="../_static/styles/furo.css?v=580074bf" rel="stylesheet" type="text/css">
+<link href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" rel="stylesheet" type="text/css">
+<link href="../_static/sphinx-codeautolink.css?v=b2176991" rel="stylesheet" type="text/css">
+<link href="../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css">
+<link href="../_static/styles/furo-extensions.css?v=8dab3a3b" rel="stylesheet" type="text/css">
+<link href="../_static/custom.css?v=d923d65c" rel="stylesheet" type="text/css">
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+      }
+    }
+  }
+</style></link></link></link></link></link></link></link></meta></head>
+<body>
+<script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<symbol id="svg-toc" viewbox="0 0 24 24">
+<title>Contents</title>
+<svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 1024 1024">
+<path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"></path>
+</svg>
+</symbol>
+<symbol id="svg-menu" viewbox="0 0 24 24">
+<title>Menu</title>
+<svg class="feather-menu" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<line x1="3" x2="21" y1="12" y2="12"></line>
+<line x1="3" x2="21" y1="6" y2="6"></line>
+<line x1="3" x2="21" y1="18" y2="18"></line>
+</svg>
+</symbol>
+<symbol id="svg-arrow-right" viewbox="0 0 24 24">
+<title>Expand</title>
+<svg class="feather-chevron-right" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</symbol>
+<symbol id="svg-sun" viewbox="0 0 24 24">
+<title>Light mode</title>
+<svg class="feather-sun" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="12" r="5"></circle>
+<line x1="12" x2="12" y1="1" y2="3"></line>
+<line x1="12" x2="12" y1="21" y2="23"></line>
+<line x1="4.22" x2="5.64" y1="4.22" y2="5.64"></line>
+<line x1="18.36" x2="19.78" y1="18.36" y2="19.78"></line>
+<line x1="1" x2="3" y1="12" y2="12"></line>
+<line x1="21" x2="23" y1="12" y2="12"></line>
+<line x1="4.22" x2="5.64" y1="19.78" y2="18.36"></line>
+<line x1="18.36" x2="19.78" y1="5.64" y2="4.22"></line>
+</svg>
+</symbol>
+<symbol id="svg-moon" viewbox="0 0 24 24">
+<title>Dark mode</title>
+<svg class="icon-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+</svg>
+</symbol>
+<symbol id="svg-sun-with-moon" viewbox="0 0 24 24">
+<title>Auto light/dark, in light mode</title>
+<svg class="icon-custom-derived-from-feather-sun-and-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z" style="opacity: 50%"></path>
+<line x1="14.5" x2="14.5" y1="3.25" y2="1.25"></line>
+<line x1="14.5" x2="14.5" y1="15.85" y2="17.85"></line>
+<line x1="10.044" x2="8.63" y1="5.094" y2="3.68"></line>
+<line x1="19" x2="20.414" y1="14.05" y2="15.464"></line>
+<line x1="8.2" x2="6.2" y1="9.55" y2="9.55"></line>
+<line x1="20.8" x2="22.8" y1="9.55" y2="9.55"></line>
+<line x1="10.044" x2="8.63" y1="14.006" y2="15.42"></line>
+<line x1="19" x2="20.414" y1="5.05" y2="3.636"></line>
+<circle cx="14.5" cy="9.55" r="3.6"></circle>
+</svg>
+</symbol>
+<symbol id="svg-moon-with-sun" viewbox="0 0 24 24">
+<title>Auto light/dark, in dark mode</title>
+<svg class="icon-custom-derived-from-feather-sun-and-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"></path>
+<line style="opacity: 50%" x1="18" x2="18" y1="3.705" y2="2.5"></line>
+<line style="opacity: 50%" x1="18" x2="18" y1="11.295" y2="12.5"></line>
+<line style="opacity: 50%" x1="15.316" x2="14.464" y1="4.816" y2="3.964"></line>
+<line style="opacity: 50%" x1="20.711" x2="21.563" y1="10.212" y2="11.063"></line>
+<line style="opacity: 50%" x1="14.205" x2="13.001" y1="7.5" y2="7.5"></line>
+<line style="opacity: 50%" x1="21.795" x2="23" y1="7.5" y2="7.5"></line>
+<line style="opacity: 50%" x1="15.316" x2="14.464" y1="10.184" y2="11.036"></line>
+<line style="opacity: 50%" x1="20.711" x2="21.563" y1="4.789" y2="3.937"></line>
+<circle cx="18" cy="7.5" r="2.169" style="opacity: 50%"></circle>
+</svg>
+</symbol>
+<symbol id="svg-pencil" viewbox="0 0 24 24">
+<svg class="icon-tabler-pencil-code" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path>
+<path d="M13.5 6.5l4 4"></path>
+<path d="M20 21l2 -2l-2 -2"></path>
+<path d="M17 17l-2 2l2 2"></path>
+</svg>
+</symbol>
+<symbol id="svg-eye" viewbox="0 0 24 24">
+<svg class="icon-tabler-eye-code" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
+<path d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008"></path>
+<path d="M20 21l2 -2l-2 -2"></path>
+<path d="M17 17l-2 2l2 2"></path>
+</svg>
+</symbol>
+</svg>
+<input aria-label="Toggle site navigation sidebar" class="sidebar-toggle" id="__navigation" name="__navigation" type="checkbox"/>
+<input aria-label="Toggle table of contents sidebar" class="sidebar-toggle" id="__toc" name="__toc" type="checkbox"/>
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+<div class="page">
+<header class="mobile-header">
+<div class="header-left">
+<label class="nav-overlay-icon" for="__navigation">
+<span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+</label>
+</div>
+<div class="header-center">
+<a href="../index.html"><div class="brand">STACIE 1.2</div></a>
+</div>
+<div class="header-right">
+<div class="theme-toggle-container theme-toggle-header">
+<button aria-label="Toggle Light / Dark / Auto color theme" class="theme-toggle">
+<svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+<svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-header-icon" for="__toc">
+<span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+</label>
+</div>
+</header>
+<aside class="sidebar-drawer">
+<div class="sidebar-container">
+<div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+<div class="sidebar-logo-container">
+<img alt="Light Logo" class="sidebar-logo only-light" src="../_static/stacie-logo-black.svg"/>
+<img alt="Dark Logo" class="sidebar-logo only-dark" src="../_static/stacie-logo-white.svg"/>
+</div>
+<span class="sidebar-brand-text">STACIE 1.2</span>
+</a><form action="../search.html" class="sidebar-search-container" method="get" role="search">
+<input aria-label="Search" class="sidebar-search" name="q" placeholder="Search"/>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../getting_started/index.html">Getting Started</a><input aria-label="Toggle navigation of Getting Started" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/licenses.html">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/usage.html">Usage Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/cite.html">How to Cite</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../theory/index.html">Theory</a><input aria-label="Toggle navigation of Theory" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../theory/notation.html">Notation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/overview.html">STACIE Algorithm Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/model.html">Model Spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/statistics.html">Parameter Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/cutoff.html">Frequency Cutoff</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../preparing_inputs/index.html">Preparing Inputs</a><input aria-label="Toggle navigation of Preparing Inputs" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/data_sufficiency.html">How to Prepare Sufficient Inputs for STACIE?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/block_averages.html">Reducing Storage Requirements with Block Averages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/molecular_dynamics.html">Recommendations for MD Simulations</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../properties/index.html">Properties Derived from the Autocorrelation Function</a><input aria-label="Toggle navigation of Properties Derived from the Autocorrelation Function" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../properties/error_estimates.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/autocorrelation_time.html">Integrated and Exponential Autocorrelation Time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/shear_viscosity.html">Shear Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/bulk_viscosity.html">Bulk Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/thermal_conductivity.html">Thermal Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/electrical_conductivity.html">Ionic Electrical Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/diffusion_coefficient.html">Diffusion Coefficient</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Worked Examples</a><input aria-label="Toggle navigation of Worked Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="minimal.html">Minimal Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="error_mean.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="applicability.html">Applicability of the Lorentz Model</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Diffusion on a Surface with Newtonian Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_shear_viscosity.html">Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_bulk_viscosity.html">Bulk Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_thermal_conductivity.html">Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molten_salt.html">Ionic Electrical Conductivity of Molten Sodium Chloride at 1100 K (OpenMM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Utility Module for Plots Reused in Multiple Examples.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cloud_cover.html">Correlation Time Analysis of Cloud Cover Data</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../apidocs/modules.html">Application Programming Interface</a><input aria-label="Toggle navigation of Application Programming Interface" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../apidocs/stacie.html">stacie package</a><input aria-label="Toggle navigation of stacie package" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.conditioning.html">stacie.conditioning module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cost.html">stacie.cost module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cutoff.html">stacie.cutoff module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.estimate.html">stacie.estimate module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.model.html">stacie.model module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.plot.html">stacie.plot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.spectrum.html">stacie.spectrum module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.synthetic.html">stacie.synthetic module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.utils.html">stacie.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../development/index.html">Development</a><input aria-label="Toggle navigation of Development" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/contributing.html">Contributor Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/setup.html">Development Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/release.html">How to Make a Release</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<div class="main">
+<div class="content">
+<div class="article-container">
+<a class="back-to-top muted-link" href="#">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+</svg>
+<span>Back to top</span>
+</a>
+<div class="content-icon-container">
+<div class="view-this-page">
+<a class="muted-link" href="https://github.com/molmod/stacie/blob/main/docs/examples/surface_diffusion.py?plain=true" title="View this page">
+<svg><use href="#svg-eye"></use></svg>
+<span class="visually-hidden">View this page</span>
+</a>
+</div><div class="edit-this-page">
+<a class="muted-link" href="https://github.com/molmod/stacie/edit/main/docs/examples/surface_diffusion.py" rel="edit" title="Edit this page">
+<svg><use href="#svg-pencil"></use></svg>
+<span class="visually-hidden">Edit this page</span>
+</a>
+</div><div class="theme-toggle-container theme-toggle-content">
+<button aria-label="Toggle Light / Dark / Auto color theme" class="theme-toggle">
+<svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+<svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-content-icon" for="__toc">
+<span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+</label>
+</div>
+<article id="furo-main-content" role="main">
+<section class="tex2jax_ignore mathjax_ignore" id="diffusion-on-a-surface-with-newtonian-dynamics">
+<h1>Diffusion on a Surface with Newtonian Dynamics<a class="headerlink" href="#diffusion-on-a-surface-with-newtonian-dynamics" title="Link to this heading">¶</a></h1>
+<p>This example shows how to compute the diffusion coefficient
+of a particle adsorbed on a crystal surface.
+For simplicity, the motion of the adsorbed particle is described
+by Newton’s equations (without thermostat), i.e. in the <a class="reference internal" href="../glossary.html#term-NVE"><span class="xref std std-term">NVE</span></a> ensemble,
+and the particle can only move in two dimensions.</p>
+<p>This is a completely self-contained example that generates the input sequences
+(with numerical integration) and then analyzes them with STACIE.
+Unless otherwise noted, atomic units are used.</p>
+<section id="library-imports-and-matplotlib-configuration">
+<h2>Library Imports and Matplotlib Configuration<a class="headerlink" href="#library-imports-and-matplotlib-configuration" title="Link to this heading">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">attrs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numdifftools</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nd</span>
+<span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="numpy"><span class="nn">numpy</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/constants.html#module-scipy.constants" title="scipy.constants"><span class="nn">scipy.constants</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#module-numpy.typing" title="numpy.typing"><span class="nn">numpy.typing</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike" title="numpy.typing.ArrayLike"><span class="n">ArrayLike</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray" title="numpy.typing.NDArray"><span class="n">NDArray</span></a>
+<span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.html#module-stacie" title="stacie"><span class="nn">stacie</span></a><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">UnitConfig</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.compute_spectrum" title="stacie.spectrum.compute_spectrum"><span class="n">compute_spectrum</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="n">estimate_acint</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.model.html#stacie.model.LorentzModel" title="stacie.model.LorentzModel"><span class="n">LorentzModel</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_extras" title="stacie.plot.plot_extras"><span class="n">plot_extras</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_fitted_spectrum" title="stacie.plot.plot_fitted_spectrum"><span class="n">plot_fitted_spectrum</span></a><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_msds</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mpl</span><span class="o">.</span><span class="n">rc_file</span><span class="p">(</span><span class="s2">"matplotlibrc"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = ["svg"]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="data-generation">
+<h2>Data Generation<a class="headerlink" href="#data-generation" title="Link to this heading">¶</a></h2>
+<section id="potential-energy-surface">
+<h3>Potential energy surface<a class="headerlink" href="#potential-energy-surface" title="Link to this heading">¶</a></h3>
+<p>The first cell below defines the potential energy of a particle on a surface,
+as well as the force that the surface exerts on the particle.
+The potential energy model is a superposition of cosine functions:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    U(\mathbf{r}) = -A \sum_{n=1}^N \cos(2\pi \mathbf{r}\cdot\mathbf{e}_n / \lambda)
+\]</div>
+</div>
+<p>with</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    \mathbf{e}_n = \mathbf{e}_x \cos(n\alpha)  + \mathbf{e}_y \sin(n\alpha)
+\]</div>
+</div>
+<p>The default settings for this notebook result in a hexagonal lattice:
+<span class="math notranslate nohighlight">\(A = 0.2\,\mathrm{eV}\)</span>,
+<span class="math notranslate nohighlight">\(\lambda = 5\,\mathrm{a}_0\)</span>,
+<span class="math notranslate nohighlight">\(N=3\)</span>, and
+<span class="math notranslate nohighlight">\(\alpha = 2\pi/3\)</span>.
+One may change these parameters to construct different types of surfaces:</p>
+<ul class="simple">
+<li><p>A square lattice: <span class="math notranslate nohighlight">\(N = 2\)</span> and <span class="math notranslate nohighlight">\(\alpha = \pi/2\)</span>.</p></li>
+<li><p>A quasi-periodic pentagonal lattice: <span class="math notranslate nohighlight">\(N=5\)</span> and <span class="math notranslate nohighlight">\(\alpha = 2\pi/5\)</span>.</p></li>
+</ul>
+<p>The rest of the notebook is set up to work well with the default parameters.
+If you change the potential energy model, remaining settings will also need to be adapted.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">WAVELENGTH</span> <span class="o">=</span> <span class="mf">5.0</span>
+<span class="n">ALPHA</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/constants.html#numpy.pi" title="numpy.pi"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a> <span class="o">/</span> <span class="mi">3</span>
+<span class="n">ANGLES</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ALPHA</span>
+<span class="n">EV</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"electron volt"</span><span class="p">)</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of energy"</span><span class="p">)</span>
+<span class="n">AMPLITUDE</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">EV</span>
+<span class="n">ANGSTROM</span> <span class="o">=</span> <span class="mf">1e-10</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of length"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">potential_energy_force</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike" title="numpy.typing.ArrayLike"><span class="n">ArrayLike</span></a><span class="p">)</span> <span class="o">-&gt;</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="tuple"><span class="nb">tuple</span></a><span class="p">[</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray" title="numpy.typing.NDArray"><span class="n">NDArray</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray" title="numpy.typing.NDArray"><span class="n">NDArray</span></a><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Compute the potential energies for given particle positions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coords</span>
+<span class="sd">        A NumPy array with one or more particle positions.</span>
+<span class="sd">        The last dimension is assumed to have size two.</span>
+<span class="sd">        Index 0 and 1 of the last axis correspond to x and y coordinates,</span>
+<span class="sd">        respectively.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    energy</span>
+<span class="sd">        The potential energies for the given particle positions.</span>
+<span class="sd">        An array with shape `pos.shape[:-1]`.</span>
+<span class="sd">    force</span>
+<span class="sd">        The forces acting on the particles.</span>
+<span class="sd">        Same shape as `pos`, with same index conventions.</span>
+<span class="sd">    """</span>
+    <span class="n">coords</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.asarray.html#numpy.asarray" title="numpy.asarray"><span class="n">np</span><span class="o">.</span><span class="n">asarray</span></a><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#float" title="float"><span class="nb">float</span></a><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">force</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">wavenum</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/constants.html#numpy.pi" title="numpy.pi"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a> <span class="o">/</span> <span class="n">WAVELENGTH</span>
+    <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">ANGLES</span><span class="p">:</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.cos.html#numpy.cos" title="numpy.cos"><span class="n">np</span><span class="o">.</span><span class="n">cos</span></a><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.sin.html#numpy.sin" title="numpy.sin"><span class="n">np</span><span class="o">.</span><span class="n">sin</span></a><span class="p">(</span><span class="n">angle</span><span class="p">))</span> <span class="o">*</span> <span class="n">wavenum</span>
+        <span class="n">energy</span> <span class="o">-=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.cos.html#numpy.cos" title="numpy.cos"><span class="n">np</span><span class="o">.</span><span class="n">cos</span></a><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        <span class="n">sin_wave</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.sin.html#numpy.sin" title="numpy.sin"><span class="n">np</span><span class="o">.</span><span class="n">sin</span></a><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">*</span> <span class="n">wavenum</span>
+        <span class="n">force</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">sin_wave</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.cos.html#numpy.cos" title="numpy.cos"><span class="n">np</span><span class="o">.</span><span class="n">cos</span></a><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+        <span class="n">force</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">sin_wave</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.sin.html#numpy.sin" title="numpy.sin"><span class="n">np</span><span class="o">.</span><span class="n">sin</span></a><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">AMPLITUDE</span> <span class="o">*</span> <span class="n">energy</span><span class="p">,</span> <span class="n">AMPLITUDE</span> <span class="o">*</span> <span class="n">force</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The following code cell provides a quick visual test of the forces using
+<a class="reference external" href="https://github.com/pbrod/numdifftools">numdifftools</a>.
+(The force is equal to minus the energy gradient.)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="n">potential_energy_force</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="n">nd</span><span class="o">.</span><span class="n">Gradient</span><span class="p">(</span><span class="k">lambda</span> <span class="n">coords</span><span class="p">:</span> <span class="n">potential_energy_force</span><span class="p">(</span><span class="n">coords</span><span class="p">)[</span><span class="mi">0</span><span class="p">])([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(np.float64(0.004500133964627546), array([-0.00569293, -0.01063935]))
+[0.00569293 0.01063935]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, the following code cell plots the potential energy surface.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_pes</span><span class="p">():</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"pes"</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"pes"</span><span class="p">)</span>
+    <span class="n">xs</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">201</span><span class="p">)</span>
+    <span class="n">ys</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">201</span><span class="p">)</span>
+    <span class="n">coords</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html#numpy.meshgrid" title="numpy.meshgrid"><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span></a><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="n">potential_energy_force</span><span class="p">(</span><span class="n">coords</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">cf</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">xs</span> <span class="o">/</span> <span class="n">ANGSTROM</span><span class="p">,</span> <span class="n">ys</span> <span class="o">/</span> <span class="n">ANGSTROM</span><span class="p">,</span> <span class="n">energies</span> <span class="o">/</span> <span class="n">EV</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">"equal"</span><span class="p">,</span> <span class="s2">"box"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"x [Å]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"y [Å]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Potential Energy Surface"</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cf</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Energy [eV]"</span><span class="p">)</span>
+
+
+<span class="n">plot_pes</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/e3943623d145c47842da78afbd759e52594621e58fe19ce2a43e170856e64e3b.svg" src="../_images/e3943623d145c47842da78afbd759e52594621e58fe19ce2a43e170856e64e3b.svg"/>
+</div>
+</div>
+</section>
+<section id="newtonian-dynamics">
+<h3>Newtonian Dynamics<a class="headerlink" href="#newtonian-dynamics" title="Link to this heading">¶</a></h3>
+<p>The following code cell implements a vectorized
+<a class="reference external" href="https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet">Velocity Verlet integrator</a>,
+which can integrate multiple independent trajectories at the same time.
+Some parameters, like mass and time step are fixed as global constants.
+The mass is that of an Argon atom converted to atomic units.
+The timestep is five femtosecond converted to atomic units.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">MASS</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"unified atomic mass unit"</span><span class="p">)</span> <span class="o">*</span> <span class="mf">39.948</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of mass"</span><span class="p">)</span>
+<span class="n">FEMTOSECOND</span> <span class="o">=</span> <span class="mf">1e-15</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of time"</span><span class="p">)</span>
+<span class="n">PICOSECOND</span> <span class="o">=</span> <span class="mf">1e-12</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of time"</span><span class="p">)</span>
+<span class="n">TERAHERTZ</span> <span class="o">=</span> <span class="mf">1e12</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of time"</span><span class="p">)</span>
+<span class="n">TIMESTEP</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">FEMTOSECOND</span>
+
+
+<span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Trajectory</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Bundle dynamics trajectory results.</span>
+
+<span class="sd">    The first axis of all array attributes corresponds to time steps.</span>
+<span class="sd">    """</span>
+
+    <span class="n">timestep</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#float" title="float"><span class="nb">float</span></a> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">"""The spacing between two recorded time steps."""</span>
+
+    <span class="n">coords</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray" title="numpy.typing.NDArray"><span class="n">NDArray</span></a> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">"""The time-dependent particle positions, with shape `(natom, 2, nstep)`.</span>
+
+<span class="sd">    The last index is used for time steps, of which only every `block_size` step is recorded.</span>
+<span class="sd">    """</span>
+
+    <span class="n">vels</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray" title="numpy.typing.NDArray"><span class="n">NDArray</span></a> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">"""The time-dependent particle velocities, with shape `(natom, 2, nstep)`.</span>
+
+<span class="sd">    If block_size is larger than 1,</span>
+<span class="sd">    this attribute contains the block-averaged velocity.</span>
+<span class="sd">    """</span>
+
+    <span class="n">potential_energies</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray" title="numpy.typing.NDArray"><span class="n">NDArray</span></a> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">"""The time-dependent potential energies."""</span>
+
+    <span class="n">kinetic_energies</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray" title="numpy.typing.NDArray"><span class="n">NDArray</span></a> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">"""The time-dependent potential energies."""</span>
+
+    <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#classmethod" title="classmethod"><span class="nd">@classmethod</span></a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="tuple"><span class="nb">tuple</span></a><span class="p">[</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">nstep</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a><span class="p">,</span> <span class="n">timestep</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#float" title="float"><span class="nb">float</span></a><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Construct an empty trajectory object."""</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">timestep</span><span class="p">,</span>
+            <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">((</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">nstep</span><span class="p">)),</span>
+            <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">((</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">nstep</span><span class="p">)),</span>
+            <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">((</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="n">nstep</span><span class="p">)),</span>
+            <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">((</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="n">nstep</span><span class="p">)),</span>
+        <span class="p">)</span>
+
+    <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#property" title="property"><span class="nd">@property</span></a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nstep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The number of time steps."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">integrate</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike" title="numpy.typing.ArrayLike"><span class="n">ArrayLike</span></a><span class="p">,</span> <span class="n">vels</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike" title="numpy.typing.ArrayLike"><span class="n">ArrayLike</span></a><span class="p">,</span> <span class="n">nstep</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a><span class="p">,</span> <span class="n">block_size</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Integrate Newton's equation of motion for the given initial conditions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coords</span>
+<span class="sd">        The initial particle positions.</span>
+<span class="sd">        Index 0 and 1 of the last axis correspond to x and y coordinates.</span>
+<span class="sd">    vels</span>
+<span class="sd">        The initial particle velocities.</span>
+<span class="sd">        Index 0 and 1 of the last axis correspond to x and y coordinates.</span>
+<span class="sd">    nstep</span>
+<span class="sd">        The number of MD time steps.</span>
+<span class="sd">    block_size</span>
+<span class="sd">        The block_size with which to record the trajectory data.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    trajectory</span>
+<span class="sd">        A Trajectory object holding all the results.</span>
+<span class="sd">    """</span>
+    <span class="n">traj</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">nstep</span> <span class="o">//</span> <span class="n">block_size</span><span class="p">,</span> <span class="n">TIMESTEP</span> <span class="o">*</span> <span class="n">block_size</span><span class="p">)</span>
+    <span class="n">energies</span><span class="p">,</span> <span class="n">forces</span> <span class="o">=</span> <span class="n">potential_energy_force</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">delta_vels</span> <span class="o">=</span> <span class="n">forces</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">TIMESTEP</span> <span class="o">/</span> <span class="n">MASS</span><span class="p">)</span>
+
+    <span class="n">vels_block</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">istep</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">nstep</span> <span class="o">*</span> <span class="n">block_size</span><span class="p">):</span>
+        <span class="n">vels</span> <span class="o">+=</span> <span class="n">delta_vels</span>
+        <span class="n">coords</span> <span class="o">+=</span> <span class="n">vels</span> <span class="o">*</span> <span class="n">TIMESTEP</span>
+        <span class="n">energies</span><span class="p">,</span> <span class="n">forces</span> <span class="o">=</span> <span class="n">potential_energy_force</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">delta_vels</span> <span class="o">=</span> <span class="n">forces</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">TIMESTEP</span> <span class="o">/</span> <span class="n">MASS</span><span class="p">)</span>
+        <span class="n">vels</span> <span class="o">+=</span> <span class="n">delta_vels</span>
+        <span class="n">vels_block</span> <span class="o">+=</span> <span class="n">vels</span>
+        <span class="k">if</span> <span class="n">istep</span> <span class="o">%</span> <span class="n">block_size</span> <span class="o">==</span> <span class="n">block_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">itraj</span> <span class="o">=</span> <span class="n">istep</span> <span class="o">//</span> <span class="n">block_size</span>
+            <span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">itraj</span><span class="p">]</span> <span class="o">=</span> <span class="n">coords</span>
+            <span class="n">traj</span><span class="o">.</span><span class="n">vels</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">itraj</span><span class="p">]</span> <span class="o">=</span> <span class="n">vels_block</span> <span class="o">/</span> <span class="n">block_size</span>
+            <span class="n">traj</span><span class="o">.</span><span class="n">potential_energies</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">itraj</span><span class="p">]</span> <span class="o">=</span> <span class="n">energies</span>
+            <span class="n">traj</span><span class="o">.</span><span class="n">kinetic_energies</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">itraj</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">MASS</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">vels</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">vels_block</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">traj</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>As a quick test, the following code cell integrates the equations of motion
+for a single particle with a small initial velocity.
+In this case, the particle oscillates around the origin
+and one can easily verify that the total energy is conserved.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">demo_energy_conservation</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Simple demo of the approximate energy conservation.</span>
+
+<span class="sd">    The initial velocity is small enough</span>
+<span class="sd">    to let the particle vibrate around the origin.</span>
+<span class="sd">    """</span>
+    <span class="n">nstep</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">traj</span> <span class="o">=</span> <span class="n">integrate</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.full.html#numpy.full" title="numpy.full"><span class="n">np</span><span class="o">.</span><span class="n">full</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">),</span> <span class="n">nstep</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"energy"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"energy"</span><span class="p">)</span>
+    <span class="n">times</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">nstep</span><span class="p">)</span> <span class="o">*</span> <span class="n">traj</span><span class="o">.</span><span class="n">timestep</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span> <span class="o">/</span> <span class="n">PICOSECOND</span><span class="p">,</span> <span class="n">traj</span><span class="o">.</span><span class="n">potential_energies</span> <span class="o">/</span> <span class="n">EV</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"potential"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">times</span> <span class="o">/</span> <span class="n">PICOSECOND</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">potential_energies</span> <span class="o">+</span> <span class="n">traj</span><span class="o">.</span><span class="n">kinetic_energies</span><span class="p">)</span> <span class="o">/</span> <span class="n">EV</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">"total"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Energy Conservation Demo"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time [ps]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Energy [eV]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+
+<span class="n">demo_energy_conservation</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/029fd5b4e4d1d21ab975a4dbb45122fb463bba2ec6a76488dae965b16ed6c2bd.svg" src="../_images/029fd5b4e4d1d21ab975a4dbb45122fb463bba2ec6a76488dae965b16ed6c2bd.svg"/>
+</div>
+</div>
+</section>
+<section id="demonstration-of-deterministic-choas">
+<h3>Demonstration of Deterministic Choas<a class="headerlink" href="#demonstration-of-deterministic-choas" title="Link to this heading">¶</a></h3>
+<p>Newtonian dynamics is deterministic,
+but has chaotic solutions for many systems.
+The particle on a surface in this notebook is no exception.
+The following cell shows two trajectories
+for nearly identical initial conditions,
+but they slowly drift apart over time.
+After sufficient time,
+any information about their nearly identical initial conditions is lost.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">demo_chaos</span><span class="p">():</span>
+    <span class="n">vels</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([[</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.000001e-3</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">]])</span>
+    <span class="n">traj</span> <span class="o">=</span> <span class="n">integrate</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">vels</span><span class="p">,</span> <span class="mi">1500</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"chaos"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"chaos"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"o"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"k"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Initial position"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">ANGSTROM</span><span class="p">,</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ANGSTROM</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">"C1"</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">"Trajectory 1"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">ANGSTROM</span><span class="p">,</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ANGSTROM</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">"C3"</span><span class="p">,</span>
+        <span class="n">ls</span><span class="o">=</span><span class="s2">":"</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">"Trajectory 2"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">"equal"</span><span class="p">,</span> <span class="s2">"box"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"x [Å]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"y [Å]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Two Trajectories"</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"chaos_dist"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"chaos_dist"</span><span class="p">)</span>
+    <span class="n">times</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">nstep</span><span class="p">)</span> <span class="o">*</span> <span class="n">traj</span><span class="o">.</span><span class="n">timestep</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span>
+        <span class="n">times</span> <span class="o">/</span> <span class="n">PICOSECOND</span><span class="p">,</span>
+        <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html#numpy.linalg.norm" title="numpy.linalg.norm"><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span></a><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">ANGSTROM</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time [ps]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Interparticle distance [Å]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Slow Separation"</span><span class="p">)</span>
+
+
+<span class="n">demo_chaos</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/40c3529c382fe6640fc2978c5881209e733e37d17a407fef2639e1917c5f96ea.svg" src="../_images/40c3529c382fe6640fc2978c5881209e733e37d17a407fef2639e1917c5f96ea.svg"/>
+<img alt="../_images/406b1880ba21e117a885250564b44afc9d58074d028d2b8513c784aea22f1723.svg" src="../_images/406b1880ba21e117a885250564b44afc9d58074d028d2b8513c784aea22f1723.svg"/>
+</div>
+</div>
+<p>Because the trajectories are
+<a class="reference external" href="https://en.wikipedia.org/wiki/Chaos_theory">chaotic</a>,
+the short term motion is ballistic,
+while the long term motion is a random walk.</p>
+<p>Note that the random walk is only found in a specific energy window.
+If the energy is too small,
+the particles will oscillate around a local potential energy minimum.
+If the energy is too large, or just high enough to cross barriers,
+the particles will follow almost linear paths over the surface.</p>
+</section>
+</section>
+<section id="surface-diffusion-without-block-averages">
+<h2>Surface diffusion without block averages<a class="headerlink" href="#surface-diffusion-without-block-averages" title="Link to this heading">¶</a></h2>
+<p>This section considers 100 independent particles whose initial velocities
+have the same magnitude but whose directions are random.
+The time-dependent particle velocities are used as inputs for STACIE
+to compute the diffusion coefficient.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">demo_stacie</span><span class="p">(</span><span class="n">block_size</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Simulate particles on a surface and compute the diffusion coefficient.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    block_size</span>
+<span class="sd">        The block size for the block averages.</span>
+<span class="sd">        If 1, no block averages are used.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    result</span>
+<span class="sd">        The result of the STACIE analysis.</span>
+<span class="sd">    """</span>
+    <span class="n">natom</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">nstep</span> <span class="o">=</span> <span class="mi">20000</span>
+    <span class="n">rng</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="numpy.random.default_rng"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span></a><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">vels</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">natom</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">vels</span> <span class="o">*=</span> <span class="mf">9.7e-4</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html#numpy.linalg.norm" title="numpy.linalg.norm"><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span></a><span class="p">(</span><span class="n">vels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">traj</span> <span class="o">=</span> <span class="n">integrate</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.zeros.html#numpy.zeros" title="numpy.zeros"><span class="n">np</span><span class="o">.</span><span class="n">zeros</span></a><span class="p">((</span><span class="n">natom</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">vels</span><span class="p">,</span> <span class="n">nstep</span><span class="p">,</span> <span class="n">block_size</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="sa">f</span><span class="s2">"trajs_</span><span class="si">{</span><span class="n">block_size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="sa">f</span><span class="s2">"trajs_</span><span class="si">{</span><span class="n">block_size</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="n">natom</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">"equal"</span><span class="p">,</span> <span class="s2">"box"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"x [a$_0$]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"y [a$_0$]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">natom</span><span class="si">}</span><span class="s2"> Newtonian Pseudo-Random Walks"</span><span class="p">)</span>
+
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.Spectrum" title="stacie.spectrum.Spectrum"><span class="n">spectrum</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.compute_spectrum" title="stacie.spectrum.compute_spectrum"><span class="n">compute_spectrum</span></a><span class="p">(</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">vels</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">natom</span><span class="p">,</span> <span class="n">traj</span><span class="o">.</span><span class="n">nstep</span><span class="p">),</span>
+        <span class="n">timestep</span><span class="o">=</span><span class="n">traj</span><span class="o">.</span><span class="n">timestep</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Define units and conversion factors used for screen output and plotting.</span>
+    <span class="c1"># This does not affect numerical values stored in the result object.</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">UnitConfig</span></a><span class="p">(</span>
+        <span class="n">acint_symbol</span><span class="o">=</span><span class="s2">"D"</span><span class="p">,</span>
+        <span class="n">acint_unit</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of time"</span><span class="p">)</span>
+        <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of length"</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">acint_unit_str</span><span class="o">=</span><span class="s2">"m$^2$/s"</span><span class="p">,</span>
+        <span class="n">acint_fmt</span><span class="o">=</span><span class="s2">".2e"</span><span class="p">,</span>
+        <span class="n">freq_unit</span><span class="o">=</span><span class="n">TERAHERTZ</span><span class="p">,</span>
+        <span class="n">freq_unit_str</span><span class="o">=</span><span class="s2">"THz"</span><span class="p">,</span>
+        <span class="n">time_unit</span><span class="o">=</span><span class="n">PICOSECOND</span><span class="p">,</span>
+        <span class="n">time_unit_str</span><span class="o">=</span><span class="s2">"ps"</span><span class="p">,</span>
+        <span class="n">time_fmt</span><span class="o">=</span><span class="s2">".2f"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># The maximum cutoff frequency is chosen to be 1 THz,</span>
+    <span class="c1"># by inspecting the first spectrum plot.</span>
+    <span class="c1"># Beyond the cutoff frequency, the spectrum has resonance peaks that</span>
+    <span class="c1"># the Lorentz model is not designed to handle.</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="n">estimate_acint</span></a><span class="p">(</span>
+        <a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.Spectrum" title="stacie.spectrum.Spectrum"><span class="n">spectrum</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.model.html#stacie.model.LorentzModel" title="stacie.model.LorentzModel"><span class="n">LorentzModel</span></a><span class="p">(),</span> <span class="n">fcut_max</span><span class="o">=</span><span class="n">TERAHERTZ</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">uc</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a>
+    <span class="p">)</span>
+
+    <span class="c1"># Plotting</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="sa">f</span><span class="s2">"spectrum_</span><span class="si">{</span><span class="n">block_size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="sa">f</span><span class="s2">"spectrum_</span><span class="si">{</span><span class="n">block_size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_fitted_spectrum" title="stacie.plot.plot_fitted_spectrum"><span class="n">plot_fitted_spectrum</span></a><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="sa">f</span><span class="s2">"extras_</span><span class="si">{</span><span class="n">block_size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="sa">f</span><span class="s2">"extras_</span><span class="si">{</span><span class="n">block_size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_extras" title="stacie.plot.plot_extras"><span class="n">plot_extras</span></a><span class="p">(</span><span class="n">axs</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a><span class="p">)</span>
+    <span class="k">return</span> <span class="n">traj</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">traj_1</span><span class="p">,</span> <span class="n">result_1</span> <span class="o">=</span> <span class="n">demo_stacie</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CUTOFF FREQUENCY SCAN cv2l(125%)
+     neff   criterion  fcut [THz]
+---------  ----------  ----------
+     15.0        40.4    1.41e-01
+     15.9        39.8    1.50e-01
+     16.9        39.0    1.60e-01
+     18.0        38.3    1.70e-01
+     19.1        37.6    1.81e-01
+     20.3        37.0    1.93e-01
+     21.6        36.3    2.06e-01
+     23.0        35.7    2.19e-01
+     24.4        35.0    2.33e-01
+     25.9        34.4    2.48e-01
+     27.6        33.9    2.64e-01
+     29.3        34.0    2.81e-01
+     31.2        34.8    2.99e-01
+     33.2        37.0    3.18e-01
+     35.3        40.9    3.39e-01
+     37.5        46.7    3.61e-01
+     39.9        56.4    3.84e-01
+     42.4        75.9    4.09e-01
+     45.1       102.9    4.35e-01
+     48.0       133.8    4.63e-01
+     51.1       161.2    4.93e-01
+Cutoff criterion exceeds incumbent + margin: 33.9 + 100.0.
+
+INPUT TIME SERIES
+    Time step:                     0.01 ps
+    Simulation time:               100.00 ps
+    Maximum degrees of freedom:    400.0
+
+MAIN RESULTS
+    Autocorrelation integral:      5.79e-07 ± 1.59e-08 m$^2$/s
+    Integrated correlation time:   0.72 ± 0.02 ps
+
+SANITY CHECKS (weighted averages over cutoff grid)
+    Effective number of points:    27.4 (ideally &gt; 60)
+    Regression cost Z-score:       -0.2 (ideally &lt; 2)
+    Cutoff criterion Z-score:      -0.1 (ideally &lt; 2)
+
+MODEL lorentz() | CUTOFF CRITERION cv2l(125%)
+    Number of parameters:          3
+    Average cutoff frequency:      2.62e-01 THz
+    Exponential correlation time:  0.98 ± 0.06 ps
+
+RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL CORR. TIME)
+    Block time:                  &lt; 0.31 ± 0.03 ps
+    Simulation time:             &gt; 61.70 ± 0.45 ps
+</pre></div>
+</div>
+<img alt="../_images/8ef93691a2b81eab5db23268a153d4a19743aa58cc36ee1646fa9539072bdc12.svg" src="../_images/8ef93691a2b81eab5db23268a153d4a19743aa58cc36ee1646fa9539072bdc12.svg"/>
+<img alt="../_images/1610fb7ac89eb4cf3dae3d6ceb60515c6341ccd3a738f53c443676e03a246e99.svg" src="../_images/1610fb7ac89eb4cf3dae3d6ceb60515c6341ccd3a738f53c443676e03a246e99.svg"/>
+<img alt="../_images/8fbe43b0ba6279f15287ed160eaa42a7ff15505aab79b047b49d9a75eaa2fcdf.svg" src="../_images/8fbe43b0ba6279f15287ed160eaa42a7ff15505aab79b047b49d9a75eaa2fcdf.svg"/>
+</div>
+</div>
+<p>The spectrum has several peaks related to oscillations of the particles
+around a local minimum.
+These peaks are irrelevant to the diffusion coefficient.
+The broad peak at zero frequency is used by STACIE
+to derive the diffusion coefficient.
+The obtained value is not directly comparable to experiment
+because the 2D lattice model for the surface
+is not based on an experimental case.
+However, the order of magnitude is comparable to the self-diffusion constants
+of pure liquids <span id="id1">[<a class="reference internal" href="../references.html#id40" title="Hiromi Baba, Ryo Urano, Tetsuro Nagai, and Susumu Okazaki. Prediction of self-diffusion coefficients of chemically diverse pure liquids by all-atom molecular dynamics simulations. J. Comput. Chem., 43(28):1892–1900, 2022. doi:10.1002/jcc.26975.">BUNO22</a>]</span>.</p>
+<p>It is also interesting to compare the integrated and exponential autocorrelation time,
+as they are not the same in this case.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"corrtime_exp = </span><span class="si">{</span><span class="n">result_1</span><span class="o">.</span><span class="n">corrtime_exp</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">PICOSECOND</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> ps"</span><span class="p">)</span>
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"corrtime_int = </span><span class="si">{</span><span class="n">result_1</span><span class="o">.</span><span class="n">corrtime_int</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">PICOSECOND</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> ps"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>corrtime_exp = 0.982 ps
+corrtime_int = 0.718 ps
+</pre></div>
+</div>
+</div>
+</div>
+<p>The integrated autocorrelation time is smaller than the exponential one
+because the former is an average of all time scales of the particle velocities.
+This includes the slow diffusion and faster oscillations in local minima.
+In contrast, the exponential autocorrelation time only represents the slow diffusive motion.</p>
+<p>Finally, it is well known that the velocity autocorrelation function
+of molecules in a liquid decays according to a power law <span id="id2">[<a class="reference internal" href="../references.html#id52" title="B. J. Alder and T. E. Wainwright. Decay of the velocity autocorrelation function. Phys. Rev. A, 1(1):18–21, 1970. doi:10.1103/physreva.1.18.">AW70</a>]</span>.
+One might wonder why the Lorentz model can be used here since it implies that diffusion
+can be described with an exponentially decaying autocorrelation function.
+The system in this notebook exhibits exponential decay
+because every particle only interacts with the surface,
+and not with each other, such that there are no collective modes with long memory effects.</p>
+</section>
+<section id="surface-diffusion-with-block-averages">
+<h2>Surface diffusion with block averages<a class="headerlink" href="#surface-diffusion-with-block-averages" title="Link to this heading">¶</a></h2>
+<p>This section repeats the same example,
+but now with block averages of velocities.
+<a class="reference internal" href="../preparing_inputs/block_averages.html"><span class="std std-doc">Block averages</span></a>
+are primarily useful for reducing storage requirements
+when saving trajectories to disk before processing them with STACIE.
+In this example, the block size is determined by the following guideline:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/constants.html#numpy.pi" title="numpy.pi"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a> <span class="o">*</span> <span class="n">result_1</span><span class="o">.</span><span class="n">corrtime_exp</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">TIMESTEP</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>61.70265956349357
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s use a block size of 60 to stay on the safe side.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">traj_60</span><span class="p">,</span> <span class="n">result_60</span> <span class="o">=</span> <span class="n">demo_stacie</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CUTOFF FREQUENCY SCAN cv2l(125%)
+     neff   criterion  fcut [THz]
+---------  ----------  ----------
+     15.0        40.4    1.41e-01
+     15.9        39.7    1.51e-01
+     16.9        38.9    1.60e-01
+     18.0        38.1    1.71e-01
+     19.1        37.5    1.82e-01
+     20.3        36.9    1.93e-01
+     21.6        36.2    2.06e-01
+     23.0        35.5    2.19e-01
+     24.4        34.8    2.33e-01
+     25.9        34.2    2.48e-01
+     27.6        33.9    2.64e-01
+     29.3        34.3    2.81e-01
+     31.2        35.7    2.99e-01
+     33.2        38.5    3.19e-01
+     35.3        43.0    3.39e-01
+     37.5        49.4    3.61e-01
+     39.9        59.1    3.84e-01
+     42.4        76.9    4.09e-01
+     45.1        97.5    4.36e-01
+     48.0       118.6    4.64e-01
+     51.1       135.8    4.94e-01
+Cutoff criterion exceeds incumbent + margin: 33.9 + 100.0.
+
+INPUT TIME SERIES
+    Time step:                     0.30 ps
+    Simulation time:               99.90 ps
+    Maximum degrees of freedom:    400.0
+
+MAIN RESULTS
+    Autocorrelation integral:      5.80e-07 ± 1.60e-08 m$^2$/s
+    Integrated correlation time:   1.00 ± 0.03 ps
+
+SANITY CHECKS (weighted averages over cutoff grid)
+    Effective number of points:    26.7 (ideally &gt; 60)
+    Regression cost Z-score:       -0.1 (ideally &lt; 2)
+    Cutoff criterion Z-score:      -0.1 (ideally &lt; 2)
+
+MODEL lorentz() | CUTOFF CRITERION cv2l(125%)
+    Number of parameters:          3
+    Average cutoff frequency:      2.56e-01 THz
+    Exponential correlation time:  0.99 ± 0.06 ps
+
+RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL CORR. TIME)
+    Block time:                  &lt; 0.31 ± 0.03 ps
+    Simulation time:             &gt; 61.99 ± 0.45 ps
+</pre></div>
+</div>
+<img alt="../_images/5671dc47a2f4c2dc69f4c2a9ef0b134a9f85fcafa00264f47c408c3cec075503.svg" src="../_images/5671dc47a2f4c2dc69f4c2a9ef0b134a9f85fcafa00264f47c408c3cec075503.svg"/>
+<img alt="../_images/6d9ed0830fb3c7c0c0aafb7be4aa1c1b7409478ad4817bdd314c77033bce0d33.svg" src="../_images/6d9ed0830fb3c7c0c0aafb7be4aa1c1b7409478ad4817bdd314c77033bce0d33.svg"/>
+<img alt="../_images/425980cbb5747f7a40b5b045062fa9c88b71416ca2d5c803487dbec2e3c59aec.svg" src="../_images/425980cbb5747f7a40b5b045062fa9c88b71416ca2d5c803487dbec2e3c59aec.svg"/>
+</div>
+</div>
+<p>As expected, there are no significant changes in the results.</p>
+<p>It is again interesting to compare the integrated and exponential autocorrelation times.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"corrtime_exp = </span><span class="si">{</span><span class="n">result_60</span><span class="o">.</span><span class="n">corrtime_exp</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">PICOSECOND</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> ps"</span><span class="p">)</span>
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"corrtime_int = </span><span class="si">{</span><span class="n">result_60</span><span class="o">.</span><span class="n">corrtime_int</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">PICOSECOND</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> ps"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>corrtime_exp = 0.987 ps
+corrtime_int = 0.997 ps
+</pre></div>
+</div>
+</div>
+</div>
+<p>The exponential autocorrelation time is unaffected by the block averages.
+However, the integrated autocorrelation time has increased
+and is now closer to the exponential value.
+Taking block averages removes the fastest oscillations,
+causing the integrated autocorrelation time to be dominated by slow diffusive motion.</p>
+</section>
+<section id="comparison-to-mean-squared-displacement-analysis">
+<h2>Comparison to mean-squared displacement analysis<a class="headerlink" href="#comparison-to-mean-squared-displacement-analysis" title="Link to this heading">¶</a></h2>
+<p>This section does not perform a full regression to derive the diffusion coefficient
+from the mean-squared displacement (MSD) data.
+Instead, it simply computes the MSDs from the trajectories,
+and plots them together with the expected slope from STACIE’s analysis above,
+to confirm that STACIE’s results are consistent with the MSD analysis.
+This avoids the pernicious choices required for a full regression analysis of the MSD data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_msd</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">time_step</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Plot mean-squared displacements from trajectory and STACIE result.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    traj</span>
+<span class="sd">        The trajectory object.</span>
+<span class="sd">    result</span>
+<span class="sd">        The STACIE result object.</span>
+<span class="sd">    lags</span>
+<span class="sd">        The integer lag times (in number of (block) time steps)</span>
+<span class="sd">        for which to compute the MSDs.</span>
+<span class="sd">    time_step</span>
+<span class="sd">        The time step size of the trajectory, possibly accounting for the block size.</span>
+<span class="sd">    """</span>
+    <span class="n">lag_times</span> <span class="o">=</span> <span class="n">lags</span> <span class="o">*</span> <span class="n">time_step</span>
+    <span class="n">natom</span> <span class="o">=</span> <span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">msds</span> <span class="o">=</span> <span class="n">compute_msds</span><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">natom</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">traj</span><span class="o">.</span><span class="n">nstep</span><span class="p">),</span> <span class="n">lags</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"msd"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"msd"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">lag_times</span> <span class="o">/</span> <span class="n">PICOSECOND</span><span class="p">,</span>
+        <span class="n">msds</span> <span class="o">/</span> <span class="n">ANGSTROM</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+        <span class="s2">"C0o"</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">"MSD from trajectories"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">lag_times</span> <span class="o">/</span> <span class="n">PICOSECOND</span><span class="p">,</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">result</span><span class="o">.</span><span class="n">acint</span> <span class="o">*</span> <span class="n">lag_times</span> <span class="o">/</span> <span class="n">ANGSTROM</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+        <span class="s2">"C1-"</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">"Expected slope"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Lag time [ps]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Mean-squared displacement [Å$^2$]"</span><span class="p">)</span>
+
+
+<span class="n">lags</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.logspace.html#numpy.logspace" title="numpy.logspace"><span class="n">np</span><span class="o">.</span><span class="n">logspace</span></a><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a><span class="p">))</span>
+<span class="n">plot_msd</span><span class="p">(</span><span class="n">traj_1</span><span class="p">,</span> <span class="n">result_1</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">TIMESTEP</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/1cf6a13c0bcff0bca69fd042d6ad72e7f9f10cfbe35173eb60dc39b8bba5ace0.svg" src="../_images/1cf6a13c0bcff0bca69fd042d6ad72e7f9f10cfbe35173eb60dc39b8bba5ace0.svg"/>
+</div>
+</div>
+<p>As expected, the simple comparison confirms that STACIE’s results
+are consistent with the MSD analysis.
+For sufficiently large lag times, the MSDs increase linearly with time,
+with a slope that corresponds to the diffusion coefficient derived with STACIE.</p>
+<p>Note that STACIE only estimates the slope of a straight line fitted to the MSD curve.
+It does not provide information on the intercept.</p>
+</section>
+<section id="regression-tests">
+<h2>Regression Tests<a class="headerlink" href="#regression-tests" title="Link to this heading">¶</a></h2>
+<p>If you are experimenting with this notebook, you can ignore any exceptions below.
+The tests are only meant to pass for the notebook in its original form.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">acint_unit</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of time"</span><span class="p">)</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.constants.value.html#scipy.constants.value" title="scipy.constants.value"><span class="n">sc</span><span class="o">.</span><span class="n">value</span></a><span class="p">(</span><span class="s2">"atomic unit of length"</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">acint_1</span> <span class="o">=</span> <span class="n">result_1</span><span class="o">.</span><span class="n">acint</span> <span class="o">/</span> <span class="n">acint_unit</span>
+<span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#abs" title="abs"><span class="nb">abs</span></a><span class="p">(</span><span class="n">acint_1</span> <span class="o">-</span> <span class="mf">5.80e-7</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">5e-9</span><span class="p">:</span>
+    <span class="k">raise</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="ValueError"><span class="ne">ValueError</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Wrong acint (no block average): </span><span class="si">{</span><span class="n">acint_1</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">acint_60</span> <span class="o">=</span> <span class="n">result_60</span><span class="o">.</span><span class="n">acint</span> <span class="o">/</span> <span class="n">acint_unit</span>
+<span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#abs" title="abs"><span class="nb">abs</span></a><span class="p">(</span><span class="n">acint_60</span> <span class="o">-</span> <span class="mf">5.80e-7</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">5e-9</span><span class="p">:</span>
+    <span class="k">raise</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="ValueError"><span class="ne">ValueError</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Wrong acint (block size 60): </span><span class="si">{</span><span class="n">acint_60</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</article>
+</div>
+<footer>
+<div class="related-pages">
+<a class="next-page" href="lj_shear_viscosity.html">
+<div class="page-info">
+<div class="context">
+<span>Next</span>
+</div>
+<div class="title">Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</div>
+</div>
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+</a>
+<a class="prev-page" href="applicability.html">
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+<div class="page-info">
+<div class="context">
+<span>Previous</span>
+</div>
+<div class="title">Applicability of the Lorentz Model</div>
+</div>
+</a>
+</div>
+<div class="bottom-of-page">
+<div class="left-details">
+<div class="copyright">
+                Copyright © 2024--2026, Gözdenur Toraman, Toon Verstraelen
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+</div>
+<div class="right-details">
+<div class="icons">
+<a aria-label="Center for Molecular Modeling" class="muted-link" href="https://molmod.ugent.be"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M 8,0.23203771 1.2708502,4.1166743 V 7.586584 H 2.0757403 V 4.5814695 L 8,1.1606847 13.924259,4.5814695 V 7.586584 h 0.80489 V 4.1166743 Z"></path>
+<path d="m 8,3.6329842 c -2.4076366,0 -4.3683267,1.9606901 -4.3683267,4.368326 0,1.0499591 0.3736113,2.0145218 0.9938323,2.7689368 L 4.9523743,9.845379 C 4.6268573,9.3073839 4.436564,8.6780482 4.436564,8.0013102 4.436564,6.0283899 6.027079,4.4378742 8,4.4378742 c 1.9729204,0 3.563435,1.5905157 3.563435,3.563436 0,0.676738 -0.190293,1.3060737 -0.515809,1.8440688 l 0.326868,0.924868 c 0.620221,-0.754415 0.993832,-1.7189777 0.993832,-2.7689368 0,-2.4076359 -1.96069,-4.3683267 -4.368326,-4.368326 z"></path>
+<path d="m 4.5647296,15.767884 2.0103367,-5.68462 0.979439,5.684633 0.8166682,-0.0019 L 7.1003242,8.3914521 H 6.3187358 L 4.1855869,14.427689 2.052438,8.3914521 H 1.2708502 L 2e-7,15.765962 l 0.81666821,0.0019 0.97943899,-5.684633 2.0103367,5.68462 z"></path>
+<path d="m 12.193555,15.767884 2.010337,-5.68462 0.979438,5.684633 L 16,15.765962 14.729149,8.3914521 H 13.947561 L 11.814413,14.427689 9.6812637,8.3914521 H 8.8996758 l -1.2708506,7.3745099 0.8166683,0.002 0.9794395,-5.684632 2.010337,5.684619 z"></path>
+</svg></a>
+<a aria-label="Soete Laboratory" class="muted-link" href="https://www.ugent.be/ea/emsme/en/research/soete"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M 1.2243149,11.312034 V 0.3537872 c 0,-0.47171662 3.2133726,-0.47171662 3.2133726,0 V 11.275667 c 0.038589,1.391853 0.8362299,2.107621 2.6118885,2.188801 0.3456227,0 0.3456227,2.535532 0,2.535532 -2.5872928,0 -5.8252611,-1.272498 -5.8252611,-4.687966 z"></path>
+<path d="M 9.0151601,16 C 12.286758,15.9977 14.766446,14.194112 14.775658,11.101887 14.784658,8.0882805 12.485826,7.1827295 10.791465,6.4316093 9.6750417,5.9366938 8.1559684,5.3529148 8.1229508,4.0958595 8.089931,2.8388043 9.1956669,2.5059896 10.318156,2.4898791 c 1.24952,-0.017939 2.35918,0.6351356 3.134465,1.0460205 0.333368,0.1766787 0.80108,-1.909061 0.109685,-2.62234708 C 12.969839,0.30232534 11.507764,0.01488162 9.9750266,0.01430271 6.3231448,0.01292984 4.9375194,2.3766199 4.917302,4.4194486 4.894588,6.7146645 6.6302121,8.1331941 8.4220755,8.9015433 c 1.235865,0.5299374 3.0428875,0.956338 3.0526165,2.6331567 0.007,1.208881 -1.112249,1.929768 -2.4595319,1.929768 -0.4639212,0 -0.4729202,2.535532 0,2.535532 z"></path>
+</svg></a>
+<a aria-label="Ghent University" class="muted-link" href="https://ugent.be"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M 8.4671319,6.1991107 H 7.5328685 V 12.263022 H 8.4671319 V 6.1991107"></path>
+<path d="M 6.5989047,6.1991107 H 5.6647163 V 12.263022 H 6.5989047 V 6.1991107"></path>
+<path d="M 4.7307525,6.1991107 H 3.7964891 V 12.263022 H 4.7307525 V 6.1991107"></path>
+<path d="M 2.8626002,6.1991107 H 1.9283368 V 12.263022 H 2.8626002 V 6.1991107"></path>
+<path d="M 10.335284,6.1991107 H 9.4010957 V 12.263022 H 10.335284 V 6.1991107"></path>
+<path d="m 12.203511,6.1991107 h -0.934263 v 6.0639113 h 0.934263 V 6.1991107"></path>
+<path d="M 14.071664,6.1991107 H 13.1374 v 6.0639113 h 0.934264 V 6.1991107"></path>
+<path d="M 15.028173,14.131773 H 0.97182731 V 13.196985 H 15.028173 v 0.934788"></path>
+<path d="M 14.071664,5.2648473 H 1.9283368 L 0.99437307,4.3309584 H 15.005627 l -0.933963,0.9338889"></path>
+<path d="M 15.962062,16 H 0.03793844 V 15.065138 H 15.962062 V 16"></path>
+<path d="M 15.962062,2.8200179 7.9998879,7.5076002e-8 0.03793844,2.8200179 V 3.8118816 L 7.9998879,0.99246298 15.962062,3.8118816 V 2.8200179"></path>
+</svg></a>
+<a aria-label="GitHub" class="muted-link" href="https://github.com/molmod/stacie"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg></a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<aside class="toc-drawer">
+<div class="toc-sticky toc-scroll">
+<div class="toc-title-container">
+<span class="toc-title">
+            On this page
+          </span>
+</div>
+<div class="toc-tree-container">
+<div class="toc-tree">
+<ul>
+<li><a class="reference internal" href="#">Diffusion on a Surface with Newtonian Dynamics</a><ul>
+<li><a class="reference internal" href="#library-imports-and-matplotlib-configuration">Library Imports and Matplotlib Configuration</a></li>
+<li><a class="reference internal" href="#data-generation">Data Generation</a><ul>
+<li><a class="reference internal" href="#potential-energy-surface">Potential energy surface</a></li>
+<li><a class="reference internal" href="#newtonian-dynamics">Newtonian Dynamics</a></li>
+<li><a class="reference internal" href="#demonstration-of-deterministic-choas">Demonstration of Deterministic Choas</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#surface-diffusion-without-block-averages">Surface diffusion without block averages</a></li>
+<li><a class="reference internal" href="#surface-diffusion-with-block-averages">Surface diffusion with block averages</a></li>
+<li><a class="reference internal" href="#comparison-to-mean-squared-displacement-analysis">Comparison to mean-squared displacement analysis</a></li>
+<li><a class="reference internal" href="#regression-tests">Regression Tests</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div><script src="../_static/documentation_options.js?v=61243dd2"></script>
+<script src="../_static/doctools.js?v=9bcbadda"></script>
+<script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+<script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../_static/copybutton.js?v=f281be69"></script>
+<script defer="defer" src="https://unpkg.com/@popperjs/core@2"></script>
+<script defer="defer" src="https://unpkg.com/tippy.js@6"></script>
+<script defer="defer" src="../_static/tippy/examples/surface_diffusion.2eacd83e-3f94-41ba-bcc8-4474bcfd433c.js"></script>
+<script>window.MathJax = {"tex": {"macros": {"mean": "\\operatorname{E}", "var": "\\operatorname{VAR}", "std": "\\operatorname{STD}", "cov": "\\operatorname{COV}", "gdist": "\\operatorname{Gamma}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+<script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

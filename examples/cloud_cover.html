@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+
+<html class="no-js" data-content_root="../" lang="en">
+<head><meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/><meta content="width=device-width, initial-scale=1" name="viewport">
+<link href="../genindex.html" rel="index" title="Index"/><link href="../search.html" rel="search" title="Search"/><link href="../references.html" rel="next" title="References"/><link href="utils.html" rel="prev" title="Utility Module for Plots Reused in Multiple Examples."/>
+<link as="image" href="../_static/stacie-logo-black.svg" rel="prefetch"/>
+<link as="image" href="../_static/stacie-logo-white.svg" rel="prefetch"/>
+<link href="../_static/stacie-logo-black.svg" rel="shortcut icon"/><!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+<title>Correlation Time Analysis of Cloud Cover Data - STACIE 1.2</title>
+<link href="../_static/pygments.css?v=d111a655" rel="stylesheet" type="text/css">
+<link href="../_static/styles/furo.css?v=580074bf" rel="stylesheet" type="text/css">
+<link href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" rel="stylesheet" type="text/css">
+<link href="../_static/sphinx-codeautolink.css?v=b2176991" rel="stylesheet" type="text/css">
+<link href="../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css">
+<link href="../_static/styles/furo-extensions.css?v=8dab3a3b" rel="stylesheet" type="text/css">
+<link href="../_static/custom.css?v=d923d65c" rel="stylesheet" type="text/css">
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+      }
+    }
+  }
+</style></link></link></link></link></link></link></link></meta></head>
+<body>
+<script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<symbol id="svg-toc" viewbox="0 0 24 24">
+<title>Contents</title>
+<svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 1024 1024">
+<path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"></path>
+</svg>
+</symbol>
+<symbol id="svg-menu" viewbox="0 0 24 24">
+<title>Menu</title>
+<svg class="feather-menu" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<line x1="3" x2="21" y1="12" y2="12"></line>
+<line x1="3" x2="21" y1="6" y2="6"></line>
+<line x1="3" x2="21" y1="18" y2="18"></line>
+</svg>
+</symbol>
+<symbol id="svg-arrow-right" viewbox="0 0 24 24">
+<title>Expand</title>
+<svg class="feather-chevron-right" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</symbol>
+<symbol id="svg-sun" viewbox="0 0 24 24">
+<title>Light mode</title>
+<svg class="feather-sun" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="12" r="5"></circle>
+<line x1="12" x2="12" y1="1" y2="3"></line>
+<line x1="12" x2="12" y1="21" y2="23"></line>
+<line x1="4.22" x2="5.64" y1="4.22" y2="5.64"></line>
+<line x1="18.36" x2="19.78" y1="18.36" y2="19.78"></line>
+<line x1="1" x2="3" y1="12" y2="12"></line>
+<line x1="21" x2="23" y1="12" y2="12"></line>
+<line x1="4.22" x2="5.64" y1="19.78" y2="18.36"></line>
+<line x1="18.36" x2="19.78" y1="5.64" y2="4.22"></line>
+</svg>
+</symbol>
+<symbol id="svg-moon" viewbox="0 0 24 24">
+<title>Dark mode</title>
+<svg class="icon-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+</svg>
+</symbol>
+<symbol id="svg-sun-with-moon" viewbox="0 0 24 24">
+<title>Auto light/dark, in light mode</title>
+<svg class="icon-custom-derived-from-feather-sun-and-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z" style="opacity: 50%"></path>
+<line x1="14.5" x2="14.5" y1="3.25" y2="1.25"></line>
+<line x1="14.5" x2="14.5" y1="15.85" y2="17.85"></line>
+<line x1="10.044" x2="8.63" y1="5.094" y2="3.68"></line>
+<line x1="19" x2="20.414" y1="14.05" y2="15.464"></line>
+<line x1="8.2" x2="6.2" y1="9.55" y2="9.55"></line>
+<line x1="20.8" x2="22.8" y1="9.55" y2="9.55"></line>
+<line x1="10.044" x2="8.63" y1="14.006" y2="15.42"></line>
+<line x1="19" x2="20.414" y1="5.05" y2="3.636"></line>
+<circle cx="14.5" cy="9.55" r="3.6"></circle>
+</svg>
+</symbol>
+<symbol id="svg-moon-with-sun" viewbox="0 0 24 24">
+<title>Auto light/dark, in dark mode</title>
+<svg class="icon-custom-derived-from-feather-sun-and-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"></path>
+<line style="opacity: 50%" x1="18" x2="18" y1="3.705" y2="2.5"></line>
+<line style="opacity: 50%" x1="18" x2="18" y1="11.295" y2="12.5"></line>
+<line style="opacity: 50%" x1="15.316" x2="14.464" y1="4.816" y2="3.964"></line>
+<line style="opacity: 50%" x1="20.711" x2="21.563" y1="10.212" y2="11.063"></line>
+<line style="opacity: 50%" x1="14.205" x2="13.001" y1="7.5" y2="7.5"></line>
+<line style="opacity: 50%" x1="21.795" x2="23" y1="7.5" y2="7.5"></line>
+<line style="opacity: 50%" x1="15.316" x2="14.464" y1="10.184" y2="11.036"></line>
+<line style="opacity: 50%" x1="20.711" x2="21.563" y1="4.789" y2="3.937"></line>
+<circle cx="18" cy="7.5" r="2.169" style="opacity: 50%"></circle>
+</svg>
+</symbol>
+<symbol id="svg-pencil" viewbox="0 0 24 24">
+<svg class="icon-tabler-pencil-code" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path>
+<path d="M13.5 6.5l4 4"></path>
+<path d="M20 21l2 -2l-2 -2"></path>
+<path d="M17 17l-2 2l2 2"></path>
+</svg>
+</symbol>
+<symbol id="svg-eye" viewbox="0 0 24 24">
+<svg class="icon-tabler-eye-code" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
+<path d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008"></path>
+<path d="M20 21l2 -2l-2 -2"></path>
+<path d="M17 17l-2 2l2 2"></path>
+</svg>
+</symbol>
+</svg>
+<input aria-label="Toggle site navigation sidebar" class="sidebar-toggle" id="__navigation" name="__navigation" type="checkbox"/>
+<input aria-label="Toggle table of contents sidebar" class="sidebar-toggle" id="__toc" name="__toc" type="checkbox"/>
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+<div class="page">
+<header class="mobile-header">
+<div class="header-left">
+<label class="nav-overlay-icon" for="__navigation">
+<span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+</label>
+</div>
+<div class="header-center">
+<a href="../index.html"><div class="brand">STACIE 1.2</div></a>
+</div>
+<div class="header-right">
+<div class="theme-toggle-container theme-toggle-header">
+<button aria-label="Toggle Light / Dark / Auto color theme" class="theme-toggle">
+<svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+<svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-header-icon" for="__toc">
+<span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+</label>
+</div>
+</header>
+<aside class="sidebar-drawer">
+<div class="sidebar-container">
+<div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+<div class="sidebar-logo-container">
+<img alt="Light Logo" class="sidebar-logo only-light" src="../_static/stacie-logo-black.svg"/>
+<img alt="Dark Logo" class="sidebar-logo only-dark" src="../_static/stacie-logo-white.svg"/>
+</div>
+<span class="sidebar-brand-text">STACIE 1.2</span>
+</a><form action="../search.html" class="sidebar-search-container" method="get" role="search">
+<input aria-label="Search" class="sidebar-search" name="q" placeholder="Search"/>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../getting_started/index.html">Getting Started</a><input aria-label="Toggle navigation of Getting Started" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/licenses.html">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/usage.html">Usage Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/cite.html">How to Cite</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../theory/index.html">Theory</a><input aria-label="Toggle navigation of Theory" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../theory/notation.html">Notation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/overview.html">STACIE Algorithm Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/model.html">Model Spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/statistics.html">Parameter Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/cutoff.html">Frequency Cutoff</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../preparing_inputs/index.html">Preparing Inputs</a><input aria-label="Toggle navigation of Preparing Inputs" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/data_sufficiency.html">How to Prepare Sufficient Inputs for STACIE?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/block_averages.html">Reducing Storage Requirements with Block Averages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/molecular_dynamics.html">Recommendations for MD Simulations</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../properties/index.html">Properties Derived from the Autocorrelation Function</a><input aria-label="Toggle navigation of Properties Derived from the Autocorrelation Function" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../properties/error_estimates.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/autocorrelation_time.html">Integrated and Exponential Autocorrelation Time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/shear_viscosity.html">Shear Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/bulk_viscosity.html">Bulk Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/thermal_conductivity.html">Thermal Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/electrical_conductivity.html">Ionic Electrical Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/diffusion_coefficient.html">Diffusion Coefficient</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Worked Examples</a><input aria-label="Toggle navigation of Worked Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="minimal.html">Minimal Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="error_mean.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="applicability.html">Applicability of the Lorentz Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface_diffusion.html">Diffusion on a Surface with Newtonian Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_shear_viscosity.html">Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_bulk_viscosity.html">Bulk Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_thermal_conductivity.html">Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molten_salt.html">Ionic Electrical Conductivity of Molten Sodium Chloride at 1100 K (OpenMM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Utility Module for Plots Reused in Multiple Examples.</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Correlation Time Analysis of Cloud Cover Data</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../apidocs/modules.html">Application Programming Interface</a><input aria-label="Toggle navigation of Application Programming Interface" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../apidocs/stacie.html">stacie package</a><input aria-label="Toggle navigation of stacie package" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.conditioning.html">stacie.conditioning module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cost.html">stacie.cost module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cutoff.html">stacie.cutoff module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.estimate.html">stacie.estimate module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.model.html">stacie.model module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.plot.html">stacie.plot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.spectrum.html">stacie.spectrum module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.synthetic.html">stacie.synthetic module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.utils.html">stacie.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../development/index.html">Development</a><input aria-label="Toggle navigation of Development" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/contributing.html">Contributor Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/setup.html">Development Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/release.html">How to Make a Release</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<div class="main">
+<div class="content">
+<div class="article-container">
+<a class="back-to-top muted-link" href="#">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+</svg>
+<span>Back to top</span>
+</a>
+<div class="content-icon-container">
+<div class="view-this-page">
+<a class="muted-link" href="https://github.com/molmod/stacie/blob/main/docs/examples/cloud_cover.py?plain=true" title="View this page">
+<svg><use href="#svg-eye"></use></svg>
+<span class="visually-hidden">View this page</span>
+</a>
+</div><div class="edit-this-page">
+<a class="muted-link" href="https://github.com/molmod/stacie/edit/main/docs/examples/cloud_cover.py" rel="edit" title="Edit this page">
+<svg><use href="#svg-pencil"></use></svg>
+<span class="visually-hidden">Edit this page</span>
+</a>
+</div><div class="theme-toggle-container theme-toggle-content">
+<button aria-label="Toggle Light / Dark / Auto color theme" class="theme-toggle">
+<svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+<svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-content-icon" for="__toc">
+<span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+</label>
+</div>
+<article id="furo-main-content" role="main">
+<section class="tex2jax_ignore mathjax_ignore" id="correlation-time-analysis-of-cloud-cover-data">
+<h1>Correlation Time Analysis of Cloud Cover Data<a class="headerlink" href="#correlation-time-analysis-of-cloud-cover-data" title="Link to this heading">¶</a></h1>
+<p>This example is inspired by the work of P. A. Jones <span id="id1">[<a class="reference internal" href="../references.html#id3" title="P. A. Jones. Cloud-cover distributions and correlations. Journal of Applied Meteorology, 31(7):732–741, 1992. doi:10.1175/1520-0450(1992)031&lt;0732:ccdac&gt;2.0.co;2.">Jon92</a>]</span>
+on the analysis of temporal (and spatial) correlations in cloud cover data.
+Jones observed an exponential decay of the autocorrelation function,
+with half-life times ranging from 5 to 40 hours.</p>
+<p>Here, we analyze a time series of cloud cover data obtained from
+the <a class="reference external" href="https://open-meteo.com/">Open-Meteo</a> platform.
+The data correspond to hourly cloud cover observations
+(in percentage of the sky covered by clouds) in Ghent, Belgium,
+from January 1, 2010 to January 1, 2020.</p>
+<section id="library-imports-and-matplotlib-configuration">
+<h2>Library Imports and Matplotlib Configuration<a class="headerlink" href="#library-imports-and-matplotlib-configuration" title="Link to this heading">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/os.html#module-os" title="os"><span class="nn">os</span></a>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="numpy"><span class="nn">numpy</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">path</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.html#module-stacie" title="stacie"><span class="nn">stacie</span></a><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.compute_spectrum" title="stacie.spectrum.compute_spectrum"><span class="n">compute_spectrum</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="n">estimate_acint</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.model.html#stacie.model.LorentzModel" title="stacie.model.LorentzModel"><span class="n">LorentzModel</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">UnitConfig</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_extras" title="stacie.plot.plot_extras"><span class="n">plot_extras</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_fitted_spectrum" title="stacie.plot.plot_fitted_spectrum"><span class="n">plot_fitted_spectrum</span></a><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#module-stacie.utils" title="stacie.utils"><span class="nn">stacie.utils</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.split" title="stacie.utils.split"><span class="n">split</span></a>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mpl</span><span class="o">.</span><span class="n">rc_file</span><span class="p">(</span><span class="s2">"matplotlibrc"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = ["svg"]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="cloud-cover-data">
+<h2>Cloud Cover Data<a class="headerlink" href="#cloud-cover-data" title="Link to this heading">¶</a></h2>
+<p>In this example, cloud cover is expressed as the fraction of the sky covered by clouds,
+ranging from 0 (clear sky) to 1 (completely overcast).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># You normally do not need to change this path.</span>
+<span class="c1"># It only needs to be overridden when building the documentation.</span>
+<span class="n">DATA_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/os.html#os.getenv" title="os.getenv"><span class="n">os</span><span class="o">.</span><span class="n">getenv</span></a><span class="p">(</span><span class="s2">"DATA_ROOT"</span><span class="p">,</span> <span class="s2">"./"</span><span class="p">))</span> <span class="o">/</span> <span class="s2">"cloud-cover/"</span>
+
+<span class="c1"># Load data and convert to a fraction from 0 to 1.</span>
+<span class="n">cover</span> <span class="o">=</span> <span class="p">(</span>
+    <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="numpy.loadtxt"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span>
+        <span class="n">DATA_ROOT</span> <span class="o">/</span> <span class="s2">"cloud-cover-ghent-2010-2020.csv"</span><span class="p">,</span>
+        <span class="n">delimiter</span><span class="o">=</span><span class="s2">","</span><span class="p">,</span>
+        <span class="n">usecols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">skiprows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">/</span> <span class="mi">100</span>
+<span class="p">)</span>
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Number of measurements: </span><span class="si">{</span><span class="n">cover</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Number of measurements: (87672,)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="sample-of-the-cloud-cover-data">
+<h2>Sample of the Cloud Cover Data<a class="headerlink" href="#sample-of-the-cloud-cover-data" title="Link to this heading">¶</a></h2>
+<p>To get a first impression of the data, we plot a small sample.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_sample</span><span class="p">():</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"sample"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"sample"</span><span class="p">)</span>
+    <span class="n">time</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">240</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">cover</span><span class="p">[:</span><span class="mi">240</span><span class="p">],</span> <span class="s2">"C0-"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time [h]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Cloud Cover Fraction"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Sample of Cloud Cover Data (Ghent, First 10 Days of 2010)"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">)</span>
+
+
+<span class="n">plot_sample</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/74f62b43957ea691c7a297f1d1b01ca9d5011e5f68f730abc906b883ca55c6fe.svg" src="../_images/74f62b43957ea691c7a297f1d1b01ca9d5011e5f68f730abc906b883ca55c6fe.svg"/>
+</div>
+</div>
+</section>
+<section id="histogram-of-cloud-cover-data">
+<h2>Histogram of Cloud Cover Data<a class="headerlink" href="#histogram-of-cloud-cover-data" title="Link to this heading">¶</a></h2>
+<p>The histogram below shows the distribution of cloud cover values.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_histogram</span><span class="p">():</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"histogram"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"histogram"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">cover</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s2">"w"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Cloud Cover Fraction"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Probability Density"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Histogram of Cloud Cover Data (Ghent, 2010-2020)"</span><span class="p">)</span>
+
+
+<span class="n">plot_histogram</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/5e0cd720eb60589a2a93be21b0adc94b41964035abab30531c4915a4cd305847.svg" src="../_images/5e0cd720eb60589a2a93be21b0adc94b41964035abab30531c4915a4cd305847.svg"/>
+</div>
+</div>
+<p>This histogram reflects the typical weather pattern in Belgium,
+with plenty of cloudy days.
+This is also reflected in the normalized standard deviation (NS),
+as defined by Jones <span id="id2">[<a class="reference internal" href="../references.html#id3" title="P. A. Jones. Cloud-cover distributions and correlations. Journal of Applied Meteorology, 31(7):732–741, 1992. doi:10.1175/1520-0450(1992)031&lt;0732:ccdac&gt;2.0.co;2.">Jon92</a>]</span>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cc_mean</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean" title="numpy.mean"><span class="n">np</span><span class="o">.</span><span class="n">mean</span></a><span class="p">(</span><span class="n">cover</span><span class="p">)</span>
+<span class="n">cc_std</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.std.html#numpy.std" title="numpy.std"><span class="n">np</span><span class="o">.</span><span class="n">std</span></a><span class="p">(</span><span class="n">cover</span><span class="p">)</span>
+<span class="n">cc_ns</span> <span class="o">=</span> <span class="n">cc_std</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html#numpy.sqrt" title="numpy.sqrt"><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span></a><span class="p">(</span><span class="n">cc_mean</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cc_mean</span><span class="p">))</span>
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"    Mean cloud cover: </span><span class="si">{</span><span class="n">cc_mean</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"  Standard deviation: </span><span class="si">{</span><span class="n">cc_std</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Normalized std. dev.: </span><span class="si">{</span><span class="n">cc_ns</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>    Mean cloud cover: 0.668
+  Standard deviation: 0.369
+Normalized std. dev.: 0.783
+</pre></div>
+</div>
+</div>
+</div>
+<p>Compared to the values in Figure 10 of Jones’s work,
+this is a relatively high NS, which has been associated with
+longer correlation times.</p>
+</section>
+<section id="autocorrelation-function">
+<h2>Autocorrelation Function<a class="headerlink" href="#autocorrelation-function" title="Link to this heading">¶</a></h2>
+<p>Before applying STACIE to the data, let’s first compute and plot the
+autocorrelation function (ACF) directly.</p>
+<p>Mind the normalization: due to the zero padding in <code class="docutils literal notranslate"><span class="pre">np.correlate</span></code>,
+the number of terms contributing to the ACF decreases with lag time.
+Furthermore, the ACF is not normalized to 1 in this plot,
+as we want to keep the amplitude information.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">C_1</span> <span class="o">=</span> <span class="mf">0.0347</span>  <span class="c1"># From STACIE Lorentz $C_1$ parameter, see below.</span>
+<span class="n">TAU_EXP</span> <span class="o">=</span> <span class="mf">57.6</span>  <span class="c1"># From STACIE $tau_\text{exp}$, see below.</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_acf</span><span class="p">():</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"acf"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"acf"</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">cover</span> <span class="o">-</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean" title="numpy.mean"><span class="n">np</span><span class="o">.</span><span class="n">mean</span></a><span class="p">(</span><span class="n">cover</span><span class="p">)</span>
+    <span class="n">acf</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.correlate.html#numpy.correlate" title="numpy.correlate"><span class="n">np</span><span class="o">.</span><span class="n">correlate</span></a><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"same"</span><span class="p">)</span>
+    <span class="n">nkeep</span> <span class="o">=</span> <span class="n">acf</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">acf</span> <span class="o">=</span> <span class="n">acf</span><span class="p">[</span><span class="n">nkeep</span><span class="p">:]</span> <span class="o">/</span> <span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#len" title="len"><span class="nb">len</span></a><span class="p">(</span><span class="n">acf</span><span class="p">)</span> <span class="o">-</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="n">nkeep</span><span class="p">))</span>
+    <span class="n">time</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">240</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">acf</span><span class="p">[:</span><span class="mi">240</span><span class="p">],</span> <span class="s2">"C0-"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">C_1</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.exp.html#numpy.exp" title="numpy.exp"><span class="n">np</span><span class="o">.</span><span class="n">exp</span></a><span class="p">(</span><span class="o">-</span><span class="n">time</span> <span class="o">/</span> <span class="n">TAU_EXP</span><span class="p">),</span> <span class="s2">"C1--"</span><span class="p">)</span>
+    <span class="n">xticks</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">241</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">240</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Lag Time [h]"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Autocorrelation Function"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Autocorrelation Function of Cloud Cover Data (Ghent, 2010-2020)"</span><span class="p">)</span>
+
+
+<span class="n">plot_acf</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/0b605a58d30e84301387b5f08d04f19587bf49c673a59d58efacc04460d589b1.svg" src="../_images/0b605a58d30e84301387b5f08d04f19587bf49c673a59d58efacc04460d589b1.svg"/>
+</div>
+</div>
+<p>The ripples in the ACF are due to diurnal cycles,
+resulting in weak correlations at multiples of 24 hours.
+Superimposed on these diurnal effects,
+an overall exponential decay of the ACF can be observed.
+However, it is difficult to fit an exponential function to the ACF
+due to (i) the ripples and (ii) non-exponential short-time effects.
+Hence, fitting an exponential function can at best provide
+a rough estimate of the correlation time.</p>
+<p>Below, it is shown how to use STACIE instead to perform a more robust analysis.
+The exponential decay shown in the plot is derived from STACIE’s output below.
+It is only expected to be representative at long lag times.</p>
+</section>
+<section id="autocorrelation-time">
+<h2>Autocorrelation Time<a class="headerlink" href="#autocorrelation-time" title="Link to this heading">¶</a></h2>
+<p>The following cells perform a standard time correlation analysis using STACIE.
+The <code class="docutils literal notranslate"><span class="pre">prefactors</span></code> argument is set so that the resulting autocorrelation integral
+is the <a class="reference internal" href="../properties/error_estimates.html"><span class="std std-doc">variance of the mean</span></a> cloud cover.
+To reduce the noise of the spectrum, the data is split into 20 blocks,
+and the resulting spectra are averaged.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute spectrum</span>
+<a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.Spectrum" title="stacie.spectrum.Spectrum"><span class="n">spectrum</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.compute_spectrum" title="stacie.spectrum.compute_spectrum"><span class="n">compute_spectrum</span></a><span class="p">(</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.split" title="stacie.utils.split"><span class="n">split</span></a><span class="p">(</span><span class="n">cover</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="n">include_zero_freq</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">prefactors</span><span class="o">=</span><span class="mf">2.0</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#len" title="len"><span class="nb">len</span></a><span class="p">(</span><span class="n">cover</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Estimate autocorrelation time</span>
+<a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">UnitConfig</span></a><span class="p">(</span>
+    <span class="n">time_unit_str</span><span class="o">=</span><span class="s2">"h"</span><span class="p">,</span>
+    <span class="n">freq_unit_str</span><span class="o">=</span><span class="s2">"1/h"</span><span class="p">,</span>
+    <span class="n">time_fmt</span><span class="o">=</span><span class="s2">".1f"</span><span class="p">,</span>
+    <span class="n">freq_fmt</span><span class="o">=</span><span class="s2">".3f"</span><span class="p">,</span>
+<span class="p">)</span>
+<a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="n">estimate_acint</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.Spectrum" title="stacie.spectrum.Spectrum"><span class="n">spectrum</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.model.html#stacie.model.LorentzModel" title="stacie.model.LorentzModel"><span class="n">LorentzModel</span></a><span class="p">(),</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">uc</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CUTOFF FREQUENCY SCAN cv2l(125%)
+     neff   criterion  fcut [1/h]
+---------  ----------  ----------
+     15.0        32.7    0.003
+     16.0        31.2    0.004
+     17.1        29.9    0.004
+     18.2        29.0    0.004
+     19.4        28.4    0.004
+     20.7        28.0    0.005
+     22.0        27.6    0.005
+     23.5        27.2    0.005
+     25.0        27.0    0.006
+     26.7        27.0    0.006
+     28.4        27.2    0.006
+     30.3        27.5    0.007
+     32.3        27.8    0.007
+     34.4        27.9    0.008
+     36.7        27.9    0.008
+     39.1        27.9    0.009
+     41.6        27.8    0.009
+     44.3        27.7    0.010
+     47.2        27.8    0.011
+     50.3        28.2    0.011
+     53.6        28.8    0.012
+     57.1        29.6    0.013
+     60.8        30.6    0.014
+     64.7        31.5    0.015
+     68.9        32.5    0.015
+     73.4        33.3    0.016
+     78.2        34.0    0.018
+     83.3        34.6    0.019
+     88.7        35.2    0.020
+     94.4        35.8    0.021
+    100.5        36.5    0.022
+    107.1        37.1    0.024
+    114.0        37.6    0.025
+    121.4        38.0    0.027
+    129.2        38.9    0.029
+    137.6        41.2    0.031
+    146.5        46.5    0.033
+    156.0        56.6    0.035
+    166.1        72.8    0.037
+    176.8        94.2    0.039
+    188.3       118.1    0.042
+    200.4       139.9    0.045
+Cutoff criterion exceeds incumbent + margin: 27.0 + 100.0.
+
+INPUT TIME SERIES
+    Time step:                     1.0 h
+    Simulation time:               4383.0 h
+    Maximum degrees of freedom:    40.0
+
+MAIN RESULTS
+    Autocorrelation integral:      5.16e+00 ± 5.66e-01 
+    Integrated correlation time:   19.0 ± 2.1 h
+
+SANITY CHECKS (weighted averages over cutoff grid)
+    Effective number of points:    31.7 (ideally &gt; 60)
+    Regression cost Z-score:       -0.4 (ideally &lt; 2)
+    Cutoff criterion Z-score:      0.0 (ideally &lt; 2)
+
+MODEL lorentz() | CUTOFF CRITERION cv2l(125%)
+    Number of parameters:          3
+    Average cutoff frequency:      0.007 1/h
+    Exponential correlation time:  57.6 ± 16.9 h
+
+RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL CORR. TIME)
+    Block time:                  &lt; 18.1 ± 9.4 h
+    Simulation time:             &gt; 3618.5 ± 133.6 h
+</pre></div>
+</div>
+</div>
+</div>
+<p>As expected, the correlation times are on the order of one or a few days.
+The exponential correlation time, which is about 60 hours,
+is the longest because it captures the slowest relaxation process.
+The integrated correlation time is notably shorter at about 20 hours.</p>
+<p>In the code below, we also derive the <span class="math notranslate nohighlight">\(B\)</span> parameter of the Lorentz model,
+which has been used to plot the exponential decay in the ACF above.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">c_1</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.props" title="stacie.estimate.Result.props"><span class="n">result</span><span class="o">.</span><span class="n">props</span></a><span class="p">[</span><span class="s2">"pars_lorentz"</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.corrtime_exp" title="stacie.estimate.Result.corrtime_exp"><span class="n">tau_exp</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.corrtime_exp" title="stacie.estimate.Result.corrtime_exp"><span class="n">result</span><span class="o">.</span><span class="n">corrtime_exp</span></a>
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"C_1 = </span><span class="si">{</span><span class="n">c_1</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"TAU_EXP = </span><span class="si">{</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.corrtime_exp" title="stacie.estimate.Result.corrtime_exp"><span class="n">tau_exp</span></a><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> h"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>C_1 = 0.0347
+TAU_EXP = 57.5898 h
+</pre></div>
+</div>
+</div>
+</div>
+<p>The plots below show the fitted spectrum and additional diagnostics.
+These plots can be used to evaluate the quality of the fit
+and confirm that the Lorentz model is appropriate in this case.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"fitted"</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"fitted"</span><span class="p">)</span>
+<a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_fitted_spectrum" title="stacie.plot.plot_fitted_spectrum"><span class="n">plot_fitted_spectrum</span></a><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/47fbe77e1db1f2d895198223d695ada705c868cb5391f9b5035b800b26ccd60a.svg" src="../_images/47fbe77e1db1f2d895198223d695ada705c868cb5391f9b5035b800b26ccd60a.svg"/>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"extras"</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="s2">"extras"</span><span class="p">)</span>
+<a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_extras" title="stacie.plot.plot_extras"><span class="n">plot_extras</span></a><span class="p">(</span><span class="n">axs</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/c876067d333fadc343b5ffc6dd9d20f82183a3f4d1d8a8d9f5e3e0a13323f044.svg" src="../_images/c876067d333fadc343b5ffc6dd9d20f82183a3f4d1d8a8d9f5e3e0a13323f044.svg"/>
+</div>
+</div>
+</section>
+<section id="regression-tests">
+<h2>Regression Tests<a class="headerlink" href="#regression-tests" title="Link to this heading">¶</a></h2>
+<p>If you are experimenting with this notebook, you can ignore any exceptions below.
+The tests are only meant to pass for the notebook in its original form.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#abs" title="abs"><span class="nb">abs</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.acint" title="stacie.estimate.Result.acint"><span class="n">result</span><span class="o">.</span><span class="n">acint</span></a> <span class="o">-</span> <span class="mf">5.1612</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">5e-3</span><span class="p">:</span>
+    <span class="k">raise</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="ValueError"><span class="ne">ValueError</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Wrong acint: </span><span class="si">{</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.acint" title="stacie.estimate.Result.acint"><span class="n">result</span><span class="o">.</span><span class="n">acint</span></a><span class="si">:</span><span class="s2">.4e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#abs" title="abs"><span class="nb">abs</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.corrtime_exp" title="stacie.estimate.Result.corrtime_exp"><span class="n">result</span><span class="o">.</span><span class="n">corrtime_exp</span></a> <span class="o">-</span> <span class="mf">57.590</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">5e-2</span><span class="p">:</span>
+    <span class="k">raise</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="ValueError"><span class="ne">ValueError</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Wrong corrtime_exp: </span><span class="si">{</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.corrtime_exp" title="stacie.estimate.Result.corrtime_exp"><span class="n">result</span><span class="o">.</span><span class="n">corrtime_exp</span></a><span class="si">:</span><span class="s2">.4e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#abs" title="abs"><span class="nb">abs</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.props" title="stacie.estimate.Result.props"><span class="n">result</span><span class="o">.</span><span class="n">props</span></a><span class="p">[</span><span class="s2">"pars_lorentz"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.1683</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">5e-3</span><span class="p">:</span>
+    <span class="k">raise</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="ValueError"><span class="ne">ValueError</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Wrong lorentz C_0: </span><span class="si">{</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.props" title="stacie.estimate.Result.props"><span class="n">result</span><span class="o">.</span><span class="n">props</span></a><span class="p">[</span><span class="s1">'pars_lorentz'</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.4e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#abs" title="abs"><span class="nb">abs</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.props" title="stacie.estimate.Result.props"><span class="n">result</span><span class="o">.</span><span class="n">props</span></a><span class="p">[</span><span class="s2">"pars_lorentz"</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.0347</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">5e-3</span><span class="p">:</span>
+    <span class="k">raise</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="ValueError"><span class="ne">ValueError</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Wrong lorentz C_1: </span><span class="si">{</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result.props" title="stacie.estimate.Result.props"><span class="n">result</span><span class="o">.</span><span class="n">props</span></a><span class="p">[</span><span class="s1">'pars_lorentz'</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</article>
+</div>
+<footer>
+<div class="related-pages">
+<a class="next-page" href="../references.html">
+<div class="page-info">
+<div class="context">
+<span>Next</span>
+</div>
+<div class="title">References</div>
+</div>
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+</a>
+<a class="prev-page" href="utils.html">
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+<div class="page-info">
+<div class="context">
+<span>Previous</span>
+</div>
+<div class="title">Utility Module for Plots Reused in Multiple Examples.</div>
+</div>
+</a>
+</div>
+<div class="bottom-of-page">
+<div class="left-details">
+<div class="copyright">
+                Copyright © 2024--2026, Gözdenur Toraman, Toon Verstraelen
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+</div>
+<div class="right-details">
+<div class="icons">
+<a aria-label="Center for Molecular Modeling" class="muted-link" href="https://molmod.ugent.be"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M 8,0.23203771 1.2708502,4.1166743 V 7.586584 H 2.0757403 V 4.5814695 L 8,1.1606847 13.924259,4.5814695 V 7.586584 h 0.80489 V 4.1166743 Z"></path>
+<path d="m 8,3.6329842 c -2.4076366,0 -4.3683267,1.9606901 -4.3683267,4.368326 0,1.0499591 0.3736113,2.0145218 0.9938323,2.7689368 L 4.9523743,9.845379 C 4.6268573,9.3073839 4.436564,8.6780482 4.436564,8.0013102 4.436564,6.0283899 6.027079,4.4378742 8,4.4378742 c 1.9729204,0 3.563435,1.5905157 3.563435,3.563436 0,0.676738 -0.190293,1.3060737 -0.515809,1.8440688 l 0.326868,0.924868 c 0.620221,-0.754415 0.993832,-1.7189777 0.993832,-2.7689368 0,-2.4076359 -1.96069,-4.3683267 -4.368326,-4.368326 z"></path>
+<path d="m 4.5647296,15.767884 2.0103367,-5.68462 0.979439,5.684633 0.8166682,-0.0019 L 7.1003242,8.3914521 H 6.3187358 L 4.1855869,14.427689 2.052438,8.3914521 H 1.2708502 L 2e-7,15.765962 l 0.81666821,0.0019 0.97943899,-5.684633 2.0103367,5.68462 z"></path>
+<path d="m 12.193555,15.767884 2.010337,-5.68462 0.979438,5.684633 L 16,15.765962 14.729149,8.3914521 H 13.947561 L 11.814413,14.427689 9.6812637,8.3914521 H 8.8996758 l -1.2708506,7.3745099 0.8166683,0.002 0.9794395,-5.684632 2.010337,5.684619 z"></path>
+</svg></a>
+<a aria-label="Soete Laboratory" class="muted-link" href="https://www.ugent.be/ea/emsme/en/research/soete"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M 1.2243149,11.312034 V 0.3537872 c 0,-0.47171662 3.2133726,-0.47171662 3.2133726,0 V 11.275667 c 0.038589,1.391853 0.8362299,2.107621 2.6118885,2.188801 0.3456227,0 0.3456227,2.535532 0,2.535532 -2.5872928,0 -5.8252611,-1.272498 -5.8252611,-4.687966 z"></path>
+<path d="M 9.0151601,16 C 12.286758,15.9977 14.766446,14.194112 14.775658,11.101887 14.784658,8.0882805 12.485826,7.1827295 10.791465,6.4316093 9.6750417,5.9366938 8.1559684,5.3529148 8.1229508,4.0958595 8.089931,2.8388043 9.1956669,2.5059896 10.318156,2.4898791 c 1.24952,-0.017939 2.35918,0.6351356 3.134465,1.0460205 0.333368,0.1766787 0.80108,-1.909061 0.109685,-2.62234708 C 12.969839,0.30232534 11.507764,0.01488162 9.9750266,0.01430271 6.3231448,0.01292984 4.9375194,2.3766199 4.917302,4.4194486 4.894588,6.7146645 6.6302121,8.1331941 8.4220755,8.9015433 c 1.235865,0.5299374 3.0428875,0.956338 3.0526165,2.6331567 0.007,1.208881 -1.112249,1.929768 -2.4595319,1.929768 -0.4639212,0 -0.4729202,2.535532 0,2.535532 z"></path>
+</svg></a>
+<a aria-label="Ghent University" class="muted-link" href="https://ugent.be"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M 8.4671319,6.1991107 H 7.5328685 V 12.263022 H 8.4671319 V 6.1991107"></path>
+<path d="M 6.5989047,6.1991107 H 5.6647163 V 12.263022 H 6.5989047 V 6.1991107"></path>
+<path d="M 4.7307525,6.1991107 H 3.7964891 V 12.263022 H 4.7307525 V 6.1991107"></path>
+<path d="M 2.8626002,6.1991107 H 1.9283368 V 12.263022 H 2.8626002 V 6.1991107"></path>
+<path d="M 10.335284,6.1991107 H 9.4010957 V 12.263022 H 10.335284 V 6.1991107"></path>
+<path d="m 12.203511,6.1991107 h -0.934263 v 6.0639113 h 0.934263 V 6.1991107"></path>
+<path d="M 14.071664,6.1991107 H 13.1374 v 6.0639113 h 0.934264 V 6.1991107"></path>
+<path d="M 15.028173,14.131773 H 0.97182731 V 13.196985 H 15.028173 v 0.934788"></path>
+<path d="M 14.071664,5.2648473 H 1.9283368 L 0.99437307,4.3309584 H 15.005627 l -0.933963,0.9338889"></path>
+<path d="M 15.962062,16 H 0.03793844 V 15.065138 H 15.962062 V 16"></path>
+<path d="M 15.962062,2.8200179 7.9998879,7.5076002e-8 0.03793844,2.8200179 V 3.8118816 L 7.9998879,0.99246298 15.962062,3.8118816 V 2.8200179"></path>
+</svg></a>
+<a aria-label="GitHub" class="muted-link" href="https://github.com/molmod/stacie"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg></a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<aside class="toc-drawer">
+<div class="toc-sticky toc-scroll">
+<div class="toc-title-container">
+<span class="toc-title">
+            On this page
+          </span>
+</div>
+<div class="toc-tree-container">
+<div class="toc-tree">
+<ul>
+<li><a class="reference internal" href="#">Correlation Time Analysis of Cloud Cover Data</a><ul>
+<li><a class="reference internal" href="#library-imports-and-matplotlib-configuration">Library Imports and Matplotlib Configuration</a></li>
+<li><a class="reference internal" href="#cloud-cover-data">Cloud Cover Data</a></li>
+<li><a class="reference internal" href="#sample-of-the-cloud-cover-data">Sample of the Cloud Cover Data</a></li>
+<li><a class="reference internal" href="#histogram-of-cloud-cover-data">Histogram of Cloud Cover Data</a></li>
+<li><a class="reference internal" href="#autocorrelation-function">Autocorrelation Function</a></li>
+<li><a class="reference internal" href="#autocorrelation-time">Autocorrelation Time</a></li>
+<li><a class="reference internal" href="#regression-tests">Regression Tests</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div><script src="../_static/documentation_options.js?v=61243dd2"></script>
+<script src="../_static/doctools.js?v=9bcbadda"></script>
+<script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+<script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../_static/copybutton.js?v=f281be69"></script>
+<script defer="defer" src="https://unpkg.com/@popperjs/core@2"></script>
+<script defer="defer" src="https://unpkg.com/tippy.js@6"></script>
+<script defer="defer" src="../_static/tippy/examples/cloud_cover.3634774b-82b2-4fe1-bd76-c980efc6d3f1.js"></script>
+<script>window.MathJax = {"tex": {"macros": {"mean": "\\operatorname{E}", "var": "\\operatorname{VAR}", "std": "\\operatorname{STD}", "cov": "\\operatorname{COV}", "gdist": "\\operatorname{Gamma}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+<script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+
+<html class="no-js" data-content_root="../" lang="en">
+<head><meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/><meta content="width=device-width, initial-scale=1" name="viewport">
+<link href="../genindex.html" rel="index" title="Index"/><link href="../search.html" rel="search" title="Search"/><link href="lj_bulk_viscosity.html" rel="next" title="Bulk Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)"/><link href="surface_diffusion.html" rel="prev" title="Diffusion on a Surface with Newtonian Dynamics"/>
+<link as="image" href="../_static/stacie-logo-black.svg" rel="prefetch"/>
+<link as="image" href="../_static/stacie-logo-white.svg" rel="prefetch"/>
+<link href="../_static/stacie-logo-black.svg" rel="shortcut icon"/><!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+<title>Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS) - STACIE 1.2</title>
+<link href="../_static/pygments.css?v=d111a655" rel="stylesheet" type="text/css">
+<link href="../_static/styles/furo.css?v=580074bf" rel="stylesheet" type="text/css">
+<link href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" rel="stylesheet" type="text/css">
+<link href="../_static/sphinx-codeautolink.css?v=b2176991" rel="stylesheet" type="text/css">
+<link href="../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css">
+<link href="../_static/styles/furo-extensions.css?v=8dab3a3b" rel="stylesheet" type="text/css">
+<link href="../_static/custom.css?v=d923d65c" rel="stylesheet" type="text/css">
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+      }
+    }
+  }
+</style></link></link></link></link></link></link></link></meta></head>
+<body>
+<script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<symbol id="svg-toc" viewbox="0 0 24 24">
+<title>Contents</title>
+<svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 1024 1024">
+<path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"></path>
+</svg>
+</symbol>
+<symbol id="svg-menu" viewbox="0 0 24 24">
+<title>Menu</title>
+<svg class="feather-menu" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<line x1="3" x2="21" y1="12" y2="12"></line>
+<line x1="3" x2="21" y1="6" y2="6"></line>
+<line x1="3" x2="21" y1="18" y2="18"></line>
+</svg>
+</symbol>
+<symbol id="svg-arrow-right" viewbox="0 0 24 24">
+<title>Expand</title>
+<svg class="feather-chevron-right" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</symbol>
+<symbol id="svg-sun" viewbox="0 0 24 24">
+<title>Light mode</title>
+<svg class="feather-sun" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="12" r="5"></circle>
+<line x1="12" x2="12" y1="1" y2="3"></line>
+<line x1="12" x2="12" y1="21" y2="23"></line>
+<line x1="4.22" x2="5.64" y1="4.22" y2="5.64"></line>
+<line x1="18.36" x2="19.78" y1="18.36" y2="19.78"></line>
+<line x1="1" x2="3" y1="12" y2="12"></line>
+<line x1="21" x2="23" y1="12" y2="12"></line>
+<line x1="4.22" x2="5.64" y1="19.78" y2="18.36"></line>
+<line x1="18.36" x2="19.78" y1="5.64" y2="4.22"></line>
+</svg>
+</symbol>
+<symbol id="svg-moon" viewbox="0 0 24 24">
+<title>Dark mode</title>
+<svg class="icon-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+</svg>
+</symbol>
+<symbol id="svg-sun-with-moon" viewbox="0 0 24 24">
+<title>Auto light/dark, in light mode</title>
+<svg class="icon-custom-derived-from-feather-sun-and-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z" style="opacity: 50%"></path>
+<line x1="14.5" x2="14.5" y1="3.25" y2="1.25"></line>
+<line x1="14.5" x2="14.5" y1="15.85" y2="17.85"></line>
+<line x1="10.044" x2="8.63" y1="5.094" y2="3.68"></line>
+<line x1="19" x2="20.414" y1="14.05" y2="15.464"></line>
+<line x1="8.2" x2="6.2" y1="9.55" y2="9.55"></line>
+<line x1="20.8" x2="22.8" y1="9.55" y2="9.55"></line>
+<line x1="10.044" x2="8.63" y1="14.006" y2="15.42"></line>
+<line x1="19" x2="20.414" y1="5.05" y2="3.636"></line>
+<circle cx="14.5" cy="9.55" r="3.6"></circle>
+</svg>
+</symbol>
+<symbol id="svg-moon-with-sun" viewbox="0 0 24 24">
+<title>Auto light/dark, in dark mode</title>
+<svg class="icon-custom-derived-from-feather-sun-and-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"></path>
+<line style="opacity: 50%" x1="18" x2="18" y1="3.705" y2="2.5"></line>
+<line style="opacity: 50%" x1="18" x2="18" y1="11.295" y2="12.5"></line>
+<line style="opacity: 50%" x1="15.316" x2="14.464" y1="4.816" y2="3.964"></line>
+<line style="opacity: 50%" x1="20.711" x2="21.563" y1="10.212" y2="11.063"></line>
+<line style="opacity: 50%" x1="14.205" x2="13.001" y1="7.5" y2="7.5"></line>
+<line style="opacity: 50%" x1="21.795" x2="23" y1="7.5" y2="7.5"></line>
+<line style="opacity: 50%" x1="15.316" x2="14.464" y1="10.184" y2="11.036"></line>
+<line style="opacity: 50%" x1="20.711" x2="21.563" y1="4.789" y2="3.937"></line>
+<circle cx="18" cy="7.5" r="2.169" style="opacity: 50%"></circle>
+</svg>
+</symbol>
+<symbol id="svg-pencil" viewbox="0 0 24 24">
+<svg class="icon-tabler-pencil-code" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path>
+<path d="M13.5 6.5l4 4"></path>
+<path d="M20 21l2 -2l-2 -2"></path>
+<path d="M17 17l-2 2l2 2"></path>
+</svg>
+</symbol>
+<symbol id="svg-eye" viewbox="0 0 24 24">
+<svg class="icon-tabler-eye-code" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
+<path d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008"></path>
+<path d="M20 21l2 -2l-2 -2"></path>
+<path d="M17 17l-2 2l2 2"></path>
+</svg>
+</symbol>
+</svg>
+<input aria-label="Toggle site navigation sidebar" class="sidebar-toggle" id="__navigation" name="__navigation" type="checkbox"/>
+<input aria-label="Toggle table of contents sidebar" class="sidebar-toggle" id="__toc" name="__toc" type="checkbox"/>
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+<div class="page">
+<header class="mobile-header">
+<div class="header-left">
+<label class="nav-overlay-icon" for="__navigation">
+<span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+</label>
+</div>
+<div class="header-center">
+<a href="../index.html"><div class="brand">STACIE 1.2</div></a>
+</div>
+<div class="header-right">
+<div class="theme-toggle-container theme-toggle-header">
+<button aria-label="Toggle Light / Dark / Auto color theme" class="theme-toggle">
+<svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+<svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-header-icon" for="__toc">
+<span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+</label>
+</div>
+</header>
+<aside class="sidebar-drawer">
+<div class="sidebar-container">
+<div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+<div class="sidebar-logo-container">
+<img alt="Light Logo" class="sidebar-logo only-light" src="../_static/stacie-logo-black.svg"/>
+<img alt="Dark Logo" class="sidebar-logo only-dark" src="../_static/stacie-logo-white.svg"/>
+</div>
+<span class="sidebar-brand-text">STACIE 1.2</span>
+</a><form action="../search.html" class="sidebar-search-container" method="get" role="search">
+<input aria-label="Search" class="sidebar-search" name="q" placeholder="Search"/>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../getting_started/index.html">Getting Started</a><input aria-label="Toggle navigation of Getting Started" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/licenses.html">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/usage.html">Usage Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/cite.html">How to Cite</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../theory/index.html">Theory</a><input aria-label="Toggle navigation of Theory" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../theory/notation.html">Notation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/overview.html">STACIE Algorithm Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/model.html">Model Spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/statistics.html">Parameter Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/cutoff.html">Frequency Cutoff</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../preparing_inputs/index.html">Preparing Inputs</a><input aria-label="Toggle navigation of Preparing Inputs" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/data_sufficiency.html">How to Prepare Sufficient Inputs for STACIE?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/block_averages.html">Reducing Storage Requirements with Block Averages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/molecular_dynamics.html">Recommendations for MD Simulations</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../properties/index.html">Properties Derived from the Autocorrelation Function</a><input aria-label="Toggle navigation of Properties Derived from the Autocorrelation Function" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../properties/error_estimates.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/autocorrelation_time.html">Integrated and Exponential Autocorrelation Time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/shear_viscosity.html">Shear Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/bulk_viscosity.html">Bulk Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/thermal_conductivity.html">Thermal Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/electrical_conductivity.html">Ionic Electrical Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/diffusion_coefficient.html">Diffusion Coefficient</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Worked Examples</a><input aria-label="Toggle navigation of Worked Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="minimal.html">Minimal Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="error_mean.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="applicability.html">Applicability of the Lorentz Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface_diffusion.html">Diffusion on a Surface with Newtonian Dynamics</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_bulk_viscosity.html">Bulk Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_thermal_conductivity.html">Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molten_salt.html">Ionic Electrical Conductivity of Molten Sodium Chloride at 1100 K (OpenMM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Utility Module for Plots Reused in Multiple Examples.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cloud_cover.html">Correlation Time Analysis of Cloud Cover Data</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../apidocs/modules.html">Application Programming Interface</a><input aria-label="Toggle navigation of Application Programming Interface" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../apidocs/stacie.html">stacie package</a><input aria-label="Toggle navigation of stacie package" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.conditioning.html">stacie.conditioning module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cost.html">stacie.cost module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cutoff.html">stacie.cutoff module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.estimate.html">stacie.estimate module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.model.html">stacie.model module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.plot.html">stacie.plot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.spectrum.html">stacie.spectrum module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.synthetic.html">stacie.synthetic module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.utils.html">stacie.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../development/index.html">Development</a><input aria-label="Toggle navigation of Development" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/contributing.html">Contributor Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/setup.html">Development Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/release.html">How to Make a Release</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<div class="main">
+<div class="content">
+<div class="article-container">
+<a class="back-to-top muted-link" href="#">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+</svg>
+<span>Back to top</span>
+</a>
+<div class="content-icon-container">
+<div class="view-this-page">
+<a class="muted-link" href="https://github.com/molmod/stacie/blob/main/docs/examples/lj_shear_viscosity.py?plain=true" title="View this page">
+<svg><use href="#svg-eye"></use></svg>
+<span class="visually-hidden">View this page</span>
+</a>
+</div><div class="edit-this-page">
+<a class="muted-link" href="https://github.com/molmod/stacie/edit/main/docs/examples/lj_shear_viscosity.py" rel="edit" title="Edit this page">
+<svg><use href="#svg-pencil"></use></svg>
+<span class="visually-hidden">Edit this page</span>
+</a>
+</div><div class="theme-toggle-container theme-toggle-content">
+<button aria-label="Toggle Light / Dark / Auto color theme" class="theme-toggle">
+<svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+<svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-content-icon" for="__toc">
+<span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+</label>
+</div>
+<article id="furo-main-content" role="main">
+<section class="tex2jax_ignore mathjax_ignore" id="shear-viscosity-of-a-lennard-jones-liquid-near-the-triple-point-lammps">
+<h1>Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)<a class="headerlink" href="#shear-viscosity-of-a-lennard-jones-liquid-near-the-triple-point-lammps" title="Link to this heading">¶</a></h1>
+<p>This example shows how to calculate viscosity of argon
+from pressure tensor data obtained from <a class="reference internal" href="../glossary.html#term-LAMMPS"><span class="xref std std-term">LAMMPS</span></a> <a class="reference internal" href="../glossary.html#term-MD"><span class="xref std std-term">MD</span></a> simulations.
+The required theoretical background is explained the
+<a class="reference internal" href="../properties/shear_viscosity.html"><span class="std std-doc">Shear Viscosity</span></a> section.
+The same simulations are also used for the <a class="reference internal" href="lj_bulk_viscosity.html"><span class="std std-doc">bulk viscosity</span></a>
+and <a class="reference internal" href="lj_thermal_conductivity.html"><span class="std std-doc">thermal conductivity</span></a> examples in the following two notebooks.
+The goal of the argon examples is to derive the three transport properties
+with a relative error smaller than those found in the literature.</p>
+<p>All argon MD simulations use the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Lennard-Jones_potential">Lennard-Jones potential</a>
+with reduced Lennard-Jones units.
+For example, the reduced unit of viscosity is denoted as η*,
+and the reduced unit of time as τ*.
+The simulated system consists of 1372 argon atoms.
+The thermodynamic state <span class="math notranslate nohighlight">\(\rho=0.8442\,\mathrm{\rho}^*\)</span> and <span class="math notranslate nohighlight">\(T=0.722\,\mathrm{T}^*\)</span>
+corresponds to a liquid phase near the triple point
+(<span class="math notranslate nohighlight">\(\rho=0.0845\,\mathrm{\rho}^*\)</span> and <span class="math notranslate nohighlight">\(T=0.69\,\mathrm{T}^*\)</span>).
+This liquid state is known to exhibit slow relaxation times,
+which complicates the convergence of transport properties and
+makes it a popular test case for computational methods.</p>
+<p>The LAMMPS input files can be found in the directory <code class="docutils literal notranslate"><span class="pre">docs/data/lammps_lj3d</span></code>
+of STACIE’s Git source repository.
+To obtain sufficient data for all three properties, we performed 100 independent runs,
+for which the <a class="reference internal" href="../preparing_inputs/data_sufficiency.html"><span class="std std-doc">guesstimated relative error</span></a>
+is tabulated below.
+The <a class="reference internal" href="../theory/model.html#section-lorentz-target"><span class="std std-ref">Lorentz model</span></a> is used to fit the spectrum,
+with degrees <span class="math notranslate nohighlight">\(S_\text{num}=\{0, 2\}\)</span> and <span class="math notranslate nohighlight">\(S_\text{den}=\{2\}\)</span>, corresponding to <span class="math notranslate nohighlight">\(P=3\)</span> parameters.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Property</p></th>
+<th class="head text-right"><p><span class="math notranslate nohighlight">\(M\)</span></p></th>
+<th class="head text-right"><p>Guess rel. error</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Shear viscosity</p></td>
+<td class="text-right"><p>500</p></td>
+<td class="text-right"><p>0.5 %</p></td>
+</tr>
+<tr class="row-odd"><td><p>Bulk viscosity</p></td>
+<td class="text-right"><p>100</p></td>
+<td class="text-right"><p>1.2 %</p></td>
+</tr>
+<tr class="row-even"><td><p>Thermal conductivity</p></td>
+<td class="text-right"><p>300</p></td>
+<td class="text-right"><p>0.7 %</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The (initial) settings for the production runs were determined as follows.
+In general, the integration time step in MD simulations roughly
+corresponds to one tenth of a period of the fastest oscillations in the system.
+At shorter time scales than 10 steps, the dynamics is most likely irrelevant for transport properties.
+Hence, in our first simulations, all data was recorded with block averages of 10 steps.
+As mentioned in the section on the <a class="reference internal" href="../preparing_inputs/block_averages.html"><span class="std std-doc">block averages</span></a>,
+at least <span class="math notranslate nohighlight">\(400 P\)</span> blocks are recommended.
+The initial production runs therefore consisted of 12000 MD steps.
+Note that these values are only coarse estimates.
+As explained below, the production runs were extended twice to improve the statistics.</p>
+<p>Details of the MD simulations can be found the LAMMPS inputs
+<code class="docutils literal notranslate"><span class="pre">docs/data/lammps_lj3d/template-init.lammps</span></code> and <code class="docutils literal notranslate"><span class="pre">docs/data/lammps_lj3d/template-ext.lammps</span></code>
+in STACIE’s Git repository.
+These input files are actually <a class="reference external" href="https://jinja.palletsprojects.com/">Jinja2</a> templates
+that are rendered with different random seeds (and restart files) for each run.
+The initial production simulations start from an FCC crystal structure,
+which is first melted for 5000 steps
+at an elevated temperature of <span class="math notranslate nohighlight">\(T=1.5\,\mathrm{T}^*\)</span> in the <a class="reference internal" href="../glossary.html#term-NVT"><span class="xref std std-term">NVT</span></a> ensemble.
+The system is then equilibrated at the desired temperature
+of <span class="math notranslate nohighlight">\(T=0.722\,\mathrm{T}^*\)</span> for 5000 additional steps.
+Starting from the equilibrated states, production runs were performed in the <a class="reference internal" href="../glossary.html#term-NVE"><span class="xref std std-term">NVE</span></a> ensemble.
+The velocities are not rescaled after the NVT equilibration,
+to ensure that the set of NVE runs as a whole is representative of the NVT ensemble.
+During the production phase, trajectory data is collected with block averages over 10 steps.</p>
+<p>The LAMMPS input files contain commands to write output files
+that can be directly loaded using Python and NumPy without any additional converters or wrappers.
+The following output files from <code class="docutils literal notranslate"><span class="pre">docs/data/lammps_lj3d/sims/replica_????_part_??/</span></code> were used for the analysis:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">info.yaml</span></code>: simulation settings that may be useful for post-processing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nve_thermo.txt</span></code>: subsampled instantaneous temperature and related quantities</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nve_pressure_blav.txt</span></code>: block-averaged (off)diagonal pressure tensor components</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nve_heatflux_blav.txt</span></code>: block-averaged <span class="math notranslate nohighlight">\(x\)</span>, <span class="math notranslate nohighlight">\(y\)</span>, and <span class="math notranslate nohighlight">\(z\)</span> components of
+the heat flux vector, i.e. <span class="math notranslate nohighlight">\(J^\text{h}_x\)</span>, <span class="math notranslate nohighlight">\(J^\text{h}_y\)</span>, and <span class="math notranslate nohighlight">\(J^\text{h}_z\)</span>.
+Heat fluxes are used in the thermal conductivity example, not in this notebook.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The results in this example were obtained using
+<a class="reference external" href="https://github.com/lammps/lammps/releases/tag/stable_29Aug2024_update3">LAMMPS 29 Aug 2024 Update 3</a>.
+Minor differences may arise when using a different version of LAMMPS,
+or even the same version compiled with a different compiler.</p>
+</div>
+<section id="library-imports-and-configuration">
+<h2>Library Imports and Configuration<a class="headerlink" href="#library-imports-and-configuration" title="Link to this heading">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/os.html#module-os" title="os"><span class="nn">os</span></a>
+<span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="numpy"><span class="nn">numpy</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">path</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">yaml</span><span class="w"> </span><span class="kn">import</span> <span class="n">safe_load</span>
+<span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/stats.html#module-scipy.stats" title="scipy.stats"><span class="nn">scipy.stats</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.chi2.html#scipy.stats.chi2" title="scipy.stats.chi2"><span class="n">chi2</span></a>
+<span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.html#module-stacie" title="stacie"><span class="nn">stacie</span></a><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">UnitConfig</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.compute_spectrum" title="stacie.spectrum.compute_spectrum"><span class="n">compute_spectrum</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="n">estimate_acint</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.model.html#stacie.model.LorentzModel" title="stacie.model.LorentzModel"><span class="n">LorentzModel</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_fitted_spectrum" title="stacie.plot.plot_fitted_spectrum"><span class="n">plot_fitted_spectrum</span></a><span class="p">,</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_extras" title="stacie.plot.plot_extras"><span class="n">plot_extras</span></a><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_instantaneous_percentiles</span><span class="p">,</span> <span class="n">plot_cumulative_temperature_histogram</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mpl</span><span class="o">.</span><span class="n">rc_file</span><span class="p">(</span><span class="s2">"matplotlibrc"</span><span class="p">)</span>
+<span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = ["svg"]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># You normally do not need to change this path.</span>
+<span class="c1"># It only needs to be overridden when building the documentation.</span>
+<span class="n">DATA_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/os.html#os.getenv" title="os.getenv"><span class="n">os</span><span class="o">.</span><span class="n">getenv</span></a><span class="p">(</span><span class="s2">"DATA_ROOT"</span><span class="p">,</span> <span class="s2">"./"</span><span class="p">))</span> <span class="o">/</span> <span class="s2">"lammps_lj3d/sims/"</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="analysis-of-the-equilibration-runs">
+<h2>Analysis of the Equilibration Runs<a class="headerlink" href="#analysis-of-the-equilibration-runs" title="Link to this heading">¶</a></h2>
+<p>To ensure that the production runs start from a well-equilibrated state,
+we first analyze the equilibration runs.
+The following code cell plots percentiles of the instantaneous temperature
+as a function of time over all independent runs.
+For reference, the theoretical percentiles of the NVT ensemble
+are shown as horizontal dotted lines.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_equilibration</span><span class="p">(</span><span class="n">ntraj</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Plot percentiles of the instantaneous temperature."""</span>
+    <span class="c1"># Load the configuration from the YAML file.</span>
+    <span class="k">with</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#open" title="open"><span class="nb">open</span></a><span class="p">(</span><span class="n">DATA_ROOT</span> <span class="o">/</span> <span class="s2">"replica_0000_part_00/info.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">safe_load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+    <span class="n">temp_d</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">"temperature"</span><span class="p">]</span>
+    <span class="n">ndof</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">"natom"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">-</span> <span class="mi">3</span>
+
+    <span class="c1"># Load trajectory data.</span>
+    <span class="n">temps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">itraj</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="n">ntraj</span><span class="p">):</span>
+        <span class="n">equil_dir</span> <span class="o">=</span> <span class="n">DATA_ROOT</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"replica_</span><span class="si">{</span><span class="n">itraj</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">_part_00/"</span>
+        <span class="n">data</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="numpy.loadtxt"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span><span class="n">equil_dir</span> <span class="o">/</span> <span class="s2">"nvt_thermo.txt"</span><span class="p">)</span>
+        <span class="n">temps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">"block_size"</span><span class="p">]</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s2">"timestep"</span><span class="p">]</span> <span class="o">*</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#len" title="len"><span class="nb">len</span></a><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">temps</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">temps</span><span class="p">)</span>
+
+    <span class="c1"># Select the last part (final temperature), discarding the melting phase.</span>
+    <span class="n">temps</span> <span class="o">=</span> <span class="n">temps</span><span class="p">[:,</span> <span class="mi">550</span><span class="p">:]</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="p">[</span><span class="mi">550</span><span class="p">:]</span>
+
+    <span class="c1"># Plot the instantaneous and desired temperature.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"tempequil"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"tempequil"</span><span class="p">)</span>
+    <span class="n">percents</span> <span class="o">=</span> <span class="p">[</span><span class="mi">95</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="n">plot_instantaneous_percentiles</span><span class="p">(</span>
+        <span class="n">ax</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">,</span>
+        <span class="n">temps</span><span class="p">,</span>
+        <span class="n">percents</span><span class="p">,</span>
+        <span class="n">expected</span><span class="o">=</span><span class="p">[</span><span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">percent</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="n">ndof</span><span class="p">)</span> <span class="o">*</span> <span class="n">temp_d</span> <span class="o">/</span> <span class="n">ndof</span> <span class="k">for</span> <span class="n">percent</span> <span class="ow">in</span> <span class="n">percents</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="s2">"Percentiles of the instantaneous temperature over the 100 equilibration runs"</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Temperature"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time"</span><span class="p">)</span>
+
+
+<span class="n">plot_equilibration</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/2d76f5d546851cb661c71ecc005bda4a7c35778e2338141ef423690f28bae0b8.svg" src="../_images/2d76f5d546851cb661c71ecc005bda4a7c35778e2338141ef423690f28bae0b8.svg"/>
+</div>
+</div>
+<p>The plot shows that the equilibration runs were successful:
+They reach the correct average temperature <strong>and</strong> also exhibit the expected fluctuations.
+Note that we used a Langevin thermestat for equilibration.
+This is a robust local thermostat that quickly brings
+all degrees of freedom to the desired temperature.
+In comparison, a global Nosé-Hoover-chain (NHC) thermostat would still show large
+oscillations in the temperature, even after 5000 steps.
+Taking the last state from an NHC run generally results in biased initial conditions for the NVE runs.
+(You can see the difference by modifying the LAMMPS input files,
+rerunning them and then rerunning this notebook.)</p>
+</section>
+<section id="analysis-of-the-initial-production-simulations">
+<h2>Analysis of the Initial Production Simulations<a class="headerlink" href="#analysis-of-the-initial-production-simulations" title="Link to this heading">¶</a></h2>
+<p>The following code cell defines analysis functions:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_indep_paniso</span></code> transforms the pressure tensor components
+into five independent anisotropic contributions,
+as explained in the <a class="reference internal" href="../properties/shear_viscosity.html"><span class="std std-doc">Shear Viscosity</span></a> theory section.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimate_viscosity</span></code> calculates the viscosity and plots the results.
+It also prints recommendations for data reduction (block averaging) and simulation time,
+as explained in the following two sections of the documentation:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../properties/autocorrelation_time.html"><span class="std std-doc">Integrated and Exponential Autocorrelation Time</span></a></p></li>
+<li><p><a class="reference internal" href="../preparing_inputs/block_averages.html"><span class="std std-doc">Reducing Storage Requirements with Block Averages</span></a></p></li>
+</ul>
+<p>These will be used to determine whether our initial simulation settings are appropriate.</p>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_indep_paniso</span><span class="p">(</span><span class="n">pcomps</span><span class="p">):</span>
+    <span class="k">return</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="n">pcomps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">pcomps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">pcomps</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html#numpy.sqrt" title="numpy.sqrt"><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span></a><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+            <span class="mf">0.5</span> <span class="o">*</span> <span class="n">pcomps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">pcomps</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">pcomps</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+            <span class="n">pcomps</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+            <span class="n">pcomps</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">estimate_viscosity</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pcomps</span><span class="p">,</span> <span class="n">av_temperature</span><span class="p">,</span> <span class="n">volume</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="c1"># Create the spectrum of the pressure fluctuations.</span>
+    <span class="c1"># Note that the Boltzmann constant is 1 in reduced LJ units.</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">UnitConfig</span></a><span class="p">(</span>
+        <span class="n">acint_fmt</span><span class="o">=</span><span class="s2">".3f"</span><span class="p">,</span>
+        <span class="n">acint_symbol</span><span class="o">=</span><span class="s2">"η"</span><span class="p">,</span>
+        <span class="n">acint_unit_str</span><span class="o">=</span><span class="s2">"η*"</span><span class="p">,</span>
+        <span class="n">freq_unit_str</span><span class="o">=</span><span class="s2">"1/τ*"</span><span class="p">,</span>
+        <span class="n">time_fmt</span><span class="o">=</span><span class="s2">".3f"</span><span class="p">,</span>
+        <span class="n">time_unit_str</span><span class="o">=</span><span class="s2">"τ*"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.Spectrum" title="stacie.spectrum.Spectrum"><span class="n">spectrum</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.compute_spectrum" title="stacie.spectrum.compute_spectrum"><span class="n">compute_spectrum</span></a><span class="p">(</span>
+        <span class="n">pcomps</span><span class="p">,</span>
+        <span class="n">prefactors</span><span class="o">=</span><span class="n">volume</span> <span class="o">/</span> <span class="n">av_temperature</span><span class="p">,</span>
+        <span class="n">timestep</span><span class="o">=</span><span class="n">timestep</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Estimate the viscosity from the spectrum.</span>
+    <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="n">estimate_acint</span></a><span class="p">(</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.spectrum.html#stacie.spectrum.Spectrum" title="stacie.spectrum.Spectrum"><span class="n">spectrum</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.model.html#stacie.model.LorentzModel" title="stacie.model.LorentzModel"><span class="n">LorentzModel</span></a><span class="p">(),</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">uc</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="c1"># Plot some basic analysis figures.</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_spectrum"</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_spectrum"</span><span class="p">)</span>
+        <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_fitted_spectrum" title="stacie.plot.plot_fitted_spectrum"><span class="n">plot_fitted_spectrum</span></a><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_extras"</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_extras"</span><span class="p">)</span>
+        <a class="sphinx-codeautolink-a" href="../apidocs/stacie.plot.html#stacie.plot.plot_extras" title="stacie.plot.plot_extras"><span class="n">plot_extras</span></a><span class="p">(</span><span class="n">axs</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.utils.html#stacie.utils.UnitConfig" title="stacie.utils.UnitConfig"><span class="n">uc</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a><span class="p">)</span>
+
+    <span class="c1"># Return the viscosity</span>
+    <span class="k">return</span> <a class="sphinx-codeautolink-a" href="../apidocs/stacie.estimate.html#stacie.estimate.Result" title="stacie.estimate.Result"><span class="n">result</span></a>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The next cell performs the analysis of the initial simulations.
+It prints the recommended block size and the simulation time for the production runs,
+and then generates two figures:</p>
+<ul class="simple">
+<li><p>The spectrum of the off-diagonal pressure fluctuations, and the model fitted to the spectrum.</p></li>
+<li><p>Additional intermediate results.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">analyze_production</span><span class="p">(</span><span class="n">npart</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a><span class="p">,</span> <span class="n">ntraj</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Perform the analysis of the production runs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    npart</span>
+<span class="sd">        Number of parts in the production runs.</span>
+<span class="sd">        For the initial production runs, this is 1.</span>
+<span class="sd">    ntraj</span>
+<span class="sd">        Number of trajectories in the production runs.</span>
+<span class="sd">    select</span>
+<span class="sd">        If `None`, all anisotropic contributions are selected.</span>
+<span class="sd">        If not `None`, only select the given anisotropic contribution</span>
+<span class="sd">        for the viscosity estimate. Must be one of `0`, `1`, `2`, `3`, `4`, `None`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    result</span>
+<span class="sd">        The result from STACIE's `estimate_acint` function,</span>
+<span class="sd">    """</span>
+    <span class="c1"># Load the configuration from the YAML file.</span>
+    <span class="k">with</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#open" title="open"><span class="nb">open</span></a><span class="p">(</span><span class="n">DATA_ROOT</span> <span class="o">/</span> <span class="s2">"replica_0000_part_00/info.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">safe_load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+
+    <span class="c1"># Load trajectory data.</span>
+    <span class="n">thermos</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pcomps_full</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">itraj</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="n">ntraj</span><span class="p">):</span>
+        <span class="n">thermos</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="n">pcomps_full</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">ipart</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="n">npart</span><span class="p">):</span>
+            <span class="n">prod_dir</span> <span class="o">=</span> <span class="n">DATA_ROOT</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"replica_</span><span class="si">{</span><span class="n">itraj</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">_part_</span><span class="si">{</span><span class="n">ipart</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">/"</span>
+            <span class="n">thermos</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="numpy.loadtxt"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span><span class="n">prod_dir</span> <span class="o">/</span> <span class="s2">"nve_thermo.txt"</span><span class="p">))</span>
+            <span class="n">pcomps_full</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="numpy.loadtxt"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span><span class="n">prod_dir</span> <span class="o">/</span> <span class="s2">"nve_pressure_blav.txt"</span><span class="p">))</span>
+    <span class="n">thermos</span> <span class="o">=</span> <span class="p">[</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html#numpy.concatenate" title="numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="k">for</span> <span class="n">parts</span> <span class="ow">in</span> <span class="n">thermos</span><span class="p">]</span>
+    <span class="n">pcomps_full</span> <span class="o">=</span> <span class="p">[</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html#numpy.concatenate" title="numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="k">for</span> <span class="n">parts</span> <span class="ow">in</span> <span class="n">pcomps_full</span><span class="p">]</span>
+    <span class="n">av_temperature</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean" title="numpy.mean"><span class="n">np</span><span class="o">.</span><span class="n">mean</span></a><span class="p">([</span><span class="n">thermo</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">thermo</span> <span class="ow">in</span> <span class="n">thermos</span><span class="p">])</span>
+
+    <span class="c1"># Compute the viscosity.</span>
+    <span class="n">pcomps_aniso</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html#numpy.concatenate" title="numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">([</span><span class="n">get_indep_paniso</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pcomps_full</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">select</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">select</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">select</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="ValueError"><span class="ne">ValueError</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid selection </span><span class="si">{</span><span class="n">select</span><span class="si">}</span><span class="s2">, must be in [0, 4]"</span><span class="p">)</span>
+        <span class="n">pcomps_aniso</span> <span class="o">=</span> <span class="n">pcomps_aniso</span><span class="p">[</span><span class="n">select</span><span class="p">::</span><span class="mi">5</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">estimate_viscosity</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"part</span><span class="si">{</span><span class="n">npart</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="n">pcomps_aniso</span><span class="p">,</span>
+        <span class="n">av_temperature</span><span class="p">,</span>
+        <span class="n">info</span><span class="p">[</span><span class="s2">"volume"</span><span class="p">],</span>
+        <span class="n">info</span><span class="p">[</span><span class="s2">"timestep"</span><span class="p">]</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s2">"block_size"</span><span class="p">],</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">select</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="n">eta_production_init</span> <span class="o">=</span> <span class="n">analyze_production</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">acint</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CUTOFF FREQUENCY SCAN cv2l(125%)
+     neff   criterion  fcut [1/τ*]
+---------  ----------  ----------
+     15.0        12.5    3.93e-01
+     15.9        11.4    4.18e-01
+     16.9        10.4    4.45e-01
+     18.0         9.6    4.73e-01
+     19.1         8.9    5.04e-01
+     20.3         8.3    5.36e-01
+     21.6         7.9    5.71e-01
+     23.0         7.8    6.08e-01
+     24.4         8.2    6.47e-01
+     25.9         9.0    6.89e-01
+     27.6        10.5    7.33e-01
+     29.3        12.8    7.81e-01
+     31.2        16.1    8.31e-01
+     33.2        20.5    8.85e-01
+     35.3        26.3    9.42e-01
+     37.5        33.2    1.00e+00
+     39.9        41.1    1.07e+00
+     42.4        49.5    1.14e+00
+     45.1        58.0    1.21e+00
+     48.0        67.0    1.29e+00
+     51.1        76.9    1.37e+00
+     54.4        88.4    1.46e+00
+     57.8       102.9    1.55e+00
+     61.5       121.4    1.65e+00
+Cutoff criterion exceeds incumbent + margin: 7.8 + 100.0.
+
+INPUT TIME SERIES
+    Time step:                     0.030 τ*
+    Simulation time:               36.000 τ*
+    Maximum degrees of freedom:    1000.0
+
+MAIN RESULTS
+    Autocorrelation integral:      3.228 ± 0.069 η*
+    Integrated correlation time:   0.139 ± 0.003 τ*
+
+SANITY CHECKS (weighted averages over cutoff grid)
+    Effective number of points:    22.1 (ideally &gt; 60)
+    Regression cost Z-score:       -1.0 (ideally &lt; 2)
+    Cutoff criterion Z-score:      0.5 (ideally &lt; 2)
+
+MODEL lorentz() | CUTOFF CRITERION cv2l(125%)
+    Number of parameters:          3
+    Average cutoff frequency:      5.86e-01 1/τ*
+    Exponential correlation time:  0.411 ± 0.060 τ*
+
+RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL CORR. TIME)
+    Block time:                  &lt; 0.129 ± 0.034 τ*
+    Simulation time:             &gt; 25.821 ± 0.477 τ*
+</pre></div>
+</div>
+<img alt="../_images/0c4616c1cc8cde227f9d12fb9a78d4995ff1c753edaef5c3582401efbcff388a.svg" src="../_images/0c4616c1cc8cde227f9d12fb9a78d4995ff1c753edaef5c3582401efbcff388a.svg"/>
+<img alt="../_images/68cef996741af04e6ffa0243218bf219978842756bd05eb275f509c5941d6113.svg" src="../_images/68cef996741af04e6ffa0243218bf219978842756bd05eb275f509c5941d6113.svg"/>
+</div>
+</div>
+<p>Several things can be observed in the analysis of the initial production runs:</p>
+<ul class="simple">
+<li><p>The recommendations based on the exponential correlation time were met by the initial simulation settings.</p>
+<ul>
+<li><p>The recommended simulation time is 25.8 τ*, which about 8600 steps.
+The initial production runs (12000 steps) were therefore sufficient.</p></li>
+<li><p>The recommended block time is 0.129 τ*, which corresponds to about 40 steps.
+The block size used in the initial production runs (10 steps) was sufficiently small.</p></li>
+</ul>
+</li>
+<li><p>The relative error of the viscosity estimate is about 2%,
+which is larger than the guesstimated value 0.5%.
+This is fine and somewhat expected, since this guess is known to be crude.</p></li>
+<li><p>The Lorentz model used to fit the spectrum was a fair choice, but for higher frequencies,
+the sampling PSD clearly decays faster than the fitted model.
+For the case of viscosity, there is (to the best of our knowledge) no solid theoretical argument
+to support the exponential decay of the ACF of the pressure tensor.
+It just seems to be a reasonable choice for this case.</p></li>
+<li><p>The effective number of points fitted to the spectrum is 22.1,
+which is low for a 3 parameter model.
+For high-quality production simulations, it would be good to triple the simulation length,
+as to multiply the resolution of the frequency grid by 3.
+This is hopefully sufficient to reach 60 effective points.</p></li>
+</ul>
+<p>As can be seen in the comparison to literature results below,
+the results for the initial production runs were already quite good.
+However, for the sake of demonstration,
+the production runs were extended by an additional 24000 steps each,
+to triple the simulation time.
+This revealed that the effective number of points fitted to the spectrum
+increase to 61, which is a sublinear increase, just enough to reach the target of 60.
+For the sake of demonstration, we decided to extend the production runs by another 64000 steps,
+which resulted in a total simulation time of 300 τ* per run.</p>
+<p>The difficulty of increasing the effective number of fitted points can be understood as follows.
+The Lorentz model is not capable of fitting the spectrum to higher frequencies.
+By including more data points, the limitations of the approximating model also become clearer,
+and the cutoff criterion will detect some underfitting (and thus risk for bias) at lower cutoffs.</p>
+</section>
+<section id="analysis-of-the-production-simulations">
+<h2>Analysis of the Production Simulations<a class="headerlink" href="#analysis-of-the-production-simulations" title="Link to this heading">¶</a></h2>
+<p>Here we just repeat the analysis, but now with extended production runs.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eta_production_ext</span> <span class="o">=</span> <span class="n">analyze_production</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">acint</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CUTOFF FREQUENCY SCAN cv2l(125%)
+     neff   criterion  fcut [1/τ*]
+---------  ----------  ----------
+     15.0        41.2    4.71e-02
+     15.9        41.4    5.01e-02
+     16.9        41.5    5.34e-02
+     18.0        41.7    5.68e-02
+     19.1        42.1    6.05e-02
+     20.3         inf    6.44e-02  (rel.err. tau_exp &gt; 1.0e+02 x rel.err. ac integral)
+     21.6         inf    6.85e-02  (rel.err. tau_exp &gt; 1.0e+02 x rel.err. ac integral)
+     23.0         inf    7.30e-02  (rel.err. tau_exp &gt; 1.0e+02 x rel.err. ac integral)
+     24.4         inf    7.77e-02  (rel.err. tau_exp &gt; 1.0e+02 x rel.err. ac integral)
+     25.9         inf    8.27e-02  (rel.err. tau_exp &gt; 1.0e+02 x rel.err. ac integral)
+     27.6         inf    8.80e-02  (rel.err. tau_exp &gt; 1.0e+02 x rel.err. ac integral)
+     29.3         inf    9.37e-02  (rel.err. tau_exp &gt; 1.0e+02 x rel.err. ac integral)
+     31.2        99.4    9.97e-02
+     33.2        81.4    1.06e-01
+     35.3        69.9    1.13e-01
+     37.5        61.6    1.20e-01
+     39.9        56.0    1.28e-01
+     42.4        51.7    1.36e-01
+     45.1        48.9    1.45e-01
+     48.0        47.4    1.54e-01
+     51.1        46.8    1.64e-01
+     54.4        45.8    1.75e-01
+     57.8        43.6    1.86e-01
+     61.5        40.2    1.98e-01
+     65.5        36.0    2.11e-01
+     69.7        31.7    2.25e-01
+     74.1        27.5    2.39e-01
+     78.9        24.0    2.55e-01
+     83.9        21.3    2.71e-01
+     89.3        19.4    2.89e-01
+     95.0        17.9    3.07e-01
+    101.1        16.8    3.27e-01
+    107.6        15.8    3.48e-01
+    114.5        14.7    3.70e-01
+    121.9        13.6    3.94e-01
+    129.7        12.6    4.20e-01
+    138.0        11.7    4.47e-01
+    146.9        11.1    4.76e-01
+    156.3        11.0    5.06e-01
+    166.4        11.5    5.39e-01
+    177.1        13.2    5.74e-01
+    188.5        16.6    6.11e-01
+    200.6        22.3    6.50e-01
+    213.5        30.8    6.92e-01
+    227.2        42.5    7.37e-01
+    241.9        57.6    7.84e-01
+    257.4        75.9    8.35e-01
+    274.0        97.8    8.89e-01
+    291.6       124.0    9.46e-01
+Cutoff criterion exceeds incumbent + margin: 11.0 + 100.0.
+
+INPUT TIME SERIES
+    Time step:                     0.030 τ*
+    Simulation time:               300.000 τ*
+    Maximum degrees of freedom:    1000.0
+
+MAIN RESULTS
+    Autocorrelation integral:      3.239 ± 0.025 η*
+    Integrated correlation time:   0.139 ± 0.001 τ*
+
+SANITY CHECKS (weighted averages over cutoff grid)
+    Effective number of points:    150.9 (ideally &gt; 60)
+    Regression cost Z-score:       0.3 (ideally &lt; 2)
+    Cutoff criterion Z-score:      3.6 (ideally &lt; 2)
+
+MODEL lorentz() | CUTOFF CRITERION cv2l(125%)
+    Number of parameters:          3
+    Average cutoff frequency:      4.89e-01 1/τ*
+    Exponential correlation time:  0.399 ± 0.029 τ*
+
+RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL CORR. TIME)
+    Block time:                  &lt; 0.125 ± 0.016 τ*
+    Simulation time:             &gt; 25.047 ± 0.228 τ*
+</pre></div>
+</div>
+<img alt="../_images/16513938596c4aac86f66a3841b54fa1846666123b603584ce0ebe7145b80d1b.svg" src="../_images/16513938596c4aac86f66a3841b54fa1846666123b603584ce0ebe7145b80d1b.svg"/>
+<img alt="../_images/90fde62c43f73d13cc9d9449283820931d0c477d06a57ca9fcda35e85707ae4e.svg" src="../_images/90fde62c43f73d13cc9d9449283820931d0c477d06a57ca9fcda35e85707ae4e.svg"/>
+</div>
+</div>
+<p>Some remarks about the final results:</p>
+<ul class="simple">
+<li><p>The effective number of points has increased to 150.9,
+which is a fine number of data points for a model with <span class="math notranslate nohighlight">\(P=3\)</span> parameters.</p></li>
+<li><p>For higher frequency cutoffs, both Z-scores increase, showing that the
+autocorrelation function only decays exponentially in the limit of large lag times.
+This is expected, since at sufficiently short time scales,
+the pressure tensor fluctuations are smooth functions,
+i.e. not featuring the cusp of a purely exponential ACF.</p></li>
+</ul>
+</section>
+<section id="comparison-to-literature-results">
+<h2>Comparison to Literature Results<a class="headerlink" href="#comparison-to-literature-results" title="Link to this heading">¶</a></h2>
+<p>Comprehensive literature surveys on computational estimates of the shear viscosity of a Lennard-Jones fluid
+can be found in <span id="id1">[<a class="reference internal" href="../references.html#id20" title="Karsten Meier, Arno Laesecke, and Stephan Kabelac. Transport coefficients of the lennard-jones model fluid. i. viscosity. J. Chem. Phys., 121(8):3671–3687, 2004. doi:10.1063/1.1770695.">MLK04a</a>]</span> and <span id="id2">[<a class="reference internal" href="../references.html#id23" title="S. Viscardy, J. Servantie, and P. Gaspard. Transport and helfand moments in the lennard-jones fluid. i. shear viscosity. J. Chem. Phys., 126(18):184512, 2007. doi:10.1063/1.2724820.">VSG07a</a>]</span>.
+These papers also present new results, which are included in the table below.
+Since the simulation settings (<span class="math notranslate nohighlight">\(r_\text{cut}^{*}=2.5\)</span>, <span class="math notranslate nohighlight">\(N=1372\)</span>, <span class="math notranslate nohighlight">\(T^*=0.722\)</span> and <span class="math notranslate nohighlight">\(\rho^{*}=0.8442\)</span>)
+are identical to those used in this notebook, the reported values should be directly comparable.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head text-right"><p>Simulation time [τ*]</p></th>
+<th class="head text-right"><p>Shear viscosity [η*]</p></th>
+<th class="head"><p>Reference</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>EMD NVE (STACIE)</p></td>
+<td class="text-right"><p>3600</p></td>
+<td class="text-right"><p>3.228 ± 0.069</p></td>
+<td><p>(here) initial</p></td>
+</tr>
+<tr class="row-odd"><td><p>EMD NVE (STACIE)</p></td>
+<td class="text-right"><p>10800</p></td>
+<td class="text-right"><p>3.208 ± 0.041</p></td>
+<td><p>(here) extension 1</p></td>
+</tr>
+<tr class="row-even"><td><p>EMD NVE (STACIE)</p></td>
+<td class="text-right"><p>30000</p></td>
+<td class="text-right"><p>3.239 ± 0.025</p></td>
+<td><p>(here) extension 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>EMD NVE (Helfand-Einstein)</p></td>
+<td class="text-right"><p>75000</p></td>
+<td class="text-right"><p>3.277 ± 0.098</p></td>
+<td><p><span id="id3">[<a class="reference internal" href="../references.html#id20" title="Karsten Meier, Arno Laesecke, and Stephan Kabelac. Transport coefficients of the lennard-jones model fluid. i. viscosity. J. Chem. Phys., 121(8):3671–3687, 2004. doi:10.1063/1.1770695.">MLK04a</a>]</span></p></td>
+</tr>
+<tr class="row-even"><td><p>EMD NVE (Helfand-moment)</p></td>
+<td class="text-right"><p>600000</p></td>
+<td class="text-right"><p>3.268 ± 0.055</p></td>
+<td><p><span id="id4">[<a class="reference internal" href="../references.html#id23" title="S. Viscardy, J. Servantie, and P. Gaspard. Transport and helfand moments in the lennard-jones fluid. i. shear viscosity. J. Chem. Phys., 126(18):184512, 2007. doi:10.1063/1.2724820.">VSG07a</a>]</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>This comparison confirms that STACIE can reproduce a well-known viscosity result,
+in line with literature results.
+To achieve a state-of-the-art statistical <a class="reference internal" href="../glossary.html#term-Uncertainty"><span class="xref std std-term">uncertainty</span></a>, it requires far less simulation time.
+Even our longest production runs are still less than half as long as in the cited papers,
+and we achieve a much smaller uncertainties.</p>
+<p>To be fair, the simulation time only accounts for production runs.
+Our setup also includes a significant amount of equilibration runs (3000 τ* in total)
+to ensure that different production runs are uncorrelated.
+Even when these additional runs are included, the overall simulation time
+remains significantly lower than in the cited papers.</p>
+</section>
+<section id="validation-of-the-production-runs">
+<h2>Validation of the Production Runs<a class="headerlink" href="#validation-of-the-production-runs" title="Link to this heading">¶</a></h2>
+<p>To further establish that our NVE runs together represent the NVT ensemble,
+the following two cells perform additional validation checks.</p>
+<ul class="simple">
+<li><p>A plot of the conserved quantity of the separate NVE runs, to detect any drift.</p></li>
+<li><p>The distribution of the instantaneous temperature,
+which should match the desired NVT distribution.
+For each individual NVE run and for the combined NVE runs, cumulative distributions are plotted.
+The function also plots the expected cumulative distribution of the NVT ensemble.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_total_energy</span><span class="p">():</span>
+    <span class="c1"># Load trajectory data.</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">itraj</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">time_traj</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">energies_traj</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ipart</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">prod_dir</span> <span class="o">=</span> <span class="n">DATA_ROOT</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"replica_</span><span class="si">{</span><span class="n">itraj</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">_part_</span><span class="si">{</span><span class="n">ipart</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">/"</span>
+            <span class="n">data</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="numpy.loadtxt"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span><span class="n">prod_dir</span> <span class="o">/</span> <span class="s2">"nve_thermo.txt"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">time_traj</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="n">energies_traj</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:])</span>
+        <span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html#numpy.concatenate" title="numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">time_traj</span><span class="p">)</span>
+        <span class="n">energies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energies_traj</span><span class="p">)</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="p">[</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html#numpy.concatenate" title="numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">energy</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="k">for</span> <span class="n">energy</span> <span class="ow">in</span> <span class="n">energies</span><span class="p">]</span>
+
+    <span class="c1"># Plot the total energy of the NVE runs.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"energyprod"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"energyprod"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">kes</span><span class="p">,</span> <span class="n">pes</span> <span class="ow">in</span> <span class="n">energies</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">kes</span> <span class="o">+</span> <span class="n">pes</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Total Energy"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Total Energy of the NVE Runs"</span><span class="p">)</span>
+
+
+<span class="n">plot_total_energy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/029aeedf482189263f106e07ce0a211c190c9e7b088bf246ae9fc99b5aa89246.svg" src="../_images/029aeedf482189263f106e07ce0a211c190c9e7b088bf246ae9fc99b5aa89246.svg"/>
+</div>
+</div>
+<p>There is no noticeable drift in the total energy of the NVE runs.
+Apart from the usual (and acceptable) numerical noise, the total energy is conserved perfectly.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_temperature</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Plot cumulative distributions of the instantaneous temperature."""</span>
+    <span class="c1"># Load the configuration from the YAML file.</span>
+    <span class="k">with</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#open" title="open"><span class="nb">open</span></a><span class="p">(</span><span class="n">DATA_ROOT</span> <span class="o">/</span> <span class="s2">"replica_0000_part_00/info.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">safe_load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+    <span class="n">temp_d</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">"temperature"</span><span class="p">]</span>
+    <span class="n">ndof</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">"natom"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">-</span> <span class="mi">3</span>
+
+    <span class="c1"># Load trajectory data.</span>
+    <span class="n">temps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">itraj</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">temps</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">ipart</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">prod_dir</span> <span class="o">=</span> <span class="n">DATA_ROOT</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"replica_</span><span class="si">{</span><span class="n">itraj</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">_part_</span><span class="si">{</span><span class="n">ipart</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">/"</span>
+            <span class="n">temps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="numpy.loadtxt"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span><span class="n">prod_dir</span> <span class="o">/</span> <span class="s2">"nve_thermo.txt"</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">temps</span> <span class="o">=</span> <span class="p">[</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html#numpy.concatenate" title="numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">temp</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="n">temps</span><span class="p">]</span>
+
+    <span class="c1"># Plot the instantaneous and desired temperature distribution.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"tempprod"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"tempprod"</span><span class="p">)</span>
+    <span class="n">plot_cumulative_temperature_histogram</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">temps</span><span class="p">,</span> <span class="n">temp_d</span><span class="p">,</span> <span class="n">ndof</span><span class="p">,</span> <span class="s2">"τ*"</span><span class="p">)</span>
+
+
+<span class="n">validate_temperature</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/11e6945aaad3189d5487a3ab753fec437fef3e01d709016448cd19192f4da0a9.svg" src="../_images/11e6945aaad3189d5487a3ab753fec437fef3e01d709016448cd19192f4da0a9.svg"/>
+</div>
+</div>
+<p>This plot offers detailed insight into NVE versus NVT temperature distributions:</p>
+<ul class="simple">
+<li><p>In the NVE ensemble, the temperature distribution is relatively narrow.
+Hence, using a single NVE run would not be representative of the temperature variance of the NVT ensemble.</p></li>
+<li><p>Some of the individual NVE runs have significantly lower ore higher temperatures than the average.
+If the transport property of interest has a nonlinear dependence on the temperature,
+this effect will lead to a shift in the estimated transport property,
+compared to using a single NVE run.</p></li>
+</ul>
+<p>In the limit of macroscopic system sizes (<span class="math notranslate nohighlight">\(N \rightarrow \infty\)</span>),
+the NVE ensemble converges to the NVT ensemble.
+However, in simulations, one operates at finite system sizes,
+well below the thermodynamic limit.</p>
+</section>
+<section id="validation-of-the-independence-of-the-anistropic-contributions">
+<h2>Validation of the Independence of the Anistropic Contributions<a class="headerlink" href="#validation-of-the-independence-of-the-anistropic-contributions" title="Link to this heading">¶</a></h2>
+<p>Here we validate numerically that the
+<a class="reference internal" href="../properties/shear_viscosity.html"><span class="std std-doc">five independent anisotropic contributions</span></a>
+to the pressure tensor are indeed statistically independent.
+The covariance matrix of the anisotropic contributions is computed and the off-diagonal elements
+are plotted.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_independence</span><span class="p">(</span><span class="n">ntraj</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Validate the independence of the anisotropic contributions."""</span>
+    <span class="c1"># Load trajectory data.</span>
+    <span class="n">pcomps_full</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">itraj</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="n">ntraj</span><span class="p">):</span>
+        <span class="n">pcomps_full</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">ipart</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">prod_dir</span> <span class="o">=</span> <span class="n">DATA_ROOT</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"replica_</span><span class="si">{</span><span class="n">itraj</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">_part_</span><span class="si">{</span><span class="n">ipart</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">/"</span>
+            <span class="n">pcomps_full</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="numpy.loadtxt"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span><span class="n">prod_dir</span> <span class="o">/</span> <span class="s2">"nve_pressure_blav.txt"</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">:])</span>
+    <span class="n">pcomps_aniso</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_indep_paniso</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html#numpy.concatenate" title="numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="k">for</span> <span class="n">parts</span> <span class="ow">in</span> <span class="n">pcomps_full</span><span class="p">]</span>
+
+    <span class="c1"># Compute the average of the covariance matrix over all NVE trajectories.</span>
+    <span class="n">cov</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean" title="numpy.mean"><span class="n">np</span><span class="o">.</span><span class="n">mean</span></a><span class="p">([</span><a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.cov.html#numpy.cov" title="numpy.cov"><span class="n">np</span><span class="o">.</span><span class="n">cov</span></a><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pcomps_aniso</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#abs" title="abs"><span class="nb">abs</span></a><span class="p">(</span><span class="n">cov</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.05</span>
+
+    <span class="c1"># Plot the covariance matrix.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">"covariance"</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">"covariance"</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">cov</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"coolwarm"</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">scale</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Covariance of Anisotropic Pressure Contributions"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Anisotropic Contribution $P'_i$"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Anisotropic Contribution $P'_j$"</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+
+
+<span class="n">validate_independence</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/8905710d8f9deaa234731c9f5b617b63f7a44cf88fb5192b90b75013e6a0a03d.svg" src="../_images/8905710d8f9deaa234731c9f5b617b63f7a44cf88fb5192b90b75013e6a0a03d.svg"/>
+</div>
+</div>
+<p>The plot confirms that there is (at least visually)
+no sign of any statistical correlation between the anisotropic contributions.
+Note that one may perform more rigorous statistical tests
+to validate the independence of the five contributions.
+Here, we keep it simple for the sake of an intuitive demonstration.</p>
+</section>
+<section id="validation-of-the-consistency-of-the-anisotropic-contributions">
+<h2>Validation of the consistency of the Anisotropic Contributions<a class="headerlink" href="#validation-of-the-consistency-of-the-anisotropic-contributions" title="Link to this heading">¶</a></h2>
+<p>The following code cell shows that the five independent anisotropic contributions
+result in the same shear viscosity estimate, within the predicted uncertainties.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_consistency</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#range" title="range"><span class="nb">range</span></a><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">analyze_production</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">acint</span>
+        <span class="n">eta_std</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">acint_std</span>
+        <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Anisotropic contribution </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">: η = </span><span class="si">{</span><span class="n">eta</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">eta_std</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> η*"</span><span class="p">)</span>
+
+
+<span class="n">validate_consistency</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Anisotropic contribution 1: η = 3.275 ± 0.059 η*
+Anisotropic contribution 2: η = 3.194 ± 0.048 η*
+Anisotropic contribution 3: η = 3.256 ± 0.055 η*
+Anisotropic contribution 4: η = 3.183 ± 0.048 η*
+Anisotropic contribution 5: η = 3.257 ± 0.055 η*
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that one may perform more rigorous statistical tests to validate the consistency of the results.
+Here, we keep it simple for the sake of an intuitive demonstration.</p>
+</section>
+<section id="regression-tests">
+<h2>Regression Tests<a class="headerlink" href="#regression-tests" title="Link to this heading">¶</a></h2>
+<p>If you are experimenting with this notebook, you can ignore any exceptions below.
+The tests are only meant to pass for the notebook in its original form.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#abs" title="abs"><span class="nb">abs</span></a><span class="p">(</span><span class="n">eta_production_init</span> <span class="o">-</span> <span class="mf">3.236</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">:</span>
+    <span class="k">raise</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="ValueError"><span class="ne">ValueError</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"wrong viscosity (production): </span><span class="si">{</span><span class="n">eta_production_init</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#abs" title="abs"><span class="nb">abs</span></a><span class="p">(</span><span class="n">eta_production_ext</span> <span class="o">-</span> <span class="mf">3.257</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">:</span>
+    <span class="k">raise</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="ValueError"><span class="ne">ValueError</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"wrong viscosity (production): </span><span class="si">{</span><span class="n">eta_production_ext</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</article>
+</div>
+<footer>
+<div class="related-pages">
+<a class="next-page" href="lj_bulk_viscosity.html">
+<div class="page-info">
+<div class="context">
+<span>Next</span>
+</div>
+<div class="title">Bulk Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</div>
+</div>
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+</a>
+<a class="prev-page" href="surface_diffusion.html">
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+<div class="page-info">
+<div class="context">
+<span>Previous</span>
+</div>
+<div class="title">Diffusion on a Surface with Newtonian Dynamics</div>
+</div>
+</a>
+</div>
+<div class="bottom-of-page">
+<div class="left-details">
+<div class="copyright">
+                Copyright © 2024--2026, Gözdenur Toraman, Toon Verstraelen
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+</div>
+<div class="right-details">
+<div class="icons">
+<a aria-label="Center for Molecular Modeling" class="muted-link" href="https://molmod.ugent.be"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M 8,0.23203771 1.2708502,4.1166743 V 7.586584 H 2.0757403 V 4.5814695 L 8,1.1606847 13.924259,4.5814695 V 7.586584 h 0.80489 V 4.1166743 Z"></path>
+<path d="m 8,3.6329842 c -2.4076366,0 -4.3683267,1.9606901 -4.3683267,4.368326 0,1.0499591 0.3736113,2.0145218 0.9938323,2.7689368 L 4.9523743,9.845379 C 4.6268573,9.3073839 4.436564,8.6780482 4.436564,8.0013102 4.436564,6.0283899 6.027079,4.4378742 8,4.4378742 c 1.9729204,0 3.563435,1.5905157 3.563435,3.563436 0,0.676738 -0.190293,1.3060737 -0.515809,1.8440688 l 0.326868,0.924868 c 0.620221,-0.754415 0.993832,-1.7189777 0.993832,-2.7689368 0,-2.4076359 -1.96069,-4.3683267 -4.368326,-4.368326 z"></path>
+<path d="m 4.5647296,15.767884 2.0103367,-5.68462 0.979439,5.684633 0.8166682,-0.0019 L 7.1003242,8.3914521 H 6.3187358 L 4.1855869,14.427689 2.052438,8.3914521 H 1.2708502 L 2e-7,15.765962 l 0.81666821,0.0019 0.97943899,-5.684633 2.0103367,5.68462 z"></path>
+<path d="m 12.193555,15.767884 2.010337,-5.68462 0.979438,5.684633 L 16,15.765962 14.729149,8.3914521 H 13.947561 L 11.814413,14.427689 9.6812637,8.3914521 H 8.8996758 l -1.2708506,7.3745099 0.8166683,0.002 0.9794395,-5.684632 2.010337,5.684619 z"></path>
+</svg></a>
+<a aria-label="Soete Laboratory" class="muted-link" href="https://www.ugent.be/ea/emsme/en/research/soete"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M 1.2243149,11.312034 V 0.3537872 c 0,-0.47171662 3.2133726,-0.47171662 3.2133726,0 V 11.275667 c 0.038589,1.391853 0.8362299,2.107621 2.6118885,2.188801 0.3456227,0 0.3456227,2.535532 0,2.535532 -2.5872928,0 -5.8252611,-1.272498 -5.8252611,-4.687966 z"></path>
+<path d="M 9.0151601,16 C 12.286758,15.9977 14.766446,14.194112 14.775658,11.101887 14.784658,8.0882805 12.485826,7.1827295 10.791465,6.4316093 9.6750417,5.9366938 8.1559684,5.3529148 8.1229508,4.0958595 8.089931,2.8388043 9.1956669,2.5059896 10.318156,2.4898791 c 1.24952,-0.017939 2.35918,0.6351356 3.134465,1.0460205 0.333368,0.1766787 0.80108,-1.909061 0.109685,-2.62234708 C 12.969839,0.30232534 11.507764,0.01488162 9.9750266,0.01430271 6.3231448,0.01292984 4.9375194,2.3766199 4.917302,4.4194486 4.894588,6.7146645 6.6302121,8.1331941 8.4220755,8.9015433 c 1.235865,0.5299374 3.0428875,0.956338 3.0526165,2.6331567 0.007,1.208881 -1.112249,1.929768 -2.4595319,1.929768 -0.4639212,0 -0.4729202,2.535532 0,2.535532 z"></path>
+</svg></a>
+<a aria-label="Ghent University" class="muted-link" href="https://ugent.be"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M 8.4671319,6.1991107 H 7.5328685 V 12.263022 H 8.4671319 V 6.1991107"></path>
+<path d="M 6.5989047,6.1991107 H 5.6647163 V 12.263022 H 6.5989047 V 6.1991107"></path>
+<path d="M 4.7307525,6.1991107 H 3.7964891 V 12.263022 H 4.7307525 V 6.1991107"></path>
+<path d="M 2.8626002,6.1991107 H 1.9283368 V 12.263022 H 2.8626002 V 6.1991107"></path>
+<path d="M 10.335284,6.1991107 H 9.4010957 V 12.263022 H 10.335284 V 6.1991107"></path>
+<path d="m 12.203511,6.1991107 h -0.934263 v 6.0639113 h 0.934263 V 6.1991107"></path>
+<path d="M 14.071664,6.1991107 H 13.1374 v 6.0639113 h 0.934264 V 6.1991107"></path>
+<path d="M 15.028173,14.131773 H 0.97182731 V 13.196985 H 15.028173 v 0.934788"></path>
+<path d="M 14.071664,5.2648473 H 1.9283368 L 0.99437307,4.3309584 H 15.005627 l -0.933963,0.9338889"></path>
+<path d="M 15.962062,16 H 0.03793844 V 15.065138 H 15.962062 V 16"></path>
+<path d="M 15.962062,2.8200179 7.9998879,7.5076002e-8 0.03793844,2.8200179 V 3.8118816 L 7.9998879,0.99246298 15.962062,3.8118816 V 2.8200179"></path>
+</svg></a>
+<a aria-label="GitHub" class="muted-link" href="https://github.com/molmod/stacie"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg></a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<aside class="toc-drawer">
+<div class="toc-sticky toc-scroll">
+<div class="toc-title-container">
+<span class="toc-title">
+            On this page
+          </span>
+</div>
+<div class="toc-tree-container">
+<div class="toc-tree">
+<ul>
+<li><a class="reference internal" href="#">Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a><ul>
+<li><a class="reference internal" href="#library-imports-and-configuration">Library Imports and Configuration</a></li>
+<li><a class="reference internal" href="#analysis-of-the-equilibration-runs">Analysis of the Equilibration Runs</a></li>
+<li><a class="reference internal" href="#analysis-of-the-initial-production-simulations">Analysis of the Initial Production Simulations</a></li>
+<li><a class="reference internal" href="#analysis-of-the-production-simulations">Analysis of the Production Simulations</a></li>
+<li><a class="reference internal" href="#comparison-to-literature-results">Comparison to Literature Results</a></li>
+<li><a class="reference internal" href="#validation-of-the-production-runs">Validation of the Production Runs</a></li>
+<li><a class="reference internal" href="#validation-of-the-independence-of-the-anistropic-contributions">Validation of the Independence of the Anistropic Contributions</a></li>
+<li><a class="reference internal" href="#validation-of-the-consistency-of-the-anisotropic-contributions">Validation of the consistency of the Anisotropic Contributions</a></li>
+<li><a class="reference internal" href="#regression-tests">Regression Tests</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div><script src="../_static/documentation_options.js?v=61243dd2"></script>
+<script src="../_static/doctools.js?v=9bcbadda"></script>
+<script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+<script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../_static/copybutton.js?v=f281be69"></script>
+<script defer="defer" src="https://unpkg.com/@popperjs/core@2"></script>
+<script defer="defer" src="https://unpkg.com/tippy.js@6"></script>
+<script defer="defer" src="../_static/tippy/examples/lj_shear_viscosity.eb3615d5-de78-43de-bb4e-ecc9ee56a9e4.js"></script>
+<script>window.MathJax = {"tex": {"macros": {"mean": "\\operatorname{E}", "var": "\\operatorname{VAR}", "std": "\\operatorname{STD}", "cov": "\\operatorname{COV}", "gdist": "\\operatorname{Gamma}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+<script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

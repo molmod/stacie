@@ -1,0 +1,7 @@
+Application Programming Interface
+=================================
+
+.. toctree::
+   :maxdepth: 4
+
+   stacie

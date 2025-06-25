@@ -1,0 +1,780 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Preparing Inputs" href="../preparing_inputs/index.html"><link rel="prev" title="Parameter Estimation" href="statistics.html">
+        <link rel="prefetch" href="../_static/stacie-logo-black.svg" as="image">
+        <link rel="prefetch" href="../_static/stacie-logo-white.svg" as="image">
+
+    <link rel="shortcut icon" href="../_static/stacie-logo-black.svg"><!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+        <title>Frequency Cutoff - STACIE 1.2</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-codeautolink.css?v=b2176991" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d923d65c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">STACIE 1.2</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../_static/stacie-logo-black.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../_static/stacie-logo-white.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">STACIE 1.2</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../getting_started/index.html">Getting Started</a><input aria-label="Toggle navigation of Getting Started" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/licenses.html">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/usage.html">Usage Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/cite.html">How to Cite</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Theory</a><input aria-label="Toggle navigation of Theory" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="notation.html">Notation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html">STACIE Algorithm Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">Model Spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="statistics.html">Parameter Estimation</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Frequency Cutoff</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../preparing_inputs/index.html">Preparing Inputs</a><input aria-label="Toggle navigation of Preparing Inputs" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/data_sufficiency.html">How to Prepare Sufficient Inputs for STACIE?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/block_averages.html">Reducing Storage Requirements with Block Averages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/molecular_dynamics.html">Recommendations for MD Simulations</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../properties/index.html">Properties Derived from the Autocorrelation Function</a><input aria-label="Toggle navigation of Properties Derived from the Autocorrelation Function" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../properties/error_estimates.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/autocorrelation_time.html">Integrated and Exponential Autocorrelation Time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/shear_viscosity.html">Shear Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/bulk_viscosity.html">Bulk Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/thermal_conductivity.html">Thermal Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/electrical_conductivity.html">Ionic Electrical Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/diffusion_coefficient.html">Diffusion Coefficient</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples/index.html">Worked Examples</a><input aria-label="Toggle navigation of Worked Examples" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/minimal.html">Minimal Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/error_mean.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/applicability.html">Applicability of the Lorentz Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/surface_diffusion.html">Diffusion on a Surface with Newtonian Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/lj_shear_viscosity.html">Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/lj_bulk_viscosity.html">Bulk Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/lj_thermal_conductivity.html">Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/molten_salt.html">Ionic Electrical Conductivity of Molten Sodium Chloride at 1100 K (OpenMM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/utils.html">Utility Module for Plots Reused in Multiple Examples.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/cloud_cover.html">Correlation Time Analysis of Cloud Cover Data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../apidocs/modules.html">Application Programming Interface</a><input aria-label="Toggle navigation of Application Programming Interface" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../apidocs/stacie.html">stacie package</a><input aria-label="Toggle navigation of stacie package" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.conditioning.html">stacie.conditioning module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cost.html">stacie.cost module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cutoff.html">stacie.cutoff module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.estimate.html">stacie.estimate module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.model.html">stacie.model module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.plot.html">stacie.plot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.spectrum.html">stacie.spectrum module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.synthetic.html">stacie.synthetic module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.utils.html">stacie.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../development/index.html">Development</a><input aria-label="Toggle navigation of Development" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/contributing.html">Contributor Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/setup.html">Development Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/release.html">How to Make a Release</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/molmod/stacie/blob/main/docs/theory/cutoff.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/molmod/stacie/edit/main/docs/theory/cutoff.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="frequency-cutoff">
+<h1>Frequency Cutoff<a class="headerlink" href="#frequency-cutoff" title="Link to this heading">¶</a></h1>
+<p>In STACIE, a model is fitted to the low-frequency part of the sampling <a class="reference internal" href="../glossary.html#term-PSD"><span class="xref std std-term">PSD</span></a>.
+This low-frequency part is defined by a cutoff frequency, <span class="math notranslate nohighlight">\(f_{\text{cut}}\)</span>,
+above which the model is not expected to explain the data.
+The <a class="reference internal" href="statistics.html"><span class="std std-doc">previous section</span></a> discussed how to implement a local regression
+using a smooth switching function parameterized by such a cutoff frequency, <span class="math notranslate nohighlight">\(f_\text{cut}\)</span>.
+A good choice for the cutoff seeks a trade-off between two conflicting goals:</p>
+<ol class="arabic simple">
+<li><p>If too much data is included in the fit,
+the model may be too simple to explain all features of the spectrum.
+It underfits the data, and the estimates are generally biased.</p></li>
+<li><p>If too little data is included in the fit,
+the variance of the estimated parameters is larger than necessary,
+meaning that not all relevant information is used.</p></li>
+</ol>
+<p>Finding a good compromise between these two can be done in several ways,
+and similar difficulties arise in other approaches to compute transport coefficients.
+For example, in the direct quadrature of the <a class="reference internal" href="../glossary.html#term-ACF"><span class="xref std std-term">ACF</span></a>,
+the truncation of the integral faces a similar trade-off.</p>
+<p>Because the <a class="reference internal" href="model.html"><span class="std std-doc">model</span></a> is fitted to a sampling PSD with known and convenient statistical properties,
+as discussed in the <a class="reference internal" href="statistics.html"><span class="std std-doc">previous section</span></a>,
+it is possible to determine the cutoff frequency systematically.
+As also explained in the <a class="reference internal" href="statistics.html"><span class="std std-doc">previous section</span></a>,
+the cutoff frequency is not a proper hyperparameter in the Bayesian sense,
+meaning that a straightforward marginalization over the cutoff frequency is not possible
+<span id="id1">[<a class="reference internal" href="../references.html#id49" title="Carl Edward Rasmussen and Christopher K I Williams. Gaussian processes for machine learning. MIT Press, November 2005. ISBN 0-262-18253-X.">RW05</a>]</span>.
+Instead, STACIE uses cross-validation to find a good compromise between bias and variance.
+As explained below, a model likelihood is constructed based on cross-validation,
+whose unit is independent of the cutoff frequency.
+This model is then used to marginalize estimated parameters over the cutoff frequency.</p>
+<section id="effective-number-of-fitting-points">
+<h2>Effective number of fitting points<a class="headerlink" href="#effective-number-of-fitting-points" title="Link to this heading">¶</a></h2>
+<p>The concept of “effective number of fitting points” is used regularly in the following subsections.
+For a given cutoff frequency, it is defined as:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    N_{\text{eff}}(f_{\text{cut}}) = \sum_{k=1}^{M} w(f_k|f_{\text{cut}})
+\]</div>
+</div>
+<p>This is simply the sum of the weights introduced in the section on <a class="reference internal" href="statistics.html#regression"><span class="std std-ref">regression</span></a>.</p>
+</section>
+<section id="grid-of-cutoff-frequencies">
+<h2>Grid of Cutoff Frequencies<a class="headerlink" href="#grid-of-cutoff-frequencies" title="Link to this heading">¶</a></h2>
+<p>STACIE uses a logarithmic grid of cutoff frequencies and fits model parameters for each cutoff.
+The grid is defined as:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    f_{\text{cut},j} = f_{\text{cut},0} \, r^j
+\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(f_{\text{cut},0}\)</span> is the lowest cutoff frequency in the grid,
+and <span class="math notranslate nohighlight">\(r\)</span> is the ratio between two consecutive cutoff frequencies.
+The following parameters define the grid:</p>
+<ul>
+<li><p>The lowest cutoff is determined by solving:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+        N_{\text{eff}}(f_{\text{cut,min}}) = N_{\text{eff, min}}
+    \]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(N_{\text{eff, min}}\)</span> is a user-defined parameter, and <span class="math notranslate nohighlight">\(P\)</span> is the number of model parameters.
+In STACIE, the default value is <span class="math notranslate nohighlight">\(N_{\text{eff, min}} = 5P\)</span>,
+which reduces the risk of numerical issues in the regression.
+The value of <span class="math notranslate nohighlight">\(N_{\text{eff, min}}\)</span> can be adjusted using the <code class="docutils literal notranslate"><span class="pre">neff_min</span></code> option
+in the function <a class="reference internal" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">estimate_acint()</span></code></span></a>.</p>
+</li>
+<li><p>The maximum cutoff frequency is determined by solving:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+        N_{\text{eff}}(f_{\text{cut,max}}) = N_{\text{eff, max}}
+    \]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(N_{\text{eff, max}}\)</span> is a user-defined parameter.
+In STACIE, the default value is <span class="math notranslate nohighlight">\(N_{\text{eff, max}} = 1000\)</span>.
+This value can be modified using the <code class="docutils literal notranslate"><span class="pre">neff_max</span></code> option
+in the function <a class="reference internal" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">estimate_acint()</span></code></span></a>.
+The purpose of this parameter is to limit the computational cost of the regression.
+(For short inputs, the highest cutoff frequency is also constrained by the Nyquist frequency.)</p>
+</li>
+<li><p>The ratio between two consecutive cutoff frequencies is:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+        r = \exp(g_\text{sp}/\beta)
+    \]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(g_\text{sp}\)</span> is a user-defined parameter,
+and <span class="math notranslate nohighlight">\(\beta\)</span> controls the steepness of the switching function <span class="math notranslate nohighlight">\(w(f|f_{\text{cut}})\)</span>.
+In STACIE, the default value is <span class="math notranslate nohighlight">\(g_\text{sp} = 0.5\)</span>.
+This value can be adjusted using the <code class="docutils literal notranslate"><span class="pre">fcut_spacing</span></code> option in the function <a class="reference internal" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">estimate_acint()</span></code></span></a>.
+By incorporating the parameter <span class="math notranslate nohighlight">\(\beta\)</span> into the definition of <span class="math notranslate nohighlight">\(r\)</span>,
+a steeper switching function automatically requires a finer grid of cutoff frequencies.</p>
+</li>
+</ul>
+<p>Parameters are fitted for all cutoffs, starting from the lowest one.
+As shown below, the scan of the cutoff frequencies can be stopped before reaching <span class="math notranslate nohighlight">\(f_{\text{cut,max}}\)</span>.</p>
+</section>
+<section id="cross-validation">
+<h2>Cross-Validation<a class="headerlink" href="#cross-validation" title="Link to this heading">¶</a></h2>
+<p>Given a cutoff frequency, <span class="math notranslate nohighlight">\(f_{\text{cut},j}\)</span>,
+STACIE estimates model parameters <span class="math notranslate nohighlight">\(\hat{\mathbf{b}}^{(j)}\)</span>
+and their covariance matrix <span class="math notranslate nohighlight">\(\hat{\mathbf{C}}_{\mathbf{b}^{(j)},\mathbf{b}^{(j)}}\)</span>.
+To quantify the degree of over- or underfitting,
+the model parameters are further refined
+by fitting them to the first and second halves of the low-frequency part of the sampling PSD.
+To make these refinements robust, the two halves are defined using smooth switching functions:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}
+    w_{\text{left}}(f|f_{\text{cut},j}) &amp;= w(f|g_\text{cv} f_{\text{cut},j} / 2)
+    \\
+    w_{\text{right}}(f|f_{\text{cut},j}) &amp;= w(f|g_\text{cv} f_{\text{cut},j}) - w_{\text{left}}(f|f_{\text{cut},j})
+\end{split}\]</div>
+</div>
+<p>The parameter <span class="math notranslate nohighlight">\(g_\text{cv}\)</span> is a user-defined parameter
+that controls the amount of data used in the refinements.
+In STACIE, the default value is <span class="math notranslate nohighlight">\(g_\text{cv} = 1.25\)</span>,
+meaning that 25% more data is used compared to the original fit.
+(This makes the cross-validation more sensitive to underfitting,
+which has been found beneficial in practice.)
+This parameter can be controlled using the <code class="docutils literal notranslate"><span class="pre">fcut_factor</span></code> option
+in the <a class="reference internal" href="../apidocs/stacie.cutoff.html#stacie.cutoff.CV2LCriterion" title="stacie.cutoff.CV2LCriterion"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">CV2LCriterion</span></code></span></a> class.
+An instance of this class can be passed to the <code class="docutils literal notranslate"><span class="pre">cutoff_criterion</span></code> argument
+of the function <a class="reference internal" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">estimate_acint()</span></code></span></a>.</p>
+<p>Instead of performing two full non-linear regressions of the parameters for the two halves,
+linear regression is used to make first-order approximations of the changes in parameters.
+For cutoffs leading to well-behaved fits, these corrections are small,
+justifying the use of a linear approximation.</p>
+<p>The design matrix of the linear regression is:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    D_{kp} = \left.
+            \frac{
+                \partial I^\text{model}(f_k; \mathbf{b})
+            }{
+                \partial b_p
+            }
+        \right|_{\mathbf{b} = \hat{\mathbf{b}}^{(j)}}
+\]</div>
+</div>
+<p>The expected values are the residuals between the sampling PSD and the model:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    y_k = \hat{I}_k - I^\text{model}(f_k; \hat{\mathbf{b}}^{(j)})
+\]</div>
+</div>
+<p>The measurement error is the standard deviation of the Gamma distribution,
+using the model spectrum in the scale parameter and the shape parameter of the sampling PSD:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    \sigma_k = \frac{I^\text{model}(f_k; \hat{\mathbf{b}}^{(j)})}{\sqrt{\alpha_k}}
+\]</div>
+</div>
+<p>The weighted regression to obtain first-order corrections to the parameters <span class="math notranslate nohighlight">\(\hat{\mathbf{b}}^{(j)}\)</span>
+solves the following linear system in the least-squares sense:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    \frac{w_k}{\sigma_k} \sum_{p=1}^{P} D_{kp}\, \hat{b}^{(j)}_{\text{corr},p}
+    = \frac{w_k}{\sigma_k} y_k
+\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(w_k\)</span> is the weight of the <span class="math notranslate nohighlight">\(k\)</span>-th frequency point.
+This system is solved once with weights for the left half and once for the right half.</p>
+<p>The function <a class="reference internal" href="../apidocs/stacie.cutoff.html#stacie.cutoff.linear_weighted_regression" title="stacie.cutoff.linear_weighted_regression"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">linear_weighted_regression()</span></code></span></a>
+provides a robust pre-conditioned implementation of the above linear regression.
+It can handle multiple weight vectors simultaneously
+and can directly compute linear combinations of parameters for different weight vectors.
+It is used to directly compute the difference between the corrections for the left and right halves,
+denoted as <span class="math notranslate nohighlight">\(\hat{\mathbf{d}}\)</span>, and its covariance matrix <span class="math notranslate nohighlight">\(\hat{\mathbf{C}}_{\mathbf{d},\mathbf{d}}\)</span>.
+Normally, the model parameters fitted to both halves must be the same,
+and the negative log-likelihood of the fitted parameters being identical is given by:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    \operatorname{criterion}^\text{CV2L} = -\ln \mathcal{L}^\text{CV2L}\left(
+        \hat{\mathbf{d}}^{(j)},
+        \hat{\mathbf{C}}^{(j)}_{\mathbf{d}}
+    \right)
+    = \frac{P}{2}\ln(2\pi)
+      +\underbrace{\frac{1}{2}\ln\left|\hat{\mathbf{C}}^{(j)}_{\mathbf{d}}\right|}_\text{variance}
+      +\underbrace{
+        \frac{1}{2}
+        \bigl(\hat{\mathbf{d}}^{(j)}\bigr)^\top
+        \bigl(\hat{\mathbf{C}}^{(j)}_{\mathbf{d}}\bigr)^{-1}
+        \hat{\mathbf{d}}^{(j)}
+      }_\text{bias}
+\]</div>
+</div>
+<p>When starting from the lowest cutoff grid point,
+the second term of the criterion (the variance term) will be high
+because the parameters are poorly constrained by the small amount of data used in the fit.
+As the cutoff frequency and the effective number of fitting points increase,
+the model becomes better constrained.
+The second term will decrease, but as soon as the model underfits the data,
+the third term (the bias term) will steeply increase.
+Practically, the cutoff scan is interrupted
+when the criterion exceeds the incumbent by <span class="math notranslate nohighlight">\(g_\text{incr}\)</span>.
+The default value is <span class="math notranslate nohighlight">\(g_\text{incr} = 100\)</span>,
+but this can be changed using the <code class="docutils literal notranslate"><span class="pre">criterion_high</span></code> option
+in the function <a class="reference internal" href="../apidocs/stacie.estimate.html#stacie.estimate.estimate_acint" title="stacie.estimate.estimate_acint"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">estimate_acint()</span></code></span></a>.</p>
+<p>A good cutoff frequency is the one that minimizes the criterion,
+thereby finding a good compromise between bias and variance.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the description above, we assume that a cutoff exists
+for which the model can explain the spectrum.
+With unfortunate model choices, this may not be the case.
+The cutoff scan will then try to find a compromise between the bias and variance,
+but this will not be useful if the model can not be describe the spectrum at all.
+This situation can be detected by checking the Regression Cost Z-score,
+derived in the previous section.</p>
+</div>
+</section>
+<section id="marginalization-over-the-cutoff-frequency">
+<h2>Marginalization Over the Cutoff Frequency<a class="headerlink" href="#marginalization-over-the-cutoff-frequency" title="Link to this heading">¶</a></h2>
+<p>Any method to deduce the cutoff frequency from the spectrum,
+whether it is human judgment or an automated algorithm,
+introduces some <a class="reference internal" href="../glossary.html#term-Uncertainty"><span class="xref std std-term">uncertainty</span></a> in the final result
+because the cutoff is based on a sampling PSD spectrum with statistical uncertainty.</p>
+<p>In STACIE, this uncertainty is accounted for
+by marginalizing the model parameters over the cutoff frequency,
+using <span class="math notranslate nohighlight">\(\mathcal{L}^\text{CV2L}\)</span> as a model for the likelihood.
+This approach naturally incorporates the uncertainty in the cutoff frequency
+and is preferred over fixing the cutoff frequency at a single value.</p>
+<p>Practically, the final estimate of the parameters and their covariance is computed
+using <a class="reference external" href="https://en.wikipedia.org/wiki/Mixture_distribution#Moments">standard expressions for mixture distributions</a>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}
+  \begin{split}
+    \hat{\mathbf{b}} &amp;= \sum_{j=1}^J W_j\, \hat{\mathbf{b}}^{(j)}
+    \\
+    \hat{C}_{\mathbf{b},\mathbf{b}} &amp;= \sum_{j=1}^J W_j\, \left(
+      \hat{C}_{\mathbf{b}^{(j)},\mathbf{b}^{(j)}}
+      + (\hat{\mathbf{b}}^{(j)} - \hat{\mathbf{b}})(\hat{\mathbf{b}}^{(j)} - \hat{\mathbf{b}})^\top
+    \right)
+  \end{split}
+\end{split}\]</div>
+</div>
+<p>Here, <span class="math notranslate nohighlight">\(\hat{\mathbf{b}}^{(j)}\)</span> and <span class="math notranslate nohighlight">\(\hat{C}_{\mathbf{b}^{(j)},\mathbf{b}^{(j)}}\)</span> represent
+the parameters and their covariance, respectively, for cutoff <span class="math notranslate nohighlight">\(j\)</span>.
+The weights <span class="math notranslate nohighlight">\(W_j\)</span> sum to 1 and are proportional to <span class="math notranslate nohighlight">\(\mathcal{L}^\text{CV2L}\)</span>.</p>
+<p>Note that STACIE also computes weighted averages of other quantities in the same way,
+including:</p>
+<ul class="simple">
+<li><p>The effective number of fitting points, <span class="math notranslate nohighlight">\(N_\text{eff}\)</span></p></li>
+<li><p>The cutoff frequency, <span class="math notranslate nohighlight">\(f_\text{cut}\)</span></p></li>
+<li><p>The switching function, <span class="math notranslate nohighlight">\(w(f|f_\text{cut})\)</span></p></li>
+<li><p>The regression cost Z-score, <span class="math notranslate nohighlight">\(Z_\text{cost}\)</span></p></li>
+<li><p>The cutoff criterion Z-score, <span class="math notranslate nohighlight">\(Z_\text{criterion}\)</span> (defined below)</p></li>
+</ul>
+</section>
+<section id="cutoff-criterion-z-score">
+<h2>Cutoff Criterion Z-score<a class="headerlink" href="#cutoff-criterion-z-score" title="Link to this heading">¶</a></h2>
+<p>In the far majority of cases, the cutoff criterion will be dominated by the bias term:
+it typically increases steeply as soon as the model underfits the data.
+In contrast, the variance term decreases relatively slowly.
+As a result, the minimum of the cutoff criterion is well-defined at the onset of underfitting.
+This works particularly well when the spectrum can be computed with a high frequency resolution.
+Unfortunately, there are cases where this ideal pattern does not hold,
+usually when providing too little data to STACIE,
+in which the cutoff criterion exhibits statistical fluctuations.
+To detect such ill-constrained cases, STACIE computes a Z-score for the cutoff criterion.
+This Z-score is defined as in the same spirit as the Regression Cost Z-score,
+but now using <span class="math notranslate nohighlight">\(\operatorname{criterion}^\text{CV2L}\)</span> instead of the regression cost function.</p>
+<p>The cutoff criterion Z-score is defined as:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    Z_\text{criterion} = \frac{
+        \operatorname{criterion}^\text{CV2L} - \mean\left[
+            \hat{\operatorname{criterion}}^\text{CV2L}
+        \right]
+    }{
+        \std\left[
+            \hat{\operatorname{criterion}}^\text{CV2L}
+        \right]
+    }
+\]</div>
+</div>
+<p>The mean and standard deviation are computed by averaging over all vectors <span class="math notranslate nohighlight">\(\mathbf{d}\)</span>
+from the likelihood <span class="math notranslate nohighlight">\(\mathcal{L}^\text{CV2L}\)</span>.</p>
+<p>For cutoff frequencies that minimize the criterion, the Z-score should be close to zero,
+because the difference between two parameters fitted to the left and right halves of the spectrum
+should be zero within the statistical uncertainty.
+When the bias term in the cutoff criterion is noisy,
+it may feature minima dominated by the variance term,
+which are not useful and may produce unreliable estimates (with misleading error bars).
+In such cases, the cutoff criterion Z-score will be significantly larger than zero.</p>
+<p>The mean in the Z-score can be worked out easily
+because it corresponds to the entropy of a multivariate normal distribution:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    \mean\left[
+        \hat{\operatorname{criterion}}^\text{CV2L}
+    \right]
+    = \mean_{\mathbf{d}}\left[
+        -\ln \mathcal{L}^\text{CV2L}\left(
+            \hat{\mathbf{d}},
+            \hat{\mathbf{C}}_{\mathbf{d},\mathbf{d}}
+        \right)
+    \right]
+    = \frac{P}{2}\ln(2\pi e) + \frac{1}{2}\ln|\hat{\mathbf{C}}_{\mathbf{d},\mathbf{d}}|
+\]</div>
+</div>
+<p>For the standard deviation, we first work out the variance of the cutoff criterion:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    \var\left[
+        \hat{\operatorname{criterion}}^\text{CV2L}
+    \right]
+    = \var_{\mathbf{d}} \left[
+        -\ln \mathcal{L}^\text{CV2L}\left(
+            \hat{\mathbf{d}},
+            \hat{\mathbf{C}}_{\mathbf{d},\mathbf{d}}
+        \right)
+    \right]
+\]</div>
+</div>
+<p>Only the bias term contributes to the variance of the cutoff criterion.
+This term can be rewritten as one half the sum of <span class="math notranslate nohighlight">\(P\)</span> squared standard normal distributed variables.
+By making use of the properties of the chi-squared distribution,
+we can work out the variance of the bias term
+and take the square root to obtain the standard deviation:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+    \std\left[
+        \hat{\operatorname{criterion}}^\text{CV2L}
+    \right]
+    = \sqrt{\frac{P}{2}}
+\]</div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../preparing_inputs/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Preparing Inputs</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="statistics.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Parameter Estimation</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024--2026, Gözdenur Toraman, Toon Verstraelen
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://molmod.ugent.be" aria-label="Center for Molecular Modeling"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+<path d="M 8,0.23203771 1.2708502,4.1166743 V 7.586584 H 2.0757403 V 4.5814695 L 8,1.1606847 13.924259,4.5814695 V 7.586584 h 0.80489 V 4.1166743 Z" />
+<path d="m 8,3.6329842 c -2.4076366,0 -4.3683267,1.9606901 -4.3683267,4.368326 0,1.0499591 0.3736113,2.0145218 0.9938323,2.7689368 L 4.9523743,9.845379 C 4.6268573,9.3073839 4.436564,8.6780482 4.436564,8.0013102 4.436564,6.0283899 6.027079,4.4378742 8,4.4378742 c 1.9729204,0 3.563435,1.5905157 3.563435,3.563436 0,0.676738 -0.190293,1.3060737 -0.515809,1.8440688 l 0.326868,0.924868 c 0.620221,-0.754415 0.993832,-1.7189777 0.993832,-2.7689368 0,-2.4076359 -1.96069,-4.3683267 -4.368326,-4.368326 z" />
+<path d="m 4.5647296,15.767884 2.0103367,-5.68462 0.979439,5.684633 0.8166682,-0.0019 L 7.1003242,8.3914521 H 6.3187358 L 4.1855869,14.427689 2.052438,8.3914521 H 1.2708502 L 2e-7,15.765962 l 0.81666821,0.0019 0.97943899,-5.684633 2.0103367,5.68462 z" />
+<path d="m 12.193555,15.767884 2.010337,-5.68462 0.979438,5.684633 L 16,15.765962 14.729149,8.3914521 H 13.947561 L 11.814413,14.427689 9.6812637,8.3914521 H 8.8996758 l -1.2708506,7.3745099 0.8166683,0.002 0.9794395,-5.684632 2.010337,5.684619 z" />
+</svg></a>
+              <a class="muted-link " href="https://www.ugent.be/ea/emsme/en/research/soete" aria-label="Soete Laboratory"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+<path d="M 1.2243149,11.312034 V 0.3537872 c 0,-0.47171662 3.2133726,-0.47171662 3.2133726,0 V 11.275667 c 0.038589,1.391853 0.8362299,2.107621 2.6118885,2.188801 0.3456227,0 0.3456227,2.535532 0,2.535532 -2.5872928,0 -5.8252611,-1.272498 -5.8252611,-4.687966 z" />
+<path d="M 9.0151601,16 C 12.286758,15.9977 14.766446,14.194112 14.775658,11.101887 14.784658,8.0882805 12.485826,7.1827295 10.791465,6.4316093 9.6750417,5.9366938 8.1559684,5.3529148 8.1229508,4.0958595 8.089931,2.8388043 9.1956669,2.5059896 10.318156,2.4898791 c 1.24952,-0.017939 2.35918,0.6351356 3.134465,1.0460205 0.333368,0.1766787 0.80108,-1.909061 0.109685,-2.62234708 C 12.969839,0.30232534 11.507764,0.01488162 9.9750266,0.01430271 6.3231448,0.01292984 4.9375194,2.3766199 4.917302,4.4194486 4.894588,6.7146645 6.6302121,8.1331941 8.4220755,8.9015433 c 1.235865,0.5299374 3.0428875,0.956338 3.0526165,2.6331567 0.007,1.208881 -1.112249,1.929768 -2.4595319,1.929768 -0.4639212,0 -0.4729202,2.535532 0,2.535532 z" />
+</svg></a>
+              <a class="muted-link " href="https://ugent.be" aria-label="Ghent University"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+<path d="M 8.4671319,6.1991107 H 7.5328685 V 12.263022 H 8.4671319 V 6.1991107" />
+<path d="M 6.5989047,6.1991107 H 5.6647163 V 12.263022 H 6.5989047 V 6.1991107" />
+<path d="M 4.7307525,6.1991107 H 3.7964891 V 12.263022 H 4.7307525 V 6.1991107" />
+<path d="M 2.8626002,6.1991107 H 1.9283368 V 12.263022 H 2.8626002 V 6.1991107" />
+<path d="M 10.335284,6.1991107 H 9.4010957 V 12.263022 H 10.335284 V 6.1991107" />
+<path d="m 12.203511,6.1991107 h -0.934263 v 6.0639113 h 0.934263 V 6.1991107" />
+<path d="M 14.071664,6.1991107 H 13.1374 v 6.0639113 h 0.934264 V 6.1991107" />
+<path d="M 15.028173,14.131773 H 0.97182731 V 13.196985 H 15.028173 v 0.934788" />
+<path d="M 14.071664,5.2648473 H 1.9283368 L 0.99437307,4.3309584 H 15.005627 l -0.933963,0.9338889" />
+<path d="M 15.962062,16 H 0.03793844 V 15.065138 H 15.962062 V 16" />
+<path d="M 15.962062,2.8200179 7.9998879,7.5076002e-8 0.03793844,2.8200179 V 3.8118816 L 7.9998879,0.99246298 15.962062,3.8118816 V 2.8200179" />
+</svg></a>
+              <a class="muted-link " href="https://github.com/molmod/stacie" aria-label="GitHub"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Frequency Cutoff</a><ul>
+<li><a class="reference internal" href="#effective-number-of-fitting-points">Effective number of fitting points</a></li>
+<li><a class="reference internal" href="#grid-of-cutoff-frequencies">Grid of Cutoff Frequencies</a></li>
+<li><a class="reference internal" href="#cross-validation">Cross-Validation</a></li>
+<li><a class="reference internal" href="#marginalization-over-the-cutoff-frequency">Marginalization Over the Cutoff Frequency</a></li>
+<li><a class="reference internal" href="#cutoff-criterion-z-score">Cutoff Criterion Z-score</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=61243dd2"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script defer="defer" src="https://unpkg.com/@popperjs/core@2"></script>
+    <script defer="defer" src="https://unpkg.com/tippy.js@6"></script>
+    <script defer="defer" src="../_static/tippy/theory/cutoff.afc228d5-0b62-4078-845a-12ebefa45b6e.js"></script>
+    <script>window.MathJax = {"tex": {"macros": {"mean": "\\operatorname{E}", "var": "\\operatorname{VAR}", "std": "\\operatorname{STD}", "cov": "\\operatorname{COV}", "gdist": "\\operatorname{Gamma}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>

@@ -1,0 +1,7 @@
+stacie.conditioning module
+==========================
+
+.. automodule:: stacie.conditioning
+   :members:
+   :show-inheritance:
+   :undoc-members:
