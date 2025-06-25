@@ -50,3 +50,10 @@ Some notebooks also use helper functions from the [`utils.py`](utils.py) module.
 
 utils.py
 ```
+
+In addition to the worked examples in STACIE's documentation,
+we also recommend checking out the AutoCorrelation Integral Drill (ACID) Test Set,
+with which we have validated STACIE's performance:
+
+- ACID GitHub repository: <https://github.com/molmod/acid>
+- ACID Zenodo archive: <https://doi.org/10.5281/zenodo.15722903>
