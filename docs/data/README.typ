@@ -3,7 +3,7 @@
 
 #align(center)[
   #text(size: 24pt)[
-    *Output files of simulations analyzed in the examples in STACIE's documentation*
+    *Example Trajectory Data and Jupyter Notebooks Showing How to Compute Various Properties with STACIE*
   ]
 
   Gözdenur Toraman#super[†] and Toon Verstraelen#super[✶¶]

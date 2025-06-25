@@ -2,7 +2,7 @@ path_record_id: .zenodo-record-id.txt
 endpoint: https://zenodo.org/api
 path_token: ~/.config/zenodo-org-token.txt
 metadata:
-  title: Output files of simulations analyzed in the examples in STACIE's documentation
+  title: Example Trajectory Data and Jupyter Notebooks Showing How to Compute Various Properties with STACIE
   version: '1.0.0'
   keywords:
     - STACIE
@@ -15,8 +15,8 @@ metadata:
   resource_type: dataset
   publisher: Zenodo
   creators:
-    - family_name: Gozdenur
-      given_name: Toraman
+    - family_name: Toraman
+      given_name: Gozdenur
       identifiers:
         orcid: '0000-0001-6785-333X'
       affiliations:
