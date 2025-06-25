@@ -41,6 +41,14 @@ metadata:
             B-9052,
             Zwijnaarde, Belgium
   related:
+    - scheme: arxiv
+      identifier: '2506.?????'
+      resource_type: publication
+      relation_type: describes
+    - scheme: url
+      identifier: https://molmod.github.io/stacie
+      resource_type: publication
+      relation_type: documents
     - scheme: url
       identifier: https://github.com/molmod/stacie
       relation_type: requires

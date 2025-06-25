@@ -47,5 +47,10 @@ authors:
       Technologiepark-Zwijnaarde 46,
       B-9052,
       Zwijnaarde, Belgium
+preferred-citation:
+  identifiers:
+    - type: other
+      value: "arXiv:2506.?????"
+      description: The ArXiv preprint of the paper describing STACIE.
 license: LGPL-3.0-or-later
 repository-code: "https://github.com/molmod/stacie"
