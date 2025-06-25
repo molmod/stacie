@@ -1,0 +1,105 @@
+Traceback (most recent call last):
+  File "/home/toon/univ/molmod/stacie/venv/lib64/python3.13/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+    ~~~~~~~~~^
+        nb,
+        ^^^
+    ...<4 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "/home/toon/univ/molmod/stacie/venv/lib64/python3.13/site-packages/nbclient/client.py", line 1319, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/toon/univ/molmod/stacie/venv/lib64/python3.13/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/usr/lib64/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/toon/univ/molmod/stacie/venv/lib64/python3.13/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+        cell, index, execution_count=self.code_cells_executed + 1
+    )
+  File "/home/toon/univ/molmod/stacie/venv/lib64/python3.13/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/toon/univ/molmod/stacie/venv/lib64/python3.13/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+coeffs_ndof = {}
+for nwater in NWATERS:
+    display(Markdown(f"### {nwater} Water Molecules"))
+    plot_spectrum_stats(nwater, True, npart=1)
+    coeffs_ndof[nwater] = plot_spectrum_stats(nwater, False, npart=1)
+------------------
+
+
+[31m---------------------------------------------------------------------------[39m
+[31mKeyboardInterrupt[39m                         Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[12][39m[32m, line 5[39m
+[32m      3[39m display(Markdown([33mf[39m[33m"[39m[33m### [39m[38;5;132;01m{[39;00mnwater[38;5;132;01m}[39;00m[33m Water Molecules[39m[33m"[39m))
+[32m      4[39m plot_spectrum_stats(nwater, [38;5;28;01mTrue[39;00m, npart=[32m1[39m)
+[32m----> [39m[32m5[39m coeffs_ndof[nwater] = [43mplot_spectrum_stats[49m[43m([49m[43mnwater[49m[43m,[49m[43m [49m[38;5;28;43;01mFalse[39;49;00m[43m,[49m[43m [49m[43mnpart[49m[43m=[49m[32;43m1[39;49m[43m)[49m
+
+[36mCell[39m[36m [39m[32mIn[11][39m[32m, line 27[39m, in [36mplot_spectrum_stats[39m[34m(nwater, one_atom, npart, ntraj)[39m
+[32m     25[39m spectra = []
+[32m     26[39m timestep = load_timestep(nwater)
+[32m---> [39m[32m27[39m [43m[49m[38;5;28;43;01mfor[39;49;00m[43m [49m[43mtraj[49m[43m [49m[38;5;129;43;01min[39;49;00m[43m [49m[43mload_trajectories[49m[43m([49m[43mnwater[49m[43m,[49m[43m [49m[43mone_atom[49m[43m,[49m[43m [49m[43mnpart[49m[43m,[49m[43m [49m[43mntraj[49m[43m)[49m[43m:[49m
+[32m     28[39m [43m    [49m[43mspectra[49m[43m.[49m[43mappend[49m[43m([49m[43mcompute_spectrum[49m[43m([49m[43mtraj[49m[43m,[49m[43m [49m[43mtimestep[49m[43m=[49m[43mtimestep[49m[43m,[49m[43m [49m[43minclude_zero_freq[49m[43m=[49m[38;5;28;43;01mFalse[39;49;00m[43m)[49m[43m)[49m
+[32m     29[39m freqs = spectra[[32m0[39m].freqs
+
+[36mCell[39m[36m [39m[32mIn[11][39m[32m, line 16[39m, in [36mload_trajectories[39m[34m(nwater, one_atom, npart, ntraj)[39m
+[32m     14[39m timestep = data[[33m"[39m[33mtime[39m[33m"[39m][[32m1[39m] - data[[33m"[39m[33mtime[39m[33m"[39m][[32m0[39m]
+[32m     15[39m nstep = data[[33m"[39m[33mtime[39m[33m"[39m].shape[[32m0[39m]
+[32m---> [39m[32m16[39m pos_oart = [43mdata[49m[43m[[49m[33;43m"[39;49m[33;43mtrajcom[39;49m[33;43m"[39;49m[43m][49m
+[32m     17[39m pos_part = pos_oart[:, [32m0[39m, :] [38;5;28;01mif[39;00m one_atom [38;5;28;01melse[39;00m pos_oart.reshape(nstep, -[32m1[39m)
+[32m     18[39m vel.append(np.diff(pos_part, axis=[32m0[39m) / timestep)
+
+[36mFile [39m[32m~/univ/molmod/stacie/venv/lib64/python3.13/site-packages/numpy/lib/_npyio_impl.py:254[39m, in [36mNpzFile.__getitem__[39m[34m(self, key)[39m
+[32m    252[39m [38;5;28;01mif[39;00m magic == [38;5;28mformat[39m.MAGIC_PREFIX:
+[32m    253[39m     [38;5;28mbytes[39m = [38;5;28mself[39m.zip.open(key)
+[32m--> [39m[32m254[39m     [38;5;28;01mreturn[39;00m [38;5;28;43mformat[39;49m[43m.[49m[43mread_array[49m[43m([49m[38;5;28;43mbytes[39;49m[43m,[49m
+[32m    255[39m [43m                             [49m[43mallow_pickle[49m[43m=[49m[38;5;28;43mself[39;49m[43m.[49m[43mallow_pickle[49m[43m,[49m
+[32m    256[39m [43m                             [49m[43mpickle_kwargs[49m[43m=[49m[38;5;28;43mself[39;49m[43m.[49m[43mpickle_kwargs[49m[43m,[49m
+[32m    257[39m [43m                             [49m[43mmax_header_size[49m[43m=[49m[38;5;28;43mself[39;49m[43m.[49m[43mmax_header_size[49m[43m)[49m
+[32m    258[39m [38;5;28;01melse[39;00m:
+[32m    259[39m     [38;5;28;01mreturn[39;00m [38;5;28mself[39m.zip.read(key)
+
+[36mFile [39m[32m~/univ/molmod/stacie/venv/lib64/python3.13/site-packages/numpy/lib/format.py:851[39m, in [36mread_array[39m[34m(fp, allow_pickle, pickle_kwargs, max_header_size)[39m
+[32m    849[39m             read_count = [38;5;28mmin[39m(max_read_count, count - i)
+[32m    850[39m             read_size = [38;5;28mint[39m(read_count * dtype.itemsize)
+[32m--> [39m[32m851[39m             data = [43m_read_bytes[49m[43m([49m[43mfp[49m[43m,[49m[43m [49m[43mread_size[49m[43m,[49m[43m [49m[33;43m"[39;49m[33;43marray data[39;49m[33;43m"[39;49m[43m)[49m
+[32m    852[39m             array[i:i+read_count] = numpy.frombuffer(data, dtype=dtype,
+[32m    853[39m                                                      count=read_count)
+[32m    855[39m [38;5;28;01mif[39;00m fortran_order:
+
+[36mFile [39m[32m~/univ/molmod/stacie/venv/lib64/python3.13/site-packages/numpy/lib/format.py:986[39m, in [36m_read_bytes[39m[34m(fp, size, error_template)[39m
+[32m    981[39m [38;5;28;01mwhile[39;00m [38;5;28;01mTrue[39;00m:
+[32m    982[39m     [38;5;66;03m# io files (default in python3) return None or raise on[39;00m
+[32m    983[39m     [38;5;66;03m# would-block, python2 file will truncate, probably nothing can be[39;00m
+[32m    984[39m     [38;5;66;03m# done about that.  note that regular files can't be non-blocking[39;00m
+[32m    985[39m     [38;5;28;01mtry[39;00m:
+[32m--> [39m[32m986[39m         r = [43mfp[49m[43m.[49m[43mread[49m[43m([49m[43msize[49m[43m [49m[43m-[49m[43m [49m[38;5;28;43mlen[39;49m[43m([49m[43mdata[49m[43m)[49m[43m)[49m
+[32m    987[39m         data += r
+[32m    988[39m         [38;5;28;01mif[39;00m [38;5;28mlen[39m(r) == [32m0[39m [38;5;129;01mor[39;00m [38;5;28mlen[39m(data) == size:
+
+[36mFile [39m[32m/usr/lib64/python3.13/zipfile/__init__.py:1015[39m, in [36mZipExtFile.read[39m[34m(self, n)[39m
+[32m   1013[39m [38;5;28mself[39m._offset = [32m0[39m
+[32m   1014[39m [38;5;28;01mwhile[39;00m n > [32m0[39m [38;5;129;01mand[39;00m [38;5;129;01mnot[39;00m [38;5;28mself[39m._eof:
+[32m-> [39m[32m1015[39m     data = [38;5;28;43mself[39;49m[43m.[49m[43m_read1[49m[43m([49m[43mn[49m[43m)[49m
+[32m   1016[39m     [38;5;28;01mif[39;00m n < [38;5;28mlen[39m(data):
+[32m   1017[39m         [38;5;28mself[39m._readbuffer = data
+
+[36mFile [39m[32m/usr/lib64/python3.13/zipfile/__init__.py:1091[39m, in [36mZipExtFile._read1[39m[34m(self, n)[39m
+[32m   1089[39m [38;5;28;01melif[39;00m [38;5;28mself[39m._compress_type == ZIP_DEFLATED:
+[32m   1090[39m     n = [38;5;28mmax[39m(n, [38;5;28mself[39m.MIN_READ_SIZE)
+[32m-> [39m[32m1091[39m     data = [38;5;28;43mself[39;49m[43m.[49m[43m_decompressor[49m[43m.[49m[43mdecompress[49m[43m([49m[43mdata[49m[43m,[49m[43m [49m[43mn[49m[43m)[49m
+[32m   1092[39m     [38;5;28mself[39m._eof = ([38;5;28mself[39m._decompressor.eof [38;5;129;01mor[39;00m
+[32m   1093[39m                  [38;5;28mself[39m._compress_left <= [32m0[39m [38;5;129;01mand[39;00m
+[32m   1094[39m                  [38;5;129;01mnot[39;00m [38;5;28mself[39m._decompressor.unconsumed_tail)
+[32m   1095[39m     [38;5;28;01mif[39;00m [38;5;28mself[39m._eof:
+
+[31mKeyboardInterrupt[39m: 
+
