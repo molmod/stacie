@@ -1,0 +1,182 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev/effver/).
+
+## [Unreleased]
+
+(no summary yet)
+
+(v1.3.0)=
+## [1.3.0] - 2026-10-12
+
+This release introduces the Debye spectral model.
+
+### Added
+
+- The `DebyeModel` has been added to the list of built-in models.
+  It complements the `LorentzModel` and is suitable for spectra with a minimum at zero frequency.
+  Such spectra are typically the result of hopping-like diffusion
+  superimposed on a higher-frequency oscillatory motion.
+  The `DebyeModel` does not attempt to model these resonances in full,
+  and only accounts for the onset towards such a resonance peak,
+  to keep the number of parameters small.
+
+### Changed
+
+- The molten salt example has been refactored to use only the `DebyeModel`,
+  since it is expected to be the right model for this system *a priori*.
+- The `LorentzModel` now also rejects fits with a non-positive autocorrelation integral
+  (`p0 <= 0`) when deriving the exponential correlation time.
+  Such fits are discarded from the average over cutoff frequencies,
+  like fits with an ill-defined correlation time.
+- The package metadata now declares only the `LGPL-3.0-or-later` license,
+  as an SPDX expression, because the dual-licensed documentation is not part of the package.
+
+### Fixed
+
+- The variances of `exp_block_time` and `exp_simulation_time` in the `LorentzModel`
+  were propagated with a linear instead of a squared prefactor, which is now fixed.
+
+(v1.2.2)=
+## [1.2.2] - 2026-09-24
+
+This is a preview of an upcoming version, featuring the designed quadrature module.
+It can benefit from some more testing and feedback, which this release will facilitate.
+
+### Added
+
+- `stacie.dq` module for constructing designed quadrature rules with equal (or user-specified) weights.
+  These grids are suitable for integrating over a low-dimensional parameter space,
+  where the integrand is noisy and expensive, typically the result of a stochastic simulation.
+  In the context of STACIE, the parameter space can consist of one or a few thermodynamic parameters
+  (e.g. temperature, pressure) that are varied across a set of simulations.
+  The integral of interest is typically an ensemble average of a transport coefficient.
+  One can provide the distribution of thermodynamic parameters a priori,
+  and the quadrature rule will be optimized to integrate over this distribution,
+  by taking a simple average of the function values at the quadrature points.
+  The advantage of equal weights is that the variance of the average,
+  due to (identically distributed and independent) noise in the function values, is minimal.
+
+### Changed
+
+- Refactored several aspects of the development environment.
+
+### Fixed
+
+- Many documentation improvements and clarifications, including updated literature references.
+
+(v1.2.1)=
+## [1.2.1] - 2025-12-28
+
+Minor documentation and dependency improvements.
+
+### Changed
+
+- Several documentation improvements and clarifications.
+- Removed unused dependency `cattrs` and lowered minimum required of `attrs` to `23.1.0`
+  to facilitate installation in more constrained environments.
+
+(v1.2.0)=
+## [1.2.0] - 2025-12-23
+
+Reformulation of the Lorentz model parameters.
+
+### Changed
+
+- New parametrization of the linear coefficients in the Lorentz model:
+  $C_0$ and $C_1$ instead of $A$ and $B$.
+- Documentation improvements and clarifications.
+
+(v1.1.3)=
+## [1.1.3] - 2025-11-19
+
+Support for Python 3.10
+
+### Changed
+
+- Add support for Python 3.10
+
+(v1.1.2)=
+## [1.1.2] - 2025-11-19
+
+Additional packaging cleanups.
+
+### Changed
+
+- Removed a few more files from the source package that could cause confusion.
+- Removed an unused testing dependency.
+
+(v1.1.1)=
+## [1.1.1] - 2025-11-18
+
+Smaller source package (10x size reduction) and dependency simplification.
+
+### Changed
+
+- PyPI Package size reduction by a factor 10.
+  Only essential files are now included in the package.
+- Remove path dependency to facilitate packaging and distribution.
+
+(v1.1.0)=
+## [1.1.0] - 2025-11-10
+
+Improved Lorentz model, with a more robust estimate of the exponential correlation time and its uncertainty.
+Improved examples.
+
+### Added
+
+- Cloud cover example
+- Comparison between STACIE's diffusion coefficient and a more conventional MSD analysis
+  in the surface diffusion example.
+
+### Changed
+
+- The license of the documentation has been updated to a choice of license
+  (`CC-BY-SA-4.0 OR LGPL-3.0-or-later`).
+  STACIE's code is still distributed under a single `LGPL-3.0-or-later` license.
+- The penalty in the `LorentzModel` has been improved to exclude and down-weight results
+  from frequency cutoffs with a high relative error of the estimated exponential correlation time.
+  In this regime, the maximum a posteriori estimate of uncertainty is not reliable.
+
+### Fixed
+
+- Several documentation improvements:
+    - Clarify how the derivation of block-averaged velocities for diffusion and electrical conductivity,
+      using atomic positions (or dipole vectors) as input.
+    - Improve explanation on discarding the DC-component of the spectrum.
+    - Add more helpful comments on how to deal with unit conversion.
+    - Fixed a typo in the equation of the marginalization weights.
+- Repocard images were added.
+- Dataset metadata improvements.
+- Several other minor issues in documentation and tooling were fixed.
+
+(v1.0.0)=
+## [1.0.0] - 2025-06-26
+
+This is the first stable release of STACIE!
+
+### Changed
+
+- Metadata and citation updates
+
+(v1.0.0rc1)=
+## [1.0.0rc1] - 2025-06-25
+
+This is the first release candidate of STACIE, with a final release expected very soon.
+The main remaining issues are related to (back)linking of external resources
+in the documentation and README files.
+
+[Unreleased]: https://github.com/molmod/stacie
+[1.0.0]: https://github.com/molmod/stacie/releases/tag/v1.0.0
+[1.0.0rc1]: https://github.com/molmod/stacie/releases/tag/v1.0.0rc1
+[1.1.0]: https://github.com/molmod/stacie/releases/tag/v1.1.0
+[1.1.1]: https://github.com/molmod/stacie/releases/tag/v1.1.1
+[1.1.2]: https://github.com/molmod/stacie/releases/tag/v1.1.2
+[1.1.3]: https://github.com/molmod/stacie/releases/tag/v1.1.3
+[1.2.0]: https://github.com/molmod/stacie/releases/tag/v1.2.0
+[1.2.1]: https://github.com/molmod/stacie/releases/tag/v1.2.1
+[1.2.2]: https://github.com/molmod/stacie/releases/tag/v1.2.2
+[1.3.0]: https://github.com/molmod/stacie/releases/tag/v1.3.0

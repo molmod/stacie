@@ -1,0 +1,7 @@
+stacie.utils module
+===================
+
+.. automodule:: stacie.utils
+   :members:
+   :show-inheritance:
+   :undoc-members:

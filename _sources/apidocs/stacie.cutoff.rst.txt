@@ -1,0 +1,7 @@
+stacie.cutoff module
+====================
+
+.. automodule:: stacie.cutoff
+   :members:
+   :show-inheritance:
+   :undoc-members:
