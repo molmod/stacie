@@ -1,0 +1,10 @@
+.envrc
+.local
+.vscode
+build
+dist
+docs
+src
+tests
+tmp
+tools
