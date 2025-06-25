@@ -156,20 +156,20 @@ sphinx.builders.latex.transforms.BibliographyTransform = DummyTransform
 # https://myst-nb.readthedocs.io/en/v0.13.2/use/config-reference.html
 
 myst_enable_extensions = [
-    "dollarmath",
     "amsmath",
+    "attrs_block",
+    "attrs_inline",
+    "colon_fence",
     "deflist",
+    "dollarmath",
     "fieldlist",
     "html_admonition",
     "html_image",
-    "colon_fence",
-    "smartquotes",
     "replacements",
+    "smartquotes",
     "strikethrough",
     "substitution",
     "tasklist",
-    "attrs_inline",
-    "attrs_block",
 ]
 nb_custom_formats = {
     ".py": ["jupytext.reads", {"fmt": "py:percent"}],
