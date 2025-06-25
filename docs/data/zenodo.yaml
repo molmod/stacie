@@ -48,7 +48,7 @@ metadata:
     - scheme: url
       identifier: https://molmod.github.io/stacie
       resource_type: publication
-      relation_type: documents
+      relation_type: isdocumentedby
     - scheme: url
       identifier: https://github.com/molmod/stacie
       relation_type: requires
