@@ -1,0 +1,7 @@
+stacie.cost module
+==================
+
+.. automodule:: stacie.cost
+   :members:
+   :show-inheritance:
+   :undoc-members:
