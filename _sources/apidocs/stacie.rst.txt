@@ -1,0 +1,26 @@
+stacie package
+==============
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   stacie.conditioning
+   stacie.cost
+   stacie.cutoff
+   stacie.estimate
+   stacie.model
+   stacie.plot
+   stacie.spectrum
+   stacie.synthetic
+   stacie.utils
+
+Module contents
+---------------
+
+.. automodule:: stacie
+   :members:
+   :show-inheritance:
+   :undoc-members:
