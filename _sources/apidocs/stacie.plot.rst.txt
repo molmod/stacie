@@ -1,0 +1,7 @@
+stacie.plot module
+==================
+
+.. automodule:: stacie.plot
+   :members:
+   :show-inheritance:
+   :undoc-members:
