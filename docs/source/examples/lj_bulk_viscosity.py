@@ -31,7 +31,7 @@ from stacie import (
     UnitConfig,
     compute_spectrum,
     estimate_acint,
-    PadeModel,
+    LorentzModel,
     plot_fitted_spectrum,
     plot_extras,
 )
@@ -80,7 +80,7 @@ def estimate_bulk_viscosity(name, p_iso, av_temperature, volume, timestep):
     )
 
     # Estimate the bulk viscosity from the spectrum.
-    result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True, uc=uc)
+    result = estimate_acint(spectrum, LorentzModel(), verbose=True, uc=uc)
 
     # Plot some basic analysis figures.
     plt.close(f"{name}_spectrum")
@@ -158,7 +158,7 @@ def demo_production(npart: int = 3, ntraj: int = 100):
 eta_bulk_production = demo_production(3)
 
 # %% [markdown]
-# As opposed to the shear viscosity, the cutoff criterion Z-score is relatively high, around 2.
+# The cutoff criterion Z-score is relatively high, around 2.
 # This suggests that the fits on the two halves deviate more from each other
 # than what would be expected from the {term}`uncertainty` of the spectrum.
 # There are multiple potential explanations for this observation:
@@ -190,14 +190,15 @@ eta_bulk_production = demo_production(3)
 #
 # | Method                     | Simulation time [τ\*] | Bulk viscosity [η$_b$\*] | Reference |
 # | -------------------------- | --------------------: | -----------------------: | --------- |
-# | EMD NVE (STACIE)           | 3600                  | 1.190 ± 0.073            | (here) initial |
-# | EMD NVE (STACIE)           | 10800                 | 1.161 ± 0.032            | (here) extension 1 |
-# | EMD NVE (STACIE)           | 30000                 | 1.195 ± 0.023            | (here) extension 2 |
+# | EMD NVE (STACIE)           | 10800                 | 1.158 ± 0.030            | (here) extension 1 |
+# | EMD NVE (STACIE)           | 30000                 | 1.191 ± 0.021            | (here) extension 2 |
 # | EMD NVE (Helfand-Einstein) | 300000                | 1.186 ± 0.084            | {cite:p}`meier_2004_transport_III` |
 #
 # This comparison demonstrates that STACIE accurately reproduces bulk viscosity results
 # while achieving lower statistical uncertainty with significantly less data than existing methods.
 #
+# Note that the results for only the initial NVE production run are not included because
+# the sanity checks indicated that the data was not sufficient.
 
 # %%  [markdown]
 # ## Regression Tests

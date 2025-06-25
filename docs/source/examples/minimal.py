@@ -24,7 +24,7 @@ from stacie import (
     compute_spectrum,
     estimate_acint,
     ExpPolyModel,
-    PadeModel,
+    LorentzModel,
     UnitConfig,
     plot_extras,
     plot_fitted_spectrum,
@@ -202,24 +202,23 @@ plot_extras(axs, uc, result_exppoly)
 #    Such a large spread typically results in overfitting artifacts.
 
 # %% [markdown]
-# ## Analysis With STACIE, Using the Pade Model
+# ## Analysis With STACIE, Using the Lorentz Model
 #
 # In this example, we know *a priori* that the autocorrelation function decays exponentially.
-# Therefore, we can configure the `PadeModel` to correspond to a Lorentzian peak,
-# in line with the analytical result.
-# This model is expected to fit the data perfectly.
+# Therefore, the `LorentzModel` should be able to perfectly explain the spectrum,
+# up to the statistical noise in the data.
 
 # %%
 # Analysis
-result_pade = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True)
+result_lorentz = estimate_acint(spectrum, LorentzModel(), verbose=True)
 
 # Plotting
-plt.close("fitted_pade")
-fig, ax = plt.subplots(num="fitted_pade")
-plot_fitted_spectrum(ax, uc, result_pade)
-plt.close("extras_pade")
-fig, axs = plt.subplots(2, 2, num="extras_pade")
-plot_extras(axs, uc, result_pade)
+plt.close("fitted_lorentz")
+fig, ax = plt.subplots(num="fitted_lorentz")
+plot_fitted_spectrum(ax, uc, result_lorentz)
+plt.close("extras_lorentz")
+fig, axs = plt.subplots(2, 2, num="extras_lorentz")
+plot_extras(axs, uc, result_lorentz)
 
 # %% [markdown]
 # The extra plots reveal some noteworthy features:
@@ -230,9 +229,9 @@ plot_extras(axs, uc, result_pade)
 #   so you don't need to intervene manually to exclude these results.
 # - The cutoff weight is maximal for the highest cutoff frequencies.
 #   This is typically a sign that the input sequences are too long, but this is not the case here.
-#   While the Pade model would also yield excellent results with shorter sequences,
+#   While the Lorentz model would also yield excellent results with shorter sequences,
 #   this would still result in a high frequency cutoff.
-#   This is because the Pade model fits the data perfectly;
+#   This is because the Lorentz model fits the data perfectly;
 #   more data points will always result in a lower cutoff criterion.
 #   However, in more realistic cases involving data from complex simulations or measurements,
 #   this is unlikely to happen.
@@ -248,12 +247,12 @@ if abs(result_exppoly.acint - 1.0) > 0.03:
     raise ValueError(f"Wrong acint: {result_exppoly.acint:.4e}")
 if abs(result_exppoly.corrtime_int - 16.0) > 0.5:
     raise ValueError(f"Wrong corrtime_int: {result_exppoly.corrtime_int:.4e}")
-if abs(result_pade.acint - 1.0) > 0.03:
-    raise ValueError(f"Wrong acint: {result_pade.acint:.4e}")
-if abs(result_pade.corrtime_int - 16.0) > 0.5:
-    raise ValueError(f"Wrong corrtime_int: {result_pade.corrtime_int:.4e}")
-if abs(result_pade.corrtime_exp - 16.0) > 0.5:
-    raise ValueError(f"Wrong corrtime_exp: {result_pade.corrtime_exp:.4e}")
+if abs(result_lorentz.acint - 1.0) > 0.03:
+    raise ValueError(f"Wrong acint: {result_lorentz.acint:.4e}")
+if abs(result_lorentz.corrtime_int - 16.0) > 0.5:
+    raise ValueError(f"Wrong corrtime_int: {result_lorentz.corrtime_int:.4e}")
+if abs(result_lorentz.corrtime_exp - 16.0) > 0.5:
+    raise ValueError(f"Wrong corrtime_exp: {result_lorentz.corrtime_exp:.4e}")
 
 # %% [markdown]
 # ## Derivation of the Autocorrelation Integral

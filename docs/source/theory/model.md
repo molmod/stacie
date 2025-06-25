@@ -1,6 +1,6 @@
 # Model Spectrum
 
-STACIE supports two models for fitting the low-frequency part of the power spectrum.
+STACIE supports three models for fitting the low-frequency part of the power spectrum.
 In both models, the value at zero frequency corresponds to the autocorrelation integral.
 
 1. The [ExpPolyModel](#stacie.model.ExpPolyModel) is the most general;
@@ -27,6 +27,14 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
     - Rational functions are, in general, interesting because they can be
       parameterized to have well-behaved high-frequency tails,
       which can facilitate the regression.
+
+3. The [LorentzModel](#stacie.model.LorentzModel) is a special case of the Pade model
+   with a Lorentzian peak at the origin plus some white noise.
+   It is equivalent to the Pade model with numerator degrees $\{0, 2\}$
+   and denominator degrees $\{2\}$.
+   This special case is not only implemented for convenience,
+   since it is the most common way of using the Pade model,
+   but also because it allows STACIE to derive the exponential correlation time.
 
 (section-exppoly-target)=
 
@@ -93,9 +101,22 @@ $$
     \end{aligned}
 $$
 
-For the special case of a Lorentzian peak at the origin plus some white noise,
-that is $S_\text{num} = \{0, 2\}$ and $S_\text{den} = \{2\}$,
-the model is equivalent to:
+To construct this model, you can create an instance of the `PadeModel` class as follows:
+
+```python
+from stacie import PadeModel
+model = PadeModel([0, 2], [2])
+```
+
+This model is identified as `pade(0, 2; 2)` in STACIE's screen output and plots.
+
+(section-lorentz-target)=
+
+## 3. Lorentz Model
+
+The [LorentzModel](#stacie.model.LorentzModel) is a special case of the Pade model
+with numerator degrees $\{0, 2\}$ and denominator degrees $\{2\}$.
+For this special case the model is equivalent to:
 
 $$
     I^\text{lorentz}_k = A + \frac{B}{1 + (2 \pi f_k \tau_\text{exp})^2}
@@ -137,11 +158,26 @@ as long as the tail of the ACF decays exponentially.
 Such deviating short-time correlations will only affect the white noise level $A$
 and features in the PSD at higher frequencies, which will be ignored by STACIE.
 
-To construct this model, you can create an instance of the `PadeModel` class as follows:
+The implementation of the Lorentz model has the following advantages over the equivalent Pade model:
+
+- The exponential correlation time and its uncertainty are computed.
+- If no exponential correlation time can be computed,
+  i.e. when $q_2 \le 0$ and $p_0 q_2 \le p_2$,
+  the fit is not retained for the final average over all cutoff grid points.
+- If the relative error of the exponential correlation time exceeds a certain threshold,
+  which is set to $10 \%$ by default,
+  the fit is not retained for the final average over all cutoff grid points.
+
+The last two points weed out poor fits (typically at too low cutoff frequencies)
+for which the maximum a posteriori (MAP) estimate
+and the Laplace approximation of the posterior distribution tend to be unreliable.
+
+To construct this model, you can create an instance of the `LorentzModel` class as follows:
 
 ```python
-from stacie import PadeModel
-model = PadeModel([0, 2], [2])
+from stacie import LorentzModel
+model = LorentzModel()
 ```
 
-This model is identified as `pade(0, 2; 2)` in STACIE's screen output and plots.
+This model is identified as `lorentz(0.1)` in STACIE's screen output and plots,
+where `0.1` is the relative error threshold for the exponential correlation time.

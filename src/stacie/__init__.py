@@ -20,7 +20,7 @@
 
 from .cutoff import CV2LCriterion
 from .estimate import estimate_acint
-from .model import ExpPolyModel, PadeModel
+from .model import ExpPolyModel, LorentzModel, PadeModel
 from .plot import plot_extras, plot_fitted_spectrum, plot_results, plot_spectrum
 from .spectrum import compute_spectrum
 from .utils import UnitConfig
@@ -28,6 +28,7 @@ from .utils import UnitConfig
 __all__ = (
     "CV2LCriterion",
     "ExpPolyModel",
+    "LorentzModel",
     "PadeModel",
     "UnitConfig",
     "__version__",

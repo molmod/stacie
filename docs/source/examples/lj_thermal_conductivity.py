@@ -37,7 +37,7 @@ from stacie import (
     UnitConfig,
     compute_spectrum,
     estimate_acint,
-    PadeModel,
+    LorentzModel,
     plot_fitted_spectrum,
     plot_extras,
 )
@@ -77,7 +77,7 @@ def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep
     )
 
     # Estimate the viscosity from the spectrum.
-    result = estimate_acint(spectrum, PadeModel([0, 2], [2]), verbose=True, uc=uc)
+    result = estimate_acint(spectrum, LorentzModel(), verbose=True, uc=uc)
 
     # Plot some basic analysis figures.
     plt.close(f"{name}_spectrum")
@@ -174,8 +174,8 @@ kappa_production = demo_production(3)
 #
 # | Method                     | Simulation time  [τ\*] | Thermal conductivity [κ\*] | Reference |
 # |----------------------------|------------------------|----------------------------|-----------|
-# | EMD NVE (STACIE)           | 3600                   | 6.836 ± 0.082              | (here) initial |
-# | EMD NVE (STACIE)           | 10800                  | 7.029 ± 0.057              | (here) extension 1 |
+# | EMD NVE (STACIE)           | 3600                   | 6.837 ± 0.081              | (here) initial |
+# | EMD NVE (STACIE)           | 10800                  | 6.968 ± 0.046              | (here) extension 1 |
 # | EMD NVE (STACIE)           | 30000                  | 6.936 ± 0.029              | (here) extension 2 |
 # | EMD NVE (Helfand-moment)   | 600000                 | 6.946 ± 0.12               | {cite:p}`viscardi_2007_transport2` |
 #
