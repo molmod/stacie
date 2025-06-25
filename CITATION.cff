@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using these metadata.
+title: STable AutoCorrelation Integral Estimator (STACIE)
+abstract: >-
+  STACIE is a Python package for post-processing molecular dynamics simulations,
+  but it can also be used for more general analysis of time-correlated data.
+  Typical applications include estimating transport properties,
+  uncertainties of averages over time-correlated data,
+  and analysis of characteristic timescales.
+authors:
+  - family-names: Gozdenur
+    given-names: Toraman
+    orcid: https://orcid.org/0000-0001-6785-333X
+    affiliation: >-
+      Labo Soete,
+      Ghent University,
+      Technologiepark-Zwijnaarde 46,
+      B-9052,
+      Ghent,
+      Belgium
+  - family-names: Verstraelen
+    given-names: Toon
+    orcid: https://orcid.org/0000-0001-9288-5608
+    affiliation: >-
+      Center for Molecular Modeling (CMM),
+      Ghent University,
+      Technologiepark-Zwijnaarde 46,
+      B-9052,
+      Zwijnaarde, Belgium
+license: LGPL-3.0-or-later
+repository-code: "https://github.com/molmod/stacie"

@@ -16,7 +16,7 @@
 
 STACIE stands for the *STable AutoCorrelation Integral Estimator*.
 It is a Python package for post-processing molecular dynamics simulations,
-but can also be used for more general analysis of time-correlated data.
+but it can also be used for more general analysis of time-correlated data.
 Typical applications include estimating transport properties,
 uncertainties of averages over time-correlated data,
 and analysis of characteristic timescales.
