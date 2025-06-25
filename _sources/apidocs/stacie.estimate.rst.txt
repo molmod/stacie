@@ -1,0 +1,7 @@
+stacie.estimate module
+======================
+
+.. automodule:: stacie.estimate
+   :members:
+   :show-inheritance:
+   :undoc-members:

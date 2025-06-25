@@ -1,0 +1,7 @@
+stacie.dq module
+================
+
+.. automodule:: stacie.dq
+   :members:
+   :show-inheritance:
+   :undoc-members:

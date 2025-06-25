@@ -1,0 +1,7 @@
+stacie.spectrum module
+======================
+
+.. automodule:: stacie.spectrum
+   :members:
+   :show-inheritance:
+   :undoc-members:

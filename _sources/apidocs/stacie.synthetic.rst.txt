@@ -1,0 +1,7 @@
+stacie.synthetic module
+=======================
+
+.. automodule:: stacie.synthetic
+   :members:
+   :show-inheritance:
+   :undoc-members:
