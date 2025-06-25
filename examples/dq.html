@@ -1,0 +1,1018 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="References" href="../references.html"><link rel="prev" title="Correlation Time Analysis of Cloud Cover Data" href="cloud_cover.html">
+        <link rel="prefetch" href="../_static/stacie-logo-black.svg" as="image">
+        <link rel="prefetch" href="../_static/stacie-logo-white.svg" as="image">
+
+    <link rel="shortcut icon" href="../_static/stacie-logo-black.svg"><!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>Designed Quadrature (DQ) - STACIE 1.2</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css?v=8cd3d715" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-codeautolink.css?v=b2176991" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d923d65c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-title-font-size: 1rem;
+  --admonition-font-size: 1rem;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">STACIE 1.2</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../_static/stacie-logo-black.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../_static/stacie-logo-white.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">STACIE 1.2</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../getting_started/index.html">Getting Started</a><input aria-label="Toggle navigation of Getting Started" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/licenses.html">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/usage.html">Usage Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting_started/cite.html">How to Cite</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../theory/index.html">Theory</a><input aria-label="Toggle navigation of Theory" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../theory/notation.html">Notation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/overview.html">STACIE Algorithm Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/model.html">Model Spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/statistics.html">Parameter Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/cutoff.html">Frequency Cutoff</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../preparing_inputs/index.html">Preparing Inputs</a><input aria-label="Toggle navigation of Preparing Inputs" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/data_sufficiency.html">How to Prepare Sufficient Inputs for STACIE?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/block_averages.html">Reducing Storage Requirements with Block Averages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../preparing_inputs/molecular_dynamics.html">Recommendations for MD Simulations</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../properties/index.html">Properties Derived from the Autocorrelation Function</a><input aria-label="Toggle navigation of Properties Derived from the Autocorrelation Function" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../properties/error_estimates.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/autocorrelation_time.html">Integrated and Exponential Autocorrelation Time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/shear_viscosity.html">Shear Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/bulk_viscosity.html">Bulk Viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/thermal_conductivity.html">Thermal Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/electrical_conductivity.html">Ionic Electrical Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../properties/diffusion_coefficient.html">Diffusion Coefficient</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Worked Examples</a><input aria-label="Toggle navigation of Worked Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="minimal.html">Minimal Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="error_mean.html">Uncertainty of the Mean of Time-Correlated Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="applicability.html">Applicability of the Lorentz Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface_diffusion.html">Diffusion on a Surface with Newtonian Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_shear_viscosity.html">Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_bulk_viscosity.html">Bulk Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lj_thermal_conductivity.html">Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molten_salt.html">Ionic Electrical Conductivity of Molten Sodium Chloride at 1100 K (OpenMM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Utility Module for Plots Reused in Multiple Examples.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cloud_cover.html">Correlation Time Analysis of Cloud Cover Data</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Designed Quadrature (DQ)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../apidocs/modules.html">Application Programming Interface</a><input aria-label="Toggle navigation of Application Programming Interface" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../apidocs/stacie.html">stacie package</a><input aria-label="Toggle navigation of stacie package" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.conditioning.html">stacie.conditioning module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cost.html">stacie.cost module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.cutoff.html">stacie.cutoff module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.dq.html">stacie.dq module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.estimate.html">stacie.estimate module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.model.html">stacie.model module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.plot.html">stacie.plot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.spectrum.html">stacie.spectrum module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.synthetic.html">stacie.synthetic module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apidocs/stacie.utils.html">stacie.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../development/index.html">Development</a><input aria-label="Toggle navigation of Development" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/contributing.html">Contributor Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/setup.html">Development Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/release.html">How to Make a Release</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/molmod/stacie/blob/main/docs/examples/dq.py?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/molmod/stacie/edit/main/docs/examples/dq.py" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="designed-quadrature-dq">
+<h1>Designed Quadrature (DQ)<a class="headerlink" href="#designed-quadrature-dq" title="Link to this heading">¶</a></h1>
+<p>(This feature will become available with STACIE 1.3.0,
+which is not yet released at the time of writing.)</p>
+<p>This notebook illustrates how to use the module <a class="reference internal" href="../apidocs/stacie.dq.html#module-stacie.dq" title="stacie.dq"><code class="xref py py-mod docutils literal notranslate"><span class="pre">stacie.dq</span></code></a> to compute
+integrals over noisy integrands.
+While solving this problem is not the main goal of STACIE,
+it is often a useful step when post-processing transport properties
+computed with STACIE at different densities and/or total energies.</p>
+<p>In general, designed quadrature (DQ) refers to the numerical optimization
+of quadrature rules with application-specific constraints.
+This means that the grid points and weights in the following
+quadrature rule are optimized to work well for specific use cases:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+  \int f(x)\, p(x)\, \mathrm{d}x \approx \mathcal{I}_\text{DQ} = \sum_{n=1}^N w_n f(x_n)
+\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(p(x)\)</span> is some weight function,
+in our case always a normalized probability density function.</p>
+<p>In STACIE, the constraints are a consequence of the fact that
+the integrand is the result of statistical sampling in a stochastic simulation.
+We will initially assume that evaluation of the integrand at each grid point
+has the same variance due to finite sampling,
+in which case the quadrature weights at each point are ideally all equal, <span class="math notranslate nohighlight">\(w_n = 1/N\)</span>.
+(This minimizes the variance of the numerical integral.)
+More generally, we can average over an integer number of function evaluations at each point,
+for which the weights should be proportional to the number of evaluations,
+as this will minimize the variance of the numerical integral:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+  \sigma_{\mathcal{I_\text{DQ}}} = \sqrt{\sum_{n=1}^N w_n^2 \sigma_n^2}
+\]</div>
+</div>
+<p>In either case, the weights of the quadrature rule are positive and fixed upfront,
+while we have the freedom to tune the positions of the grid points.</p>
+<p>STACIE’s DQ algorithm optimizes the quadrature points such that the rule
+is exact for polynomials <span class="math notranslate nohighlight">\(f(x)\)</span> up to some degree <span class="math notranslate nohighlight">\(k\)</span>.
+The optimization is performed with a modified Levenberg-Marquardt algorithm
+and includes a logarithmic barrier to spread points evenly across the support of <span class="math notranslate nohighlight">\(p(x)\)</span>.
+Care is taken to avoid any interference of the logarithmic barrier with the polynomial exactness constraints.
+The regularization is orthogonal to these constraints by construction.
+To validate the accuracy of the quadrature rule for the optimal points,
+the weights are refitted in a final step of the algorithm.
+The refitted weights should be proportional to the given weights
+(or equal if none were given).
+If not, the optimization of the grid points has failed and should not be trusted.
+(Such failures normally result in an error during the optimization.)</p>
+<p>Rules with equal weights are known as Chebyshev-type quadrature rules,
+<span id="id1">[<a class="reference internal" href="../references.html#id53" title="Shoni Gilboa and Ron Peled. Chebyshev-type quadratures for doubling weights. Constructive Approximation, 45(2):193–216, 2016. doi:10.1007/s00365-016-9360-4.">GP16</a>]</span>
+not to be confused with the more specific
+<a class="reference external" href="https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature">Chebyshev-Gauss quadrature</a>.
+The main limitation of Chebyshev-type quadrature is that the quadrature rules
+can only be exact for polynomials up to a relatively low degree <span class="math notranslate nohighlight">\(k\)</span>, typically 6, 8 or 10,
+depending on the choice of <span class="math notranslate nohighlight">\(p(x)\)</span> and the number of points. <span id="id2">[<a class="reference internal" href="../references.html#id54" title="S. N. Bernstein. Sur les formules de quadrature de cotes et tchebycheff. C. R. Acad. Sci. URSS, 14:323–326, 1937.">Ber37</a>]</span>.
+For well-behaved “double scaling” probability densities <span class="math notranslate nohighlight">\(p(x)\)</span>,
+the required number of points scales like <span class="math notranslate nohighlight">\(\mathcal{O}(k^2)\)</span>. <span id="id3">[<a class="reference internal" href="../references.html#id53" title="Shoni Gilboa and Ron Peled. Chebyshev-type quadratures for doubling weights. Constructive Approximation, 45(2):193–216, 2016. doi:10.1007/s00365-016-9360-4.">GP16</a>]</span>
+For some <span class="math notranslate nohighlight">\(p(x)\)</span> it may even be impossible to reach high degrees.
+That being said, for the case of noisy integrands, modest degrees typically suffice:
+even if the integrand has a small amount of noise,
+STACIE’s DQ grids will easily outperform standard Gaussian quadrature rules
+with the same number of points.</p>
+<section id="test-case-with-a-noisy-integrand">
+<h2>Test Case With a Noisy Integrand<a class="headerlink" href="#test-case-with-a-noisy-integrand" title="Link to this heading">¶</a></h2>
+<p>This notebook demonstrates the DQ method with a computationally cheap but noisy integrand.
+In practice, the integrand is typically (very) expensive to evaluate,
+and the noise arises from the sampling required to estimate the integrand at each point.</p>
+<p>We will use a noisy cosine function as example integrand,
+and the standard normal distribution as probability density function:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}
+  \begin{aligned}
+    f(x) &amp;= \cos(x) + \epsilon \\
+    p(x) &amp;= \frac{1}{\sqrt{2\pi}} \exp\left(-\frac{x^2}{2}\right)
+  \end{aligned}
+\end{split}\]</div>
+</div>
+<p>The noise <span class="math notranslate nohighlight">\(\epsilon\)</span> is drawn from a normal distribution with mean zero and standard deviation <span class="math notranslate nohighlight">\(\sigma\)</span>,
+and the calculations below use different values of <span class="math notranslate nohighlight">\(\sigma\)</span> to illustrate the effect of noise.</p>
+<p>The true value of the integral (without noise) is <span class="math notranslate nohighlight">\(1/\sqrt{e}\)</span>.</p>
+</section>
+<section id="comparison-of-quadrature-methods">
+<h2>Comparison of Quadrature Methods<a class="headerlink" href="#comparison-of-quadrature-methods" title="Link to this heading">¶</a></h2>
+<p>We will compare four quadrature methods:</p>
+<ol class="arabic simple">
+<li><p><strong>Gauss-Hermite Quadrature</strong>:
+The standard Gauss-Hermite quadrature points and weights are optimal
+for integrating polynomials times a normal distribution.
+It is exact for polynomials of degree up to <span class="math notranslate nohighlight">\(2N-1\)</span> when using <span class="math notranslate nohighlight">\(N\)</span> points.
+However, it does not account for noise in the integrand.</p></li>
+<li><p><strong>DQ with exact moments</strong>:
+We use the first 7 moments (0 to 6) of the standard normal distribution
+to compute the quadrature points.
+This method will give exact results for polynomials of degree up to 6,
+and is expected to be more robust against noise that the Gauss-Hermite rule.</p></li>
+<li><p><strong>DQ with approximate moments</strong>:
+We use again the first 7 moments (0 to 6) of the standard normal distribution
+to compute the quadrature points.
+Instead of using the exact moments, we estimate them from 10000 samples
+drawn from the standard normal distribution.
+This mimics the situation where the moments are estimated from a finite number of samples.</p></li>
+<li><p><strong>Monte Carlo</strong>:
+We draw grid points from the standard normal distribution and use them
+to compute the integral using the standard Monte Carlo method.
+This could be considered as a quadrature method with random points and equal weights.</p></li>
+</ol>
+<p>In all cases, we will use 30 quadrature points to compute the integral.
+The uncertainty propagation of <span class="math notranslate nohighlight">\(\epsilon\)</span> can be performed analytically:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+  \sigma_{\mathcal{I}} = \sigma \sqrt{\sum_{n=1}^N w_i^2}
+\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(w_i\)</span> are the quadrature weights.</p>
+</section>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">stacie.dq</span><span class="w"> </span><span class="kn">import</span> <span class="n">construct_dq_empirical</span><span class="p">,</span> <span class="n">construct_dq_stdnormal</span><span class="p">,</span> <span class="n">dq3</span><span class="p">,</span> <span class="n">Symmetry</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Probabilists Gauss-Hermite quadrature,</span>
+<span class="c1"># with weights rescaled to integrate with respect</span>
+<span class="c1"># to the standard normal distribution.</span>
+<span class="n">npoint</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">x_gh</span><span class="p">,</span> <span class="n">w_gh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polynomial</span><span class="o">.</span><span class="n">hermite_e</span><span class="o">.</span><span class="n">hermegauss</span><span class="p">(</span><span class="n">npoint</span><span class="p">)</span>
+<span class="n">w_gh</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># DQ with exact moments</span>
+<span class="n">nmoment</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="c1"># Symmetry.NONZERO is used to exclude x=0 from the grid</span>
+<span class="c1"># as to obtain an even number of points.</span>
+<span class="n">x_dq_exact</span><span class="p">,</span> <span class="n">w_dq_exact</span> <span class="o">=</span> <span class="n">construct_dq_stdnormal</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">npoint</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span> <span class="n">nmoment</span><span class="p">,</span> <span class="n">Symmetry</span><span class="o">.</span><span class="n">NONZERO</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>iter   RMSD error    Step size        Ridge    Cond.Num.
+----  -----------  -----------  -----------  -----------
+   0     1.47e-01     4.23e-01     6.86e-01     8.52e+02
+   1     1.19e-01     3.00e-01     9.99e-01     1.03e+03
+   2     8.91e-02     2.47e-01     1.08e+00     4.47e+02
+   3     8.02e-02     3.00e-01     5.33e-01     2.42e+02
+   4     3.62e-02     1.92e-01     3.06e-01     2.48e+02
+   5     3.34e-02     7.45e-02     5.47e-01     3.06e+02
+   6     3.15e-02     7.82e-02     5.55e-01     3.11e+02
+   7     2.92e-02     7.66e-02     5.81e-01     3.06e+02
+   8     2.67e-02     2.32e-01     3.09e-01     2.96e+02
+   9     2.36e-02     4.90e-01     0.00e+00     2.56e+02
+  10     1.24e-03     1.69e-01     0.00e+00     2.42e+02
+  11     2.48e-04     3.37e-02     0.00e+00     2.55e+02
+  12     2.48e-07     1.02e-03     0.00e+00     2.54e+02
+  13     5.43e-12     3.46e-06     0.00e+00     2.55e+02
+  14     1.67e-16     7.99e-11     0.00e+00     2.55e+02
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># DQ with approximate moments</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">std_points</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">x_dq_approx</span><span class="p">,</span> <span class="n">w_dq_approx</span> <span class="o">=</span> <span class="n">construct_dq_empirical</span><span class="p">(</span>
+    <span class="n">std_points</span><span class="p">,</span> <span class="n">npoint</span><span class="p">,</span> <span class="n">nmoment</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>iter   RMSD error    Step size        Ridge    Cond.Num.
+----  -----------  -----------  -----------  -----------
+   0     7.97e-02     4.49e-01     2.70e-01     4.83e+02
+   1     5.07e-02     1.01e+00     0.00e+00     4.08e+02
+   2     5.92e-03     2.51e-01     0.00e+00     2.96e+02
+   3     2.81e-03     1.33e-01     0.00e+00     3.04e+02
+   4     3.03e-04     5.43e-02     0.00e+00     3.32e+02
+   5     2.02e-05     9.35e-03     0.00e+00     3.38e+02
+   6     7.30e-08     5.47e-04     0.00e+00     3.38e+02
+   7     7.41e-13     1.73e-06     0.00e+00     3.38e+02
+   8     3.29e-16     1.74e-11     0.00e+00     3.38e+02
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simple Monte Carlo method</span>
+<span class="n">x_mc</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">npoint</span><span class="p">)</span>
+<span class="n">x_mc</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">w_equal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">x_gh</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_gh</span><span class="p">))</span>
+<span class="n">CASES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;Gauss-Hermite&quot;</span><span class="p">,</span> <span class="n">x_gh</span><span class="p">,</span> <span class="n">w_gh</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;DQ Exact&quot;</span><span class="p">,</span> <span class="n">x_dq_exact</span><span class="p">,</span> <span class="n">w_dq_exact</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;DQ Approx&quot;</span><span class="p">,</span> <span class="n">x_dq_approx</span><span class="p">,</span> <span class="n">w_dq_approx</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;Monte Carlo&quot;</span><span class="p">,</span> <span class="n">x_mc</span><span class="p">,</span> <span class="n">w_equal</span><span class="p">),</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_points_weights</span><span class="p">():</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;quad&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="s2">&quot;quad&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">,</span> <span class="n">CASES</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Quadrature points&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Quadrature weights&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="s2">&quot;+&quot;</span><span class="p">)</span>
+
+
+<span class="n">plot_points_weights</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/01bdc38b7cc4f3c9b42158d9d147e0d73786bc64e5b7e5b043547cf4e79bcb47.png" src="../_images/01bdc38b7cc4f3c9b42158d9d147e0d73786bc64e5b7e5b043547cf4e79bcb47.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_points</span><span class="p">():</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;points&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="s2">&quot;points&quot;</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_gh</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">_w</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">,</span> <span class="n">CASES</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;+&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Quadrature points&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Index&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+
+<span class="n">plot_points</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/d857f8b8ff625e583af0d24d1a784c99e0e353f30bae2e6a9c043c75af9a88df.png" src="../_images/d857f8b8ff625e583af0d24d1a784c99e0e353f30bae2e6a9c043c75af9a88df.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Numerical integration</span>
+<span class="n">integral_true</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">e</span><span class="p">)</span>
+<span class="n">integral_gh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w_gh</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x_gh</span><span class="p">))</span>
+<span class="n">integral_dq_exact</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x_dq_exact</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">integral_dq_approx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x_dq_approx</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">integral_mc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x_mc</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;True value:       </span><span class="si">{</span><span class="n">integral_true</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gauss-Hermite 30: </span><span class="si">{</span><span class="n">integral_gh</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DQ Exact 30:      </span><span class="si">{</span><span class="n">integral_dq_exact</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DQ Approx 30:     </span><span class="si">{</span><span class="n">integral_dq_approx</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Monte Carlo 30:   </span><span class="si">{</span><span class="n">integral_mc</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True value:       0.606530659712633
+Gauss-Hermite 30: 0.606530659712634
+DQ Exact 30:      0.606168725991488
+DQ Approx 30:     0.603781473272782
+Monte Carlo 30:   0.673965607356054
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that the deviations between the first two quadrature methods and the true value
+are not due to noise, but rather due to the fact that
+the quadrature rules are approximate for a non-polynomial integrand.</p>
+<p>The approximate DQ method and Monte Carlo are affected by sampling noise:</p>
+<ul class="simple">
+<li><p>In case of the approximate DQ method,
+the moments are estimated from a finite number of samples,
+which introduces noise in the quadrature points.</p></li>
+<li><p>In case of Monte Carlo, the quadrature points are drawn randomly,
+which also introduces noise in the integral estimate.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_sigma</span><span class="p">():</span>
+    <span class="n">sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="s2">&quot;sigma&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">integral_true</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;True value&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Gauss-Hermite</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">integral_gh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Gauss-Hermite&quot;</span><span class="p">)</span>
+    <span class="n">factor_gh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">w_gh</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+        <span class="n">sigmas</span><span class="p">,</span>
+        <span class="n">integral_gh</span> <span class="o">-</span> <span class="n">factor_gh</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">,</span>
+        <span class="n">integral_gh</span> <span class="o">+</span> <span class="n">factor_gh</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># DQ Exact</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">integral_dq_exact</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;DQ Exact&quot;</span><span class="p">)</span>
+    <span class="n">factor_dq_exact</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">w_equal</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+        <span class="n">sigmas</span><span class="p">,</span>
+        <span class="n">integral_dq_exact</span> <span class="o">-</span> <span class="n">factor_dq_exact</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">,</span>
+        <span class="n">integral_dq_exact</span> <span class="o">+</span> <span class="n">factor_dq_exact</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># DQ Approx</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">integral_dq_approx</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C2&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;DQ Approx&quot;</span><span class="p">)</span>
+    <span class="n">factor_dq_approx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">w_equal</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+        <span class="n">sigmas</span><span class="p">,</span>
+        <span class="n">integral_dq_approx</span> <span class="o">-</span> <span class="n">factor_dq_approx</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">,</span>
+        <span class="n">integral_dq_approx</span> <span class="o">+</span> <span class="n">factor_dq_approx</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C2&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Plot details</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Standard deviation $\sigma$ of the noise on the integrand&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Integral estimate&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Effect of integrand noise on integral estimates&quot;</span><span class="p">)</span>
+
+
+<span class="n">plot_sigma</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/56a7b251d54e1982e645f97496a36e3f934407bef77dad6857d54f65dd44bdc3.png" src="../_images/56a7b251d54e1982e645f97496a36e3f934407bef77dad6857d54f65dd44bdc3.png" />
+</div>
+</div>
+<p>The bands in the plot represent the uncertainty on the integral estimates
+due to the noise on the integrand.</p>
+<p>The plot shows that even for errors on the integrand on the order of a percentage,
+it is beneficial to use the DQ method instead of standard quadrature rules,
+as it significantly reduces the uncertainty on the integral estimate.
+(The advantage is about a factor of 2 in this example,
+simply because about 75% of the Gauss-Hermite points have almost zero weights.)</p>
+<p>Compared to Monte Carlo, the DQ method is less biased.
+(Monte Carlo is mainly beneficial for high-dimensional integrals, which is not the case here.)</p>
+</section>
+<section id="designed-quadrature-with-unequal-weights">
+<h2>Designed Quadrature with Unequal Weights<a class="headerlink" href="#designed-quadrature-with-unequal-weights" title="Link to this heading">¶</a></h2>
+<p>As mentioned above, it is also possible dial in a specific choice of quadrature weights,
+up to a normalization factor, during the optimization of the quadrature points.
+This can be useful to obtain simpler grids with the same polynomial exactness.
+The code below illustrates how this can be accomplished.</p>
+<p>We’ll use Gauss-Hermite points and weights as a source of inspiration:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x_gh6</span><span class="p">,</span> <span class="n">w_gh6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polynomial</span><span class="o">.</span><span class="n">hermite_e</span><span class="o">.</span><span class="n">hermegauss</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">w_gh6</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x:&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">x_gh6</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;w:&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">w_gh6</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>x: -3.32426 -1.88918 -0.61671  0.61671  1.88918  3.32426
+w:  0.00256  0.08862  0.40883  0.40883  0.08862  0.00256
+</pre></div>
+</div>
+</div>
+</div>
+<p>This inspires us to use weights <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">12,</span> <span class="pre">12,</span> <span class="pre">2,</span> <span class="pre">1]</span></code> (up to a normalization factor)
+in the DQ optimization.
+These weights correspond to 30 function evaluations in total,
+1 for the two outer points, 2 for the two next points, and 12 for the two middle points.
+An integral can then be approximated by just averaging over the 30 function evaluations at the 6 quadrature points.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x_dq6</span><span class="p">,</span> <span class="n">w_dq6</span> <span class="o">=</span> <span class="n">construct_dq_stdnormal</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">6</span><span class="p">,</span> <span class="n">Symmetry</span><span class="o">.</span><span class="n">NONZERO</span><span class="p">,</span> <span class="n">weights0</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x:&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">x_dq6</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;w:&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">w_dq6</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>iter   RMSD error    Step size        Ridge    Cond.Num.
+----  -----------  -----------  -----------  -----------
+   0     2.31e+00     1.40e+00     4.85e-01     4.92e+03
+   1     1.11e+00     1.16e+00     0.00e+00     2.63e+02
+   2     9.34e-01     3.30e-01     1.14e-01     2.54e+03
+   3     8.30e-01     7.77e-01     7.22e-02     5.00e+02
+   4     9.55e-02     1.74e-01     0.00e+00     4.76e+01
+   5     2.10e-03     2.71e-02     0.00e+00     5.12e+01
+   6     1.19e-06     6.46e-04     0.00e+00     5.19e+01
+   7     4.20e-13     3.81e-07     0.00e+00     5.19e+01
+   8     1.20e-15     1.37e-13     0.00e+00     5.19e+01
+
+x: -2.43725 -1.38990 -0.65804  0.65804  1.38990  2.43725
+w:  0.03333  0.06667  0.40000  0.40000  0.06667  0.03333
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s now try this grid for the same integral as before:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">integral_gh6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w_gh6</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x_gh6</span><span class="p">))</span>
+<span class="n">integral_dq6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w_dq6</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x_dq6</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;True value:       </span><span class="si">{</span><span class="n">integral_true</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gauss-Hermite 30: </span><span class="si">{</span><span class="n">integral_gh</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gauss-Hermite 6:  </span><span class="si">{</span><span class="n">integral_gh6</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DQ Exact 30:      </span><span class="si">{</span><span class="n">integral_dq_exact</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DQ Exact 6:       </span><span class="si">{</span><span class="n">integral_dq6</span><span class="si">:</span><span class="s2">.15f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True value:       0.606530659712633
+Gauss-Hermite 30: 0.606530659712634
+Gauss-Hermite 6:  0.606529472609343
+DQ Exact 30:      0.606168725991488
+DQ Exact 6:       0.606141193064441
+</pre></div>
+</div>
+</div>
+</div>
+<p>As expected, the two DQ grids perform similarly:
+there is only a small difference for the same number of function evaluations.
+Assigning uneven weights can have a few minor practical advantages:</p>
+<ul class="simple">
+<li><p>The quadrature points are easier to solve numerically and will be better conditioned.
+(This is mainly relevant for a larger number of points and/or higher polynomial degrees.)</p></li>
+<li><p>There are fewer unique points, which may simplify the bookkeeping of function evaluations.</p></li>
+<li><p>If one can control the sampling error of the integrand (through the simulation length),
+one has more freedom to use uneven weights.
+In this case, <a class="reference external" href="https://en.wikipedia.org/wiki/Inverse-variance_weighting">the optimal weights are inverse proportional</a>
+to the variance of the integrand at each point.
+(This may sound appealing, but most stochastic simulations have a burn-in period,
+which makes it difficult to control the sampling error precisely.)</p></li>
+</ul>
+</section>
+<section id="point-grid">
+<h2>3-Point Grid<a class="headerlink" href="#point-grid" title="Link to this heading">¶</a></h2>
+<p>The module <code class="docutils literal notranslate"><span class="pre">stacie.dq</span></code> also includes a simple function <a class="reference internal" href="../apidocs/stacie.dq.html#stacie.dq.dq3" title="stacie.dq.dq3"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacie.dq.dq3()</span></code></a>
+to construct a 3-point quadrature grid with equal weights.
+The grid will integrate exactly any degree-3 polynomial times a distribution
+with given mean, standard deviation and skewness.
+Note that real solutions for the points only exist for skewness values in the range
+<span class="math notranslate nohighlight">\(\left[-\frac{1}{\sqrt{2}}, \frac{1}{\sqrt{2}}\right]\)</span>.</p>
+<p>A simple example:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x_dq3</span> <span class="o">=</span> <span class="n">dq3</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">skew</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x:&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">x_dq3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mean: </span><span class="si">{</span><span class="n">x_dq3</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;std: </span><span class="si">{</span><span class="n">x_dq3</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;skewness: </span><span class="si">{</span><span class="n">sp</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">skew</span><span class="p">(</span><span class="n">x_dq3</span><span class="p">)</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>x: -1.02845 -0.79682  3.32526
+mean: 0.50000
+std: 2.00000
+skewness: 0.70000
+</pre></div>
+</div>
+</div>
+</div>
+<p>This is a minimalistic approach with little extra effort over just computing
+a single quadrature point at the mean of the distribution.
+Yet, it will give a much better estimate of the integral for a noisy integrand.</p>
+<p>This 3-point grid, and the DQ grids above, can be used to propagate
+errors through nonlinear functions.
+Given estimates of the mean, standard deviation and skewness of a stochastic quantity,
+one can use the grid to estimate the statistics of a nonlinear function of that quantity.</p>
+<p>For example, let’s estimate the sine of a random variable with mean 1.0, standard deviation 0.5 and skewness 0.0:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x_dq3</span> <span class="o">=</span> <span class="n">dq3</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">skew</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">sine_mean_dq3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x_dq3</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">sine_std_dq3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x_dq3</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DQ3 sine: </span><span class="si">{</span><span class="n">sine_mean_dq3</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">sine_std_dq3</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>DQ3 sine: 0.73953 ± 0.26363
+</pre></div>
+</div>
+</div>
+</div>
+<p>If the underlying distribution is normal, the true value of the sine mean and standard deviation can be computed numerically:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">integrand1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">sp</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">integrand2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">sine_mean_norm</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sp</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+
+<span class="n">sine_mean_norm</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">integrand1</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">sine_std_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">integrand2</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Normal sine: </span><span class="si">{</span><span class="n">sine_mean_norm</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">sine_std_norm</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Normal sine: 0.74260 ± 0.27341
+</pre></div>
+</div>
+</div>
+</div>
+<p>The 3-point error propagation is generally more accurate than the typical first-order approximation,
+and has the added benefit that it does not require the function to be differentiable.
+There is also no need to implement analytical or numerical derivatives.</p>
+<p>For example, let’s compute the first-order approximation of the mean of
+the sine function and its uncertainty:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sine_mean_1st</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">sine_std_1st</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;First-order sine: </span><span class="si">{</span><span class="n">sine_mean_1st</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">sine_std_1st</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>First-order sine: 0.84147 ± 0.27015
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that the uncertainty is fine but that the mean of the first-order approximation
+is quite off, as the sine function is not linear around 1.0.</p>
+<p>This few-point approach to error propagation is also known as the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Unscented_transform">Unscented Transform</a>.</p>
+</section>
+<section id="regression-tests">
+<h2>Regression Tests<a class="headerlink" href="#regression-tests" title="Link to this heading">¶</a></h2>
+<p>If you are experimenting with this notebook, you can ignore any exceptions below.
+The tests are only meant to pass for the notebook in its original form.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">integral_dq_exact</span> <span class="o">-</span> <span class="mf">0.606168725991488</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.00001</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;wrong integral (DQ 30 exact): </span><span class="si">{</span><span class="n">integral_dq_exact</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">integral_dq6</span> <span class="o">-</span> <span class="mf">0.606141193064441</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.00001</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;wrong integral (DQ 6): </span><span class="si">{</span><span class="n">integral_dq6</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sine_mean_dq3</span> <span class="o">-</span> <span class="mf">0.73953</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;wrong sine mean (DQ3): </span><span class="si">{</span><span class="n">sine_mean_dq3</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sine_std_dq3</span> <span class="o">-</span> <span class="mf">0.26363</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;wrong sine std (DQ3): </span><span class="si">{</span><span class="n">sine_std_dq3</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../references.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">References</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="cloud_cover.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Correlation Time Analysis of Cloud Cover Data</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024--2026, Gözdenur Toraman, Toon Verstraelen
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://molmod.ugent.be" aria-label="Center for Molecular Modeling"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+<path d="M 8,0.23203771 1.2708502,4.1166743 V 7.586584 H 2.0757403 V 4.5814695 L 8,1.1606847 13.924259,4.5814695 V 7.586584 h 0.80489 V 4.1166743 Z" />
+<path d="m 8,3.6329842 c -2.4076366,0 -4.3683267,1.9606901 -4.3683267,4.368326 0,1.0499591 0.3736113,2.0145218 0.9938323,2.7689368 L 4.9523743,9.845379 C 4.6268573,9.3073839 4.436564,8.6780482 4.436564,8.0013102 4.436564,6.0283899 6.027079,4.4378742 8,4.4378742 c 1.9729204,0 3.563435,1.5905157 3.563435,3.563436 0,0.676738 -0.190293,1.3060737 -0.515809,1.8440688 l 0.326868,0.924868 c 0.620221,-0.754415 0.993832,-1.7189777 0.993832,-2.7689368 0,-2.4076359 -1.96069,-4.3683267 -4.368326,-4.368326 z" />
+<path d="m 4.5647296,15.767884 2.0103367,-5.68462 0.979439,5.684633 0.8166682,-0.0019 L 7.1003242,8.3914521 H 6.3187358 L 4.1855869,14.427689 2.052438,8.3914521 H 1.2708502 L 2e-7,15.765962 l 0.81666821,0.0019 0.97943899,-5.684633 2.0103367,5.68462 z" />
+<path d="m 12.193555,15.767884 2.010337,-5.68462 0.979438,5.684633 L 16,15.765962 14.729149,8.3914521 H 13.947561 L 11.814413,14.427689 9.6812637,8.3914521 H 8.8996758 l -1.2708506,7.3745099 0.8166683,0.002 0.9794395,-5.684632 2.010337,5.684619 z" />
+</svg></a>
+              <a class="muted-link " href="https://www.ugent.be/ea/emsme/en/research/soete" aria-label="Soete Laboratory"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+<path d="M 1.2243149,11.312034 V 0.3537872 c 0,-0.47171662 3.2133726,-0.47171662 3.2133726,0 V 11.275667 c 0.038589,1.391853 0.8362299,2.107621 2.6118885,2.188801 0.3456227,0 0.3456227,2.535532 0,2.535532 -2.5872928,0 -5.8252611,-1.272498 -5.8252611,-4.687966 z" />
+<path d="M 9.0151601,16 C 12.286758,15.9977 14.766446,14.194112 14.775658,11.101887 14.784658,8.0882805 12.485826,7.1827295 10.791465,6.4316093 9.6750417,5.9366938 8.1559684,5.3529148 8.1229508,4.0958595 8.089931,2.8388043 9.1956669,2.5059896 10.318156,2.4898791 c 1.24952,-0.017939 2.35918,0.6351356 3.134465,1.0460205 0.333368,0.1766787 0.80108,-1.909061 0.109685,-2.62234708 C 12.969839,0.30232534 11.507764,0.01488162 9.9750266,0.01430271 6.3231448,0.01292984 4.9375194,2.3766199 4.917302,4.4194486 4.894588,6.7146645 6.6302121,8.1331941 8.4220755,8.9015433 c 1.235865,0.5299374 3.0428875,0.956338 3.0526165,2.6331567 0.007,1.208881 -1.112249,1.929768 -2.4595319,1.929768 -0.4639212,0 -0.4729202,2.535532 0,2.535532 z" />
+</svg></a>
+              <a class="muted-link " href="https://ugent.be" aria-label="Ghent University"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+<path d="M 8.4671319,6.1991107 H 7.5328685 V 12.263022 H 8.4671319 V 6.1991107" />
+<path d="M 6.5989047,6.1991107 H 5.6647163 V 12.263022 H 6.5989047 V 6.1991107" />
+<path d="M 4.7307525,6.1991107 H 3.7964891 V 12.263022 H 4.7307525 V 6.1991107" />
+<path d="M 2.8626002,6.1991107 H 1.9283368 V 12.263022 H 2.8626002 V 6.1991107" />
+<path d="M 10.335284,6.1991107 H 9.4010957 V 12.263022 H 10.335284 V 6.1991107" />
+<path d="m 12.203511,6.1991107 h -0.934263 v 6.0639113 h 0.934263 V 6.1991107" />
+<path d="M 14.071664,6.1991107 H 13.1374 v 6.0639113 h 0.934264 V 6.1991107" />
+<path d="M 15.028173,14.131773 H 0.97182731 V 13.196985 H 15.028173 v 0.934788" />
+<path d="M 14.071664,5.2648473 H 1.9283368 L 0.99437307,4.3309584 H 15.005627 l -0.933963,0.9338889" />
+<path d="M 15.962062,16 H 0.03793844 V 15.065138 H 15.962062 V 16" />
+<path d="M 15.962062,2.8200179 7.9998879,7.5076002e-8 0.03793844,2.8200179 V 3.8118816 L 7.9998879,0.99246298 15.962062,3.8118816 V 2.8200179" />
+</svg></a>
+              <a class="muted-link " href="https://github.com/molmod/stacie" aria-label="GitHub"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Designed Quadrature (DQ)</a><ul>
+<li><a class="reference internal" href="#test-case-with-a-noisy-integrand">Test Case With a Noisy Integrand</a></li>
+<li><a class="reference internal" href="#comparison-of-quadrature-methods">Comparison of Quadrature Methods</a></li>
+<li><a class="reference internal" href="#implementation">Implementation</a></li>
+<li><a class="reference internal" href="#designed-quadrature-with-unequal-weights">Designed Quadrature with Unequal Weights</a></li>
+<li><a class="reference internal" href="#point-grid">3-Point Grid</a></li>
+<li><a class="reference internal" href="#regression-tests">Regression Tests</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=61243dd2"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script defer="defer" src="https://unpkg.com/@popperjs/core@2"></script>
+    <script defer="defer" src="https://unpkg.com/tippy.js@6"></script>
+    <script defer="defer" src="../_static/tippy/examples/dq.4a2b054c-41d4-4686-9adc-48599076ad8f.js"></script>
+    <script>window.MathJax = {"tex": {"macros": {"mean": "\\operatorname{E}", "var": "\\operatorname{VAR}", "std": "\\operatorname{STD}", "cov": "\\operatorname{COV}", "gdist": "\\operatorname{Gamma}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    </body>
+</html>
