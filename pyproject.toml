@@ -30,7 +30,7 @@ dependencies = [
     "attrs>=25.3.0",
     "cattrs>=25.1.1",
     "matplotlib>=3.10.3",
-    "numpy>=2.31.1",
+    "numpy>=2.3.1",
     "path==17.0.0",
     "scipy>=1.16.0",
 ]
