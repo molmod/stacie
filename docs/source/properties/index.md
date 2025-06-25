@@ -16,20 +16,20 @@ using the so-called Green-Kubo relations
 {cite:p}`green_1952_markoff,green_1954_markoff,kubo_1957_statistical,helfand_1960_transport`.
 These properties have recently been referred to as diagonal transport coefficients {cite:p}`pegolo_2025_transport`.
 
-- [Diffusion coefficient](diffusion_coefficient.md), $D$
-- [Electrical conductivity](electrical_conductivity.md), $\sigma$
-- [Thermal conductivity](thermal_conductivity.md), $\kappa$
 - [Shear viscosity](shear_viscosity.md), $\eta$
 - [Bulk viscosity](bulk_viscosity.md), $\eta_b$
+- [Thermal conductivity](thermal_conductivity.md), $\kappa$
+- [Electrical conductivity](electrical_conductivity.md), $\sigma$
+- [Diffusion coefficient](diffusion_coefficient.md), $D$
 
 ```{toctree}
 :hidden:
 
 error_estimates.md
 autocorrelation_time.md
-diffusion_coefficient.md
-electrical_conductivity.md
-thermal_conductivity.md
 shear_viscosity.md
 bulk_viscosity.md
+thermal_conductivity.md
+electrical_conductivity.md
+diffusion_coefficient.md
 ```

@@ -72,9 +72,9 @@ This means that in most cases (except for diffusivity), multiple independent sim
 are required to achieve a good estimate of the transport property.
 While diffusivity may seem to be a very forgiving case,
 it is important to note that displacements of particles in a liquid are often highly correlated.
-STACIE assumes its inputs to be independent, which is in principle not the case for diffusivity.
-However, at the lowest frequencies, molecules in a liquid show essentially uncorrelated motion,
-which is why STACIE can still provide a good estimate of the diffusivity.
+STACIE assumes its inputs to be independent,
+which is not the case for particle velocities when studying self-diffusivity in a liquid.
+A correct treatment of uncertainty quantification in this case is a topic of ongoing research.
 
 ## Step 2: Test the Sufficiency of the Number of Steps and Increase if Necessary
 
