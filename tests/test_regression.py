@@ -68,10 +68,10 @@ def register_result(regtest, res: Result):
         The ``stacie.estimate.Result`` to register.
     """
     with regtest:
-        print(f"acint = {res.acint:.5e} ± {res.acint_std:.5e}")
+        print(f"acint = {res.acint:.4e} ± {res.acint_std:.4e}")
         if "corrtime_exp" in res.props:
-            print(f"corrtime exp = {res.corrtime_exp:.5e} ± {res.corrtime_exp_std:.5e}")
-        print(f"corrtime int = {res.corrtime_int:.5e} ± {res.corrtime_int_std:.5e}")
+            print(f"corrtime exp = {res.corrtime_exp:.4e} ± {res.corrtime_exp_std:.4e}")
+        print(f"corrtime int = {res.corrtime_int:.4e} ± {res.corrtime_int_std:.4e}")
         print("---")
 
 
