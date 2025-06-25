@@ -1,6 +1,26 @@
 cff-version: 1.2.0
 message: If you use this software, please cite it using these metadata.
 title: STable AutoCorrelation Integral Estimator (STACIE)
+keywords:
+  - molecular dynamics
+  - post-processing
+  - autocorrelation integral
+  - time correlation
+  - transport properties
+  - characteristic timescales
+  - uncertainty quantification
+  - exponential correlation time
+  - integrated correlation time
+  - autocorrelation function
+  - ACF
+  - power spectral distribution
+  - PSD
+  - Python package
+  - LGPL
+  - open source
+  - scientific computing
+  - data analysis
+  - STACIE
 abstract: >-
   STACIE is a Python package for post-processing molecular dynamics simulations,
   but it can also be used for more general analysis of time-correlated data.
