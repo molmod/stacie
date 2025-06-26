@@ -21,7 +21,8 @@ def _get_version_info():
 
     config = Configuration.from_file("../../pyproject.toml", "./")
     verinfo = Version(_get_version(config, force_write_version_files=False))
-    return f"{verinfo.major}.{verinfo.minor}", str(verinfo)
+    major_minor = f"{verinfo.major}.{verinfo.minor}"
+    return major_minor, major_minor
 
 
 # -- Project information -----------------------------------------------------
