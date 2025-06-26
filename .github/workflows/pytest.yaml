@@ -2,13 +2,25 @@ name: pytest
 on:
   push:
     branches:
-    # Run tests for change on the main branch ...
-    - main
+      # Run tests for change on the main branch ...
+      - main
     tags-ignore:
-    # ... but not for tags (avoids duplicate work).
-    - '**'
+      # ... but not for tags (avoids duplicate work).
+      - '**'
+    paths:
+      # ... and only if relevant files have changed.
+      - stacie/**
+      - tests/**
+      - pyproject.toml
+      - .github/workflows/pytest.yaml
   pull_request:
-  # Run tests on pull requests
+  # Run tests on pull requests ..
+    paths:
+      # ... and only if relevant files have changed.
+      - stacie/**
+      - tests/**
+      - pyproject.toml
+      - .github/workflows/pytest.yaml
 
 jobs:
   tests:
