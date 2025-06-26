@@ -6,6 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/stacie.svg)](https://pypi.python.org/pypi/stacie/)
 ![Version](https://img.shields.io/pypi/pyversions/stacie.svg)
 ![License](https://img.shields.io/github/license/molmod/stacie)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15744667.svg)](https://doi.org/10.5281/zenodo.15744667)
 
 <p align="center">
     <picture>
