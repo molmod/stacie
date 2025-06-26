@@ -17,17 +17,17 @@ and the citation records below will be updated when appropriate.
     @article{Toraman2025STACIE,
         title = {STable AutoCorrelation Integral Estimator (STACIE): Robust and accurate transport properties from molecular dynamics simulations},
         url = {https://arxiv.org/abs/2506.20438},
-        doi = {10.48550/arXiv.2506.20438}
+        doi = {10.48550/arXiv.2506.20438},
         publisher = {arXiv},
         author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
         year = {2025},
-        month = jun
+        month = {jun}
     }
     ```
 
 - EndNote
 
-    ```endnote
+    ```text
     %0 Journal Article
     %A Toraman, Gözdenur
     %A Fauconnier, Dieter
@@ -42,7 +42,7 @@ and the citation records below will be updated when appropriate.
 
 - RIS (ProCite, Reference Manager)
 
-    ```ris
+    ```text
     TY  - JOUR
     AU  - Toraman, Gözdenur
     AU  - Fauconnier, Dieter
@@ -63,8 +63,7 @@ The following paper describes in detail the calculation of shear viscosity with 
 
     ```bibtex
     @article{Toraman2025ShearViscosity,
-        title = {Reliable Viscosity Calculation from High-Pressure
-                 Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane.},
+        title = {Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane.},
         author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
         year = {2025},
         note = {in preparation}
@@ -73,7 +72,7 @@ The following paper describes in detail the calculation of shear viscosity with 
 
 - EndNote
 
-    ```endnote
+    ```text
     %0 Journal Article
     %A Toraman, Gözdenur
     %A Fauconnier, Dieter
@@ -85,7 +84,7 @@ The following paper describes in detail the calculation of shear viscosity with 
 
 - RIS (ProCite, Reference Manager)
 
-    ```ris
+    ```text
     TY  - JOUR
     AU  - Toraman, Gözdenur
     AU  - Fauconnier, Dieter
