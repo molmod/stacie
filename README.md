@@ -46,8 +46,6 @@ STACIE's documentation is distributed under the
 
 If you use STACIE in your research, please cite the following paper:
 
-If you use this dataset in your research, please cite the following priprint:
-
 > Gözdenur, T.; Fauconnier, D.; Verstraelen, T.
 > "STable AutoCorrelation Integral Estimator (STACIE):
 > Robust and accurate transport properties from molecular dynamics simulations"
