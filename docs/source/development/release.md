@@ -17,8 +17,9 @@ cd docs
 cd ..
 git checkout gh-pages
 git rm -rf .
-cp -r docs/_build/html/* .
+cp -r docs/build/html/* .
 git add .
+git status
 git commit --amend -m "Documentation update"
 git push origin gh-pages --force
 git checkout main
