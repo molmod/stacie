@@ -12,6 +12,7 @@ metadata:
     - Jupyter notebook
     - transport properties
   license: cc-by-nc-sa-4.0
+  copyright: Copyright (C) 2024-2025 The contributors of the STACIE Python Package
   resource_type: dataset
   publisher: Zenodo
   creators:
