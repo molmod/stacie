@@ -51,6 +51,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+notes.md
 
 # IDEs
 .spyderproject

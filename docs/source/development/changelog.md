@@ -9,7 +9,14 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 ## [Unreleased]
 
-(no changes yet)
+(v1.0.0)=
+## [1.0.0] - 2025-06-26
+
+This is the first stable release of STACIE!
+
+### Changed
+
+- Metadata and citation updates
 
 (v1.0.0rc1)=
 ## [1.0.0rc1] - 2025-06-25
@@ -19,4 +26,5 @@ The main remaining issues are related to (back)linking of external resources
 in the documentation and README files.
 
 [Unreleased]: https://github.com/molmod/stacie
+[1.0.0]: https://github.com/molmod/stacie/releases/tag/v1.0.0
 [1.0.0rc1]: https://github.com/molmod/stacie/releases/tag/v1.0.0rc1
