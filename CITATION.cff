@@ -71,4 +71,4 @@ preferred-citation:
       type: doi
       value: 10.48550/arXiv.2506.20438
 license: LGPL-3.0-or-later
-repository-code: "https://github.com/molmod/stacie"
+repository-code: https://github.com/molmod/stacie
