@@ -12,9 +12,7 @@ STACIE is open-source software (LGPL-v3 license) and is available on
 ```{only} html
 This online documentation provides practical instructions on how to use STACIE,
 as well as the theoretical background needed to understand what STACIE computes and how it works.
-
-A PDF version of the documentation is also available for download
-with every [stable release of STACIE](https://github.com/molmod/stacie/releases).
+We also provide [a PDF version of the documentation](https://molmod.github.io/stacie/documentation.pdf).
 ```
 
 ```{only} latex

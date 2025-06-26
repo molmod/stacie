@@ -14,10 +14,12 @@ Take the following steps, starting from the root of the repository:
 cd docs
 ./clean.sh
 ./compile_html.sh
+./compile_pdf.sh
 cd ..
 git checkout gh-pages
 git rm -rf .
 cp -r docs/build/html/* docs/build/html/.gitignore docs/build/html/.nojekyll .
+cp docs/build/latex/stacie.pdf documentation.pdf
 git add .
 git status
 git commit --amend -m "Documentation update" -n
