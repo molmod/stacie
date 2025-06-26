@@ -13,4 +13,5 @@ src
 tests
 tmp
 tools
+venv
 EOF
