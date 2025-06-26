@@ -61,6 +61,8 @@ and the citation records below will be updated when appropriate.
 
 The following paper describes in detail the calculation of shear viscosity with STACIE.
 
+- BibTeX:
+
     ```bibtex
     @article{Toraman2025ShearViscosity,
         title = {Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane.},
