@@ -121,7 +121,7 @@ jobs:
 
   publish-to-testpypi:
     name: Publish Python distribution to TestPyPI
-    if: ${{ github.ref == 'refs/heads/main' &&  github.repository_owner == 'reproducible-reporting'}}
+    if: ${{ github.ref == 'refs/heads/main' &&  github.repository_owner == 'molmod'}}
     needs:
     - build
     runs-on: ubuntu-latest
