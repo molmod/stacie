@@ -45,7 +45,7 @@ metadata:
     - scheme: arxiv
       identifier: '2506.20438'
       resource_type: publication
-      relation_type: describes
+      relation_type: cites
     - scheme: url
       identifier: https://molmod.github.io/stacie
       resource_type: publication
