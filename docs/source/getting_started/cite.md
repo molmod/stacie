@@ -16,10 +16,10 @@ and the citation records below will be updated when appropriate.
     ```bibtex
     @article{Toraman2025STACIE,
         title = {STable AutoCorrelation Integral Estimator (STACIE): Robust and accurate transport properties from molecular dynamics simulations},
-        url = {https://arxiv.org/abs/2506.?????},
-        doi = {10.48550/arXiv.2506.?????}
+        url = {https://arxiv.org/abs/2506.20438},
+        doi = {10.48550/arXiv.2506.20438}
         publisher = {arXiv},
-        author = {G"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
+        author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
         year = {2025},
         month = jun
     }
@@ -29,14 +29,14 @@ and the citation records below will be updated when appropriate.
 
     ```endnote
     %0 Journal Article
-    %A Toraman, Gozdenur
+    %A Toraman, Gözdenur
     %A Fauconnier, Dieter
     %A Verstraelen, Toon
     %D 2025
     %T STable AutoCorrelation Integral Estimator (STACIE): Robust and accurate transport properties from molecular dynamics simulations
     %J arXiv
-    %U https://arxiv.org/abs/2506.?????
-    %R 10.48550/arXiv.2506.?????
+    %U https://arxiv.org/abs/2506.20438
+    %R 10.48550/arXiv.2506.20438
     %8 June
     ```
 
@@ -44,14 +44,14 @@ and the citation records below will be updated when appropriate.
 
     ```ris
     TY  - JOUR
-    AU  - Toraman, Gozdenur
+    AU  - Toraman, Gözdenur
     AU  - Fauconnier, Dieter
     AU  - Verstraelen, Toon
     PY  - 2025
     TI  - STable AutoCorrelation Integral Estimator (STACIE): Robust and accurate transport properties from molecular dynamics simulations
     JO  - arXiv
-    UR  - https://arxiv.org/abs/2506.?????
-    DO  - 10.48550/arXiv.2506.?????
+    UR  - https://arxiv.org/abs/2506.20438
+    DO  - 10.48550/arXiv.2506.20438
     PB  - arXiv
     DA  - June
     ER  -
@@ -62,20 +62,20 @@ and the citation records below will be updated when appropriate.
 The following paper describes in detail the calculation of shear viscosity with STACIE.
 
     ```bibtex
-@article{Toraman2025ShearViscosity,
-    title = {Reliable Viscosity Calculation from High-Pressure
-                Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane.},
-    author = {G"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
-    year = {2025},
-    note = {in preparation}
-}
+    @article{Toraman2025ShearViscosity,
+        title = {Reliable Viscosity Calculation from High-Pressure
+                 Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane.},
+        author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
+        year = {2025},
+        note = {in preparation}
+    }
     ```
 
 - EndNote
 
     ```endnote
     %0 Journal Article
-    %A Toraman, Gozdenur
+    %A Toraman, Gözdenur
     %A Fauconnier, Dieter
     %A Verstraelen, Toon
     %D 2025
@@ -87,7 +87,7 @@ The following paper describes in detail the calculation of shear viscosity with 
 
     ```ris
     TY  - JOUR
-    AU  - Toraman, Gozdenur
+    AU  - Toraman, Gözdenur
     AU  - Fauconnier, Dieter
     AU  - Verstraelen, Toon
     PY  - 2025

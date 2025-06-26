@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "stacie"
 authors = [
+  { name="Gözdenur Toraman", email="gozdenur.toraman@ugent.be" },
   { name="Toon Verstraelen", email="toon.verstraelen@ugent.be" },
 ]
 description = "STable AutoCorrelation Integral Estimator (STACIE)"

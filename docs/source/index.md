@@ -24,20 +24,21 @@ The latest version of the documentation can be found at <https://molmod.github.i
 
 Please cite the following in any publication that relies on STACIE:
 
-> Gozdenur, T.; Fauconnier, D.; Verstraelen, T. "STable AutoCorrelation Integral Estimator (STACIE):
-> Robust and accurate transport properties from molecular dynamics simulations" arXiv 2025, arXiv:2506.?????.
+> Gözdenur, T.; Fauconnier, D.; Verstraelen, T. "STable AutoCorrelation Integral Estimator (STACIE):
+> Robust and accurate transport properties from molecular dynamics simulations"
+> arXiv 2025, [arXiv:2506.20438](https://arxiv.org/abs/2506.20438).
 
 This manuscript has been submitted to The Journal of Chemical Information and Modeling
-and the citation records below will be updated when appropriate.
+and the citation records will be updated when appropriate.
 
 A follow-up paper is nearly completed that will describe in detail the calculation of shear viscosity
 with STACIE:
 
-> Gozdenur, T.; Fauconnier, D.; Verstraelen, T. "Reliable Viscosity Calculation from High-Pressure
+> Gözdenur, T.; Fauconnier, D.; Verstraelen, T. "Reliable Viscosity Calculation from High-Pressure
 > Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane.", in preparation.
 
-In addition, we are preparing another follow-up paper that describes how to estimate
-diffusion coefficients with STACIE, with proper uncertainty quantification,
+In addition, we are preparing another follow-up paper showing how to estimate
+diffusion coefficients with proper uncertainty quantification using STACIE,
 which is currently not fully documented yet.
 
 Copy-pasteable citation records in various formats are provided in [](getting_started/cite.md).
