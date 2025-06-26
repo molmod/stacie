@@ -17,10 +17,10 @@ cd docs
 cd ..
 git checkout gh-pages
 git rm -rf .
-cp -r docs/build/html/* .
+cp -r docs/build/html/* docs/build/html/.gitignore docs/build/html/.nojekyll .
 git add .
 git status
-git commit --amend -m "Documentation update"
+git commit --amend -m "Documentation update" -n
 git push origin gh-pages --force
 git checkout main
 ```
