@@ -9,7 +9,7 @@ on:
       - '**'
     paths:
       # ... and only if relevant files have changed.
-      - stacie/**
+      - src/**
       - tests/**
       - pyproject.toml
       - .github/workflows/pytest.yaml
@@ -17,7 +17,7 @@ on:
   # Run tests on pull requests ..
     paths:
       # ... and only if relevant files have changed.
-      - stacie/**
+      - src/**
       - tests/**
       - pyproject.toml
       - .github/workflows/pytest.yaml
