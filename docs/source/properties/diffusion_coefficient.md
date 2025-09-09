@@ -93,6 +93,15 @@ where the index $i$ runs over the recorded time steps and $\Delta_t$ is time bet
 Formally, this resembles a finite difference approximation of the velocity,
 except that $\Delta_t$ can be large.
 
+:::{warning}
+If you have sampled particle velocities directly with a large sampling interval,
+they cannot be used because they are not proper [block averages](../preparing_inputs/block_averages.md).
+In this case, your data violates the [Niquist-Shannon sampling theorem](https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem),
+and the results will be perturbed by aliasing artifacts.
+The block averages satisfy the sampling theorem by construction
+because they average out the high-frequency components.
+:::
+
 For example, if the trajectory data contains positions in Å, recorded every 10 ps,
 and you want to compute the diffusion coefficient in m²/s, the code would be:
 

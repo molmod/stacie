@@ -193,6 +193,15 @@ where $\hat{\mathbf{p}}_i$ is the dipole moment at time step $i$.
 Formally, this resembles a finite difference approximation of the charge current,
 except that $\Delta_t$ can be large.
 
+:::{warning}
+If you have sampled velocities or charge currents directly with a large sampling interval,
+they cannot be used because they are not proper [block averages](../preparing_inputs/block_averages.md).
+In this case, your data violates the [Niquist-Shannon sampling theorem](https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem),
+and the results will be perturbed by aliasing artifacts.
+The block averages satisfy the sampling theorem by construction
+because they average out the high-frequency components.
+:::
+
 For example, if the dipole moment is stored every 10 ps in eÅ,
 you can compute the charge current as follows:
 
