@@ -36,11 +36,44 @@ __all__ = (
 
 @attrs.define
 class UnitConfig:
-    """Unit configuration for plotting function.
+    """Unit configuration for functions that print or plot values.
 
-    Note that values are *divided* by their units before plotting.
-    This class only affects screen output and plotting.
-    It never influences numerical values in STACIE's computations.
+    This class never influences numerical values in STACIE's computations,
+    such as attributes of a result object or other variables.
+    It only affects printed or plotted values.
+
+    The ``acint_unit``, ``freq_unit``, and ``time_unit`` attributes should be set as follows:
+
+    - The values of variables in STACIE (and your scripts using STACIE) are always
+      in "internal units".
+    - The ``*_unit`` attributes are assumed to have the value of a "display unit" in
+      the same internal units.
+
+    For example, if your internal time unit is 1 ps and you want to display times
+    in ns, set ``time_unit=1000.0``, because your display unit (1 ns) is 1000 internal units (1 ps).
+
+    To make these conventions easy to follow (and to avoid unit hell in general),
+    it is recommended to pick consistent internal units for your system.
+    For example, use atomic units or SI units throughout your code:
+
+    - As soon as you load data from a file, immediately convert it to internal units.
+    - Only just before printing or plotting, convert to display units,
+      which is also how this class is used in STACIE.
+
+    For example, when all variables are in SI base units and you want to display time in ns,
+    frequency in THz, and autocorrelation integrals in cm^2/s, then create a ``UnitConfig``
+    as follows:
+
+    .. code-block:: python
+
+        units = UnitConfig(
+            time_unit=1e-9,
+            time_unit_str="ns",
+            freq_unit=1e12,
+            freq_unit_str="THz",
+            acint_unit=1e-4,
+            acint_unit_str="cm^2/s",
+        )
     """
 
     acint_symbol: str = attrs.field(default=r"\mathcal{I}", kw_only=True)
@@ -73,7 +106,7 @@ class UnitConfig:
     time_fmt: str = attrs.field(default=".2e", kw_only=True)
     """The format string for a time value."""
 
-    clevel: float = attrs.field(default=0.95)
+    clevel: float = attrs.field(default=0.95, kw_only=True)
     """The confidence level used to plot confidence intervals."""
 
     @property
