@@ -159,10 +159,6 @@ spectrum = compute_spectrum(
     timestep=timestep,
     include_zero_freq=False,
 )
-result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]))
-print("Electrical conductivity", result.acint)
-print("Uncertainty of the electrical conductivity", result.acint_std)
-
 # The unit configuration assumes SI units are used systematically.
 # You may need to adapt this to the units of your data.
 uc = UnitConfig(
@@ -172,20 +168,73 @@ uc = UnitConfig(
     freq_unit=1e12,
     freq_unit_str="THz",
 )
+# Actual analysis with STACIE.
+result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), unit_config=uc, verbose=True)
+print("Electrical conductivity", result.acint)
+print("Uncertainty of the electrical conductivity", result.acint_std)
+
 plot_results("electrical_conductivity.pdf", result, uc)
 ```
 
-There are several ways to alter this script, depending on your needs and the available data:
+A common scenario is that you have the positions of the ions instead of their velocities,
+or the dipole moment of the system.
+Even if this information is stored with large time intervals,
+you can still compute the ionic conductivity by first computing a
+[block-averaged](../preparing_inputs/block_averages.md) charge current.
 
-- This script is trivially extended to combine data from multiple trajectories.
-- Some codes can directly output the charge current,
-  which will reduce the amount of data stored on disk.
-- Some simulation codes will print out the instantaneous dipole moment,
-  to which finite differences can be applied to compute the charge current.
-  Even if the dipole moment is printed only every $B$ steps,
-  this approximation is useful and corresponds to taking block averages of the charge current.
-  See the section on [block averages](../preparing_inputs/block_averages.md)
-  for more details.
+$$
+    \bar{\mathbf{J}}^\text{c}_{i+1/2}
+      = \frac{1}{\Delta_t}
+        \int_{t_i}^{t_{i+1}} \hat{\mathbf{J}}^\text{c}(t)\,\mathrm{d}t
+      = \frac{\hat{\mathbf{p}}_{i+1} - \hat{\mathbf{p}}_i}{\Delta_t}
+$$
+
+where $\hat{\mathbf{p}}_i$ is the dipole moment at time step $i$.
+Formally, this resembles a finite difference approximation of the charge current,
+except that $\Delta_t$ can be large.
+
+For example, if the dipole moment is stored every 10 ps in eÅ,
+you can compute the charge current as follows:
+
+```python
+import numpy as np
+from scipy.constants import value
+from stacie import compute_spectrum, estimate_acint, plot_results, ExpPolyModel, UnitConfig
+
+# Values of units of external data in "internal" SI base units.
+ELCHARGE = value("elementary charge")
+PICOSECOND = 1e-12
+ANGSTROM = 1e-10
+TERAHERTZ = 1e12
+BOLTZMANN_CONST = value("Boltzmann constant")
+
+# Load all the required inputs, the details of which will depend on your use case.
+# It is assumed that each row of `dipoles` corresponds to a single Cartesian component
+# and each column to a time step.
+dipoles = (...) * ELCHARGE * ANGSTROM
+timestep = 10.0 * PICOSECOND
+volume, temperature  = ...
+
+# Compute charge current, as if you are using finite difference approximation.
+chargecurrent = np.diff(dipoles, axis=1) / timestep
+
+# Computation with STACIE, as before.
+spectrum = compute_spectrum(
+    chargecurrent,
+    prefactors=1.0 / (volume * temperature * BOLTZMANN_CONST),
+    timestep=timestep,
+    include_zero_freq=False,
+)
+uc = UnitConfig(
+    acint_unit_str="S m$^{-1}$",
+    time_unit=PICOSECOND,
+    time_unit_str="ps",
+    freq_unit=TERAHERTZ,
+    freq_unit_str="THz",
+)
+result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), verbose=True, unit_config=uc)
+plot_results("electrical_conductivity.pdf", result, uc)
+```
 
 A worked example can be found in the notebook
 [Ionic Conductivity and Self-diffusivity in Molten Sodium Chloride at 1100 K (OpenMM)](../examples/molten_salt.py)
