@@ -16,7 +16,7 @@
     </picture>
 </p>
 
-STACIE is a Python package and algorithm that computes the time integral of autocorrelation functions.
+STACIE is a Python package and algorithm that computes time integrals of autocorrelation functions.
 It is primarily designed for post-processing molecular dynamics simulations.
 However, it can also be used for more general analysis of time-correlated data.
 Typical applications include estimating transport properties and
