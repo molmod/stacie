@@ -182,7 +182,7 @@ $$
       +\underbrace{\frac{1}{2}\ln\left|\hat{\mathbf{C}}^{(j)}_{\mathbf{d}}\right|}_\text{variance}
       +\underbrace{
         \frac{1}{2}
-        \bigl(\hat{\mathbf{d}}^{(j)}\bigr)^T
+        \bigl(\hat{\mathbf{d}}^{(j)}\bigr)^\top
         \bigl(\hat{\mathbf{C}}^{(j)}_{\mathbf{d}}\bigr)^{-1}
         \hat{\mathbf{d}}^{(j)}
       }_\text{bias}
@@ -236,7 +236,7 @@ $$
     \\
     \hat{C}_{\mathbf{b},\mathbf{b}} &= \sum_{j=1}^J W_j\, \left(
       \hat{C}_{\mathbf{b}^{(j)},\mathbf{b}^{(j)}}
-      + (\hat{\mathbf{b}} - \hat{\mathbf{b}}^{(j)})^2
+      + (\hat{\mathbf{b}}^{(j)} - \hat{\mathbf{b}})(\hat{\mathbf{b}}^{(j)} - \hat{\mathbf{b}})^\top
     \right)
   \end{split}
 $$
