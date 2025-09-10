@@ -12,7 +12,7 @@
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="docs/source/static/stacie-logo-white.svg">
       <source media="(prefers-color-scheme: light)" srcset="docs/source/static/github_repo_card_dark.png">
-      <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="docs/source/static/stacie-logo-black.svg">
+      <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="docs/source/static/github_repo_card_dark.png">
     </picture>
 </p>
 
