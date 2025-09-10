@@ -1,6 +1,19 @@
 # Welcome to STACIE's Documentation
 
-STACIE is a *STable AutoCorrelation Integral Estimator*.
+STACIE is a Python package and algorithm that computes time integrals of autocorrelation functions.
+It is primarily designed for post-processing molecular dynamics simulations.
+However, it can also be used for more general analysis of time-correlated data.
+Typical applications include estimating transport properties
+and the uncertainty of averages over time-correlated data,
+as well as analyzing characteristic timescales.
+
+```{only} html
+![Graphical Summary](static/github_repo_card_dark.png)
+```
+
+```{only} latex
+![Graphical Summary](static/github_repo_card_light.png)
+```
 
 STACIE is developed in the context of a collaboration between
 the [Center for Molecular Modeling](https://molmod.ugent.be/)
