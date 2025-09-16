@@ -12,6 +12,7 @@ on:
       - src/**
       - tests/**
       - pyproject.toml
+      - .github/requirements-old.txt
       - .github/workflows/pytest.yaml
   pull_request:
   # Run tests on pull requests ..
@@ -20,6 +21,7 @@ on:
       - src/**
       - tests/**
       - pyproject.toml
+      - .github/requirements-old.txt
       - .github/workflows/pytest.yaml
 
 jobs:

@@ -22,7 +22,7 @@ However, it can also be used for more general analysis of time-correlated data.
 Typical applications include estimating transport properties and
 the uncertainty of averages over time-correlated data, as well as analyzing characteristic timescales.
 
-All information about STACIE can be found in the [Documentation](https://molmod.github.io/stacie).
+All information about STACIE can be found in the [documentation](https://molmod.github.io/stacie).
 
 ## License
 

@@ -8,6 +8,13 @@ on:
       - main
     tags:
       - 'v*'
+    paths:
+      - docs/**
+      - src/**
+      - tests/**
+      - pyproject.toml
+      - .github/requirements-old.txt
+      - .github/workflows/pytest.yaml
 
 env:
   # This is not critical
