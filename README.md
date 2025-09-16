@@ -46,20 +46,22 @@ STACIE's documentation is distributed under the
 
 If you use STACIE in your research, please cite the following paper:
 
-> Gözdenur, T.; Fauconnier, D.; Verstraelen, T.
+> Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
 > "STable AutoCorrelation Integral Estimator (STACIE):
 > Robust and accurate transport properties from molecular dynamics simulations"
-> arXiv 2025, [arXiv:2506.20438](https://arxiv.org/abs/2506.20438).
+> *Journal of Chemical Information and Modeling* **Article ASAP**, 2025,
+> [doi:10.1021/acs.jcim.5c01475](https://doi.org/10.1021/acs.jcim.5c01475),
+> [arXiv:2506.20438](https://arxiv.org/abs/2506.20438).
 >
 > ```bibtex
 > @article{Toraman2025,
 > title = {STable AutoCorrelation Integral Estimator (STACIE): Robust and accurate transport properties from molecular dynamics simulations},
-> url = {https://arxiv.org/abs/2506.20438},
-> doi = {10.48550/arXiv.2506.20438},
-> publisher = {arXiv},
+> url = {https://doi.org/10.1021/acs.jcim.5c01475},
+> doi = {10.1021/acs.jcim.5c01475},
+> publisher = {Journal of Chemical Information and Modeling},
 > author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
 > year = {2025},
-> month = {jun}
+> month = {sep}
 > }
 >
 > ```
