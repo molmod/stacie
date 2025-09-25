@@ -42,8 +42,12 @@ metadata:
             B-9052,
             Zwijnaarde, Belgium
   related:
+    - scheme: doi
+      identifier: 10.1021/acs.jcim.5c01475
+      resource_type: publication
+      relation_type: cites
     - scheme: arxiv
-      identifier: '2506.20438'
+      identifier: '2506.20438v2'
       resource_type: publication
       relation_type: cites
     - scheme: url

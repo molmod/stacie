@@ -40,7 +40,7 @@ Please cite the following in any publication that relies on STACIE:
 > Robust and accurate transport properties from molecular dynamics simulations"
 > *Journal of Chemical Information and Modeling* **Article ASAP**, 2025,
 > [doi:10.1021/acs.jcim.5c01475](https://doi.org/10.1021/acs.jcim.5c01475),
-> [arXiv:2506.20438](https://arxiv.org/abs/2506.20438).
+> [arXiv:2506.20438v2](https://arxiv.org/abs/2506.20438v2).
 
 A follow-up paper is nearly completed that will describe in detail the calculation of shear viscosity
 with STACIE:
