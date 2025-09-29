@@ -138,6 +138,6 @@ It also discusses the correlation times associated with the diffusive motion of 
 
 Note that this example assumes that the average of the input sequences is zero.
 If this is not the case, you should add the option `include_zero_freq=False`
-when calling {py:func}`stacie.compute_spectrum`.
+when calling {py:func}`stacie.spectrum.compute_spectrum`.
 This will drop the DC component from the spectrum,
 which is the only part of the spectrum that is affected by a non-zero average.
