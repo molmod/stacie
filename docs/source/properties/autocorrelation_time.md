@@ -135,3 +135,9 @@ print("Uncertainty of the integrated autocorrelation time", result.corrtime_int_
 A worked example can be found in the notebook
 [Diffusion on a Surface with Newtonian Dynamics](../examples/surface_diffusion.py).
 It also discusses the correlation times associated with the diffusive motion of the particles.
+
+Note that this example assumes that the average of the input sequences is zero.
+If this is not the case, you should add the option `include_zero_freq=False`
+when calling {py:func}`stacie.compute_spectrum`.
+This will drop the DC component from the spectrum,
+which is the only part of the spectrum that is affected by a non-zero average.

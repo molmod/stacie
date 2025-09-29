@@ -93,10 +93,12 @@ total_time = timestep * sequences.size
 
 # The factor 2 is just compensating for the factor 1/2 in the autocorrelation integral.
 spectrum = compute_spectrum(
-        sequences,
-        prefactors=2.0 / total_time,
-        timestep=timestep,
-        include_zero_freq=False,
+    sequences,
+    prefactors=2.0 / total_time,
+    timestep=timestep,
+    # It is assumed that the average of the sequences is not zero,
+    # so we discard the DC component from the spectrum:
+    include_zero_freq=False,
 )
 result = estimate_acint(spectrum, PadeModel([0, 2], [2]))
 print("The mean", sequences.mean())

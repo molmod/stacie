@@ -24,7 +24,8 @@ by Allen and Tildesley {cite:p}`allen_2017_computer`.
 
 As will be shown below, one must take into account that the average pressure is not zero.
 For STACIE, there is no need to subtract the average pressure first.
-Instead, you can simply drop the DC component from the spectrum.
+Instead, you can simply drop the DC component from the spectrum,
+by setting the `include_zero_freq=False` option when computing the spectrum.
 
 ## How to Compute with STACIE?
 
@@ -56,6 +57,7 @@ spectrum = compute_spectrum(
     piso,
     prefactors=volume / (temperature * boltzmann_const),
     timestep=timestep,
+    # Drop the DC component to account for non-zero average pressure:
     include_zero_freq=False,
 )
 result = estimate_acint(spectrum, PadeModel([0, 2], [2]))
