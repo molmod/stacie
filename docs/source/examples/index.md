@@ -5,7 +5,7 @@ All the examples are also available as Jupyter notebooks and can be downloaded a
 > Gözdenur Toraman, Toon Verstraelen,
 > "Example Trajectory Data and Jupyter Notebooks Showing How to Compute Various Properties with STACIE"
 > June 2025
-> <https://doi.org/10.5281/zenodo.15543903>
+> <https://doi.org/10.5281/zenodo.15543902>
 
 :::{warning}
 The ZIP file will contain executable notebooks and simulation outputs used by the examples.

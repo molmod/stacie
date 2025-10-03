@@ -51,7 +51,7 @@ authors:
       Zwijnaarde, Belgium
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.15543903
+    value: 10.5281/zenodo.15543902
     description: Example usage of STACIE (Jupyter notebooks and trajectory data)
 preferred-citation:
   authors:
