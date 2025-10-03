@@ -3,7 +3,7 @@ endpoint: https://zenodo.org/api
 path_token: ~/.config/zenodo-org-token.txt
 metadata:
   title: Example Trajectory Data and Jupyter Notebooks Showing How to Compute Various Properties with STACIE
-  version: '1.0.0'
+  version: '1.0.1'
   keywords:
     - STACIE
     - molecular dynamics trajectories

@@ -26,7 +26,7 @@ static("zenodo.yaml", "zenodo.md")
 static("lammps_lj3d/")
 static("lammps_lj3d/sims/")
 glob("lammps_lj3d/sims/replica_????_part_??/")
-lammps_paths_txt = glob("lammps_lj3d/sims/replica_????_part_??/nve_*.txt")
+lammps_paths_txt = glob("lammps_lj3d/sims/replica_????_part_??/nv?_*.txt")
 lammps_paths_yaml = glob("lammps_lj3d/sims/replica_????_part_??/info.yaml")
 
 # OpenMM Molten Salt example

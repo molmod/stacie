@@ -60,3 +60,13 @@ This second set of notebooks use MD data from the following sources:
 
 - `lammps_lj3d`: LAMMPS simulations of Lennard-Jones 3D systems
 - `openmm_salt`: OpenMM simulations of molten salt systems
+
+== Revision history
+
+=== v1.0.1 (2025-10-03)
+
+Bugfix release: add missing `nvt_thermo.txt` files to the `lammps_lj3d` data.
+
+=== v1.0.0 (2025-06-26)
+
+Initial release of the STACIE example data and notebooks.
