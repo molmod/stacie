@@ -12,17 +12,7 @@ Take the following steps, starting from the root of the repository:
 
 ```bash
 cd docs
-./clean.sh
-./compile_html.sh
-./compile_pdf.sh
-cd ..
-git checkout gh-pages
-git rm -rf .
-cp -r docs/build/html/* docs/build/html/.gitignore docs/build/html/.nojekyll .
-cp docs/build/latex/stacie.pdf documentation.pdf
-git add .
-git status
-git commit --amend -m "Documentation update" -n
-git push origin gh-pages --force
-git checkout main
+./release_docs.sh
 ```
+
+Use this script with caution, as it will push changes to the `gh-pages` branch.
