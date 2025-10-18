@@ -3,7 +3,7 @@ endpoint: https://zenodo.org/api
 path_token: ~/.config/zenodo-org-token.txt
 metadata:
   title: Example Trajectory Data and Jupyter Notebooks Showing How to Compute Various Properties with STACIE
-  version: '1.0.1'
+  version: '1.0.2'
   keywords:
     - STACIE
     - molecular dynamics trajectories
@@ -11,7 +11,9 @@ metadata:
     - molten salt
     - Jupyter notebook
     - transport properties
-  license: cc-by-nc-sa-4.0
+  license:
+    - cc-by-sa-4.0
+    - lgpl-3.0-or-later
   copyright: Copyright (C) 2024-2025 The contributors of the STACIE Python Package
   resource_type: dataset
   publisher: Zenodo
@@ -70,5 +72,7 @@ metadata:
           - url: https://research.ugent.be/web/result/project/b54e6ff5-5f33-11ec-8b09-c5a2063e752c/details/bof-24j-2021-118-molecular-dynamics-modelling-of-lubricants-at-ultra-high-pressures-with-force-fields-derived-ab-initio/en
 path_readme: zenodo.md
 paths:
-  - README.pdf
-  - examples.zip
+- README.pdf
+- examples.zip
+- ../../LICENSE-CC-BY-SA-4.0.txt
+- ../../LICENSE-LGPL-3.0-or-later.txt

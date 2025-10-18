@@ -34,9 +34,11 @@ static("openmm_salt/", "openmm_salt/output/")
 openmm_paths_npz = glob("openmm_salt/output/*.npz")
 
 # Compile the README
-
 static("README.typ")
 compile_typst("README.typ")
+
+# Make the license files static.
+glob("../../LICENSE-*.txt")
 
 # Create inventory and zip file
 paths = [

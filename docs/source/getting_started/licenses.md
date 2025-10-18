@@ -1,6 +1,4 @@
-# Licenses
-
-## Source code license
+# License
 
 STACIE is free software: you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License
@@ -12,10 +10,14 @@ but WITHOUT ANY WARRANTY;
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License along with this program.
-If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
+STACIE's documentation is located in the `docs/` directory of its source tree
+and files under this directory are distributed under a choice of license:
+either the Creative Commons Attribution-ShareAlike 4.0 International license (CC BY-SA 4.0)
+or the GNU Lesser General Public License, version 3 or later (LGPL-v3+).
+The SPDX License Expression for the documentation is `CC-BY-SA-4.0 OR LGPL-3.0-or-later`.
 
-## Documentation license
+You should have received a copy of the CC BY-SA 4.0 and LGPL-v3+ licenses along with the source code.
+If not, see:
 
-STACIE's documentation is distributed under the
-[Creative Commons CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
+- <https://creativecommons.org/licenses/by-sa/4.0/>
+- <https://www.gnu.org/licenses/>

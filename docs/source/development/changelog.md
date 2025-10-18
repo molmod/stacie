@@ -9,6 +9,23 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 ## [Unreleased]
 
+### Changed
+
+- Switch to a choice of license (`CC-BY-SA-4.0 OR LGPL-3.0-or-later`) for the documentation only.
+  STACIE's code is still distributed under `LGPL-3.0-or-later`.
+
+### Fixed
+
+- Several documentation improvements:
+    - Clarify how the derivation of block-averaged velocities for diffusion and electrical conductivity,
+      using atomic positions (or dipole vectors) as input.
+    - Improve explanation on discarding the DC-component of the spectrum.
+    - Add more helpful comments on how to deal with unit conversion.
+    - Fixed a typo in the equation of the marginalization weights.
+- Repocard images were added.
+- Dataset metadata improvements.
+- Several other minor issues in documentation and tooling were fixed.
+
 (v1.0.0)=
 ## [1.0.0] - 2025-06-26
 

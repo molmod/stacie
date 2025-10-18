@@ -63,6 +63,10 @@ This second set of notebooks use MD data from the following sources:
 
 == Revision history
 
+=== v1.0.2 (2025-10-18)
+
+Switch to choice of license `CC-BY-SA-4.0 OR LGPL-3.0-or-later` and drop the non-commercial clause.
+
 === v1.0.1 (2025-10-03)
 
 Bugfix release: add missing `nvt_thermo.txt` files to the `lammps_lj3d` data.
