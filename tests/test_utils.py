@@ -35,8 +35,8 @@ def test_split_sequences():
 
 
 def test_block_average():
-    assert_equal(block_average([1, 2, 3, 4, 5, 6], 2), [[1.5, 3.5, 5.5]])
-    assert_equal(block_average([1, 2, 3, 4, 5, 6, 7], 2), [[1.5, 3.5, 5.5]])
+    assert_equal(block_average([1, 2, 3, 4, 5, 6], 2), [1.5, 3.5, 5.5])
+    assert_equal(block_average([1, 2, 3, 4, 5, 6, 7], 2), [1.5, 3.5, 5.5])
     assert_equal(block_average([[1, 2, 3, 4, 5, 6]], 2), [[1.5, 3.5, 5.5]])
     assert_equal(block_average([[1, 2, 3, 4, 5, 6, 7]], 2), [[1.5, 3.5, 5.5]])
     assert_equal(block_average([[1, 2, 3, 4], [5, 6, 7, 8]], 3), [[2.0], [6.0]])
@@ -49,6 +49,10 @@ def test_block_average():
             4,
         ),
         [[2.5, 6.5], [10.5, 14.5]],
+    )
+    assert_equal(
+        block_average([[[1, 2, 3, 4], [5, 6, 7, 8]], [[7, 8, 9, 10], [11, 12, 13, 14]]], 2),
+        [[[1.5, 3.5], [5.5, 7.5]], [[7.5, 9.5], [11.5, 13.5]]],
     )
 
 

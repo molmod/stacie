@@ -179,7 +179,8 @@ def block_average(sequences: NDArray[float], size: int) -> NDArray:
     Parameters
     ----------
     sequences
-        Input sequence(s) to be block averaged, with shape ``(nseq, nstep)``.
+        Input sequence(s) to be block averaged, with shape ``(*data_shape, nstep)``,
+        where ``data_shape`` represents any number of leading dimensions.
         A single sequence with shape ``(nstep, )`` is also accepted.
     size
         The block size
@@ -187,13 +188,14 @@ def block_average(sequences: NDArray[float], size: int) -> NDArray:
     Returns
     -------
     blav_sequences
-        Sequences of block averages, with shape ``(nseq, nstep // size)``
+        Sequences of block averages, with shape ``(*data_shape, nstep // size)``.
+        If needed a few trailing elements of ``sequences`` are discarded
+        to make ``nstep`` divisible by ``size``.
     """
     sequences = np.asarray(sequences)
-    if sequences.ndim == 1:
-        sequences.shape = (1, -1)
-    length = sequences.shape[1] // size
-    return sequences[:, : length * size].reshape(-1, length, size).mean(axis=2)
+    data_shape = sequences.shape[:-1]
+    nblock = sequences.shape[-1] // size
+    return sequences[..., : nblock * size].reshape(*data_shape, nblock, size).mean(axis=-1)
 
 
 class PositiveDefiniteError(ValueError):
