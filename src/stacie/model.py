@@ -227,25 +227,15 @@ class SpectrumModel:
             raise ValueError("Third or higher derivatives are not supported.")
         return result
 
-    def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float]
-    ) -> dict[str, NDArray[float]]:
-        """Return autocorrelation integral (and other properties) derived from the parameters.
+    def derive_props(self, props: dict[str, NDArray[float]]):
+        """Add autocorrelation integral (and other properties) derived from the parameters.
 
         Parameters
         ----------
-        pars
-            The parameters.
-        covar
-            The covariance matrix of the parameters.
-
-        Returns
-        -------
         props
-            A dictionary with additional properties,
-            whose calculation requires model-specific knowledge.
+            The properties dictionary, including the parameters and their uncertainties.
+            Subclasses may add additional properties to this dictionary.
         """
-        return {}
 
 
 def _convert_degrees(value: ArrayLike) -> NDArray[int]:
@@ -348,24 +338,23 @@ class ExpPolyModel(SpectrumModel):
             raise ValueError("Third or higher derivatives are not supported.")
         return results
 
-    def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float]
-    ) -> dict[str, NDArray[float]]:
-        """Return autocorrelation integral (and other properties) derived from the parameters."""
+    def derive_props(self, props: dict[str, NDArray[float]]):
+        """Add autocorrelation integral (and other properties) derived from the parameters."""
         # The logarithm of the autocorrelation integral is the first parameter,
         # which is assumed to be normally distributed.
-        log_acint = pars[0]
-        log_acint_var = covar[0, 0]
+        log_acint = props["pars"][0]
+        log_acint_var = props["pars_covar"][0, 0]
         # The autocorrelation integral is the exponential of the first parameter,
         # and is therefore log-normally distributed.
         acint = np.exp(log_acint + 0.5 * log_acint_var)
         acint_var = (np.exp(log_acint_var) - 1) * np.exp(2 * log_acint + log_acint_var)
-        return {
+        acint_props = {
             "log_acint": log_acint,
             "log_acint_var": log_acint_var,
             "acint": acint,
             "acint_var": acint_var,
         }
+        props.update(acint_props)
 
 
 @attrs.define
@@ -523,14 +512,13 @@ class PadeModel(SpectrumModel):
             raise ValueError("Third or higher derivatives are not supported.")
         return results
 
-    def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float]
-    ) -> dict[str, NDArray[float]]:
-        """Return autocorrelation integral (and other properties) derived from the parameters."""
-        return {
-            "acint": pars[0],
-            "acint_var": covar[0, 0],
+    def derive_props(self, props: dict[str, NDArray[float]]):
+        """Add autocorrelation integral (and other properties) derived from the parameters."""
+        acint_props = {
+            "acint": props["pars"][0],
+            "acint_var": props["pars_covar"][0, 0],
         }
+        props.update(acint_props)
 
 
 @attrs.define
@@ -541,38 +529,55 @@ class LorentzModel(PadeModel):
     `numer_degrees` = [0, 2] and `denom_degrees` = [2].
     Furthermore, it will only accept parameters that correspond
     to a well-defined exponential correlation time.
+
+    For too small cutoffs (only covering the maximum of the Lorentzian and not its decay),
+    estimates of the width of the Lorentzian, and thus the exponential correlation time,
+    become statistically very weak.
+    In this regime, also the assumption of maximum a posteriori probability (MAP) breaks down,
+    on which STACIE relies to fit the model and estimate parameter uncertainties.
+    A ratio of relative errors is monitored as a heuristic to detect when MAP cannot be trusted.
+    In the numerator, we have the relative error of the exponential correlation time,
+    in the denominator the relative error of the autocorrelation integral.
+    When this ratio is much larger than 1, the MAP cannot be relied opon.
+    This implementation uses the ratio in two ways:
+
+    1. When the ratio is larger than a threshold (default 100), the cutoff criterion is set to Inf.
+    2. The ratio times a weight (default ...) is added to the cutoff criterion otherwise.
+
+    Note that this is an empirical penalty to avoid MAP issues, not a rigourous detection.
+    By taking a ratio of relative errors, the penalty is dimensionless
+    and insensitive to the overall uncertainty of the spectrum.
+
+    The hyperparameters `ratio_weight` and `ratio_threshold` may be tuned
+    to adjust the sensitivity of the heuristic, but it is recommended to keep
+    their default values.
     """
 
-    relerr_threshold: float = attrs.field(default=0.1)
-    """A threshold for the relative error on the exponential correlation time.
+    ratio_weight: float = attrs.field(default=1.0)
+    """The penalty for the cutoff criterion is this weight times the ratio of relative errors."""
 
-    The relative error is defined as ratio of the standard deviation
-    to the mean of the correlation time.
+    ratio_threshold: float = attrs.field(default=100.0)
+    """A threshold for the ratio of relative errors used to set the cutoff criterion to Inf."""
 
-    To accept the current cutoff frequency, the relative error must be below this threshold.
-    This eliminates high-variance cases for which the maximum a posteriori estimate
-    tends to be a poor approximation.
-    """
-
+    # Hard-code the polynomial degrees of the Pade model.
     numer_degrees: NDArray[int] = attrs.field(init=False, factory=lambda: np.array([0, 2]))
     denom_degrees: NDArray[int] = attrs.field(init=False, factory=lambda: np.array([2]))
 
     @property
     def name(self):
-        return f"lorentz({self.relerr_threshold})"
+        return f"lorentz({self.ratio_weight:.1f}, {self.ratio_threshold:.1f})"
 
-    def derive_props(
-        self, pars: NDArray[float], covar: NDArray[float]
-    ) -> dict[str, NDArray[float]]:
-        """Return autocorrelation integral (and other properties) derived from the parameters.
+    def derive_props(self, props: dict[str, NDArray[float]]):
+        """Add autocorrelation integral (and other properties) derived from the parameters.
 
-        The exponential correlation time is derived from the parameters, if possible.
-        If not, or if the variance of the estimate is too large,
-        the "criterion" is set to infinity and the "msg" is set accordingly,
+        The exponential correlation time is derived from the parameters,
+        if fitted model has a maximum at zero frequency.
+        If not, the "criterion" is set to infinity and the "msg" is set accordingly,
         to discard the current fit from the average over the cutoff frequencies.
         """
-        result = super().derive_props(pars, covar)
+        super().derive_props(props)
         # Try to deduce the exponential correlation time from the parameters.
+        pars = props["pars"]
         if (
             # real correlation time
             pars[2] > 0
@@ -581,6 +586,7 @@ class LorentzModel(PadeModel):
         ):
             # The following estimates of the exponential correlation time and its variance
             # are only valid for small variances.
+            covar = props["pars_covar"]
             tau = np.sqrt(pars[2]) / (2 * np.pi)
             dtau_dp = 1 / (4 * np.pi * np.sqrt(pars[2]))
             tau_var = covar[2, 2] * dtau_dp**2
@@ -592,16 +598,24 @@ class LorentzModel(PadeModel):
                 "exp_simulation_time": 20 * tau * np.pi,
                 "exp_simulation_time_var": 20 * tau_var * np.pi,
             }
-            result.update(tau_props)
-        # If we fail to find the exponential correlation time with a decent relative error,
-        # we discard the entire estimate at this cutoff frequency.
-        if "corrtime_exp" not in result:
-            result["criterion"] = np.inf
-            result["msg"] = "No correlation time estimate available."
-        elif result["corrtime_exp_var"] ** 0.5 > result["corrtime_exp"] * self.relerr_threshold:
-            result["criterion"] = np.inf
-            result["msg"] = "Variance of the correlation time estimate is too large."
-        return result
+            props.update(tau_props)
+            if "criterion" in props:
+                # Empirical penalty to eliminate or down-weight cutoffs
+                # for which the maximum a posteriori approximation is expected to break down.
+                relerr_corrtime = tau_var**0.5 / tau
+                relerr_acint = props["acint_var"] ** 0.5 / props["acint"]
+                if relerr_corrtime > self.ratio_threshold * relerr_acint:
+                    props["criterion"] = np.inf
+                    props["msg"] = "rel.err. tau_exp > 100 x rel.err. ac integral"
+                else:
+                    ratio = relerr_corrtime / relerr_acint
+                    props["criterion"] += self.ratio_weight * ratio
+
+        else:
+            # If we fail to find the exponential correlation time with a decent relative error,
+            # we discard the entire estimate at this cutoff frequency.
+            props["criterion"] = np.inf
+            props["msg"] = "No correlation time estimate available."
 
 
 def guess(
