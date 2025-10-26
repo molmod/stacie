@@ -542,7 +542,7 @@ class LorentzModel(PadeModel):
     This implementation uses the ratio in two ways:
 
     1. When the ratio is larger than a threshold (default 100), the cutoff criterion is set to Inf.
-    2. The ratio times a weight (default ...) is added to the cutoff criterion otherwise.
+    2. The ratio times a weight (default 1.0) is added to the cutoff criterion otherwise.
 
     Note that this is an empirical penalty to avoid MAP issues, not a rigorous detection.
     By taking a ratio of relative errors, the penalty is dimensionless
