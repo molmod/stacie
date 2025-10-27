@@ -190,6 +190,4 @@ from stacie import LorentzModel
 model = LorentzModel()
 ```
 
-This model is identified as `lorentz(1.0, 100.0)` in STACIE's screen output and plots,
-where `1.0` is a constant weight factor in the penalty and
-`100.0` is the threshold for the ratio of relative errors.
+This model is identified as `lorentz()` in STACIE's screen output and plots.

@@ -553,10 +553,10 @@ class LorentzModel(PadeModel):
     their default values.
     """
 
-    ratio_weight: float = attrs.field(default=1.0)
+    ratio_weight: float = attrs.field(default=1.0, kw_only=True)
     """The penalty for the cutoff criterion is this weight times the ratio of relative errors."""
 
-    ratio_threshold: float = attrs.field(default=100.0)
+    ratio_threshold: float = attrs.field(default=100.0, kw_only=True)
     """A threshold for the ratio of relative errors used to set the cutoff criterion to Inf."""
 
     # Hard-code the polynomial degrees of the Pade model.
@@ -565,7 +565,7 @@ class LorentzModel(PadeModel):
 
     @property
     def name(self):
-        return f"lorentz({self.ratio_weight:.1f}, {self.ratio_threshold:.1f})"
+        return "lorentz()"
 
     def derive_props(self, props: dict[str, NDArray[float]]):
         """Add autocorrelation integral (and other properties) derived from the parameters.
@@ -606,7 +606,9 @@ class LorentzModel(PadeModel):
                 relerr_acint = props["acint_var"] ** 0.5 / props["acint"]
                 if relerr_corrtime > self.ratio_threshold * relerr_acint:
                     props["criterion"] = np.inf
-                    props["msg"] = "rel.err. tau_exp > 100 x rel.err. ac integral"
+                    props["msg"] = (
+                        f"rel.err. tau_exp > {self.ratio_threshold:.1e} x rel.err. ac integral"
+                    )
                 else:
                     ratio = relerr_corrtime / relerr_acint
                     props["criterion"] += self.ratio_weight * ratio

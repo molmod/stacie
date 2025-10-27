@@ -13,6 +13,9 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 - Switch to a choice of license (`CC-BY-SA-4.0 OR LGPL-3.0-or-later`) for the documentation only.
   STACIE's code is still distributed under `LGPL-3.0-or-later`.
+- Improved penalty in the `LorentzModel` to exclude and down-weight results from frequency cutoffs
+  with a very high relative error on the estimated exponential correlation time.
+  In this regime, the maximum a posteriori estimate of uncertainty is not reliable.
 
 ### Fixed
 
