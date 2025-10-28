@@ -530,22 +530,22 @@ class LorentzModel(PadeModel):
     Furthermore, it will only accept parameters that correspond
     to a well-defined exponential correlation time.
 
-    For too small cutoffs (only covering the maximum of the Lorentzian and not its decay),
-    estimates of the width of the Lorentzian, and thus the exponential correlation time,
-    become statistically very weak.
-    In this regime, also the assumption of maximum a posteriori probability (MAP) breaks down,
-    on which STACIE relies to fit the model and estimate parameter uncertainties.
-    A ratio of relative errors is monitored as a heuristic to detect when MAP cannot be trusted.
-    In the numerator, we have the relative error of the exponential correlation time,
-    in the denominator the relative error of the autocorrelation integral.
-    When this ratio is much larger than 1, the MAP cannot be relied opon.
+    For too small cutoffs (covering only the peak of the Lorentzian and not its decay),
+    the estimates of the Lorentzian width, and consequently the exponential correlation time,
+    become statistically unreliable.
+    In this regime, the assumption of maximum a posteriori probability (MAP)
+    on which STACIE relies to fit the model and estimate parameter uncertainties, also breaks down.
+    A ratio of relative errors is monitored as a heuristic indicator for detecting unreliable MAP estimates.
+    The numerator corresponds to the relative error of the exponential correlation time,
+    while the denominator represents the relative error of the autocorrelation integral.
+    When this ratio is much larger than 1, the MAP cannot be relied upon.
     This implementation uses the ratio in two ways:
 
-    1. When the ratio is larger than a threshold (default 100), the cutoff criterion is set to Inf.
-    2. The ratio times a weight (default 1.0) is added to the cutoff criterion otherwise.
+    1. When the ratio exceeds a predefined threshold (default value 100), the cutoff criterion is set to infinity.
+    2. If the ratio remains below this threshold, the ratio times a weight (default value 1.0) is added to the cutoff criterion.
 
-    Note that this is an empirical penalty to avoid MAP issues, not a rigorous detection.
-    By taking a ratio of relative errors, the penalty is dimensionless
+    Note that this is an empirical penalty to mitigate MAP-related issues rather than a rigorous detection method.
+    Because the penalty is expressed as a ratio of relative errors, it is dimensionless
     and insensitive to the overall uncertainty of the spectrum.
 
     The hyperparameters `ratio_weight` and `ratio_threshold` may be tuned
