@@ -239,5 +239,5 @@ plot_extras(axs, uc, result)
 # %%
 if abs(result.acint - 2.47e-4) > 2e-5:
     raise ValueError(f"Wrong acint: {result.acint:.4e}")
-if abs(result.corrtime_exp - 10.408) > 1e-1:
+if abs(result.corrtime_exp - 10.166) > 1e-1:
     raise ValueError(f"Wrong corrtime_exp: {result.corrtime_exp:.4e}")

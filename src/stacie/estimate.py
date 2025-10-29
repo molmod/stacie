@@ -503,7 +503,7 @@ def fit_model_spectrum(
 
 def _finalize_props(props: dict[str, NDArray | float], model: SpectrumModel):
     """Add remaining properties in-place."""
-    props.update(model.derive_props(props["pars"], props["pars_covar"]))
+    model.derive_props(props)
     std_props = {}
     for key, value in props.items():
         if key.endswith("_var"):

@@ -164,13 +164,27 @@ The implementation of the Lorentz model has the following advantages over the eq
 - If no exponential correlation time can be computed,
   i.e. when $q_2 \le 0$ and $p_0 q_2 \le p_2$,
   the fit is not retained for the final average over all cutoff grid points.
-- If the relative error of the exponential correlation time exceeds a certain threshold,
-  which is set to $10 \%$ by default,
-  the fit is not retained for the final average over all cutoff grid points.
+- After the optimization of the model parameters at a given frequency cutoff,
+  the following two heuristics are applied to exclude or downweight fits
+  with a high relative error of the exponential correlation time:
 
-The last two points weed out poor fits (typically at too low cutoff frequencies)
-for which the maximum a posteriori (MAP) estimate
-and the Laplace approximation of the posterior distribution tend to be unreliable.
+    - If the relative error of the exponential correlation time is 100 times larger
+      than that of the autocorrelation integral, the fit is discarded.
+    - In all other cases, a penalty is added to the cutoff criterion,
+      which is proportional to the ratio of the relative error of the exponential correlation time
+      and the autocorrelation integral.
+
+  This heuristic is based on the observation that large relative errors of
+  the exponential correlation time often indicate poor fits for which the MAP estimate
+  and the Laplace approximation of the posterior distribution tend to be unreliable.
+  By taking a ratio of relative errors, the penalty is dimensionless
+  and insensitive to the overall uncertainty of the spectrum.
+
+  The result of these two heuristics is that the final estimate of the exponential correlation time,
+  after averaging over all frequency cutoffs, is more robust and reliable.
+
+  Note that the hyperparameters of the penalty can be altered, but it is recommended to keep
+  their default values.
 
 To construct this model, you can create an instance of the `LorentzModel` class as follows:
 
@@ -179,5 +193,4 @@ from stacie import LorentzModel
 model = LorentzModel()
 ```
 
-This model is identified as `lorentz(0.1)` in STACIE's screen output and plots,
-where `0.1` is the relative error threshold for the exponential correlation time.
+This model is identified as `lorentz()` in STACIE's screen output and plots.
