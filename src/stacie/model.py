@@ -228,7 +228,7 @@ class SpectrumModel:
         return result
 
     def derive_props(self, props: dict[str, NDArray[float]]):
-        """Add autocorrelation integral (and other properties) derived from the parameters.
+        """Add the autocorrelation integral (and other properties) derived from the parameters.
 
         Parameters
         ----------
@@ -339,7 +339,7 @@ class ExpPolyModel(SpectrumModel):
         return results
 
     def derive_props(self, props: dict[str, NDArray[float]]):
-        """Add autocorrelation integral (and other properties) derived from the parameters."""
+        """Add the autocorrelation integral (and other properties) derived from the parameters."""
         # The logarithm of the autocorrelation integral is the first parameter,
         # which is assumed to be normally distributed.
         log_acint = props["pars"][0]
@@ -513,7 +513,7 @@ class PadeModel(SpectrumModel):
         return results
 
     def derive_props(self, props: dict[str, NDArray[float]]):
-        """Add autocorrelation integral (and other properties) derived from the parameters."""
+        """Add the autocorrelation integral (and other properties) derived from the parameters."""
         acint_props = {
             "acint": props["pars"][0],
             "acint_var": props["pars_covar"][0, 0],
@@ -533,18 +533,19 @@ class LorentzModel(PadeModel):
     For too small cutoffs (covering only the peak of the Lorentzian and not its decay),
     the estimates of the Lorentzian width, and consequently the exponential correlation time,
     become statistically unreliable.
-    In this regime, the assumption of maximum a posteriori probability (MAP)
+    In this regime, the assumption of maximum a posteriori probability (MAP),
     on which STACIE relies to fit the model and estimate parameter uncertainties, also breaks down.
-    A ratio of relative errors is monitored as a heuristic indicator for detecting unreliable MAP estimates.
-    The numerator corresponds to the relative error of the exponential correlation time,
-    while the denominator represents the relative error of the autocorrelation integral.
-    When this ratio is much larger than 1, the MAP cannot be relied upon.
+    Unreliable MAP estimates are inferred from
+    the relative error of the exponential correlation time
+    divided by the relative error of the autocorrelation integral.
     This implementation uses the ratio in two ways:
 
-    1. When the ratio exceeds a predefined threshold (default value 100), the cutoff criterion is set to infinity.
-    2. If the ratio remains below this threshold, the ratio times a weight (default value 1.0) is added to the cutoff criterion.
+    1. When the ratio exceeds a predefined threshold (default value 100),
+       the cutoff criterion is set to infinity.
+    2. If the ratio remains below this threshold,
+       the ratio times a weight (default value 1.0) is added to the cutoff criterion.
 
-    Note that this is an empirical penalty to mitigate MAP-related issues rather than a rigorous detection method.
+    Note that this is an empirical penalty to mitigate MAP-related issues.
     Because the penalty is expressed as a ratio of relative errors, it is dimensionless
     and insensitive to the overall uncertainty of the spectrum.
 
@@ -568,10 +569,10 @@ class LorentzModel(PadeModel):
         return "lorentz()"
 
     def derive_props(self, props: dict[str, NDArray[float]]):
-        """Add autocorrelation integral (and other properties) derived from the parameters.
+        """Add the autocorrelation integral (and other properties) derived from the parameters.
 
         The exponential correlation time is derived from the parameters,
-        if fitted model has a maximum at zero frequency.
+        if the fitted model has a maximum at zero frequency.
         If not, the "criterion" is set to infinity and the "msg" is set accordingly,
         to discard the current fit from the average over the cutoff frequencies.
         """
