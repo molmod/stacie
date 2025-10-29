@@ -33,10 +33,10 @@ repos:
   hooks:
     - id: check-github-workflows
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.14.1
+  rev: v0.14.2
   hooks:
     - id: ruff-format
-    - id: ruff
+    - id: ruff-check
       args: ["--fix", "--show-fixes"]
 - repo: https://github.com/srstevenson/nb-clean
   rev: "4.0.1"
