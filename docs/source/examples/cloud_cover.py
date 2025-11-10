@@ -2,8 +2,8 @@
 # # Correlation Time Analysis of Cloud Cover Data
 #
 # This example is inspired by the work of P. A. Jones {cite:p}`jones_1992_cloudcover`
-# on the analysis of time (and spatial) correlations in cloud cover data.
-# Jones observed an exponential decay of the time correlation function,
+# on the analysis of temporal (and spatial) correlations in cloud cover data.
+# Jones observed an exponential decay of the autocorrelation function,
 # with half-life times ranging from 5 to 40 hours.
 #
 # Here, we analyze a time series of cloud cover data obtained from
@@ -38,7 +38,7 @@ mpl.rc_file("matplotlibrc")
 # %% [markdown]
 # ## Cloud Cover Data
 #
-# Cloud cover is expressed here as a fraction of the sky covered by clouds,
+# In this example, cloud cover is expressed as the fraction of the sky covered by clouds,
 # ranging from 0 (clear sky) to 1 (completely overcast).
 
 # %%
@@ -98,7 +98,7 @@ def plot_histogram():
 plot_histogram()
 
 # %% [markdown]
-# This histogram reflects the typical weather patterns in Belgium,
+# This histogram reflects the typical weather pattern in Belgium,
 # with plenty of cloudy days.
 # This is also reflected in the normalized standard deviation (NS),
 # as defined by Jones {cite:p}`jones_1992_cloudcover`:
@@ -121,9 +121,18 @@ print(f"Normalized std. dev.: {cc_ns:.3f}")
 #
 # Before applying STACIE to the data, let's first compute and plot the
 # autocorrelation function (ACF) directly.
+#
+# Mind the normalization: due to the zero padding in `np.correlate`,
+# the number of terms contributing to the ACF decreases with lag time.
+# Furthermore, the ACF is not normalized to 1 in this plot,
+# as we want to keep the amplitude information.
 
 
 # %%
+AMP_EXP = 0.0347  # From STACIE Lorentz B parameter, see below.
+TAU_EXP = 57.6  # From STACIE corrtime_exp, see below.
+
+
 def plot_acf():
     plt.close("acf")
     _, ax = plt.subplots(num="acf")
@@ -131,9 +140,14 @@ def plot_acf():
     acf = np.correlate(delta, delta, mode="same")
     nkeep = acf.size // 2
     acf = acf[nkeep:] / (len(acf) - np.arange(nkeep))
-    acf /= acf[0]
     time = np.arange(240)
     ax.plot(time, acf[:240], "C0-")
+    ax.plot(
+        time,
+        AMP_EXP * np.exp(-time / TAU_EXP),
+        "C1--",
+        label=r"exp(-t/\tau_\mathrm{exp})",
+    )
     xticks = np.arange(0, 241, 24)
     ax.set_xlim(-1, 240)
     ax.set_xticks(xticks)
@@ -150,9 +164,14 @@ plot_acf()
 # resulting in weak correlations at multiples of 24 hours.
 # Superimposed on these diurnal effects,
 # an overall exponential decay of the ACF can be observed.
-# However, it is difficult to fit an exponential function to the ACF due to the ripples.
-# Although the conventional approach of fitting an exponential decay curve provides a rough estimate,
-# we will use STACIE instead to perform a more robust analysis of the correlation time.
+# However, it is difficult to fit an exponential function to the ACF
+# due to (i) the ripples and (ii) non-exponential short-time effects.
+# Hence, fitting an exponential function can at best provide
+# a rough estimate of the correlation time.
+
+# Below, it is shown how to use STACIE instead to perform a more robust analysis.
+# The exponential decay shown in the plot is derived from STACIE's output below.
+# It is only expected to be representative at long lag times.
 
 # %% [markdown]
 # ## Autocorrelation Time
@@ -185,6 +204,16 @@ result = estimate_acint(spectrum, LorentzModel(), verbose=True, uc=uc)
 # The exponential correlation time, which is about 60 hours,
 # is the longest because it captures the slowest relaxation process.
 # The integrated correlation time is notably shorter at about 20 hours.
+#
+# In the code below, we also derive the $B$ parameter of the Lorentz model,
+# which has been used to plot the exponential decay in the ACF above.
+
+# %%
+pars = result.props["pars"]
+tau_exp = result.corrtime_exp
+amp_exp = (pars[0] - pars[1] / pars[2]) / (2 * tau_exp)
+print(f"TAU_EXP = {tau_exp:.4f} h")
+print(f"AMP_EXP = {amp_exp:.4f}")
 
 # %% [markdown]
 # The plots below show the fitted spectrum and additional diagnostics.
