@@ -31,6 +31,7 @@ from stacie import (
     plot_extras,
     plot_fitted_spectrum,
 )
+from utils import compute_msds
 
 # %%
 mpl.rc_file("matplotlibrc")
@@ -75,6 +76,7 @@ ALPHA = 2 * np.pi / 3
 ANGLES = np.arange(3) * ALPHA
 EV = sc.value("electron volt") / sc.value("atomic unit of energy")
 AMPLITUDE = 0.2 * EV
+ANGSTROM = 1e-10 / sc.value("atomic unit of length")
 
 
 def potential_energy_force(coords: ArrayLike) -> tuple[NDArray, NDArray]:
@@ -133,10 +135,10 @@ def plot_pes():
     ys = np.linspace(-20, 20, 201)
     coords = np.array(np.meshgrid(xs, ys)).transpose(1, 2, 0)
     energies = potential_energy_force(coords)[0]
-    cf = ax.contourf(xs, ys, energies / EV, levels=20)
+    cf = ax.contourf(xs / ANGSTROM, ys / ANGSTROM, energies / EV, levels=20)
     ax.set_aspect("equal", "box")
-    ax.set_xlabel("x [a$_0$]")
-    ax.set_ylabel("y [a$_0$]")
+    ax.set_xlabel("x [Å]")
+    ax.set_ylabel("y [Å]")
     ax.set_title("Potential Energy Surface")
     fig.colorbar(cf, ax=ax, label="Energy [eV]")
 
@@ -172,10 +174,13 @@ class Trajectory:
     """The spacing between two recorded time steps."""
 
     coords: NDArray = attrs.field()
-    """The time-dependent particle positions."""
+    """The time-dependent particle positions, with shape `(natom, 2, nstep)`.
+
+    The last index is used for time steps, of which only every `block_size` step is recorded.
+    """
 
     vels: NDArray = attrs.field()
-    """The time-dependent particle velocities.
+    """The time-dependent particle velocities, with shape `(natom, 2, nstep)`.
 
     If block_size is larger than 1,
     this attribute contains the block-averaged velocity.
@@ -192,16 +197,16 @@ class Trajectory:
         """Construct an empty trajectory object."""
         return cls(
             timestep,
-            np.zeros((nstep, *shape, 2)),
-            np.zeros((nstep, *shape, 2)),
-            np.zeros((nstep, *shape)),
-            np.zeros((nstep, *shape)),
+            np.zeros((*shape, 2, nstep)),
+            np.zeros((*shape, 2, nstep)),
+            np.zeros((*shape, nstep)),
+            np.zeros((*shape, nstep)),
         )
 
     @property
     def nstep(self) -> int:
         """The number of time steps."""
-        return self.coords.shape[0]
+        return self.coords.shape[-1]
 
 
 def integrate(coords: ArrayLike, vels: ArrayLike, nstep: int, block_size: int = 1):
@@ -239,10 +244,10 @@ def integrate(coords: ArrayLike, vels: ArrayLike, nstep: int, block_size: int = 
         vels_block += vels
         if istep % block_size == block_size - 1:
             itraj = istep // block_size
-            traj.coords[itraj] = coords
-            traj.vels[itraj] = vels_block / block_size
-            traj.potential_energies[itraj] = energies
-            traj.kinetic_energies[itraj] = (0.5 * MASS) * (vels**2).sum(axis=-1)
+            traj.coords[..., itraj] = coords
+            traj.vels[..., itraj] = vels_block / block_size
+            traj.potential_energies[..., itraj] = energies
+            traj.kinetic_energies[..., itraj] = (0.5 * MASS) * (vels**2).sum(axis=-1)
             vels_block = 0
     return traj
 
@@ -266,11 +271,15 @@ def demo_energy_conservation():
     plt.close("energy")
     _, ax = plt.subplots(num="energy")
     times = np.arange(traj.nstep) * traj.timestep
-    ax.plot(times, traj.potential_energies, label="potential")
-    ax.plot(times, traj.potential_energies + traj.kinetic_energies, label="total")
+    ax.plot(times / PICOSECOND, traj.potential_energies / EV, label="potential")
+    ax.plot(
+        times / PICOSECOND,
+        (traj.potential_energies + traj.kinetic_energies) / EV,
+        label="total",
+    )
     ax.set_title("Energy Conservation Demo")
-    ax.set_xlabel("Time [a.u. of time]")
-    ax.set_ylabel(r"Energy [E$_\mathrm{h}$]")
+    ax.set_xlabel("Time [ps]")
+    ax.set_ylabel("Energy [eV]")
     ax.legend()
 
 
@@ -296,26 +305,34 @@ def demo_chaos():
     plt.close("chaos")
     _, ax = plt.subplots(num="chaos")
     ax.plot([0], [0], "o", color="k", label="Initial position")
-    ax.plot(traj.coords[:, 0, 0], traj.coords[:, 0, 1], color="C1", label="Trajectory 1")
     ax.plot(
-        traj.coords[:, 1, 0],
-        traj.coords[:, 1, 1],
+        traj.coords[0, 0] / ANGSTROM,
+        traj.coords[0, 1] / ANGSTROM,
+        color="C1",
+        label="Trajectory 1",
+    )
+    ax.plot(
+        traj.coords[1, 0] / ANGSTROM,
+        traj.coords[1, 1] / ANGSTROM,
         color="C3",
         ls=":",
         label="Trajectory 2",
     )
     ax.set_aspect("equal", "box")
-    ax.set_xlabel("x [a$_0$]")
-    ax.set_ylabel("y [a$_0$]")
+    ax.set_xlabel("x [Å]")
+    ax.set_ylabel("y [Å]")
     ax.legend()
     ax.set_title("Two Trajectories")
 
     plt.close("chaos_dist")
     _, ax = plt.subplots(num="chaos_dist")
     times = np.arange(traj.nstep) * traj.timestep
-    ax.semilogy(times, np.linalg.norm(traj.coords[:, 0] - traj.coords[:, 1], axis=-1))
-    ax.set_xlabel("Time [a.u. of time]")
-    ax.set_ylabel("Interparticle distance [a$_0$]")
+    ax.semilogy(
+        times / PICOSECOND,
+        np.linalg.norm(traj.coords[0] - traj.coords[1], axis=0) / ANGSTROM,
+    )
+    ax.set_xlabel("Time [ps]")
+    ax.set_ylabel("Interparticle distance [Å]")
     ax.set_title("Slow Separation")
 
 
@@ -367,14 +384,14 @@ def demo_stacie(block_size: int = 1):
     plt.close(f"trajs_{block_size}")
     _, ax = plt.subplots(num=f"trajs_{block_size}", figsize=(6, 6))
     for i in range(natom):
-        ax.plot(traj.coords[:, i, 0], traj.coords[:, i, 1])
+        ax.plot(traj.coords[i, 0], traj.coords[i, 1])
     ax.set_aspect("equal", "box")
     ax.set_xlabel("x [a$_0$]")
     ax.set_ylabel("y [a$_0$]")
     ax.set_title(f"{natom} Newtonian Pseudo-Random Walks")
 
     spectrum = compute_spectrum(
-        traj.vels.transpose(1, 2, 0).reshape(2 * natom, traj.nstep),
+        traj.vels.reshape(2 * natom, traj.nstep),
         timestep=traj.timestep,
     )
 
@@ -408,11 +425,11 @@ def demo_stacie(block_size: int = 1):
     plt.close(f"extras_{block_size}")
     _, axs = plt.subplots(2, 2, num=f"extras_{block_size}")
     plot_extras(axs, uc, result)
-    return result
+    return traj, result
 
 
 # %%
-result_1 = demo_stacie()
+traj_1, result_1 = demo_stacie()
 
 # %% [markdown]
 # The spectrum has several peaks related to oscillations of the particles
@@ -464,7 +481,7 @@ print(np.pi * result_1.corrtime_exp / (10 * TIMESTEP))
 # Let's use a block size of 60 to stay on the safe side.
 
 # %%
-result_60 = demo_stacie(60)
+traj_60, result_60 = demo_stacie(60)
 
 # %% [markdown]
 # As expected, there are no significant changes in the results.
@@ -481,6 +498,53 @@ print(f"corrtime_int = {result_60.corrtime_int / PICOSECOND:.3f} ps")
 # and is now closer to the exponential value.
 # Taking block averages removes the fastest oscillations,
 # causing the integrated autocorrelation time to be dominated by slow diffusive motion.
+
+# %% [markdown]
+# ## Comparison to mean-squared displacement analysis
+#
+# This section does not perform a full regression to derive the diffusion coefficient
+# from the mean-squared displacement (MSD) data.
+# Instead, it simply computes the MSDs from the trajectories,
+# and plots them together with the expected slope from STACIE's analysis above,
+# to confirm that STACIE's results are consistent with the MSD analysis.
+# This avoids the pernicious choices required for a full regression analysis of the MSD data.
+
+
+# %%
+def plot_msd(traj, result, lags, time_step):
+    # Integer time lags
+    lag_times = lags * time_step
+    natom = traj.coords.shape[0]
+    msds = compute_msds(
+        traj.coords.reshape(natom * 2, traj.nstep),
+        lags,
+    )
+    plt.close("msd")
+    _, ax = plt.subplots(num="msd")
+    ax.plot(
+        lag_times / PICOSECOND, msds / ANGSTROM**2, "C0o", label="MSD from trajectories"
+    )
+    ax.plot(
+        lag_times / PICOSECOND,
+        2 * result.acint * lag_times / ANGSTROM**2,
+        "C1-",
+        label="Expected slope",
+    )
+    ax.set_xlabel("Lag time [ps]")
+    ax.set_ylabel("Mean-squared displacement [Å$^2$]")
+
+
+lags = np.unique(np.logspace(1, 3, 50).astype(int))
+plot_msd(traj_1, result_1, lags, TIMESTEP)
+
+# %% [markdown]
+# As expected, the simple comparison confirms that STACIE's results
+# are consistent with the MSD analysis.
+# For sufficiently large lag times, the MSDs increase linearly with time,
+# with a slope that corresponds to the diffusion coefficient derived with STACIE.
+#
+# Note that STACIE only estimates the slope of a straight line fitted to the MSD curve.
+# It does not provide information on the intercept.
 
 # %%  [markdown]
 # ## Regression Tests

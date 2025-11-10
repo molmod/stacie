@@ -15,10 +15,13 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 ## [1.1.0] - 2025-11-10
 
 Improved Lorentz model, with a more robust estimate of the exponential correlation time and its uncertainty.
+Improved examples.
 
 ### Added
 
 - Cloud cover example
+- Comparison between STACIE's diffusion coefficient and a more conventional MSD analysis
+  in the surface diffusion example.
 
 ### Changed
 

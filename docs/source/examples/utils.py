@@ -11,7 +11,36 @@ from scipy.stats import chi2
 __all__ = (
     "plot_instantaneous_percentiles",
     "plot_cumulative_temperature_histogram",
+    "compute_msds",
 )
+
+
+def compute_msds(series: NDArray[float], lags: NDArray[int]) -> NDArray[float]:
+    """Compute the mean squared displacements of one or more time series.
+
+    Parameters
+    ----------
+    series
+        The time series to compute the MSDs for, with shape `(*prefix, nstep)`.
+        It is assumed that the last index corresponds to time.
+    lags
+        The lag times to consider (in number of time steps), with shape `(nlag,)`.
+
+    Returns
+    -------
+    NDArray[float]
+        The mean squared displacements for the specified lag times,
+        with shape `(nlag,)`.
+    """
+    series = np.asarray(series)
+    lags = np.asarray(lags)
+    if lags.ndim != 1:
+        raise ValueError("lags must be a 1D array")
+    msds = np.zeros(lags.shape)
+    for i, lag in enumerate(lags):
+        diffs = np.diff(series[..., ::lag], axis=-1)
+        msds[i] = np.mean(diffs**2)
+    return msds
 
 
 def plot_instantaneous_percentiles(
