@@ -512,17 +512,30 @@ print(f"corrtime_int = {result_60.corrtime_int / PICOSECOND:.3f} ps")
 
 # %%
 def plot_msd(traj, result, lags, time_step):
-    # Integer time lags
+    """Plot mean-squared displacements from trajectory and STACIE result.
+
+    Parameters
+    ----------
+    traj
+        The trajectory object.
+    result
+        The STACIE result object.
+    lags
+        The integer lag times (in number of (block) time steps)
+        for which to compute the MSDs.
+    time_step
+        The time step size of the trajectory, possibly accounting for the block size.
+    """
     lag_times = lags * time_step
     natom = traj.coords.shape[0]
-    msds = compute_msds(
-        traj.coords.reshape(natom * 2, traj.nstep),
-        lags,
-    )
+    msds = compute_msds(traj.coords.reshape(natom * 2, traj.nstep), lags)
     plt.close("msd")
     _, ax = plt.subplots(num="msd")
     ax.plot(
-        lag_times / PICOSECOND, msds / ANGSTROM**2, "C0o", label="MSD from trajectories"
+        lag_times / PICOSECOND,
+        msds / ANGSTROM**2,
+        "C0o",
+        label="MSD from trajectories",
     )
     ax.plot(
         lag_times / PICOSECOND,
