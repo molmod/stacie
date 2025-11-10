@@ -33,6 +33,10 @@ lammps_paths_yaml = glob("lammps_lj3d/sims/replica_????_part_??/info.yaml")
 static("openmm_salt/", "openmm_salt/output/")
 openmm_paths_npz = glob("openmm_salt/output/*.npz")
 
+# Cloud cover example data
+static("cloud-cover/download.sh")
+cloudcover_paths = glob("cloud-cover/*.csv")
+
 # Compile the README
 static("README.typ")
 compile_typst("README.typ")
@@ -46,6 +50,7 @@ paths = [
     *lammps_paths_txt,
     *lammps_paths_yaml,
     *openmm_paths_npz,
+    *cloudcover_paths,
 ]
 make_inventory(*paths, "inventory.txt")
 zip_inventory("inventory.txt", "examples.zip")

@@ -9,12 +9,23 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 ## [Unreleased]
 
+(no changes yet)
+
+(v1.1.0)=
+## [1.1.0] - 2025-11-10
+
+Improved Lorentz model, with a more robust estimate of the exponential correlation time and its uncertainty.
+
+### Added
+
+- Cloud cover example
+
 ### Changed
 
 - The license of the documentation has been updated to a choice of license
   (`CC-BY-SA-4.0 OR LGPL-3.0-or-later`).
   STACIE's code is still distributed under a single `LGPL-3.0-or-later` license.
-- The penalty in the `LorentzModel` has been improved to exclude and downweight results
+- The penalty in the `LorentzModel` has been improved to exclude and down-weight results
   from frequency cutoffs with a high relative error of the estimated exponential correlation time.
   In this regime, the maximum a posteriori estimate of uncertainty is not reliable.
 

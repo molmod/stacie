@@ -15,3 +15,10 @@ See the `README.md` file in each directory for more details.
 In addition, the top-level directory contains a `plan.py` script to archive the examples,
 Jupyter notebooks, and data files into a single ZIP file for upload to Zenodo.
 (This is only relevant for STACIE developers.)
+
+## Cloud cover data
+
+The cloud cover data used in the `cloud-cover.py` example is obtained from Open-Meteo:
+<https://open-meteo.com/en/docs/historical-weather-api>\
+
+A script to retrieve the data is provided in `docs/data/cloud-cover/download.sh`.

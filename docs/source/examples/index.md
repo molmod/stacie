@@ -54,6 +54,15 @@ Some notebooks also use helper functions from the [`utils.py`](utils.py) module.
 utils.py
 ```
 
+To illustrate the applicability of STACIE outside the field of molecular simulations,
+we also provide an example analyzing cloud cover data:
+
+```{toctree}
+:maxdepth: 1
+
+cloud_cover.py
+```
+
 In addition to the worked examples in STACIE's documentation,
 we also recommend checking out the AutoCorrelation Integral Drill (ACID) Test Set,
 with which we have validated STACIE's performance:

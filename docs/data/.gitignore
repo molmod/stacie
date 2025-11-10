@@ -6,3 +6,4 @@ matplotlibrc
 preprocessed
 utils.py
 README.pdf
+cloud-cover/*.csv
