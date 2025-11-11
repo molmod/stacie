@@ -62,8 +62,8 @@ docs = [
     "sphinx-tippy",
     "sphinxcontrib-bibtex",
     "sphinxcontrib-svg2pdfconverter",
-    "stepup>=3.1.1",
-    "stepup-reprep>=3.1.4",
+    "stepup>=3.1.2",
+    "stepup-reprep>=3.1.5",
 ]
 tests = [
     "pytest",

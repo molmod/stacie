@@ -34,7 +34,7 @@ static("openmm_salt/", "openmm_salt/output/")
 openmm_paths_npz = glob("openmm_salt/output/*.npz")
 
 # Cloud cover example data
-static("cloud-cover/download.sh")
+static("cloud-cover/", "cloud-cover/download.sh")
 cloudcover_paths = glob("cloud-cover/*.csv")
 
 # Compile the README
