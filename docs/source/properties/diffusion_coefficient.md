@@ -4,11 +4,11 @@ The diffusion coefficient (or diffusivity) of a set of $N$ particles in $d$ dime
 
 $$
 D = \frac{1}{N\,d} \frac{1}{2}\int_{-\infty}^{+\infty}
-    \sum_{n=1}^N \sum_{i=1}^{d}
-    \cov[\hat{v}_{n,i}(t_0),\, \hat{v}_{n,i}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
+    \sum_{n=1}^N \sum_{\alpha=1}^{d}
+    \cov[\hat{v}_{n,\alpha}(t_0),\, \hat{v}_{n,\alpha}(t_0 + \Delta_t)]\,\mathrm{d}\Delta_t
 $$
 
-where $\hat{v}_{n,i}(t)$ is the $i$-th Cartesian component of
+where $\hat{v}_{n,\alpha}(t)$ is the $\alpha$-th Cartesian component of
 the time-dependent velocity of particle $n$.
 For molecular systems, the center-of-mass velocities are typically used.
 

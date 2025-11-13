@@ -5,7 +5,7 @@ of the heat flux as follows:
 
 $$
     \kappa = \frac{1}{V k_\text{B} T^2}
-        \frac{1}{3}\sum_{\alpha=x, y, z}
+        \frac{1}{d}\sum_{\alpha=1}^d
         \frac{1}{2}
         \int_{-\infty}^{+\infty}
         \cov[\hat{J}^\text{h}_\alpha(t_0) \,,\, \hat{J}^\text{h}_\alpha(t_0 + \Delta_t)]
@@ -15,9 +15,21 @@ $$
 where $V$ is the volume of the simulation cell,
 $k_\text{B}$ is the Boltzmann constant,
 $T$ is the temperature,
-and $\hat{J}^\text{h}_\alpha$ is the instantaneous heat flux along one of the Cartesian directions.
+$d$ is the dimensionality of the system (usually 3),
+and $\hat{J}^\text{h}_\alpha$ is the instantaneous microscopic heat current
+along one of the Cartesian directions.
 The time origin $t_0$ is arbitrary:
 the expected value is computed over all possible time origins.
+
+Our notation follows the convention used by most molecular dynamics packages,
+which output the microscopic (instantaneous) heat current vector,
+$\hat{\mathbf{J}}^\text{h}$, as an extensive quantity,
+with units of power times length ($\mathrm{W} \mathrm{m}$).
+This contrasts with the macroscopic heat flux,
+an intensive quantity with units of power per area ($\mathrm{W} \mathrm{m}^{-2}$).
+If you need to post-process microscopic heat flux data provided as an intensive quantity
+(i.e., a flux density), use the prefactor $V / (k_\text{B} T^2)$
+in the formula above instead of $1 / (V k_\text{B} T^2)$.
 
 The derivation of this result can be found in
 Section 8.5 of "Theory of Simple Liquids"
