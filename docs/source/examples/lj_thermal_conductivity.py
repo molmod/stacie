@@ -76,7 +76,7 @@ def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep
         timestep=timestep,
     )
 
-    # Estimate the viscosity from the spectrum.
+    # Estimate the thermal conductivity from the spectrum.
     result = estimate_acint(spectrum, LorentzModel(), verbose=True, uc=uc)
 
     # Plot some basic analysis figures.
@@ -87,7 +87,7 @@ def estimate_thermal_conductivity(name, jcomps, av_temperature, volume, timestep
     _, axs = plt.subplots(2, 2, num=f"{name}_extras")
     plot_extras(axs, uc, result)
 
-    # Return the viscosity
+    # Return the thermal conductivity
     return result.acint
 
 

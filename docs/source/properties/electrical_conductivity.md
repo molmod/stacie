@@ -5,10 +5,10 @@ of the charge current as follows:
 
 $$
     \sigma = \frac{1}{V k_\text{B} T}
-        \frac{1}{d}\sum_{i=1}^d
+        \frac{1}{d}\sum_{\alpha=1}^d
         \frac{1}{2}
         \int_{-\infty}^{+\infty}
-        \cov[\hat{J}^\text{c}_i(t_0) \,,\, \hat{J}^\text{c}_i(t_0 + \Delta_t)]
+        \cov[\hat{J}^\text{c}_\alpha(t_0) \,,\, \hat{J}^\text{c}_\alpha(t_0 + \Delta_t)]
         \,\mathrm{d}\Delta_t
 $$
 
@@ -27,8 +27,8 @@ or Section 7.7 of "Theory of Simple Liquids"
 by Hansen and McDonald {cite:p}`hansen_2013_theory`.
 
 If your simulation code does not print out the charge current,
-it can also be derived from the velocities ($\hat{\mathbf{v}}_n(t)$)
-and the net charges ($q_n$) of the charge carriers as follows:
+it can also be derived from the velocities, $\hat{\mathbf{v}}_n(t)$,
+and the net charges, $q_n$, of the charge carriers as follows:
 
 $$
     \hat{\mathbf{J}}(t) = \sum_{n=1}^{N_q} q_n \hat{\mathbf{v}}_n(t)
