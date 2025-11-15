@@ -64,6 +64,7 @@ properties/index.md
 examples/index.md
 references.md
 glossary.md
+apidocs/modules.rst
 development/index.md
 code_of_conduct.md
 ```

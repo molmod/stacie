@@ -9,5 +9,4 @@ contributing.md
 setup.md
 changelog.md
 release.md
-../apidocs/modules.rst
 ```
