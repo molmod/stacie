@@ -25,8 +25,8 @@ Our notation follows the convention used by most molecular dynamics packages,
 which output the microscopic (instantaneous) heat current vector,
 $\hat{\mathbf{J}}^\text{h}$, as an extensive quantity,
 with units of power times length ($\mathrm{W} \mathrm{m}$).
-This contrasts with the macroscopic heat flux,
-an intensive quantity with units of power per area ($\mathrm{W} \mathrm{m}^{-2}$).
+This differs from the macroscopic heat flux,
+which is an intensive quantity with units of power per area ($\mathrm{W} \mathrm{m}^{-2}$).
 If you need to post-process microscopic heat flux data provided as an intensive quantity
 (i.e., a flux density), use the prefactor $V / (k_\text{B} T^2)$
 in the formula above instead of $1 / (V k_\text{B} T^2)$.
