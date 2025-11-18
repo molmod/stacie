@@ -24,10 +24,10 @@ These test cases explore a few corner cases and verify that STACIE behaves as ex
 """
 
 from collections.abc import Callable
+from pathlib import Path
 
 import numpy as np
 import pytest
-from path import Path
 
 from stacie.cutoff import CV2LCriterion
 from stacie.estimate import Result, estimate_acint, summarize_results
@@ -53,7 +53,7 @@ CRITERIA = [CV2LCriterion()]
 def output_test_result(prefix: str, res: Result | list[Result]):
     """Dump results with STACIE's standard output formats."""
     dn_out = Path("tests/outputs")
-    dn_out.makedirs_p()
+    dn_out.mkdir(exist_ok=True)
     plot_results(dn_out / f"{prefix}.pdf", res)
     with open(dn_out / f"{prefix}.txt", "w") as fh:
         fh.write(summarize_results(res))

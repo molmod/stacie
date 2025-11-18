@@ -11,6 +11,17 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 (no changes yet)
 
+(v1.1.1)=
+## [1.1.1] - 2025-11-18
+
+Smaller source package (10x size reduction) and dependency simplification.
+
+### Changed
+
+- PyPI Package size reduction by a factor 10.
+  Only essential files are now included in the package.
+- Remove path dependency to facilitate packaging and distribution.
+
 (v1.1.0)=
 ## [1.1.0] - 2025-11-10
 
@@ -63,3 +74,5 @@ in the documentation and README files.
 [Unreleased]: https://github.com/molmod/stacie
 [1.0.0]: https://github.com/molmod/stacie/releases/tag/v1.0.0
 [1.0.0rc1]: https://github.com/molmod/stacie/releases/tag/v1.0.0rc1
+[1.1.0]: https://github.com/molmod/stacie/releases/tag/v1.1.0
+[1.1.1]: https://github.com/molmod/stacie/releases/tag/v1.1.1
