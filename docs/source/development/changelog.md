@@ -86,3 +86,4 @@ in the documentation and README files.
 [1.0.0rc1]: https://github.com/molmod/stacie/releases/tag/v1.0.0rc1
 [1.1.0]: https://github.com/molmod/stacie/releases/tag/v1.1.0
 [1.1.1]: https://github.com/molmod/stacie/releases/tag/v1.1.1
+[1.1.2]: https://github.com/molmod/stacie/releases/tag/v1.1.2
