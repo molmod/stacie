@@ -11,7 +11,7 @@ on:
     paths:
       - src/**
       - tests/**
-      - .github/workflows/pytest.yaml
+      - .github/workflows/release.yaml
       - MANIFEST.in
       - CITATION.cff
       - CODE_OF_CONDUCT.md
