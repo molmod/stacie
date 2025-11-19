@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "stacie"
 authors = [
-  { name="Gözdenur Toraman", email="gozdenur.toraman@ugent.be" },
-  { name="Toon Verstraelen", email="toon.verstraelen@ugent.be" },
+    { name = "Gözdenur Toraman", email = "gozdenur.toraman@ugent.be" },
+    { name = "Toon Verstraelen", email = "toon.verstraelen@ugent.be" },
 ]
 description = "STable AutoCorrelation Integral Estimator (STACIE)"
 readme = "README.md"
@@ -30,12 +30,12 @@ classifiers = [
 ]
 dependencies = [
     # Ensure changes to these dependencies are reflected in .github/requirements-old.txt
-    "attrs>=25.3.0",
-    "cattrs>=25.1.1",
-    "matplotlib>=3.10.3",
-    "numpy>=2.2.6",
-    "scipy>=1.15.3",
-    "typing-extensions>=4.15.0; python_version < '3.11'",
+    "attrs>=24.1.0",
+    "cattrs>=24.1.0",
+    "matplotlib>=3.9.0",
+    "numpy>=2.0.0",
+    "scipy>=1.13.0",
+    "typing-extensions>=4.8.0; python_version < '3.11'",
 ]
 dynamic = ["version"]
 
@@ -95,7 +95,7 @@ select = [
     "PL", "PT", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TRY", "UP", "W"
 ]
 ignore = [
-    "ISC001",  # https://docs.astral.sh/ruff/rules/single-line-implicit-string-concatenation/
+    "ISC001",   # https://docs.astral.sh/ruff/rules/single-line-implicit-string-concatenation/
     "PLC0415",  # https://docs.astral.sh/ruff/rules/import-outside-top-level/
     "PLR0904",  # https://docs.astral.sh/ruff/rules/too-many-public-methods/
     "PLR0911",  # https://docs.astral.sh/ruff/rules/too-many-return-statements/
@@ -106,7 +106,7 @@ ignore = [
     "PLR0916",  # https://docs.astral.sh/ruff/rules/too-many-boolean-expressions/
     "PLR0917",  # https://docs.astral.sh/ruff/rules/too-many-positional/
     "PLR2004",  # https://docs.astral.sh/ruff/rules/magic-value-comparison/
-    "PT011",  # https://docs.astral.sh/ruff/rules/pytest-raises-too-broad/
-    "RUF001",  # https://docs.astral.sh/ruff/rules/ambiguous-unicode-character-string/
-    "TRY003",  # https://docs.astral.sh/ruff/rules/raise-vanilla-args/
+    "PT011",    # https://docs.astral.sh/ruff/rules/pytest-raises-too-broad/
+    "RUF001",   # https://docs.astral.sh/ruff/rules/ambiguous-unicode-character-string/
+    "TRY003",   # https://docs.astral.sh/ruff/rules/raise-vanilla-args/
 ]
