@@ -11,6 +11,16 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 (no changes yet)
 
+(v1.1.2)=
+## [1.1.2] - 2025-11-19
+
+Additional packaging cleanups.
+
+### Changed
+
+- Removed a few more files from the source package that could cause confusion.
+- Removed an unused testing dependency.
+
 (v1.1.1)=
 ## [1.1.1] - 2025-11-18
 

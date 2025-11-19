@@ -1,18 +1,22 @@
-# Keep essentials
-include LICENSE
-include README.md
-include pyproject.toml
+# Exclude everything by default
+global-exclude *
 
-# Ensure tests are included, useful for conda package
+# Include essential project files
+include CITATION.cff
+include CONTRIBUTING.md
+include CONTRIBUTORS.md
+include LICENSE-LGPL-3.0-or-later.txt
+include pyproject.toml
+include README.md
+
+# Include source code
+graft src
+
+# Include tests (useful for conda package)
 graft tests
 
-# Exclude non-essentials
-prune docs
-prune .github
-prune .pre-commit-config.yaml
-prune .markdownlint-cli2.jsonc
-prune .gitignore
-prune .editorconfig
-prune tools
+# Exclude test outputs
 prune tests/outputs
+
+# Exclude common build artifacts and cache files
 global-exclude *.py[cod] __pycache__ *.so
