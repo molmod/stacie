@@ -9,8 +9,14 @@ Additional dependencies will be installed using the `pip` command below.
 Familiarity with [Pip](https://pip.pypa.io/) is assumed.
 We recommend performing the installation within a [Python virtual environment](https://docs.python.org/3/library/venv.html).
 
-To install STACIE, use the following shell command:
+To install STACIE in a Python virtual environment, use the following shell command:
 
 ```bash
 pip install stacie
+```
+
+Alternatively, you can install STACIE in a Conda environment from the `conda-forge` channel:
+
+```bash
+conda install -c conda-forge stacie
 ```

@@ -82,3 +82,9 @@ the following shell command will install STACIE in your Python environment.
 ```bash
 python -m pip install stacie
 ```
+
+If you have a Conda environment, you can also install STACIE from the `conda-forge` channel:
+
+```bash
+conda install -c conda-forge stacie
+```
