@@ -2,7 +2,7 @@
 
 Before you begin, ensure that you have the following installed:
 
-- [Python](https://www.python.org/) version 3.11 or higher
+- [Python](https://www.python.org/) version 3.10 or higher
 - [Pip](https://pip.pypa.io/)
 
 Additional dependencies will be installed using the `pip` command below.
