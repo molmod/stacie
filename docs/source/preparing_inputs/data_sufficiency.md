@@ -6,7 +6,7 @@ The preparation of sufficient inputs consists of two steps:
 
 1. First, we guesstimate the number of independent sequences, $M$, required
    to achieve the desired relative error.
-2. Second, a test is proposed to verify that the number of steps in the input sequencess, $N$,
+2. Second, a test is proposed to verify that the number of steps in the input sequences, $N$,
    is sufficient to achieve the desired relative error.
    Because this second step requires information that is not available *a priori*,
    it involves an analysis with STACIE of a preliminary set of input sequences.
@@ -60,7 +60,7 @@ A single molecular dynamics simulation often provides more than one independent 
 The following table lists $M$ (for a single simulation) for the transport properties discussed
 in the [Properties](../properties/index.md) section.
 
-| Transport Property |  $M$  |
+| Transport Property | $M$ |
 | ------------------ | :---: |
 | Bulk Viscosity | $1$ |
 | Thermal Conductivity | $3$ |

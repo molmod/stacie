@@ -11,7 +11,7 @@ authors = [
 description = "STable AutoCorrelation Integral Estimator (STACIE)"
 readme = "README.md"
 license = "LGPL-3.0-or-later"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
@@ -22,6 +22,7 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -32,8 +33,9 @@ dependencies = [
     "attrs>=25.3.0",
     "cattrs>=25.1.1",
     "matplotlib>=3.10.3",
-    "numpy>=2.3.1",
-    "scipy>=1.16.0",
+    "numpy>=2.2.6",
+    "scipy>=1.15.3",
+    "typing-extensions>=4.15.0; python_version < '3.11'",
 ]
 dynamic = ["version"]
 
@@ -85,7 +87,7 @@ local_scheme = "no-local-version"
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [

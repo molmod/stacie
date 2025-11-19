@@ -11,6 +11,15 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 (no changes yet)
 
+(v1.1.3)=
+## [1.1.3] - 2025-11-19
+
+Support for Python 3.10
+
+### Changed
+
+- Add support for Python 3.10
+
 (v1.1.2)=
 ## [1.1.2] - 2025-11-19
 
@@ -87,3 +96,4 @@ in the documentation and README files.
 [1.1.0]: https://github.com/molmod/stacie/releases/tag/v1.1.0
 [1.1.1]: https://github.com/molmod/stacie/releases/tag/v1.1.1
 [1.1.2]: https://github.com/molmod/stacie/releases/tag/v1.1.2
+[1.1.3]: https://github.com/molmod/stacie/releases/tag/v1.1.3

@@ -2,5 +2,6 @@
 attrs==25.3.0
 cattrs==25.1.1
 matplotlib==3.10.3
-numpy==2.3.1
-scipy==1.16.0
+numpy==2.2.6
+scipy==1.15.3
+typing-extensions==4.15.0
