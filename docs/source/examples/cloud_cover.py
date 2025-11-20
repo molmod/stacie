@@ -56,7 +56,7 @@ cover = (
     )
     / 100
 )
-print(f"Number of measurements: {cover.shape[0]}")
+print(f"Number of measurements: {cover.shape}")
 
 # %% [markdown]
 # ## Sample of the Cloud Cover Data
@@ -87,8 +87,8 @@ plot_sample()
 # %%
 def plot_histogram():
     plt.close("histogram")
-    fig, ax = plt.subplots(num="histogram")
-    ax.hist(cover, bins=20, range=(0, 1), density=True, ec="w")
+    _, ax = plt.subplots(num="histogram")
+    ax.hist(cover, bins=np.linspace(0, 1, 21), density=True, ec="w")
     ax.set_xlabel("Cloud Cover Fraction")
     ax.set_ylabel("Probability Density")
     ax.set_xlim(0, 1)
