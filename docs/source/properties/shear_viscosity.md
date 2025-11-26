@@ -145,21 +145,27 @@ $$
 
 For the last three components, this result is trivial.
 The second component, $\hat{P}'_2$, is found by rotating the Cartesian axes $45^\circ$ about the $x$-axis.
+The rotation matrix that transforms the original frame of reference into the rotated one
+is given by:
 
 $$
-    \mathcal{R} &= \left[\begin{matrix}
+    \mathbf{R} &= \left[\begin{matrix}
         1 & & \\
         & \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \\
         & \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}}
     \end{matrix}\right]
-    \\
-    \hat{\mathcal{P}} &= \left[\begin{matrix}
+$$
+
+The pressure tensor before and after the rotation is expressed as:
+
+$$
+    \hat{\mathbf{P}} &= \left[\begin{matrix}
         \hat{P}_{xx} & \hat{P}_{xy} & \hat{P}_{zx} \\
         \hat{P}_{xy} & \hat{P}_{yy} & \hat{P}_{yz} \\
         \hat{P}_{zx} & \hat{P}_{yz} & \hat{P}_{zz}
     \end{matrix}\right]
     \\
-    \mathbf{R}\hat{\mathcal{P}}\mathbf{R}^\top &= \left[\begin{matrix}
+    \mathbf{R}\hat{\mathbf{P}}\mathbf{R}^\top &= \left[\begin{matrix}
         \hat{P}_{xx} &
         \frac{\sqrt{2} \hat{P}_{xy}}{2} - \frac{\sqrt{2} \hat{P}_{zx}}{2} &
         \frac{\sqrt{2} \hat{P}_{xy}}{2} + \frac{\sqrt{2} \hat{P}_{zx}}{2}
@@ -195,69 +201,70 @@ $$
 By working out the autocorrelation functions of $\hat{P}'_1$ and $\hat{P}'_2$ one finds that,
 for the case of an isotropic liquid,
 they have the same expected values if $\alpha=\frac{1}{\sqrt{3}}$.
-First expand the covariances:
+To see this, we first expand the covariances and use $t_1 = t_0 + \Delta_t$ for brevity:
 
 $$
-    &\cov[\hat{P}'_1(t_0) \,,\, \hat{P}'_1(t_0 + \Delta_t)] =
+    &\cov[\hat{P}'_1(t_0) \,,\, \hat{P}'_1(t_1)] =
     \\
     &\qquad
-        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-        - \frac{\alpha^2}{2} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        + \alpha^2 \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_1)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_1)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{xx}(t_1)]
     \\
     &\qquad
-        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-        - \frac{\alpha^2}{2} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_1)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_1)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_1)]
     \\
     &\qquad
-        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        - \frac{\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{zz}(t_1)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_1)]
+        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_1)]
     \\
     &\qquad
-        + \frac{\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-        + \frac{\alpha^2}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
     \\
     &\qquad
-        + \alpha^2 \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
     \\[0.5em]
-    &\cov[\hat{P}'_2(t_0) \,,\, \hat{P}'_2(t_0 + \Delta_t)] =
+    &\cov[\hat{P}'_2(t_0) \,,\, \hat{P}'_2(t_1)] =
     \\
     &\qquad
-        - \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-        - \frac{1}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        + \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_1)]
+        - \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_1)]
     \\
     &\qquad
-        + \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-        + \frac{1}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
+        - \frac{1}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_1)]
+        + \frac{1}{4} \cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_1)]
 $$
 
 Because the liquid is isotropic,
 permutations of Cartesian axes do not affect the expected values,
-which greatly simplifies the expressions.
+which simplifies the expressions to:
 
 $$
-    &\cov[\hat{P}'_1(t_0), \hat{P}'_1(t_0 + \Delta_t)]
+    &\cov[\hat{P}'_1(t_0), \hat{P}'_1(t_1)]
     \\
     &\qquad
-        \frac{3\alpha^2}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        +\frac{3\alpha^2}{4} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_1)]
+        -\frac{3\alpha^2}{4} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_1)]
     \\
     &\qquad
-        - \frac{3\alpha^2}{4} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-        - \frac{3\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        -\frac{3\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_1)]
+        +\frac{3\alpha^2}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_1)]
     \\[0.5em]
-    &\cov[\hat{P}'_2(t_0), \hat{P}'_2(t_0 + \Delta_t)] =
+    &\cov[\hat{P}'_2(t_0), \hat{P}'_2(t_1)] =
     \\
     &\qquad
-        \frac{1}{2} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        + \frac{1}{4} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_1)]
+        - \frac{1}{4} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_1)]
     \\
     &\qquad
-        - \frac{1}{4} \cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-        - \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        - \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_1)]
+        + \frac{1}{4} \cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_1)]
 $$
 
 These two expected values are consistent when $\alpha^2 = 1/3$.
 
-Using the same expansion technique,
-it is shown below that the average viscosity over the five components proposed here
+Finally, it is noteworthy that the average viscosity over the five components proposed here
 is equivalent to the equation proposed by Daivis and Evans {cite:p}`daivis_1994_comparison`:
 
 $$
@@ -267,102 +274,80 @@ $$
 $$
 
 (This is Eq. A5 in their paper rewritten in our notation.)
-Working out the expansion, using
-$\hat{P}_{\text{tl},xx} =
-\frac{1}{3}(2\hat{P}_{xx} - \hat{P}_{yy} - \hat{P}_{zz})$
-and similar definitions for the two other Cartesian components, we get:
+To show the equivalence, we expand the inner product of the traceless pressure tensor,
+using $\hat{P}_{\text{tl},xx} = \frac{1}{3}(2\hat{P}_{xx} - \hat{P}_{yy} - \hat{P}_{zz})$
+and similar definitions for the two other Cartesian components:
 
 $$
-    &\frac{1}{2}\mean\left[
-        \hat{\mathbf{P}}_\text{tl}(t_0):\hat{\mathbf{P}}_\text{tl}(t_0 + \Delta_t)
-    \right] =
+    &\frac{1}{2}
+        \hat{\mathbf{P}}_\text{tl}(t_0):\hat{\mathbf{P}}_\text{tl}(t_1) =
     \\
     &\qquad
-        \cov[\hat{P}_{yz}(t_0) \,,\, \hat{P}_{yz}(t_0+\Delta_t)]
+        +\frac{1}{3}\hat{P}_{xx}(t_0) \, \hat{P}_{xx}(t_1)
+        -\frac{1}{6}\hat{P}_{xx}(t_0) \, \hat{P}_{yy}(t_1)
+        -\frac{1}{6}\hat{P}_{xx}(t_0) \, \hat{P}_{zz}(t_1)
     \\
     &\qquad
-        +\cov[\hat{P}_{zx}(t_0) \,,\, \hat{P}_{zx}(t_0+\Delta_t)]
+        -\frac{1}{6}\hat{P}_{yy}(t_0) \, \hat{P}_{xx}(t_1)
+        +\frac{1}{3}\hat{P}_{yy}(t_0) \, \hat{P}_{yy}(t_1)
+        -\frac{1}{6}\hat{P}_{yy}(t_0) \, \hat{P}_{zz}(t_1)
     \\
     &\qquad
-        +\cov[\hat{P}_{xy}(t_0) \,,\, \hat{P}_{xy}(t_0+\Delta_t)]
+        -\frac{1}{6}\hat{P}_{zz}(t_0) \,\hat{P}_{xx}(t_1)
+        -\frac{1}{6}\hat{P}_{zz}(t_0) \, \hat{P}_{yy}(t_1)
+        +\frac{1}{3}\hat{P}_{zz}(t_0) \, \hat{P}_{zz}(t_1)
     \\
     &\qquad
-        +\frac{1}{3}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
-    \\
-    &\qquad
-        +\frac{1}{3}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-    \\
-    &\qquad
-        +\frac{1}{3}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-    \\
-    &\qquad
-        -\frac{1}{6}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-        -\frac{1}{6}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-    \\
-    &\qquad
-        -\frac{1}{6}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
-        -\frac{1}{6}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-    \\
-    &\qquad
-        -\frac{1}{6}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-        -\frac{1}{6}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        +\hat{P}_{xy}(t_0) \, \hat{P}_{xy}(t_1)
+        +\hat{P}_{yz}(t_0) \, \hat{P}_{yz}(t_1)
+        +\hat{P}_{zx}(t_0) \, \hat{P}_{zx}(t_1)
 $$
 
-We can do the same for our average viscosity over the five independent components:
+We can similarly work out the products $\hat{P}_i^{\prime}(t_0) \, \hat{P}_i^\prime(t_1)$ for $i=1,\ldots,5$
+appearing in our proposed viscosity equation:
 
 $$
     \eta = \frac{1}{5} \frac{V}{k_\text{B} T} \frac{1}{2}
     \int_{-\infty}^{+\infty}
-    \sum_{i=1}^5 \cov[\hat{P}_i^{\prime}(t_0) \,,\, \hat{P}_i^\prime(t_0 + \Delta_t)]
+    \sum_{i=1}^5 \cov[\hat{P}_i^{\prime}(t_0) \,,\, \hat{P}_i^\prime(t_1)]
     \,\mathrm{d}\Delta_t
 $$
 
 Working out the expansion of the five terms in Cartesian pressure tensor components yields:
 
 $$
-    &\cov[ \hat{P}_1^{\prime}(t_0) \,,\, \hat{P}_1^\prime(t_0 + \Delta_t)] =
+    &\hat{P}_1^{\prime}(t_0) \, \hat{P}_1^\prime(t_1) =
     \\
     &\qquad
-        +\frac{1}{3}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        +\frac{1}{3}\hat{P}_{xx}(t_0) \, \hat{P}_{xx}(t_1)
+        -\frac{1}{6}\hat{P}_{xx}(t_0) \, \hat{P}_{yy}(t_1)
+        -\frac{1}{6}\hat{P}_{xx}(t_0) \, \hat{P}_{zz}(t_1)
     \\
     &\qquad
-        +\frac{1}{12}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        -\frac{1}{6}\hat{P}_{yy}(t_0) \, \hat{P}_{xx}(t_1)
+        +\frac{1}{12}\hat{P}_{yy}(t_0) \, \hat{P}_{yy}(t_1)
+        +\frac{1}{12}\hat{P}_{yy}(t_0) \, \hat{P}_{zz}(t_1)
     \\
     &\qquad
-        +\frac{1}{12}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-    \\
-    &\qquad
-        +\frac{1}{12}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-        +\frac{1}{12}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-    \\
-    &\qquad
-        -\frac{1}{6}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
-        -\frac{1}{6}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-    \\
-    &\qquad
-        -\frac{1}{6}\cov[\hat{P}_{xx}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
-        -\frac{1}{6}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{xx}(t_0+\Delta_t)]
+        -\frac{1}{6}\hat{P}_{zz}(t_0) \, \hat{P}_{xx}(t_1)
+        +\frac{1}{12}\hat{P}_{zz}(t_0) \, \hat{P}_{yy}(t_1)
+        +\frac{1}{12}\hat{P}_{zz}(t_0) \, \hat{P}_{zz}(t_1)
     \\[0.5em]
-    &\cov[ \hat{P}_2^{\prime}(t_0) \,,\, \hat{P}_2^\prime(t_0 + \Delta_t)] =
+    &\hat{P}_2^{\prime}(t_0) \, \hat{P}_2^\prime(t_1) =
     \\
     &\qquad
-        +\frac{1}{4}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        +\frac{1}{4}\hat{P}_{yy}(t_0) \, \hat{P}_{yy}(t_1)
+        -\frac{1}{4}\hat{P}_{yy}(t_0) \, \hat{P}_{zz}(t_1)
     \\
     &\qquad
-        +\frac{1}{4}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-    \\
-    &\qquad
-        -\frac{1}{4}\cov[\hat{P}_{yy}(t_0) \,,\, \hat{P}_{zz}(t_0+\Delta_t)]
-        -\frac{1}{4}\cov[\hat{P}_{zz}(t_0) \,,\, \hat{P}_{yy}(t_0+\Delta_t)]
+        -\frac{1}{4}\hat{P}_{zz}(t_0) \, \hat{P}_{yy}(t_1)
+        +\frac{1}{4}\hat{P}_{zz}(t_0) \, \hat{P}_{zz}(t_1)
     \\[0.5em]
-    &\cov[ \hat{P}_3^{\prime}(t_0) \,,\, \hat{P}_3^\prime(t_0 + \Delta_t)] =
-        \cov[\hat{P}_{yz}(t_0) \,,\, \hat{P}_{yz}(t_0+\Delta_t)]
+    &\hat{P}_3^{\prime}(t_0) \, \hat{P}_3^\prime(t_1) = \hat{P}_{yz}(t_0) \, \hat{P}_{yz}(t_1)
     \\[0.5em]
-    &\cov[ \hat{P}_4^{\prime}(t_0) \,,\, \hat{P}_4^\prime(t_0 + \Delta_t)] =
-        \cov[\hat{P}_{zx}(t_0) \,,\, \hat{P}_{zx}(t_0+\Delta_t)]
+    &\hat{P}_4^{\prime}(t_0) \, \hat{P}_4^\prime(t_1) = \hat{P}_{zx}(t_0) \, \hat{P}_{zx}(t_1)
     \\[0.5em]
-    &\cov[ \hat{P}_5^{\prime}(t_0) \,,\, \hat{P}_5^\prime(t_0 + \Delta_t)] =
-        \cov[\hat{P}_{xy}(t_0) \,,\, \hat{P}_{xy}(t_0+\Delta_t)]
+    &\hat{P}_5^{\prime}(t_0) \, \hat{P}_5^\prime(t_1) = \hat{P}_{xy}(t_0) \, \hat{P}_{xy}(t_1)
 $$
 
 Adding these five contributions together
