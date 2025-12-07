@@ -138,7 +138,7 @@ $$
         \\
         \hat{C}_1 &= \frac{\pi}{\sqrt{\hat{q}_2}}\left(\hat{p}_0 - \frac{\hat{p}_2}{\hat{q}_2}\right)
         \\
-        \tau_\text{exp} &= \frac{\sqrt{q_2}}{2 \pi}
+        \hat{\tau}_\text{exp} &= \frac{\sqrt{\hat{q}_2}}{2 \pi}
     \end{aligned}
 $$
 
@@ -148,7 +148,7 @@ We first introduce the following Jacobian matrix:
 
 $$
     \begin{aligned}
-        J &=
+        \mathbf{J} &=
         \begin{pmatrix}
             \frac{\partial C_0}{\partial p_0} &
             \frac{\partial C_0}{\partial p_2} &
@@ -181,9 +181,9 @@ and use it to compute the covariance of the Lorentz parameters:
 
 $$
     \hat{\mathbf{C}}_\text{lorentz} =
-    J \,
+    \mathbf{J} \,
     \hat{\mathbf{C}}_\text{pade(0, 2; 2)} \,
-    J^T
+    \mathbf{J}^T
 $$
 
 Note that this model is also applicable to data whose short-time correlations are not exponential,
