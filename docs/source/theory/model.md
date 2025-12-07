@@ -118,7 +118,7 @@ $$
 
 where $C_0$ is the white noise level, $C_1$ is the amplitude of the exponential decay,
 and $\tau_\text{exp}$ is the exponential correlation time.
-The Lorentz model essentially the corresponding power spectral density:
+The Lorentz model is essentially the corresponding power spectral density:
 
 $$
     I^\text{lorentz}(f) = C_0 + \frac{2 C_1 \tau_\text{exp}}{1 + (2 \pi f \tau_\text{exp})^2}
