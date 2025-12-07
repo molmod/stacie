@@ -598,7 +598,7 @@ class LorentzModel(PadeModel):
             )
             jac = np.array(
                 [
-                    [0, 1 / q2, -p0 / (q2**2)],
+                    [0, 1 / q2, -p2 / (q2**2)],
                     [
                         np.pi / np.sqrt(q2),
                         -np.pi / np.sqrt(q2**3),
