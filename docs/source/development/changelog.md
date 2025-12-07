@@ -9,7 +9,12 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 ## [Unreleased]
 
-(no changes yet)
+Reformulation of the Lorentz model parameters.
+
+### Changed
+
+- New parametrization of the linear coefficients in the Lorentz model:
+  $C_0$ and $C_1$ instead of $A$ and $B$.
 
 (v1.1.3)=
 ## [1.1.3] - 2025-11-19
