@@ -18,11 +18,12 @@
 # --
 """Tests for ``stacie.model``"""
 
+import numdifftools as nd
 import numpy as np
 import pytest
 from conftest import check_gradient, check_hessian
 
-from stacie.model import ExpPolyModel, PadeModel, guess
+from stacie.model import ExpPolyModel, PadeModel, convert_pade022_lorentz, guess
 
 NFREQ = 10
 FREQS = np.linspace(0, 0.5, NFREQ)
@@ -208,3 +209,20 @@ def test_guess_pade_detailed():
     rng = np.random.default_rng(123)
     pars_init = guess(freqs, ndofs, amplitudes_ref, WEIGHTS, model, rng, 10)
     assert pars_ref == pytest.approx(pars_init, rel=1e-10)
+
+
+def test_convert_pade022_lorentz():
+    pars_pade = np.array([2.0, 3.0, 4.0])
+    covar_pade = np.array([[0.1, 0.01, 0.02], [0.01, 0.2, 0.03], [0.02, 0.03, 0.3]])
+    pars_lorentz, covar_lorentz = convert_pade022_lorentz(pars_pade, covar_pade)
+    assert pars_lorentz.shape == (3,)
+    assert covar_lorentz.shape == (3, 3)
+    assert covar_lorentz == pytest.approx(covar_lorentz.T, abs=1e-13)
+
+    # Numerical check via finite differences
+    def transform(pars):
+        return convert_pade022_lorentz(pars, covar_pade)[0]
+
+    num_jacobian = nd.Jacobian(transform)(pars_pade)
+    covar_lorentz_fd = num_jacobian @ covar_pade @ num_jacobian.T
+    assert covar_lorentz == pytest.approx(covar_lorentz_fd, rel=1e-6)

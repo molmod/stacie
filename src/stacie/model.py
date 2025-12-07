@@ -587,30 +587,9 @@ class LorentzModel(PadeModel):
         ):
             # The following estimates of the exponential correlation time and its variance
             # are only valid for small variances.
-            pade_covar = props["pars_covar"]
-            p0, p2, q2 = pars
-            pars_lorentz = np.array(
-                [
-                    p2 / q2,
-                    np.pi / np.sqrt(q2) * (p0 - p2 / q2),
-                    np.sqrt(q2) / (2 * np.pi),
-                ]
-            )
-            jac = np.array(
-                [
-                    [0, 1 / q2, -p2 / (q2**2)],
-                    [
-                        np.pi / np.sqrt(q2),
-                        -np.pi / np.sqrt(q2**3),
-                        0.5 * np.pi / np.sqrt(q2**3) * (3 * p2 / q2 - p0),
-                    ],
-                    [0, 0, 1 / (4 * np.pi * np.sqrt(q2))],
-                ]
-            )
-            pars_lorentz_covar = jac @ pade_covar @ jac.T
-            tau = np.sqrt(pars[2]) / (2 * np.pi)
-            dtau_dp = 1 / (4 * np.pi * np.sqrt(pars[2]))
-            tau_var = pade_covar[2, 2] * dtau_dp**2
+            pars_lorentz, pars_lorentz_covar = convert_pade022_lorentz(pars, props["pars_covar"])
+            tau = pars_lorentz[2]
+            tau_var = pars_lorentz_covar[2, 2]
             tau_props = {
                 "pars_lorentz": pars_lorentz,
                 "pars_lorentz_covar": pars_lorentz_covar,
@@ -641,6 +620,47 @@ class LorentzModel(PadeModel):
             # we discard the entire estimate at this cutoff frequency.
             props["criterion"] = np.inf
             props["msg"] = "No correlation time estimate available."
+
+
+def convert_pade022_lorentz(
+    pars: NDArray[float], covar: NDArray[float]
+) -> tuple[NDArray[float], NDArray[float]]:
+    """Convert parameters and covariance from Pade(0,2;2) to Lorentz model.
+
+    Parameters
+    ----------
+    pars
+        The parameters of the Pade(0,2;2) model.
+    covar
+        The covariance matrix of the Pade(0,2;2) model.
+
+    Returns
+    -------
+    pars_lorentz
+        The parameters of the Lorentz model.
+    pars_lorentz_covar
+        The covariance matrix of the Lorentz model.
+    """
+    p0, p2, q2 = pars
+    pars_lorentz = np.array(
+        [
+            p2 / q2,
+            np.pi / np.sqrt(q2) * (p0 - p2 / q2),
+            np.sqrt(q2) / (2 * np.pi),
+        ]
+    )
+    jac = np.array(
+        [
+            [0, 1 / q2, -p2 / (q2**2)],
+            [
+                np.pi / np.sqrt(q2),
+                -np.pi / np.sqrt(q2**3),
+                0.5 * np.pi / np.sqrt(q2**3) * (3 * p2 / q2 - p0),
+            ],
+            [0, 0, 1 / (4 * np.pi * np.sqrt(q2))],
+        ]
+    )
+    return pars_lorentz, jac @ covar @ jac.T
 
 
 def guess(
