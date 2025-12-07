@@ -129,8 +129,8 @@ print(f"Normalized std. dev.: {cc_ns:.3f}")
 
 
 # %%
-AMP_EXP = 0.0347  # From STACIE Lorentz B parameter, see below.
-TAU_EXP = 57.6  # From STACIE corrtime_exp, see below.
+C_1 = 0.0347  # From STACIE Lorentz $C_1$ parameter, see below.
+TAU_EXP = 57.6  # From STACIE $tau_\text{exp}$, see below.
 
 
 def plot_acf():
@@ -142,12 +142,7 @@ def plot_acf():
     acf = acf[nkeep:] / (len(acf) - np.arange(nkeep))
     time = np.arange(240)
     ax.plot(time, acf[:240], "C0-")
-    ax.plot(
-        time,
-        AMP_EXP * np.exp(-time / TAU_EXP),
-        "C1--",
-        label=r"exp(-t/\tau_\mathrm{exp})",
-    )
+    ax.plot(time, C_1 * np.exp(-time / TAU_EXP), "C1--")
     xticks = np.arange(0, 241, 24)
     ax.set_xlim(-1, 240)
     ax.set_xticks(xticks)
@@ -209,11 +204,10 @@ result = estimate_acint(spectrum, LorentzModel(), verbose=True, uc=uc)
 # which has been used to plot the exponential decay in the ACF above.
 
 # %%
-pars = result.props["pars"]
+c_1 = result.props["pars_lorentz"][1]
 tau_exp = result.corrtime_exp
-amp_exp = (pars[0] - pars[1] / pars[2]) / (2 * tau_exp)
+print(f"C_1 = {c_1:.4f}")
 print(f"TAU_EXP = {tau_exp:.4f} h")
-print(f"AMP_EXP = {amp_exp:.4f}")
 
 # %% [markdown]
 # The plots below show the fitted spectrum and additional diagnostics.
@@ -241,3 +235,7 @@ if abs(result.acint - 5.1612) > 5e-3:
     raise ValueError(f"Wrong acint: {result.acint:.4e}")
 if abs(result.corrtime_exp - 57.590) > 5e-2:
     raise ValueError(f"Wrong corrtime_exp: {result.corrtime_exp:.4e}")
+if abs(result.props["pars_lorentz"][0] - 1.1683) > 5e-5:
+    raise ValueError(f"Wrong lorentz C_0: {result.props['pars_lorentz'][0]:.4e}")
+if abs(result.props["pars_lorentz"][1] - 0.0347) > 5e-5:
+    raise ValueError(f"Wrong lorentz C_1: {result.props['pars_lorentz'][1]:.4e}")

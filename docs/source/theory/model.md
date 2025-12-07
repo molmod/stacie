@@ -17,23 +17,17 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
     The main advantage of this model is its broad applicability,
     as it requires little prior knowledge of the functional form of the spectrum.
 
-2. The [PadeModel](#stacie.model.PadeModel) is useful in several scenarios:
+2. The [PadeModel](#stacie.model.PadeModel) approximates the spectrum as a rational function,
+   i.e., the ratio of two polynomials.
+   Rational functions can be parameterized to have well-behaved high-frequency tails,
+   which can facilitate the regression.
 
-    - It can be configured to model a spectrum with a Lorentzian peak at the origin
-      plus some white noise, which corresponds to an exponentially decaying {term}`ACF`.
-      In this case, STACIE also derives the exponential correlation time,
-      which can deviate from the integrated correlation time.
-
-    - Rational functions are, in general, interesting because they can be
-      parameterized to have well-behaved high-frequency tails,
-      which can facilitate the regression.
-
-3. The [LorentzModel](#stacie.model.LorentzModel) is a special case of the Pade model
+3. The [LorentzModel](#stacie.model.LorentzModel) is a special case of the Padé model
    with a Lorentzian peak at the origin plus some white noise.
-   It is equivalent to the Pade model with numerator degrees $\{0, 2\}$
+   It is equivalent to the Padé model with numerator degrees $\{0, 2\}$
    and denominator degrees $\{2\}$.
    This special case is not only implemented for convenience,
-   since it is the most common way of using the Pade model,
+   since it is the most common way of using the Padé model,
    but also because it allows STACIE to derive the exponential correlation time.
 
 (section-exppoly-target)=
@@ -43,7 +37,7 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
 The [ExpPolyModel](#stacie.model.ExpPolyModel) is defined as:
 
 $$
-    I^\text{exppoly}_k = \exp\left(\sum_{s \in S} b_s f_k^s\right)
+    I^\text{exppoly}(f) = \exp\left(\sum_{s \in S} b_s f^s\right)
 $$
 
 where $S$ is the set of polynomial degrees, which must include 0.
@@ -79,12 +73,12 @@ This model is identified as `exppoly(0, 1, 2)` in STACIE's screen output and plo
 The [PadeModel](#stacie.model.PadeModel) is defined as:
 
 $$
-    I^\text{pade}_k = \frac{
+    I^\text{pade}(f) = \frac{
         \displaystyle
-        \sum_{s \in S_\text{num}} p_s f_k^s
+        \sum_{s \in S_\text{num}} p_s f^s
     }{
         \displaystyle
-        1 + \sum_{s \in S_\text{den}} q_s f_k^s
+        1 + \sum_{s \in S_\text{den}} q_s f^s
     }
 $$
 
@@ -114,55 +108,94 @@ This model is identified as `pade(0, 2; 2)` in STACIE's screen output and plots.
 
 ## 3. Lorentz Model
 
-The [LorentzModel](#stacie.model.LorentzModel) is a special case of the Pade model
-with numerator degrees $\{0, 2\}$ and denominator degrees $\{2\}$.
-For this special case the model is equivalent to:
+The [LorentzModel](#stacie.model.LorentzModel) assumes that for large time lags,
+$\Delta_t$, the autocorrelation function (ACF) exhibits an exponential decay
+superimposed with a white noise background:
 
 $$
-    I^\text{lorentz}_k = A + \frac{B}{1 + (2 \pi f_k \tau_\text{exp})^2}
+  C(\Delta_t) = C_0\, \delta(\Delta_t) + C_1 \exp\left(-\frac{|\Delta_t|}{\tau_\text{exp}}\right)
 $$
 
-where $f_k$ is the standard frequency grid of the discrete Fourier transform,
-$A$ is the white noise level, $B$ is the amplitude of the Lorentzian peak,
+where $C_0$ is the white noise level, $C_1$ is the amplitude of the exponential decay,
 and $\tau_\text{exp}$ is the exponential correlation time.
-The frequency grid is defined as $f_k = k / (hN)$,
-where $h$ is the time step of the discretized time axis, and $N$ is the number of samples.
-We can write the Lorentzian model parameters in terms of the Pade model parameters as follows:
+The Lorentz model essentially the corresponding power spectral density:
+
+$$
+    I^\text{lorentz}(f) = C_0 + \frac{2 C_1 \tau_\text{exp}}{1 + (2 \pi f \tau_\text{exp})^2}
+$$
+
+This model can be expressed as a special case of the Padé model,
+with numerator degrees $\{0, 2\}$ and denominator degrees $\{2\}$, and is fitted accordingly.
+The Padé model will only correspond to a Lorentzian peak if $q_2 > 0$ and $p_0 q_2 > p_2$.
+When this is the case, $\tau_\text{exp}$ is related
+to the width of the peak ($2 \pi \tau_\text{exp}$) in the power spectrum.
+When these conditions are met after the regression,
+the parameters of the Padé model are converted as follows:
 
 $$
     \begin{aligned}
-        A &= \frac{\hat{p}_2}{\hat{q}_2}
+        \hat{C}_0 &= \frac{\hat{p}_2}{\hat{q}_2}
         \\
-        B &= \hat{p}_0 - \frac{\hat{p}_2}{\hat{q}_2}
+        \hat{C}_1 &= \frac{\pi}{\sqrt{\hat{q}_2}}\left(\hat{p}_0 - \frac{\hat{p}_2}{\hat{q}_2}\right)
         \\
         \tau_\text{exp} &= \frac{\sqrt{q_2}}{2 \pi}
     \end{aligned}
 $$
 
-The Pade model will only correspond to a Lorentzian peak if $q_2 > 0$ and $p_0 q_2 > p_2$.
-When this is the case, $\tau_\text{exp}$ is related
-to the width of the peak ($2 \pi \tau_\text{exp}$) in the power spectrum.
-The exponential correlation time and its variance can then be derived
-from the fitted parameters with first-order error propagation:
+The covariance of these parameters is derived from the covariance of the Padé parameters
+using first-order error propagation.
+We first introduce the following Jacobian matrix:
 
 $$
     \begin{aligned}
-    \hat{\tau}_\text{exp} &= \frac{\sqrt{\hat{q}_2}}{2 \pi}
-    \\
-    \hat{\sigma}^2_{\tau_\text{exp}} &= \frac{1}{16 \pi^2 \hat{q}_2} \hat{\sigma}^2_{q_2}
+        J &=
+        \begin{pmatrix}
+            \frac{\partial C_0}{\partial p_0} &
+            \frac{\partial C_0}{\partial p_2} &
+            \frac{\partial C_0}{\partial q_2} \\
+            \frac{\partial C_1}{\partial p_0} &
+            \frac{\partial C_1}{\partial p_2} &
+            \frac{\partial C_1}{\partial q_2} \\
+            \frac{\partial \tau_\text{exp}}{\partial p_0} &
+            \frac{\partial \tau_\text{exp}}{\partial p_2} &
+            \frac{\partial \tau_\text{exp}}{\partial q_2}
+        \end{pmatrix}
+        =
+        \begin{pmatrix}
+            0 &
+            \frac{1}{q_2} &
+            -\frac{p_2}{q_2^2}
+            \\
+            \frac{\pi}{\sqrt{q_2}} &
+            -\frac{\pi}{q_2^{3/2}} &
+            \frac{\pi}{2 q_2^{3/2}}\left(\frac{3p_2}{q_2} - p_0\right)
+            \\
+            0 &
+            0 &
+            \frac{1}{4 \pi \sqrt{q_2}}
+        \end{pmatrix}
     \end{aligned}
+$$
+
+and use it to compute the covariance of the Lorentz parameters:
+
+$$
+    \hat{\mathbf{C}}_\text{lorentz} =
+    J \,
+    \hat{\mathbf{C}}_\text{pade(0, 2; 2)} \,
+    J^T
 $$
 
 Note that this model is also applicable to data whose short-time correlations are not exponential,
 as long as the tail of the ACF decays exponentially.
-Such deviating short-time correlations will only affect the white noise level $A$
-and features in the PSD at higher frequencies, which will be ignored by STACIE.
+Such deviating short-time correlations will only affect the white noise level $\hat{C}_0$
+and features in the PSD at higher frequencies, which are ignored by STACIE.
 
-The implementation of the Lorentz model has the following advantages over the equivalent Pade model:
+The implementation of the Lorentz model has the following advantages over the equivalent Padé model:
 
 - The exponential correlation time and its uncertainty are computed.
 - If no exponential correlation time can be computed,
-  i.e. when $q_2 \le 0$ and $p_0 q_2 \le p_2$,
+  i.e. when $\hat{q}_2 \le 0$ and $\hat{p}_0\, \hat{q}_2 \le \hat{p}_2$,
   the fit is not retained for the final average over all cutoff grid points.
 - After the optimization of the model parameters at a given frequency cutoff,
   the following two heuristics are applied to exclude or downweight fits

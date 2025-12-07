@@ -587,11 +587,33 @@ class LorentzModel(PadeModel):
         ):
             # The following estimates of the exponential correlation time and its variance
             # are only valid for small variances.
-            covar = props["pars_covar"]
+            pade_covar = props["pars_covar"]
+            p0, p2, q2 = pars
+            pars_lorentz = np.array(
+                [
+                    p2 / q2,
+                    np.pi / np.sqrt(q2) * (p0 - p2 / q2),
+                    np.sqrt(q2) / (2 * np.pi),
+                ]
+            )
+            jac = np.array(
+                [
+                    [0, 1 / q2, -p0 / (q2**2)],
+                    [
+                        np.pi / np.sqrt(q2),
+                        -np.pi / np.sqrt(q2**3),
+                        0.5 * np.pi / np.sqrt(q2**3) * (3 * p2 / q2 - p0),
+                    ],
+                    [0, 0, 1 / (4 * np.pi * np.sqrt(q2))],
+                ]
+            )
+            pars_lorentz_covar = jac @ pade_covar @ jac.T
             tau = np.sqrt(pars[2]) / (2 * np.pi)
             dtau_dp = 1 / (4 * np.pi * np.sqrt(pars[2]))
-            tau_var = covar[2, 2] * dtau_dp**2
+            tau_var = pade_covar[2, 2] * dtau_dp**2
             tau_props = {
+                "pars_lorentz": pars_lorentz,
+                "pars_lorentz_covar": pars_lorentz_covar,
                 "corrtime_exp": tau,
                 "corrtime_exp_var": tau_var,
                 "exp_block_time": tau * np.pi / 10,
