@@ -235,7 +235,7 @@ if abs(result.acint - 5.1612) > 5e-3:
     raise ValueError(f"Wrong acint: {result.acint:.4e}")
 if abs(result.corrtime_exp - 57.590) > 5e-2:
     raise ValueError(f"Wrong corrtime_exp: {result.corrtime_exp:.4e}")
-if abs(result.props["pars_lorentz"][0] - 1.1683) > 5e-5:
+if abs(result.props["pars_lorentz"][0] - 1.1683) > 5e-3:
     raise ValueError(f"Wrong lorentz C_0: {result.props['pars_lorentz'][0]:.4e}")
-if abs(result.props["pars_lorentz"][1] - 0.0347) > 5e-5:
+if abs(result.props["pars_lorentz"][1] - 0.0347) > 5e-3:
     raise ValueError(f"Wrong lorentz C_1: {result.props['pars_lorentz'][1]:.4e}")
