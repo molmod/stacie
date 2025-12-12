@@ -18,6 +18,7 @@ The following notation is used throughout STACIE's documentation.
       and usually has a subscript $\text{int}$ or $\text{exp}$
       to distinguish between integrated and exponential autocorrelation times.
     - $h$ is the time step of a discretized time axis (with equal spacing between the grid points).
+    - $t_\text{sim} = N h$ is the total simulation time, with $N$ the number of steps.
     - Integer steps on a discretized time axis are denoted by
       indices $n$ or $m$; the difference between them is $\Delta$.
 

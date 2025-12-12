@@ -57,13 +57,13 @@ $$
 Analogously, when the sample mean is defined over a continuous function:
 
 $$
-    \hat{x}_\text{av} = \frac{1}{T} \int_0^T \hat{x}(t)\,\mathrm{d} t
+    \hat{x}_\text{av} = \frac{1}{t_\text{sim}} \int_0^{t_\text{sim}} \hat{x}(t)\,\mathrm{d} t
 $$
 
 the variance of this sample mean is:
 
 $$
-    \var[\hat{x}_\text{av}] = \frac{1}{T} \int_{-\infty}^\infty c(\Delta_t)\,\mathrm{d} \Delta_t
+    \var[\hat{x}_\text{av}] = \frac{1}{t_\text{sim}} \int_{-\infty}^\infty c(\Delta_t)\,\mathrm{d} \Delta_t
 $$
 
 ## How to Compute with STACIE?
