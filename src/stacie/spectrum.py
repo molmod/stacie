@@ -49,7 +49,7 @@ class Spectrum:
     nstep: int = attrs.field(converter=int)
     """The number of time steps in the input sequences.
 
-    When the time series are given as an array of shape (nindep, nstep) is given as input,
+    When the time series are given as an array of shape (nindep, nstep) as input,
     this is the size of the second dimension.
     """
 
