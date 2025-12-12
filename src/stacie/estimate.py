@@ -578,8 +578,8 @@ EXPONENTIAL_TEMPLATE = """\
 {uc.time_unit_str}
 
 RECOMMENDED SIMULATION SETTINGS (EXPONENTIAL CORR. TIME)
-    Block time:                    {exp_block_time:{uc.time_fmt}} ± \
+    Block time:                  < {exp_block_time:{uc.time_fmt}} ± \
 {exp_block_time_std:{uc.time_fmt}} {uc.time_unit_str}
-    Simulation time:               {exp_simulation_time:{uc.time_fmt}} ± \
+    Simulation time:             > {exp_simulation_time:{uc.time_fmt}} ± \
 {exp_simulation_time_std:{uc.time_fmt}} {uc.time_unit_str}
 """
