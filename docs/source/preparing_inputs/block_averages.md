@@ -79,7 +79,7 @@ there are two ways to determine the appropriate block size.
    are not distorted by the block averages.
    The width of this peak in the Pade model is $1/2\pi\tau_\text{exp}$,
    and the resolution of the frequency axis of the power spectrum is $1/t_\text{sim}$,
-   where $t_\text{sim} = hN$ is the total simulation time.
+   where $t_\text{sim} = N h$ is the total simulation time.
    These equations can be combined with $kB/N \ll 1$ to find:
 
     $$
