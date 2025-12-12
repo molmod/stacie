@@ -114,22 +114,23 @@ and repeating the analysis with STACIE:
   [the Pade model](../theory/model.md)
   and is $1/2\pi\tau_\text{exp}$,
   where $\tau_\text{exp}$ is the exponential correlation time.
-  Because the resolution of the frequency axis of the power spectrum is $1/T$,
-  where $T$ is the total simulation time,
+  Because the resolution of the frequency axis of the power spectrum is $1/t_\text{sim}$,
+  where $t_\text{sim}$ is the total simulation time,
   ample frequency grid points in this first peak are guaranteed when:
 
   $$
-        T \gg 2\pi\tau_\text{exp}
+        t_\text{sim} \gg 2\pi\tau_\text{exp}
   $$
 
-  For example, $T \approx 20\pi\tau_\text{exp}$ will provide a decent resolution.
+  For example, $t_\text{sim} \approx 20\pi\tau_\text{exp}$ will provide a decent resolution.
   When using a discrete time step $h$, the corresponding number of steps is:
 
   $$
         N \approx 20\pi\tau_\text{exp}/h
   $$
 
-  When STACIE estimates a large exponential correlation time, e.g. $\tau_\text{exp} > T/(20 \pi)$,
+  When STACIE estimates a large exponential correlation time,
+  e.g. $\tau_\text{exp} > t_\text{sim}/(20 \pi)$,
   it has derived this value from a very sharp spectral peak at zero frequency.
   In this case, the peak width is artificially broadened due to
   [spectral leakage](https://en.wikipedia.org/wiki/Spectral_leakage),
