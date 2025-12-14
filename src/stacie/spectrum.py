@@ -49,8 +49,8 @@ class Spectrum:
     nstep: int = attrs.field(converter=int)
     """The number of time steps in the input sequences.
 
-    When the time series are given as an array of shape (nindep, nstep) as input,
-    this is the size of the second dimension.
+    If the time series are given as an array with shape (nindep, nstep),
+    this corresponds to the size of the second dimension.
     """
 
     freqs: NDArray[float] = attrs.field()
@@ -59,8 +59,8 @@ class Spectrum:
     ndofs: NDArray[float] = attrs.field()
     """The number of independent contributions to each amplitude.
 
-    For the DC and Nyquist components (in case of even `nstep`),
-    this equals the number of independent time series (`nindep`).
+    For the DC and Nyquist components (for even `nstep`),
+    this is equal to the number of independent time series (`nindep`).
     For all other frequencies, this is `2 * nindep`.
     """
 
