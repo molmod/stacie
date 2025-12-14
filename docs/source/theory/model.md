@@ -19,8 +19,8 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
 
 2. The [PadeModel](#stacie.model.PadeModel) approximates the spectrum as a rational function,
    i.e., the ratio of two polynomials.
-   Rational functions can be parameterized to have well-behaved high-frequency tails,
-   which can facilitate the regression.
+   Such rational functions can be parameterized to have well-behaved high-frequency tails,
+   which facilitates the regression.
 
 3. The [LorentzModel](#stacie.model.LorentzModel) is a special case of the Padé model
    with a Lorentzian peak at the origin plus some white noise.
@@ -126,8 +126,8 @@ $$
 
 This model can be expressed as a special case of the Padé model,
 with numerator degrees $\{0, 2\}$ and denominator degrees $\{2\}$, and is fitted accordingly.
-The Padé model will only correspond to a Lorentzian peak if $q_2 > 0$ and $p_0 q_2 > p_2$.
-When this is the case, $\tau_\text{exp}$ is related
+The Padé model corresponds to a Lorentzian peak only if $q_2 > 0$ and $p_0 q_2 > p_2$.
+In this case, $\tau_\text{exp}$ is related
 to the width of the peak ($2 \pi \tau_\text{exp}$) in the power spectrum.
 When these conditions are met after the regression,
 the parameters of the Padé model are converted as follows:
