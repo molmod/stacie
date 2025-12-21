@@ -400,9 +400,10 @@ def fit_model_spectrum(
     - ``pars``: optimized parameters
     - ``pars_covar``: covariance matrix of the parameters
 
-    If the model can derive the exponential correlation time,
-    The following properties are also included:
+    The ``LorentzModel`` has the following additional properties:
 
+    - ``pars_lorentz``: optimized Lorentz parameters (converted from the Padé parameters)
+    - ``pars_lorentz_covar``: covariance matrix of the Lorentz parameters
     - ``corrtime_exp``: exponential correlation time, the slowest time scale in the sequences
     - ``corrtime_exp_var``: variance of the estimated exponential correlation time
     - ``corrtime_exp_std``: standard error of the estimated exponential correlation time
