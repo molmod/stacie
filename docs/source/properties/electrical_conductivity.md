@@ -129,6 +129,7 @@ where the first index is for the ion, the second for the Cartesian component,
 and the last for the time step.
 To compute the charge current, you need to put the charges of the ions
 in an array `charges`.
+
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,
 all in consistent units.

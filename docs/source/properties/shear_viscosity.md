@@ -360,11 +360,12 @@ enabling precise uncertainty quantification.
 ## How to Compute with STACIE?
 
 It is assumed that you can load the time-dependent pressure tensor components
-(diagonal and off-diagonal) into a 2D NumPy array `pcomps`.
-Each row of this array corresponds to one pressure tensor component in the order
-$\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, $\hat{P}_{xy}$
+(diagonal and off-diagonal) into a 2D NumPy array `pcomps`,
+of which each column corresponds to a time step.
+Each row corresponds to one pressure tensor component in the order
+$\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, and $\hat{P}_{xy}$
 (same order as in Voigt notation).
-Columns correspond to time steps.
+
 You also need to store the cell volume, temperature, Boltzmann constant,
 and time step in Python variables, all in consistent units.
 With these requirements, the shear viscosity can be computed as follows:
@@ -410,7 +411,8 @@ uc = UnitConfig(
 plot_results("shear_viscosity.pdf", result, uc)
 ```
 
-This script can be trivially extended to combine data from multiple trajectories.
+This script can be trivially extended to combine data from multiple trajectories,
+by stacking additional independent pressure contributions as rows in the `indep_pcomps` array.
 
 A worked example can be found in the notebook
 [Shear viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../examples/lj_shear_viscosity.py)

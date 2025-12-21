@@ -52,10 +52,11 @@ and thus require the `compute centroid/stress/atom` command.
 ## How to Compute with STACIE?
 
 It is assumed that you can load the time-dependent heat flux components
-into a 2D NumPy array `heatflux`.
-Each row of this array corresponds to one heat flux component
-in the order $\hat{J}_x$, $\hat{J}_y$, and $\hat{J}_z$.
-Columns correspond to time steps.
+into a 2D NumPy array `heatflux`,
+of which each column corresponds to a time step.
+Each row corresponds to one heat flux component:
+$\hat{J}_x$, $\hat{J}_y$, and $\hat{J}_z$.
+
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,
 all in consistent units.
@@ -94,7 +95,8 @@ uc = UnitConfig(
 plot_results("thermal_conductivity.pdf", result, uc)
 ```
 
-This script is trivially extended to combine data from multiple trajectories.
+This script is trivially extended to combine data from multiple trajectories,
+by stacking additional heat flux components as rows in the `heatflux` array.
 
 A worked example can be found in the notebook
 [Thermal Conductivity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../examples/lj_thermal_conductivity.py).

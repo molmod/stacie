@@ -30,12 +30,13 @@ by setting the `include_zero_freq=False` option when computing the spectrum.
 ## How to Compute with STACIE?
 
 It is assumed that you can load the diagonal, time-dependent pressure tensor components
-into a 2D NumPy array `pcomps`.
-(The same array as for [shear viscosity](shear_viscosity.md) can be used.)
-Each row of this array corresponds to one pressure tensor component in the order
-$\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, $\hat{P}_{xy}$.
-(This is the same order as in Voigt notation. The last three components are not used and can be omitted.)
-Columns correspond to time steps.
+into a 2D NumPy array `pcomps`,
+of which each column corresponds to a time step.
+Each row corresponds to one pressure tensor component:
+$\hat{P}_{xx}$, $\hat{P}_{yy}$, and $\hat{P}_{zz}$.
+The same array as for [shear viscosity](shear_viscosity.md) can be used,
+but only the first three rows are needed for bulk viscosity.
+
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,
 all in consistent units.
@@ -76,7 +77,8 @@ uc = UnitConfig(
 plot_results("bulk_viscosity.pdf", result, uc)
 ```
 
-This script can be trivially extended to combine data from multiple trajectories.
+This script can be trivially extended to combine data from multiple trajectories,
+by making `piso` a 2D array with additional independent isotropic pressure time series as rows.
 
 A worked example can be found in the notebook
 [Bulk viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../examples/lj_bulk_viscosity.py)
