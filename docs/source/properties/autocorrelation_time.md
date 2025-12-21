@@ -70,8 +70,8 @@ Both definitions are useful and relevant for different applications.
 
 2. The exponential correlation time can be used to estimate the required length
    of the input sequences when computing an autocorrelation integral.
-   The resolution of the frequency axis of the power spectrum is $1/T$,
-   where $T=hN$ is the total simulation time,
+   The resolution of the frequency axis of the power spectrum is $1/t_\text{sim}$,
+   where $t_\text{sim} = N h$ is the total simulation time,
    $h$ is the time step, and $N$ the number of steps.
    This resolution must be fine enough to resolve the zero-frequency peak
    associated with the exponential decay of the autocorrelation function.
@@ -81,10 +81,10 @@ Both definitions are useful and relevant for different applications.
    the simulation time must be sufficiently long:
 
     $$
-        T \gg 2\pi\tau_\text{exp}
+        t_\text{sim} \gg 2\pi\tau_\text{exp}
     $$
 
-    For example, $T = 20\pi\tau_\text{exp}$ will provide a decent resolution.
+    For example, $t_\text{sim} = 20\pi\tau_\text{exp}$ will provide a decent resolution.
 
     Of course, before you start generating the data (e.g., through simulations),
     the value of $\tau_\text{exp}$ is yet unclear.
