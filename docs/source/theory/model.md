@@ -1,7 +1,7 @@
 # Model Spectrum
 
 STACIE supports three models for fitting the low-frequency part of the power spectrum.
-In both models, the value at zero frequency corresponds to the autocorrelation integral.
+In all models, the value at zero frequency corresponds to the autocorrelation integral.
 
 1. The [ExpPolyModel](#stacie.model.ExpPolyModel) is the most general;
    it is an exponential function of a linear combination of simple monomials of the frequency.
@@ -10,7 +10,7 @@ In both models, the value at zero frequency corresponds to the autocorrelation i
     - Degree $0$ is suitable for a white noise spectrum.
     - Degrees $\{0, 1\}$ can be used to extract useful information from a noisy spectrum.
     - Degrees $\{0, 1, 2\}$ are applicable to spectra with low statistical uncertainty,
-      e.g., averaged over $>100$ inputs.
+      e.g., averaged over more than 100 inputs.
     - An even polynomial with degrees $\{0, 2\}$ is suitable for spectra
       that are expected to have a vanishing derivative at zero frequency.
 
@@ -126,7 +126,7 @@ $$
 
 This model can be expressed as a special case of the Padé model,
 with numerator degrees $\{0, 2\}$ and denominator degrees $\{2\}$, and is fitted accordingly.
-The Padé model corresponds to a Lorentzian peak only if $q_2 > 0$ and $p_0 q_2 > p_2$.
+The Padé model corresponds to a Lorentzian peak only if $q_2 > 0$ and $p_0\, q_2 > p_2$.
 In this case, $\tau_\text{exp}$ is related
 to the width of the peak ($2 \pi \tau_\text{exp}$) in the power spectrum.
 When these conditions are met after the regression,
@@ -197,6 +197,7 @@ The implementation of the Lorentz model has the following advantages over the eq
 - If no exponential correlation time can be computed,
   i.e. when $\hat{q}_2 \le 0$ and $\hat{p}_0\, \hat{q}_2 \le \hat{p}_2$,
   the fit is not retained for the final average over all cutoff grid points.
+  (These are typically poor fits.)
 - After the optimization of the model parameters at a given frequency cutoff,
   the following two heuristics are applied to exclude or downweight fits
   with a high relative error of the exponential correlation time:
