@@ -44,16 +44,25 @@ class Spectrum:
     """The variance of the input sequences multiplied by the prefactor."""
 
     timestep: float = attrs.field(converter=float)
-    """The time between two subsequent elements in the given sequence."""
+    """The time between two subsequent elements in the input sequences."""
 
     nstep: int = attrs.field(converter=int)
-    """The number of time steps in the input."""
+    """The number of time steps in the input sequences.
+
+    If the time series are given as an array with shape ``(nindep, nstep)``,
+    this corresponds to the size of the second dimension.
+    """
 
     freqs: NDArray[float] = attrs.field()
     """The equidistant frequency axis of the spectrum."""
 
     ndofs: NDArray[float] = attrs.field()
-    """The number of independent contributions to each amplitude."""
+    """The number of independent contributions to each amplitude.
+
+    For the DC and Nyquist components (for even ``nstep``),
+    this is equal to the number of independent time series (``nindep``).
+    For all other frequencies, this is ``2 * nindep``.
+    """
 
     amplitudes: NDArray[float] = attrs.field()
     """The spectrum amplitudes averaged over the given input sequences."""
