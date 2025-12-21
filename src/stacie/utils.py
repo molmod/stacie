@@ -121,7 +121,7 @@ class UnitConfig:
 
 
 def label_unit(label: str, unit_str: str | None) -> str:
-    """Format a label with the unit string as `label [unit]`.
+    """Format a label with the unit string as ``label [unit]``.
 
     When the unit is ``""`` or ``None``, the unit is omitted.
 

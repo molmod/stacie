@@ -526,7 +526,7 @@ class LorentzModel(PadeModel):
     """A model for the spectrum with a Lorentzian peak at zero frequency plus some white noise.
 
     This is a special case of the PadeModel with
-    `numer_degrees` = [0, 2] and `denom_degrees` = [2].
+    ``numer_degrees = [0, 2]`` and ``denom_degrees = [2]``.
     Furthermore, it will only accept parameters that correspond
     to a well-defined exponential correlation time.
 
@@ -549,7 +549,7 @@ class LorentzModel(PadeModel):
     Because the penalty is expressed as a ratio of relative errors, it is dimensionless
     and insensitive to the overall uncertainty of the spectrum.
 
-    The hyperparameters `ratio_weight` and `ratio_threshold` may be tuned
+    The hyperparameters ``ratio_weight`` and ``ratio_threshold`` may be tuned
     to adjust the sensitivity of the heuristic, but it is recommended to keep
     their default values.
     """
