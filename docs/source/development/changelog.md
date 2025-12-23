@@ -9,12 +9,18 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 ## [Unreleased]
 
+(no changes yet)
+
+(v1.2.0)=
+## [1.2.0] - 2025-12-23
+
 Reformulation of the Lorentz model parameters.
 
 ### Changed
 
 - New parametrization of the linear coefficients in the Lorentz model:
   $C_0$ and $C_1$ instead of $A$ and $B$.
+- Documentation improvements and clarifications.
 
 (v1.1.3)=
 ## [1.1.3] - 2025-11-19
@@ -102,3 +108,4 @@ in the documentation and README files.
 [1.1.1]: https://github.com/molmod/stacie/releases/tag/v1.1.1
 [1.1.2]: https://github.com/molmod/stacie/releases/tag/v1.1.2
 [1.1.3]: https://github.com/molmod/stacie/releases/tag/v1.1.3
+[1.2.0]: https://github.com/molmod/stacie/releases/tag/v1.2.0
