@@ -32,10 +32,10 @@ by setting the `include_zero_freq=False` option when computing the spectrum.
 It is assumed that you can load the diagonal, time-dependent pressure tensor components
 into a 2D NumPy array `pcomps`,
 where each column corresponds to a time step.
-Each row corresponds to one pressure tensor component:
+Each row corresponds to a diagonal pressure tensor component:
 $\hat{P}_{xx}$, $\hat{P}_{yy}$, and $\hat{P}_{zz}$.
-The same array as for [shear viscosity](shear_viscosity.md) can be used,
-but only the first three rows are needed for bulk viscosity.
+The same array used for [shear viscosity](shear_viscosity.md) can be reused here,
+but only the first three rows are necessary.
 
 You also need to store the cell volume, temperature,
 Boltzmann constant, and time step in Python variables,
@@ -78,7 +78,8 @@ plot_results("bulk_viscosity.pdf", result, uc)
 ```
 
 This script can be trivially extended to combine data from multiple trajectories,
-by making `piso` a 2D array with additional independent isotropic pressure time series as rows.
+by defining `piso` as a 2D array,
+where each row corresponds to an additional independent isotropic pressure time series.
 
 A worked example can be found in the notebook
 [Bulk viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)](../examples/lj_bulk_viscosity.py)
