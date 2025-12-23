@@ -360,9 +360,9 @@ enabling precise uncertainty quantification.
 ## How to Compute with STACIE?
 
 It is assumed that you can load the time-dependent pressure tensor components
-(diagonal and off-diagonal) into a 2D NumPy array `pcomps`,
-of which each column corresponds to a time step.
-Each row corresponds to one pressure tensor component in the order
+(both diagonal and off-diagonal) into a 2D NumPy array `pcomps`,
+where each column corresponds to a time step.
+Each row corresponds to an individual pressure tensor component in the order
 $\hat{P}_{xx}$, $\hat{P}_{yy}$, $\hat{P}_{zz}$, $\hat{P}_{zx}$, $\hat{P}_{yz}$, and $\hat{P}_{xy}$
 (same order as in Voigt notation).
 

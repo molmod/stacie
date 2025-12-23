@@ -53,8 +53,8 @@ and thus require the `compute centroid/stress/atom` command.
 
 It is assumed that you can load the time-dependent heat flux components
 into a 2D NumPy array `heatflux`,
-of which each column corresponds to a time step.
-Each row corresponds to one heat flux component:
+where each column corresponds to a time step.
+Each row corresponds to a single heat flux component:
 $\hat{J}_x$, $\hat{J}_y$, and $\hat{J}_z$.
 
 You also need to store the cell volume, temperature,

@@ -31,7 +31,7 @@ by setting the `include_zero_freq=False` option when computing the spectrum.
 
 It is assumed that you can load the diagonal, time-dependent pressure tensor components
 into a 2D NumPy array `pcomps`,
-of which each column corresponds to a time step.
+where each column corresponds to a time step.
 Each row corresponds to one pressure tensor component:
 $\hat{P}_{xx}$, $\hat{P}_{yy}$, and $\hat{P}_{zz}$.
 The same array as for [shear viscosity](shear_viscosity.md) can be used,
