@@ -79,7 +79,7 @@ Issues = "https://github.com/molmod/stacie/issues/"
 Source = "https://github.com/molmod/stacie/"
 
 [tool.pytest.ini_options]
-addopts = "-n auto -W error"
+addopts = "-n auto --dist worksteal -W error"
 
 [tool.setuptools_scm]
 version_scheme = "post-release"
