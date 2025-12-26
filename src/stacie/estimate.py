@@ -428,11 +428,11 @@ def fit_model_spectrum(
     - ``acint_var``: variance of the estimate of the autocorrelation integral
     - ``acint_std``: standard error of the estimate of the autocorrelation integral
     - ``cost_value``: cost function value
-    - ``cost_grad``: cost Gradient vector (if ``deriv >= 1``)
+    - ``cost_grad``: cost gradient vector (if ``deriv >= 1``)
     - ``cost_hess``: cost Hessian matrix (if ``deriv == 2``)
     - ``cost_hess_scales``: Hessian rescaling vector, see ``robust_posinv``.
     - ``cost_hess_rescaled_evals``: Rescaled Hessian eigenvalues
-    - ``cost_hess_rescaled_evecs``: Rescaled hessian eigenvectors
+    - ``cost_hess_rescaled_evecs``: Rescaled Hessian eigenvectors
     - ``cost_expected``: expected value of the cost function
     - ``cost_var``: expected variance of the cost function
     - ``cost_zscore``: z-score of the cost function
