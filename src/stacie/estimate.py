@@ -49,8 +49,43 @@ class Result:
     props: dict[str] = attrs.field()
     """The properties marginalized over the ensemble of cutoff frequencies.
 
-    Properties of this class derive their results from information in this dictionary.
-    See docstring of :func:`fit_model_spectrum` for details.
+    The following properties documented in :func:`fit_model_spectrum` are computed as
+    weighted averages over the cutoff frequencies:
+
+    - ``amplitudes_model``: model amplitudes at the included frequencies
+    - ``acint``: autocorrelation integral
+    - ``acint_std``: uncertainty of the autocorrelation integral
+    - ``acint_var``: variance of the autocorrelation integral
+    - ``cost_zscore``: z-score of the cost function
+    - ``criterion_zscore``: z-score of the cutoff criterion
+    - ``fcut``: cutoff frequency
+    - ``pars``: optimized parameters
+    - ``pars_covar``: covariance matrix of the parameters
+
+    Some of the included properties are not averages:
+
+    - ``ncut``: number of points included in the fit, i.e. with weight larger than WEIGHT_EPS
+    - ``switch_exponent``: exponent used to construct the cutoff
+    - ``weights``: the weights used to combine the spectrum points in the fit
+
+    When using :class:`stacie.model.LorentzModel`, the following properties are added
+    (derived from the marginalized parameters and their covariance):
+
+    - ``pars_lorentz``: optimized Lorentz parameters (converted from the Padé parameters)
+    - ``pars_lorentz_covar``: covariance matrix of the Lorentz parameters
+    - ``corrtime_exp``: exponential correlation time, the slowest time scale in the sequences
+    - ``corrtime_exp_var``: variance of the estimated exponential correlation time
+    - ``corrtime_exp_std``: standard error of the estimated exponential correlation time
+    - ``exp_simulation_time``: recommended simulation time based on the exponential correlation time
+    - ``exp_block_time``: recommended block time based on the exponential correlation time
+
+    When using :class:`stacie.model.ExpPolyModel`, the following additional properties are added
+    (derived from the marginalized parameters and their covariance):
+
+    - ``log_acint``: the logarithm of the autocorrelation integral
+    - ``log_acint_var``: variance of the logarithm of the autocorrelation integral
+    - ``log_acint_std``: standard error of the logarithm of the autocorrelation integral
+
     """
 
     history: list[dict[str]] = attrs.field()
@@ -376,14 +411,25 @@ def fit_model_spectrum(
 
     Notes
     -----
-    The returned dictionary contains the following items if the fit succeeds:
+    The returned dictionary contains at least the following items, irrespective of
+    whether the fit succeeds or fails:
+
+    - ``fcut``: cutoff frequency used
+    - ``ncut``: number of points included in the fit, i.e. with weight larger than WEIGHT_EPS
+    - ``switch_exponent``: exponent used to construct the cutoff
+    - ``neff``: effective number of points used in the fit (sum of weights)
+    - ``pars_init``: initial guess of the parameters
+    - ``criterion``: infinity if the fit fails, value of the cutoff criterion otherwise
+    - ``msg``: error message, if the fit fails
+
+    If the fit succeeds, the following additional properties are also set:
 
     - ``acint``: estimate of the autocorrelation integral
     - ``acint_var``: variance of the estimate of the autocorrelation integral
     - ``acint_std``: standard error of the estimate of the autocorrelation integral
     - ``cost_value``: cost function value
-    - ``cost_grad``: cost Gradient vector (if ``deriv>=1``)
-    - ``cost_hess``: cost Hessian matrix (if ``deriv==2``)
+    - ``cost_grad``: cost Gradient vector (if ``deriv >= 1``)
+    - ``cost_hess``: cost Hessian matrix (if ``deriv == 2``)
     - ``cost_hess_scales``: Hessian rescaling vector, see ``robust_posinv``.
     - ``cost_hess_rescaled_evals``: Rescaled Hessian eigenvalues
     - ``cost_hess_rescaled_evecs``: Rescaled hessian eigenvectors
@@ -391,16 +437,15 @@ def fit_model_spectrum(
     - ``cost_var``: expected variance of the cost function
     - ``cost_zscore``: z-score of the cost function
     - ``switch_exponent``: exponent used to construct the cutoff
-    - ``criterion``: value of the criterion whose minimizer determines the frequency cutoff
-    - ``criterion_expected``: expected value of the criterion
-    - ``criterion_var``: expected variance of the criterion
-    - ``criterion_zscore``: z-score of the criterion
+    - ``criterion_expected``: expected value of the cutoff criterion
+    - ``criterion_var``: expected variance of the cutoff criterion
+    - ``criterion_zscore``: z-score of the cutoff criterion
     - ``ll``: log likelihood
     - ``pars_init``: initial guess of the parameters
     - ``pars``: optimized parameters
     - ``pars_covar``: covariance matrix of the parameters
 
-    The ``LorentzModel`` has the following additional properties:
+    When using :class:`stacie.model.LorentzModel`, the following properties are added:
 
     - ``pars_lorentz``: optimized Lorentz parameters (converted from the Padé parameters)
     - ``pars_lorentz_covar``: covariance matrix of the Lorentz parameters
@@ -410,16 +455,11 @@ def fit_model_spectrum(
     - ``exp_simulation_time``: recommended simulation time based on the exponential correlation time
     - ``exp_block_time``: recommended block time based on the exponential correlation time
 
-    The ``ExpPolyModel`` has the following additional properties:
+    When using :class:`stacie.model.ExpPolyModel`, the following properties are added:
 
     - ``log_acint``: the logarithm of the autocorrelation integral
     - ``log_acint_var``: variance of the logarithm of the autocorrelation integral
     - ``log_acint_std``: standard error of the logarithm of the autocorrelation integral
-
-    If the fit fails, the following properties are set:
-
-    - ``criterion``: infinity
-    - ``msg``: error message
     """
     # Create a switching function for a smooth cutoff
     weights = switch_func(spectrum.freqs, fcut, switch_exponent)

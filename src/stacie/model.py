@@ -31,7 +31,7 @@ __all__ = ("ExpPolyModel", "LorentzModel", "PadeModel", "SpectrumModel", "guess"
 class SpectrumModel:
     """Abstract base class for spectrum models.
 
-    Subclasses must override all methods that raise ``NotImplementedError``.
+    Subclasses must override all methods that raise :class:`NotImplementedError`.
 
     The first parameter must have a property that is used when constructing an initial guess:
     When the first parameter increases, the model should increase everywhere,
