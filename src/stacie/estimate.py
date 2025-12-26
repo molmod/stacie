@@ -436,12 +436,10 @@ def fit_model_spectrum(
     - ``cost_expected``: expected value of the cost function
     - ``cost_var``: expected variance of the cost function
     - ``cost_zscore``: z-score of the cost function
-    - ``switch_exponent``: exponent used to construct the cutoff
     - ``criterion_expected``: expected value of the cutoff criterion
     - ``criterion_var``: expected variance of the cutoff criterion
     - ``criterion_zscore``: z-score of the cutoff criterion
     - ``ll``: log likelihood
-    - ``pars_init``: initial guess of the parameters
     - ``pars``: optimized parameters
     - ``pars_covar``: covariance matrix of the parameters
 
