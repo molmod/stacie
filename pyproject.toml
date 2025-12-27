@@ -30,8 +30,7 @@ classifiers = [
 ]
 dependencies = [
     # Ensure changes to these dependencies are reflected in .github/requirements-old.txt
-    "attrs>=24.1.0",
-    "cattrs>=24.1.0",
+    "attrs>=23.1.0",
     "matplotlib>=3.9.0",
     "numpy>=2.0.0",
     "scipy>=1.13.0",
