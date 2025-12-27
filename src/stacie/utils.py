@@ -49,7 +49,7 @@ class UnitConfig:
     - The ``*_unit`` attributes are assumed to have the value of a "display unit" in
       the same internal units.
 
-    For example, if your internal time unit is 1 ps and you want to display times in ns,
+    For example, if your internal time unit is 1 ps and you want times to be reported in ns,
     set ``time_unit = 1000.0``, because your display unit (1 ns) is 1000 internal units (1 ps).
 
     To make these conventions easy to follow (and to avoid unit hell in general),
