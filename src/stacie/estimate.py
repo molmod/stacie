@@ -59,10 +59,10 @@ class Result:
     - ``cost_zscore``: z-score of the cost function
     - ``criterion_zscore``: z-score of the cutoff criterion
     - ``fcut``: cutoff frequency
-    - ``pars``: optimized parameters
-    - ``pars_covar``: covariance matrix of the parameters
+    - ``pars``: optimized model parameters
+    - ``pars_covar``: covariance matrix of the optimized parameters
 
-    Some of the included properties are not averages:
+    Some properties are not averaged over cutoff frequencies:
 
     - ``ncut``: number of points included in the fit, i.e. with weight larger than WEIGHT_EPS
     - ``switch_exponent``: exponent used to construct the cutoff
@@ -76,8 +76,8 @@ class Result:
     - ``corrtime_exp``: exponential correlation time, the slowest time scale in the sequences
     - ``corrtime_exp_var``: variance of the estimated exponential correlation time
     - ``corrtime_exp_std``: standard error of the estimated exponential correlation time
-    - ``exp_simulation_time``: recommended simulation time based on the exponential correlation time
-    - ``exp_block_time``: recommended block time based on the exponential correlation time
+    - ``exp_simulation_time``: recommended simulation time based on the estimated exponential correlation time
+    - ``exp_block_time``: recommended block time based on the estimated exponential correlation time
 
     When using :class:`stacie.model.ExpPolyModel`, the following additional properties are added
     (derived from the marginalized parameters and their covariance):
@@ -419,7 +419,7 @@ def fit_model_spectrum(
     - ``switch_exponent``: exponent used to construct the cutoff
     - ``neff``: effective number of points used in the fit (sum of weights)
     - ``pars_init``: initial guess of the parameters
-    - ``criterion``: infinity if the fit fails, value of the cutoff criterion otherwise
+    - ``criterion``: value of the cutoff criterion, or infinity if the fit fails.
     - ``msg``: error message, if the fit fails
 
     If the fit succeeds, the following additional properties are also set:
