@@ -239,6 +239,49 @@ def estimate_acint(
     result
         The inputs, intermediate results and outputs or the algorithm.
     """
+    history = _scan_frequencies(
+        spectrum,
+        model,
+        neff_min,
+        neff_max,
+        fcut_min,
+        fcut_max,
+        fcut_spacing,
+        switch_exponent,
+        cutoff_criterion,
+        rng,
+        nonlinear_budget,
+        criterion_high,
+        verbose,
+        uc,
+    )
+    return _marginalize_properties(
+        spectrum,
+        model,
+        history,
+        switch_exponent,
+        cutoff_criterion,
+        verbose,
+        uc,
+    )
+
+
+def _scan_frequencies(
+    spectrum: Spectrum,
+    model: SpectrumModel,
+    neff_min: int | None = None,
+    neff_max: int | None = 1000,
+    fcut_min: float | None = None,
+    fcut_max: float | None = None,
+    fcut_spacing: float = 0.5,
+    switch_exponent: float = 8.0,
+    cutoff_criterion: CutoffCriterion | None = None,
+    rng: np.random.Generator | None = None,
+    nonlinear_budget: int = 100,
+    criterion_high: float = 100,
+    verbose: bool = False,
+    uc: UnitConfig | None = None,
+) -> list[dict[str]]:
     if rng is None:
         rng = np.random.default_rng(42)
     if neff_min is None:
@@ -325,6 +368,21 @@ def estimate_acint(
     if len(history) == 0:
         raise ValueError("The cutoff criterion could not be computed for any cutoff frequency.")
 
+    return history
+
+
+def _marginalize_properties(
+    spectrum: Spectrum,
+    model: SpectrumModel,
+    history: list[dict[str]],
+    switch_exponent: float = 8.0,
+    cutoff_criterion: CutoffCriterion | None = None,
+    verbose: bool = False,
+    uc: UnitConfig | None = None,
+) -> Result:
+    if cutoff_criterion is None:
+        cutoff_criterion = CV2LCriterion()
+
     # Weights and cutoff frequency
     criteria = np.array([props["criterion"] for props in history])
     criteria -= criteria.min()
@@ -360,7 +418,7 @@ def estimate_acint(
     # This seems to be slightly better,
     # likely because the fcut_weights are based on parameter vectors only.
     props["amplitudes_model"] = model.compute(freqs, props["pars"], deriv=1)
-    _finalize_props(props, model)
+    _finalize_properties(props, model)
 
     result = Result(spectrum, model, cutoff_criterion, props, history)
 
@@ -533,13 +591,13 @@ def fit_model_spectrum(
         else np.inf
     )
 
-    _finalize_props(props, model)
+    _finalize_properties(props, model)
 
     # Done
     return props
 
 
-def _finalize_props(props: dict[str, NDArray | float], model: SpectrumModel):
+def _finalize_properties(props: dict[str, NDArray | float], model: SpectrumModel):
     """Add remaining properties in-place."""
     model.derive_props(props)
     std_props = {}
