@@ -49,7 +49,7 @@ class Result:
     props: dict[str] = attrs.field()
     """The properties marginalized over the ensemble of cutoff frequencies.
 
-    The following properties documented in :func:`fit_model_spectrum` are computed as
+    The following properties documented in :func:`fit_model_spectrum` are estimated as
     weighted averages over the cutoff frequencies:
 
     - ``amplitudes_model``: model amplitudes at the included frequencies
@@ -59,8 +59,8 @@ class Result:
     - ``cost_zscore``: z-score of the cost function
     - ``criterion_zscore``: z-score of the cutoff criterion
     - ``fcut``: cutoff frequency
-    - ``pars``: optimized model parameters
-    - ``pars_covar``: covariance matrix of the optimized parameters
+    - ``pars``: model parameters
+    - ``pars_covar``: covariance matrix of the parameters
 
     Some properties are not averaged over cutoff frequencies:
 
@@ -71,13 +71,13 @@ class Result:
     When using :class:`stacie.model.LorentzModel`, the following properties are added
     (derived from the marginalized parameters and their covariance):
 
-    - ``pars_lorentz``: optimized Lorentz parameters (converted from the Padé parameters)
+    - ``pars_lorentz``: Lorentz parameters (converted from the Padé parameters)
     - ``pars_lorentz_covar``: covariance matrix of the Lorentz parameters
-    - ``corrtime_exp``: exponential correlation time, the slowest time scale in the sequences
-    - ``corrtime_exp_var``: variance of the estimated exponential correlation time
-    - ``corrtime_exp_std``: standard error of the estimated exponential correlation time
-    - ``exp_simulation_time``: recommended simulation time based on the estimated exponential correlation time
-    - ``exp_block_time``: recommended block time based on the estimated exponential correlation time
+    - ``corrtime_exp``: exponential correlation time
+    - ``corrtime_exp_var``: variance of the exponential correlation time
+    - ``corrtime_exp_std``: standard error of the exponential correlation time
+    - ``exp_simulation_time``: recommended simulation time based on the exponential correlation time
+    - ``exp_block_time``: recommended block time based on the exponential correlation time
 
     When using :class:`stacie.model.ExpPolyModel`, the following additional properties are added
     (derived from the marginalized parameters and their covariance):
@@ -406,7 +406,7 @@ def fit_model_spectrum(
     -------
     props
         A dictionary containing various intermediate results of the cost function calculation,
-        computed for the optimized parameters.
+        computed for the estimated parameters.
         See Notes for details.
 
     Notes
@@ -422,11 +422,11 @@ def fit_model_spectrum(
     - ``criterion``: value of the cutoff criterion, or infinity if the fit fails.
     - ``msg``: error message, if the fit fails
 
-    If the fit succeeds, the following additional properties are also set:
+    If the fit succeeds, the following additional statistical estimates are also set:
 
-    - ``acint``: estimate of the autocorrelation integral
-    - ``acint_var``: variance of the estimate of the autocorrelation integral
-    - ``acint_std``: standard error of the estimate of the autocorrelation integral
+    - ``acint``: autocorrelation integral
+    - ``acint_var``: variance of the autocorrelation integral
+    - ``acint_std``: standard error of the autocorrelation integral
     - ``cost_value``: cost function value
     - ``cost_grad``: cost gradient vector (if ``deriv >= 1``)
     - ``cost_hess``: cost Hessian matrix (if ``deriv == 2``)
@@ -440,20 +440,20 @@ def fit_model_spectrum(
     - ``criterion_var``: expected variance of the cutoff criterion
     - ``criterion_zscore``: z-score of the cutoff criterion
     - ``ll``: log likelihood
-    - ``pars``: optimized parameters
-    - ``pars_covar``: covariance matrix of the parameters
+    - ``pars``: model parameters
+    - ``pars_covar``: covariance matrix of the model parameters
 
-    When using :class:`stacie.model.LorentzModel`, the following properties are added:
+    When using :class:`stacie.model.LorentzModel`, the following estimates are added:
 
-    - ``pars_lorentz``: optimized Lorentz parameters (converted from the Padé parameters)
+    - ``pars_lorentz``: Lorentz parameters (converted from the Padé parameters)
     - ``pars_lorentz_covar``: covariance matrix of the Lorentz parameters
     - ``corrtime_exp``: exponential correlation time, the slowest time scale in the sequences
-    - ``corrtime_exp_var``: variance of the estimated exponential correlation time
-    - ``corrtime_exp_std``: standard error of the estimated exponential correlation time
+    - ``corrtime_exp_var``: variance of the exponential correlation time
+    - ``corrtime_exp_std``: standard error of the exponential correlation time
     - ``exp_simulation_time``: recommended simulation time based on the exponential correlation time
     - ``exp_block_time``: recommended block time based on the exponential correlation time
 
-    When using :class:`stacie.model.ExpPolyModel`, the following properties are added:
+    When using :class:`stacie.model.ExpPolyModel`, the following estimates are added:
 
     - ``log_acint``: the logarithm of the autocorrelation integral
     - ``log_acint_var``: variance of the logarithm of the autocorrelation integral
