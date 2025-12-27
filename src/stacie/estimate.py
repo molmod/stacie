@@ -29,7 +29,15 @@ from .model import SpectrumModel, guess
 from .spectrum import Spectrum
 from .utils import PositiveDefiniteError, UnitConfig, label_unit, mixture_stats, robust_posinv
 
-__all__ = ("Result", "estimate_acint", "fit_model_spectrum", "summarize_results")
+__all__ = (
+    "Result",
+    "estimate_acint",
+    "finalize_properties",
+    "fit_model_spectrum",
+    "marginalize_properties",
+    "scan_frequencies",
+    "summarize_results",
+)
 
 
 @attrs.define
@@ -173,6 +181,11 @@ def estimate_acint(
     Finally, an ensemble average over all cutoffs is computed,
     by using ``-np.log`` of the cutoff criterion as weight.
 
+    The loop over all cutoff frequencies is performed in :py:func:`_scan_frequencies`,
+    while the marginalization over cutoff frequencies is done in :py:func:`_marginalize_properties`.
+    The function :py:func:`fit_model_spectrum` performs the actual fitting of the model
+    for a given cutoff frequency.
+
     The cutoff frequency grid is logarithmically spaced,
     with the ratio between two successive cutoff frequencies given by
 
@@ -238,36 +251,39 @@ def estimate_acint(
     result
         The inputs, intermediate results and outputs or the algorithm.
     """
-    history = _scan_frequencies(
+    history = scan_frequencies(
         spectrum,
         model,
-        neff_min,
-        neff_max,
-        fcut_min,
-        fcut_max,
-        fcut_spacing,
-        switch_exponent,
-        cutoff_criterion,
-        rng,
-        nonlinear_budget,
-        criterion_high,
-        verbose,
-        uc,
+        neff_min=neff_min,
+        neff_max=neff_max,
+        fcut_min=fcut_min,
+        fcut_max=fcut_max,
+        fcut_spacing=fcut_spacing,
+        switch_exponent=switch_exponent,
+        cutoff_criterion=cutoff_criterion,
+        rng=rng,
+        nonlinear_budget=nonlinear_budget,
+        criterion_high=criterion_high,
+        verbose=verbose,
+        uc=uc,
     )
-    return _marginalize_properties(
+    result = marginalize_properties(
         spectrum,
         model,
         history,
-        switch_exponent,
-        cutoff_criterion,
-        verbose,
-        uc,
+        switch_exponent=switch_exponent,
+        cutoff_criterion=cutoff_criterion,
     )
+    if verbose:
+        print()
+        print(summarize_results(result, uc=uc))
+    return result
 
 
-def _scan_frequencies(
+def scan_frequencies(
     spectrum: Spectrum,
     model: SpectrumModel,
+    *,
     neff_min: int | None = None,
     neff_max: int | None = 1000,
     fcut_min: float | None = None,
@@ -281,6 +297,18 @@ def _scan_frequencies(
     verbose: bool = False,
     uc: UnitConfig | None = None,
 ) -> list[dict[str]]:
+    """Scan over cutoff frequencies and fit a model for each cutoff.
+
+    Parameters
+    ----------
+    See :func:`estimate_acint` for parameter descriptions.
+
+    Returns
+    -------
+    history
+        A list of dictionaries, one for each cutoff frequency,
+        each containing various intermediate results of the fitting.
+    """
     if rng is None:
         rng = np.random.default_rng(42)
     if neff_min is None:
@@ -370,15 +398,27 @@ def _scan_frequencies(
     return history
 
 
-def _marginalize_properties(
+def marginalize_properties(
     spectrum: Spectrum,
     model: SpectrumModel,
     history: list[dict[str]],
+    *,
     switch_exponent: float = 8.0,
     cutoff_criterion: CutoffCriterion | None = None,
-    verbose: bool = False,
-    uc: UnitConfig | None = None,
 ) -> Result:
+    """Marginalize the properties over the ensemble of cutoff frequencies.
+
+    Parameters
+    ----------
+    See :func:`estimate_acint` for parameter descriptions other than `history`.
+    The `history` parameter is the list of dictionaries returned by :func:`scan_frequencies`.
+
+    Returns
+    -------
+    result
+        The inputs, intermediate results and outputs or the algorithm.
+        The function :func:`estimate_acint` returns this object.
+    """
     if cutoff_criterion is None:
         cutoff_criterion = CV2LCriterion()
 
@@ -417,14 +457,9 @@ def _marginalize_properties(
     # This seems to be slightly better,
     # likely because the fcut_weights are based on parameter vectors only.
     props["amplitudes_model"] = model.compute(freqs, props["pars"], deriv=1)
-    _finalize_properties(props, model)
+    finalize_properties(props, model)
 
-    result = Result(spectrum, model, cutoff_criterion, props, history)
-
-    if verbose:
-        print()
-        print(summarize_results(result, uc=uc))
-    return result
+    return Result(spectrum, model, cutoff_criterion, props, history)
 
 
 def fit_model_spectrum(
@@ -590,14 +625,26 @@ def fit_model_spectrum(
         else np.inf
     )
 
-    _finalize_properties(props, model)
+    finalize_properties(props, model)
 
     # Done
     return props
 
 
-def _finalize_properties(props: dict[str], model: SpectrumModel):
-    """Add remaining properties in-place."""
+def finalize_properties(props: dict[str], model: SpectrumModel):
+    """Add remaining properties in-place.
+
+    Parameters
+    ----------
+    props
+        The properties dictionary to finalize.
+        This is either the result of :func:`fit_model_spectrum`
+        or the marginalized properties in :func:`marginalize_properties`.
+        This dictionary is modified in-place to add model-specific properties
+        and to derive standard errors from variances.
+    model
+        The model used to fit the spectrum.
+    """
     model.derive_props(props)
     std_props = {}
     for key, value in props.items():
