@@ -181,8 +181,8 @@ def estimate_acint(
     Finally, an ensemble average over all cutoffs is computed,
     by using ``-np.log`` of the cutoff criterion as weight.
 
-    The loop over all cutoff frequencies is performed in :py:func:`_scan_frequencies`,
-    while the marginalization over cutoff frequencies is done in :py:func:`_marginalize_properties`.
+    The loop over all cutoff frequencies is performed in :py:func:`scan_frequencies`,
+    while the marginalization over cutoff frequencies is done in :py:func:`marginalize_properties`.
     The function :py:func:`fit_model_spectrum` performs the actual fitting of the model
     for a given cutoff frequency.
 
@@ -249,7 +249,7 @@ def estimate_acint(
     Returns
     -------
     result
-        The inputs, intermediate results and outputs or the algorithm.
+        The inputs, intermediate results and outputs of the algorithm.
     """
     history = scan_frequencies(
         spectrum,
@@ -416,7 +416,7 @@ def marginalize_properties(
     Returns
     -------
     result
-        The inputs, intermediate results and outputs or the algorithm.
+        The inputs, intermediate results and outputs of the algorithm.
         The function :func:`estimate_acint` returns this object.
     """
     if cutoff_criterion is None:
