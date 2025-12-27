@@ -20,7 +20,6 @@
 
 import attrs
 import numpy as np
-from numpy.typing import NDArray
 from scipy.optimize import minimize, root_scalar
 
 from .conditioning import ConditionedCost
@@ -436,7 +435,7 @@ def fit_model_spectrum(
     cutoff_criterion: CutoffCriterion,
     rng: np.random.Generator,
     nonlinear_budget: int,
-) -> dict[str, NDArray | float]:
+) -> dict[str]:
     """Optimize the parameter of a model for a given spectrum and cutoff frequency.
 
     Parameters
@@ -597,7 +596,7 @@ def fit_model_spectrum(
     return props
 
 
-def _finalize_properties(props: dict[str, NDArray | float], model: SpectrumModel):
+def _finalize_properties(props: dict[str], model: SpectrumModel):
     """Add remaining properties in-place."""
     model.derive_props(props)
     std_props = {}
