@@ -405,8 +405,7 @@ def fit_model_spectrum(
     Returns
     -------
     props
-        A dictionary containing various intermediate results of the cost function calculation,
-        computed for the estimated parameters.
+        A dictionary containing various intermediate results of the cost function calculation.
         See Notes for details.
 
     Notes
