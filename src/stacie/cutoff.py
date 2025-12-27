@@ -61,7 +61,7 @@ class CutoffCriterion:
         self,
         spectrum: Spectrum,
         model: SpectrumModel,
-        props: dict[str, NDArray],
+        props: dict[str, NDArray[float]],
     ) -> dict[str, float]:
         """Compute the criterion for the given spectrum and model.
 
@@ -72,7 +72,8 @@ class CutoffCriterion:
         model
             The model to be fitted to the spectrum.
         props
-            The property dictionary returned by the :py:meth:`stacie.cost.LowFreqCost.props` method.
+            The property dictionary being constructed in the
+            :py:func:`stacie.estimate.fit_model_spectrum` function.
 
         Returns
         -------
@@ -135,7 +136,7 @@ class CV2LCriterion(CutoffCriterion):
         self,
         spectrum: Spectrum,
         model: SpectrumModel,
-        props: dict[str, NDArray],
+        props: dict[str, NDArray[float]],
     ) -> dict[str, float]:
         """The disparity between fits to two different parts of the spectrum."""
         # Compute weights for the two halves and the model

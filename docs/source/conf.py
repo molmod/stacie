@@ -190,6 +190,7 @@ myst_heading_anchors = 4
 add_module_names = False
 autodoc_default_options = {
     "undoc-members": True,
+    "special-members": "__call__",
     "members": None,
     "ignore-module-all": True,
 }

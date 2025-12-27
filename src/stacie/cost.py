@@ -47,7 +47,7 @@ class LowFreqCost:
     model: SpectrumModel = attrs.field()
     """The model to be fitted to the spectrum."""
 
-    def __call__(self, pars: NDArray[float], *, deriv: int = 0) -> float:
+    def __call__(self, pars: NDArray[float], *, deriv: int = 0) -> list[NDArray[float]]:
         """Evaluate the cost function and its derivatives.
 
         Parameters
@@ -143,7 +143,7 @@ class LowFreqCost:
 
 def logpdf_gamma(
     x: NDArray[float], alpha: NDArray[float], theta: NDArray[float], *, deriv: int = 0
-):
+) -> list[NDArray[float]]:
     """Compute the logarithm of the probability density function of the Gamma distribution.
 
     Parameters
@@ -179,7 +179,9 @@ def logpdf_gamma(
     return results
 
 
-def entropy_gamma(alpha: NDArray[float], theta: NDArray[float], *, deriv: int = 0):
+def entropy_gamma(
+    alpha: NDArray[float], theta: NDArray[float], *, deriv: int = 0
+) -> list[NDArray[float]]:
     """Compute the entropy of the Gamma distribution.
 
     Parameters

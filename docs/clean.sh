@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-rm -rfv build
+rm -rfv build jupyter_execute

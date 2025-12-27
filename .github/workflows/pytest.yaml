@@ -43,4 +43,4 @@ jobs:
       - name: Install package with test dependencies
         run: pip install -e .[tests]
       - name: Run pytest
-        run: pytest -vv
+        run: pytest -vv ${{ matrix.python-version == '3.10' && '-W ignore::Warning' || '' }}

@@ -49,8 +49,8 @@ class UnitConfig:
     - The ``*_unit`` attributes are assumed to have the value of a "display unit" in
       the same internal units.
 
-    For example, if your internal time unit is 1 ps and you want to display times
-    in ns, set ``time_unit=1000.0``, because your display unit (1 ns) is 1000 internal units (1 ps).
+    For example, if your internal time unit is 1 ps and you want times to be reported in ns,
+    set ``time_unit = 1000.0``, because your display unit (1 ns) is 1000 internal units (1 ps).
 
     To make these conventions easy to follow (and to avoid unit hell in general),
     it is recommended to pick consistent internal units for your system.
@@ -61,7 +61,7 @@ class UnitConfig:
       which is also how this class is used in STACIE.
 
     For example, when all variables are in SI base units and you want to display time in ns,
-    frequency in THz, and autocorrelation integrals in cm^2/s, then create a ``UnitConfig``
+    frequency in THz, and autocorrelation integrals in cm^2/s, then create a :class:`UnitConfig`
     as follows:
 
     .. code-block:: python
@@ -205,9 +205,9 @@ class PositiveDefiniteError(ValueError):
 def robust_posinv(matrix: NDArray[float]) -> tuple[NDArray, NDArray, NDArray, NDArray]:
     """Compute the eigenvalues, eigenvectors and inverse of a positive definite symmetric matrix.
 
-    This function is a robust version of ``numpy.linalg.eigh`` and ``numpy.linalg.inv``
+    This function is a robust replacement for :func:`numpy.linalg.eigh` and :func:`numpy.linalg.inv`
     that can handle large variations in order of magnitude of the diagonal elements.
-    If the matrix is not positive definite, a ``ValueError`` is raised.
+    If the matrix is not positive definite, a :class:`ValueError` is raised.
 
     Parameters
     ----------
@@ -249,7 +249,7 @@ def robust_posinv(matrix: NDArray[float]) -> tuple[NDArray, NDArray, NDArray, ND
 def robust_dot(scales, evals, evecs, other):
     """Compute the dot product of a robustly diagonalized matrix with another matrix.
 
-    - The first three arguments are the output of ``robust_posinv``.
+    - The first three arguments are the output of :func:`robust_posinv`.
     - To multiply with the inverse, just use element-wise inversion of ``scales`` and ``evals``.
 
     Parameters

@@ -99,7 +99,7 @@ def compute_spectrum(
     timestep: float = 1,
     include_zero_freq: bool = True,
 ) -> Spectrum:
-    r"""Compute a spectrum and store all inputs for ``estimate_acint`` in a ``Spectrum`` instance.
+    r"""Compute a spectrum and return it as a :class:`Spectrum` object.
 
     The spectrum amplitudes are computed as follows:
 
@@ -165,8 +165,9 @@ def compute_spectrum(
     Returns
     -------
     spectrum
-        A ``Spectrum`` object holding all the inputs needed to estimate
+        A :class:`Spectrum` object holding all the inputs needed to estimate
         the integral of the autocorrelation function.
+        This can be used as input to :func:`stacie.estimate.estimate_acint`.
     """
     # Handle tuple (prefactor, sequences) case
     if isinstance(sequences, tuple):
