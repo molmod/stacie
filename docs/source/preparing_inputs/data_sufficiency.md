@@ -108,10 +108,10 @@ and repeating the analysis with STACIE:
   Note that the Z-scores may also be large for other reasons than insufficient data.
   This may also occur when the functional form of the model can never match the data,
   e.g. fitting a white noise model to a spectrum that has a non-zero slope.
-- When using the Pade model, the total simulation time should be sufficient
+- When using the Lorentz model, the total simulation time should be sufficient
   to resolve the zero-frequency peak of the spectrum.
   The width of the peak can be derived from
-  [the Pade model](../theory/model.md)
+  [the Lorentz model](../theory/model.md)
   and is $1/2\pi\tau_\text{exp}$,
   where $\tau_\text{exp}$ is the exponential correlation time.
   Because the resolution of the frequency axis of the power spectrum is $1/t_\text{sim}$,
