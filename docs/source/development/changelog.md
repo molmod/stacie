@@ -11,6 +11,17 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 (no changes yet)
 
+(v1.2.1)=
+## [1.2.1] - 2025-12-28
+
+Minor documentation and dependency improvements.
+
+### Changed
+
+- Several documentation improvements and clarifications.
+- Removed unused dependency `cattrs` and lowered minimum required of `attrs` to `23.1.0`
+  to facilitate installation in more constrained environments.
+
 (v1.2.0)=
 ## [1.2.0] - 2025-12-23
 
@@ -109,3 +120,4 @@ in the documentation and README files.
 [1.1.2]: https://github.com/molmod/stacie/releases/tag/v1.1.2
 [1.1.3]: https://github.com/molmod/stacie/releases/tag/v1.1.3
 [1.2.0]: https://github.com/molmod/stacie/releases/tag/v1.2.0
+[1.2.1]: https://github.com/molmod/stacie/releases/tag/v1.2.1
