@@ -417,7 +417,7 @@ def marginalize_properties(
     -------
     result
         The inputs, intermediate results and outputs of the algorithm.
-        The function :func:`estimate_acint` returns this object.
+        This object is returned by the function :func:`estimate_acint`.
     """
     if cutoff_criterion is None:
         cutoff_criterion = CV2LCriterion()
@@ -638,10 +638,10 @@ def finalize_properties(props: dict[str], model: SpectrumModel):
     ----------
     props
         The properties dictionary to finalize.
-        This is either the result of :func:`fit_model_spectrum`
-        or the marginalized properties in :func:`marginalize_properties`.
+        This is either the output of :func:`fit_model_spectrum`
+        or the marginalized properties obtained by :func:`marginalize_properties`.
         This dictionary is modified in-place to add model-specific properties
-        and to derive standard errors from variances.
+        and to compute standard errors from variances.
     model
         The model used to fit the spectrum.
     """
