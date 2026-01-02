@@ -15,7 +15,7 @@ metadata:
   license:
     - cc-by-sa-4.0
     - lgpl-3.0-or-later
-  copyright: Copyright (C) 2024-2025 The contributors of the STACIE Python Package
+  copyright: Copyright 2024-2026 The contributors of the STACIE Python Package
   resource_type: dataset
   publisher: Zenodo
   creators:
