@@ -315,10 +315,10 @@ eta_production_init = analyze_production(1).acint
 #
 # - The recommendations based on the exponential correlation time were met by the initial simulation settings.
 #
-#     - The recommended simulation time is 24 τ\*, which about 8000 steps.
+#     - The recommended simulation time is 25.8 τ\*, which about 8600 steps.
 #       The initial production runs (12000 steps) were therefore sufficient.
 #
-#     - The recommended block time is 0.118 τ\*, which corresponds to about 40 steps.
+#     - The recommended block time is 0.129 τ\*, which corresponds to about 40 steps.
 #       The block size used in the initial production runs (10 steps) was sufficiently small.
 #
 # - The relative error of the viscosity estimate is about 2%,
@@ -331,7 +331,7 @@ eta_production_init = analyze_production(1).acint
 #   to support the exponential decay of the ACF of the pressure tensor.
 #   It just seems to be a reasonable choice for this case.
 #
-# - The effective number of points fitted to the spectrum is 29.4,
+# - The effective number of points fitted to the spectrum is 22.1,
 #   which is low for a 3 parameter model.
 #   For high-quality production simulations, it would be good to triple the simulation length,
 #   as to multiply the resolution of the frequency grid by 3.
@@ -363,7 +363,7 @@ eta_production_ext = analyze_production(3).acint
 # %% [markdown]
 # Some remarks about the final results:
 #
-# - The effective number of points has increased to 134.8,
+# - The effective number of points has increased to 150.9,
 #   which is a fine number of data points for a model with $P=3$ parameters.
 #
 # - For higher frequency cutoffs, both Z-scores increase, showing that the
@@ -384,9 +384,9 @@ eta_production_ext = analyze_production(3).acint
 #
 # | Method                     | Simulation time [τ\*] | Shear viscosity [η\*] | Reference |
 # |----------------------------| --------------------: | --------------------: |-----------|
-# | EMD NVE (STACIE)           | 3600                  | 3.205 ± 0.063         | (here) initial |
+# | EMD NVE (STACIE)           | 3600                  | 3.228 ± 0.069         | (here) initial |
 # | EMD NVE (STACIE)           | 10800                 | 3.207 ± 0.040         | (here) extension 1 |
-# | EMD NVE (STACIE)           | 30000                 | 3.245 ± 0.026         | (here) extension 2 |
+# | EMD NVE (STACIE)           | 30000                 | 3.239 ± 0.025         | (here) extension 2 |
 # | EMD NVE (Helfand-Einstein) | 75000                 | 3.277 ± 0.098         | {cite:p}`meier_2004_transport_I` |
 # | EMD NVE (Helfand-moment)   | 600000                | 3.268 ± 0.055         | {cite:p}`viscardi_2007_transport1` |
 #
