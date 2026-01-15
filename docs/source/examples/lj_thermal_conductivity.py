@@ -151,7 +151,7 @@ def demo_production(npart: int = 3, ntraj: int = 100):
 kappa_production = demo_production(3)
 
 # %% [markdown]
-# The exponential correlation time of the heat flux tensor fluctuations is five times shorter
+# The exponential correlation time of the heat flux tensor fluctuations is about four times shorter
 # than that of the pressure tensor fluctuations.
 # This means that the thermal conductivity is a bit easier to compute than the viscosity.
 # Note that the selected block size is still compatible with this shorter time scale.
@@ -174,9 +174,9 @@ kappa_production = demo_production(3)
 #
 # | Method                     | Simulation time  [τ\*] | Thermal conductivity [κ\*] | Reference |
 # |----------------------------|------------------------|----------------------------|-----------|
-# | EMD NVE (STACIE)           | 3600                   | 6.837 ± 0.081              | (here) initial |
-# | EMD NVE (STACIE)           | 10800                  | 6.968 ± 0.046              | (here) extension 1 |
-# | EMD NVE (STACIE)           | 30000                  | 6.936 ± 0.029              | (here) extension 2 |
+# | EMD NVE (STACIE)           | 3600                   | 6.852 ± 0.079              | (here) initial |
+# | EMD NVE (STACIE)           | 10800                  | 6.968 ± 0.045              | (here) extension 1 |
+# | EMD NVE (STACIE)           | 30000                  | 6.934 ± 0.028              | (here) extension 2 |
 # | EMD NVE (Helfand-moment)   | 600000                 | 6.946 ± 0.12               | {cite:p}`viscardi_2007_transport2` |
 #
 # This small comparison confirms that STACIE can reproduce a well-known thermal conductivity result,

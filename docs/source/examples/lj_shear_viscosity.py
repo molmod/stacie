@@ -385,7 +385,7 @@ eta_production_ext = analyze_production(3).acint
 # | Method                     | Simulation time [τ\*] | Shear viscosity [η\*] | Reference |
 # |----------------------------| --------------------: | --------------------: |-----------|
 # | EMD NVE (STACIE)           | 3600                  | 3.228 ± 0.069         | (here) initial |
-# | EMD NVE (STACIE)           | 10800                 | 3.207 ± 0.040         | (here) extension 1 |
+# | EMD NVE (STACIE)           | 10800                 | 3.208 ± 0.041         | (here) extension 1 |
 # | EMD NVE (STACIE)           | 30000                 | 3.239 ± 0.025         | (here) extension 2 |
 # | EMD NVE (Helfand-Einstein) | 75000                 | 3.277 ± 0.098         | {cite:p}`meier_2004_transport_I` |
 # | EMD NVE (Helfand-moment)   | 600000                | 3.268 ± 0.055         | {cite:p}`viscardi_2007_transport1` |
