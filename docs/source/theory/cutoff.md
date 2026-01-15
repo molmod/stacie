@@ -73,8 +73,8 @@ The following parameters define the grid:
         N_{\text{eff}}(f_{\text{cut,max}}) = N_{\text{eff, max}}
     $$
 
-    where $N_{\text{eff, min}}$ is a user-defined parameter.
-    In STACIE, the default value is $N_{\text{eff, min}} = 1000$.
+    where $N_{\text{eff, max}}$ is a user-defined parameter.
+    In STACIE, the default value is $N_{\text{eff, max}} = 1000$.
     This value can be modified using the `neff_max` option
     in the function [`estimate_acint()`](#stacie.estimate.estimate_acint).
     The purpose of this parameter is to limit the computational cost of the regression.
