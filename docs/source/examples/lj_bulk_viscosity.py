@@ -190,8 +190,9 @@ eta_bulk_production = demo_production(3)
 #
 # | Method                     | Simulation time [τ\*] | Bulk viscosity [η$_b$\*] | Reference |
 # | -------------------------- | --------------------: | -----------------------: | --------- |
-# | EMD NVE (STACIE)           | 10800                 | 1.158 ± 0.030            | (here) extension 1 |
-# | EMD NVE (STACIE)           | 30000                 | 1.191 ± 0.021            | (here) extension 2 |
+# | EMD NVE (STACIE)           | 3600                  | 1.182 ± 0.071            | (here) initial |
+# | EMD NVE (STACIE)           | 10800                 | 1.159 ± 0.031            | (here) extension 1 |
+# | EMD NVE (STACIE)           | 30000                 | 1.190 ± 0.021            | (here) extension 2 |
 # | EMD NVE (Helfand-Einstein) | 300000                | 1.186 ± 0.084            | {cite:p}`meier_2004_transport_III` |
 #
 # This comparison demonstrates that STACIE accurately reproduces bulk viscosity results
