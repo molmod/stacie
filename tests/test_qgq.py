@@ -105,12 +105,17 @@ def test_construct_qgq_stdnormal(zero, solver):
     fig.savefig(dn_out / f"{stem}.pdf")
 
 
-def test_construct_qgq_empirical():
+@pytest.mark.parametrize("nmoment", [4, 5])
+@pytest.mark.parametrize("guess", [True, False])
+def test_construct_qgq_empirical(nmoment, guess):
     rng = np.random.default_rng(0)
     shape = 20
     scale = 1.2
     samples = rng.gamma(shape=shape, scale=scale, size=1000)
-    points, weights, extra = construct_qgq_empirical(samples, npoint=20, nmoment=5, do_extra=True)
+    points0 = 20 if guess else np.quantile(samples, (np.arange(-10, 10) + 0.5) / 20 + 0.5)
+    points, weights, extra = construct_qgq_empirical(
+        samples, points0=points0, nmoment=nmoment, do_extra=True
+    )
     assert len(points) == len(weights) == 20
     assert np.all(weights > 0)
     assert weights.sum() == pytest.approx(1, abs=1e-5)
@@ -127,7 +132,7 @@ def test_construct_qgq_empirical():
 
     # write plot
     def plot_dist(ax):
-        ax.set_title(f"Gamma shape={shape}, scale={scale}, nsample=1000")
+        ax.set_title(f"Gamma $α={shape}$, $θ={scale}$, $S=1000$, $M={nmoment}$")
         ax.hist(samples, bins=30, density=True, alpha=0.7)
         xgrid = np.linspace(samples.min(), samples.max(), 100)
         mygamma = sp.stats.gamma(a=shape, scale=scale)
@@ -139,4 +144,7 @@ def test_construct_qgq_empirical():
     dn_out = Path("tests/outputs")
     dn_out.mkdir(exist_ok=True)
     fig, _ = plot_qgq(extra, plot_dist)
-    fig.savefig(dn_out / "qgq_empirical.pdf")
+    stem = f"qgq_empirical_{nmoment}"
+    if guess:
+        stem += "_guess"
+    fig.savefig(dn_out / f"{stem}.pdf")

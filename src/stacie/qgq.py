@@ -89,7 +89,7 @@ def construct_qgq_stdnormal(
 
 def construct_qgq_empirical(
     samples: ArrayLike,
-    npoint: int,
+    points0: int | ArrayLike,
     nmoment: int,
     targets_weights: ArrayLike | None = None,
     weight_solver: Callable | None = None,
@@ -102,8 +102,8 @@ def construct_qgq_empirical(
     ----------
     samples
         The samples from the empirical distribution, used to compute the target moments.
-    npoint
-        The number of grid points to optimize.
+    points0
+        The number of grid points to optimize or the initial grid points.
     nmoment
         The number of moments to match,
         must be strictly positive and strictly less than npoint.
@@ -130,6 +130,11 @@ def construct_qgq_empirical(
     extra
         If `do_extra` is True, a dictionary containing additional information.
     """
+    if isinstance(points0, int):
+        npoint = points0
+        points0 = None
+    else:
+        npoint = len(points0)
     if nmoment <= 0:
         raise ValueError("nmoment must be strictly positive")
     if nmoment >= npoint:
@@ -142,7 +147,10 @@ def construct_qgq_empirical(
     samples = (samples - mu) / sigma
     basis_funcs = [HermiteE.basis(i) for i in range(1, nmoment + 1, 1)]
     targets_basis = [basis_func(samples).mean() for basis_func in basis_funcs]
-    points0 = np.quantile(samples, (np.arange(npoint) + 0.5) / npoint)
+    if points0 is None:
+        points0 = np.quantile(samples, (np.arange(npoint) + 0.5) / npoint)
+    else:
+        points0 = (np.asarray(points0, dtype=float) - mu) / sigma
     result = construct_qgq_low(
         points0=points0,
         basis_funcs=basis_funcs,
