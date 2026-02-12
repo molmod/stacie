@@ -63,6 +63,13 @@ we also provide an example analyzing cloud cover data:
 cloud_cover.py
 ```
 
+Some numerical aspects are demostrated separately in the following notebooks:
+
+```{toctree}
+:maxdepth: 1
+qgq.py
+```
+
 In addition to the worked examples in STACIE's documentation,
 we also recommend checking out the AutoCorrelation Integral Drill (ACID) Test Set,
 with which we have validated STACIE's performance:

@@ -9,6 +9,7 @@ This module only handles 1D integrations.
 """
 
 from collections.abc import Callable
+from enum import Enum
 from functools import partial
 
 import matplotlib.pyplot as plt
@@ -20,11 +21,24 @@ from numpy.typing import ArrayLike, NDArray
 __all__ = ("construct_qgq_empirical", "construct_qgq_low", "construct_qgq_stdnormal", "plot_qgq")
 
 
+class Symmetry(Enum):
+    """Symmetry of the quadrature grid points (and weights) around zero."""
+
+    # Enforce no symmetry
+    NONE = 0
+
+    # Even symmetry including x=0 fixed
+    ZERO = 1
+
+    # Even symmetry excluding x=0
+    NONZERO = 2
+
+
 def construct_qgq_stdnormal(
     points0: ArrayLike,
     nmoment: int,
     targets_weights: ArrayLike | None = None,
-    eps: float = 1e-5,
+    eps: float = 1e-4,
     do_extra: bool = False,
 ) -> NDArray | tuple[NDArray, dict[str]]:
     """Construct a quasi-Gaussian quadrature grid for the standard normal distribution.
@@ -63,8 +77,10 @@ def construct_qgq_stdnormal(
     if points0[0] == 0:
         fix = [0]
         targets_weights[0] = 0.5
+        symmetry = Symmetry.ZERO
     else:
         fix = []
+        symmetry = Symmetry.NONZERO
 
     return construct_qgq_low(
         points0=points0,
@@ -73,7 +89,7 @@ def construct_qgq_stdnormal(
         targets_basis=np.zeros(nmoment // 2),
         targets_weights=targets_weights,
         fix=fix,
-        symmetric=True,
+        symmetry=symmetry,
         eps=eps,
         do_extra=do_extra,
     )
@@ -84,7 +100,8 @@ def construct_qgq_empirical(
     points0: int | ArrayLike,
     nmoment: int,
     targets_weights: ArrayLike | None = None,
-    eps: float = 1e-5,
+    symmetry: Symmetry = Symmetry.NONE,
+    eps: float = 1e-4,
     do_extra: bool = False,
 ) -> NDArray | tuple[NDArray, dict[str]]:
     """Construct a quasi-Gaussian quadrature grid for an empirical distribution.
@@ -101,6 +118,10 @@ def construct_qgq_empirical(
     targets_weights
         The target weights for the quadrature, which the quadrature should match.
         If not given, all values are set to 1.
+    symmetry
+        The symmetry of the quadrature grid points (and weights) around zero.
+        If symmetry is imposed, only the positive points are given in `points0`,
+        and the negative ones are added implicitly by symmetry.
     eps
         A small regularization parameter to prevent points from collapsing or reshuffling.
     do_extra
@@ -111,6 +132,8 @@ def construct_qgq_empirical(
     -------
     points
         The optimized grid points.
+    weights
+        The optimized quadrature weights, typically nearly proportional to the Gaussian weights.
     extra
         If `do_extra` is True, a dictionary containing additional information.
     """
@@ -132,9 +155,26 @@ def construct_qgq_empirical(
     basis_funcs = [HermiteE.basis(i) for i in range(1, nmoment + 1, 1)]
     targets_basis = [basis_func(samples).mean() for basis_func in basis_funcs]
     if points0 is None:
-        points0 = np.quantile(samples, (np.arange(npoint) + 0.5) / npoint)
+        if symmetry == Symmetry.NONE:
+            qs = (np.arange(npoint) + 0.5) / npoint
+        else:
+            frac_neg = (samples < 0).mean()
+            frac_pos = 1 - frac_neg
+            if symmetry == Symmetry.ZERO:
+                if npoint % 2 == 0:
+                    raise ValueError("npoint must be odd when symmetry is ZERO")
+                nhalf = npoint // 2 + 1
+                qs = np.arange(nhalf) / nhalf
+            else:
+                if npoint % 2 != 0:
+                    raise ValueError("npoint must be even when symmetry is NONZERO")
+                nhalf = npoint // 2
+                qs = (np.arange(nhalf) + 0.5) / nhalf
+            qs = frac_neg + qs * frac_pos
+        points0 = np.quantile(samples, qs)
     else:
         points0 = (np.asarray(points0, dtype=float) - mu) / sigma
+
     result = construct_qgq_low(
         points0=points0,
         basis_funcs=basis_funcs,
@@ -142,7 +182,7 @@ def construct_qgq_empirical(
         targets_basis=targets_basis,
         targets_weights=targets_weights,
         fix=None,
-        symmetric=False,
+        symmetry=symmetry,
         eps=eps,
         do_extra=do_extra,
     )
@@ -165,8 +205,8 @@ def construct_qgq_low(
     targets_basis: ArrayLike,
     targets_weights: ArrayLike | None = None,
     fix: ArrayLike | None = None,
-    symmetric: bool = False,
-    eps: float = 1e-5,
+    symmetry: Symmetry = Symmetry.NONE,
+    eps: float = 1e-4,
     do_extra: bool = False,
 ) -> NDArray | tuple[NDArray, dict[str]]:
     """Construct a quasi-Gaussian quadrature grid, low-level interface.
@@ -190,9 +230,10 @@ def construct_qgq_low(
         The target weights for the quadrature points.
     fix
         The indices of the points to keep fixed during optimization.
-    symmetric
-        If True, it is assumed that only the positive points are given in `points0`,
-        and the negative ones must be added implicitly by symmetry.
+    symmetry
+        The symmetry of the quadrature grid points (and weights) around zero.
+        If symmetry is imposed, only the positive points are given in `points0`,
+        and the negative ones are added implicitly by symmetry.
     eps
         A small regularization parameter to prevent points from collapsing or reshuffling.
     do_extra
@@ -203,6 +244,8 @@ def construct_qgq_low(
     -------
     points1
         The optimized grid points.
+    weights1
+        The optimized quadrature weights.
     extra
         If `do_extra` is True, a dictionary containing intermediate results:
 
@@ -237,6 +280,10 @@ def construct_qgq_low(
 
     if np.diff(points0).min() <= 0:
         raise ValueError("points0 must be strictly increasing")
+    if symmetry == Symmetry.ZERO and points0[0] != 0:
+        raise ValueError("points0[0] must be 0 when symmetry is ZERO")
+    if symmetry == Symmetry.NONZERO and np.any(points0 <= 0):
+        raise ValueError("all points0 must be strictly positive when symmetry is NONZERO")
     if eps < 0:
         raise ValueError("eps must be positive")
 
@@ -253,7 +300,7 @@ def construct_qgq_low(
                 basis_funcs_d=basis_funcs_d,
                 targets_basis=targets_basis,
                 targets_weights=targets_weights,
-                symmetric=symmetric,
+                symmetry=symmetry,
                 eps=eps,
             )
             return cost, grad[mask]
@@ -264,17 +311,15 @@ def construct_qgq_low(
             basis_funcs_d=basis_funcs_d,
             targets_basis=targets_basis,
             targets_weights=targets_weights,
-            symmetric=symmetric,
+            symmetry=symmetry,
             eps=eps,
         )
 
-    initial_tr_radius = np.diff(points0).min() / 10
     res = sp.optimize.minimize(
         cost_wrapper,
         points0[mask] if len(fix) > 0 else points0,
-        method="trust-constr",
+        method="L-BFGS-B",
         jac=True,
-        options={"maxiter": 1000, "gtol": 1e-15, "initial_tr_radius": initial_tr_radius},
     )
     if not res.success:
         raise RuntimeError(f"Optimization failed: {res.message}")
@@ -284,20 +329,34 @@ def construct_qgq_low(
         points1[mask] = res.x
     else:
         points1 = res.x
-    if symmetric:
-        even = points0[0] > 0
-        points0 = apply_symmetry_points(points0, even)
-        points1 = apply_symmetry_points(points1, even)
-        targets_weights = apply_symmetry_weights(targets_weights, even)
+    if symmetry != Symmetry.NONE:
+        points0 = apply_symmetry_points(points0, symmetry == Symmetry.ZERO)
+        points1 = apply_symmetry_points(points1, symmetry == Symmetry.ZERO)
+        targets_weights = apply_symmetry_weights(targets_weights, symmetry == Symmetry.ZERO)
     eqs0, eqs0_d = build_eqs(points0, basis_funcs, basis_funcs_d)
     eqs1, eqs1_d = build_eqs(points1, basis_funcs, basis_funcs_d)
     weights0 = assign_weights_l2(eqs0, targets_basis, targets_weights)
     weights1 = assign_weights_l2(eqs1, targets_basis, targets_weights)
+    order = np.argsort(points1)
+    points1 = points1[order]
+    weights1 = weights1[order]
     cost0, grad0 = point_cost(
-        points0, basis_funcs, basis_funcs_d, targets_basis, targets_weights, eps=eps
+        points0,
+        basis_funcs,
+        basis_funcs_d,
+        targets_basis,
+        targets_weights,
+        symmetry=symmetry,
+        eps=eps,
     )
     cost1, grad1 = point_cost(
-        points1, basis_funcs, basis_funcs_d, targets_basis, targets_weights, eps=eps
+        points1,
+        basis_funcs,
+        basis_funcs_d,
+        targets_basis,
+        targets_weights,
+        symmetry=symmetry,
+        eps=eps,
     )
     if do_extra:
         extra = {
@@ -333,15 +392,15 @@ def plot_qgq(
         plot_dist(axs[0])
 
     def plot_points(ax):
-        ax.plot(extra["points0"], extra["weights0"], "ko-", label="initial")
-        ax.plot(extra["points1"], extra["weights1"], "ro-", label="optimized")
+        ax.plot(extra["points0"], extra["weights0"], "k+-", label="initial")
+        ax.plot(extra["points1"], extra["weights1"], "r+-", label="optimized")
         ax.set_xlabel("x")
         ax.set_ylabel("weight")
         ax.legend()
 
     def plot_eqs(ax):
         for i, eq in enumerate(extra["eqs1"]):
-            ax.plot(extra["points1"], eq, "o-", label=f"eq {i}")
+            ax.plot(extra["points1"], eq, "+-", label=f"eq {i}")
         ax.set_xlabel("x")
         ax.set_ylabel("basis functions")
 
@@ -356,8 +415,8 @@ def point_cost(
     basis_funcs_d: list,
     targets_basis: NDArray,
     targets_weights: NDArray,
-    symmetric: bool = False,
-    eps: float = 1e-5,
+    symmetry: Symmetry = Symmetry.NONE,
+    eps: float = 1e-4,
 ):
     """The cost function for optimizing the quadrature points.
 
@@ -373,9 +432,10 @@ def point_cost(
         The target integrals of the basis functions, which the quadrature should match.
     targets_weights
         The target weights for the quadrature points.
-    symmetric
-        If True, it is assumed that only the positive points are given in `points`,
-        and the negative ones must be added implicitly by symmetry.
+    symmetry
+        The symmetry of the quadrature grid points (and weights) around zero.
+        If symmetry is imposed, only the positive points are given in `points0`,
+        and the negative ones are added implicitly by symmetry.
     eps
         A small regularization parameter to prevent points from collapsing or reshuffling.
 
@@ -386,13 +446,10 @@ def point_cost(
     grad
         The gradient of the cost function with respect to the grid points, used for optimization.
     """
-    if symmetric:
+    if symmetry != Symmetry.NONE:
         nhalf = len(points)
-        if points[0] < 0:
-            raise ValueError("the first point must be non-negative when symmetric is True")
-        even = points[0] > 0
-        points = apply_symmetry_points(points, even)
-        targets_weights = apply_symmetry_weights(targets_weights, even)
+        points = apply_symmetry_points(points, symmetry == Symmetry.ZERO)
+        targets_weights = apply_symmetry_weights(targets_weights, symmetry == Symmetry.ZERO)
 
     # Compute the quadrature weights and cost for fixed points.
     eqs, eqs_d = build_eqs(points, basis_funcs, basis_funcs_d)
@@ -402,14 +459,14 @@ def point_cost(
     grad = np.dot(errors, eqs_d) * targets_weights
 
     # Add a minor penalty to prevent points from collapsing or reshuffling.
-    penalties = np.exp(-np.diff(points))
-    cost += eps * penalties.sum()
+    penalties = eps * np.exp(-np.diff(points))
+    cost += penalties.sum()
     penalty_grad = np.zeros_like(points)
-    penalty_grad[:-1] += eps * penalties
-    penalty_grad[1:] -= eps * penalties
+    penalty_grad[:-1] += penalties
+    penalty_grad[1:] -= penalties
     grad += penalty_grad
 
-    if symmetric:
+    if symmetry != Symmetry.NONE:
         grad_half = grad[-nhalf:].copy()
         grad_half = -grad[:nhalf][::-1]
         grad = grad_half
@@ -417,23 +474,23 @@ def point_cost(
     return cost, grad
 
 
-def apply_symmetry_points(points_half: NDArray, even: bool) -> NDArray:
+def apply_symmetry_points(points_half: NDArray, zero: bool) -> NDArray:
     """Mirror the points and weights around zero to enforce symmetry."""
-    if even:
-        points = np.concatenate((-points_half[::-1], points_half))
-    else:
+    if zero:
         points = np.concatenate((-points_half[1:][::-1], points_half))
+    else:
+        points = np.concatenate((-points_half[::-1], points_half))
     return points
 
 
-def apply_symmetry_weights(weights_half: NDArray, even: bool) -> NDArray:
+def apply_symmetry_weights(weights_half: NDArray, zero: bool) -> NDArray:
     """Mirror the weights around zero to enforce symmetry."""
-    if even:
-        weights = np.concatenate((weights_half[::-1], weights_half))
-    else:
+    if zero:
         weights = np.zeros(2 * len(weights_half) - 1)
         weights[: len(weights_half)] = weights_half[::-1]
         weights[-len(weights_half) :] += weights_half
+    else:
+        weights = np.concatenate((weights_half[::-1], weights_half))
     return weights
 
 
@@ -469,49 +526,7 @@ def assign_weights_l2(eqs, rhs, wref):
 
 
 def extend_eqs(eqs, rhs):
+    """Add the mandatory constraint that the sum of weights equals 1."""
     eqs = np.concatenate([np.ones((1, eqs.shape[1])), eqs], axis=0)
     rhs = np.concatenate([[1], rhs])
     return eqs, rhs
-
-
-def assign_weights_kld(eqs, rhs, wref):
-    """Optimize the quadrature weights by minimizing their KL-divergence from the reference.
-
-    See `assign_weights_l2` for the API documentation, which is the same as this function.
-    """
-    eqs, rhs = extend_eqs(eqs, rhs)
-    l0 = np.ones(len(eqs))
-    res = sp.optimize.root(kld_constr, l0, args=(eqs, rhs, wref), jac=True, tol=1e-15)
-    l1 = res.x
-    return wref * np.exp(np.dot(-l1, eqs))
-
-
-def kld_constr(lbda, eqs, rhs, wref):
-    """Helper to solve the Langrange multipliers for the KL-divergence optimization.
-
-    Parameters
-    ----------
-    lbda
-        The current values of the Lagrange multipliers.
-        Shape `(nconstraint,)`.
-    eqs
-        The linear coefficients of the constraints to impose.
-        Shape `(nconstraint, npoint)`.
-    rhs
-        The target values of the constraints to impose.
-        Shape `(nconstraint,)`.
-    wref
-        The reference weights to aim for.
-        Shape `(npoint,)`.
-
-    Returns
-    -------
-    errors
-        The current values of the constraint errors, to be made zero.
-    jac
-        The Jacobian of the constraint errors with respect to the Lagrange multipliers.
-    """
-    weights = wref * np.exp(np.dot(-lbda, eqs))
-    errors = np.dot(eqs, weights) - rhs
-    jac = -np.einsum("ij,j,kj->ik", eqs, weights, eqs)
-    return errors, jac
