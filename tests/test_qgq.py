@@ -78,9 +78,10 @@ def test_construct_qgq_stdnormal(zero, npoint, nmoment):
     points0 = np.linspace(0, 1.5, npoint)
     if not zero:
         points0 += 0.2
-    # gtol is relaxed to speed up the test. Avoid this in production.
+    # gtol and eps are relaxed to speed up the test and facilitate convergence.
+    # Avoid this in production.
     points, weights, extra = construct_qgq_stdnormal(
-        points0, nmoment=nmoment, gtol=1e-4, do_extra=True
+        points0, nmoment=nmoment, gtol=1e-5, eps=1e-3, do_extra=True
     )
     assert len(points) == len(weights) == 2 * len(points0) - zero
     assert np.diff(points).min() > 0
@@ -128,9 +129,10 @@ def test_construct_qgq_empirical(guess, npoint, nmoment):
         points0 = np.quantile(
             samples, (np.arange(-npoint // 2, npoint // 2) + 0.5) / (npoint + 2) + 0.5
         )
-    # gtol is relaxed to speed up the test. Avoid this in production.
+    # gtol and eps are relaxed to speed up the test and facilitate convergence.
+    # Avoid this in production.
     points, weights, extra = construct_qgq_empirical(
-        samples, points0=points0, nmoment=nmoment, gtol=1e-4, do_extra=True
+        samples, points0=points0, nmoment=nmoment, gtol=1e-5, eps=1e-3, do_extra=True
     )
     assert len(points) == len(weights) == npoint
     assert np.diff(points).min() > 0
