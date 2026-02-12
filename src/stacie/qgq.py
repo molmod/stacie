@@ -38,7 +38,8 @@ def construct_qgq_stdnormal(
     points0: ArrayLike,
     nmoment: int,
     targets_weights: ArrayLike | None = None,
-    eps: float = 1e-4,
+    gtol: float = 1e-13,
+    eps: float = 1e-5,
     do_extra: bool = False,
 ) -> NDArray | tuple[NDArray, dict[str]]:
     """Construct a quasi-Gaussian quadrature grid for the standard normal distribution.
@@ -55,8 +56,13 @@ def construct_qgq_stdnormal(
     targets_weights
         The target weights for the quadrature, which the quadrature should match.
         If not given, all values are set to 1, except when points0[0] = 0,
-        in which case the first weight is set to 0.5 to account for the symmetry.    eps
+        in which case the first weight is set to 0.5 to account for the symmetry.
+    gtol
+        The gradient tolerance for the optimization convergence.
+        The default is very strict.
+    eps
         A small regularization parameter to prevent points from collapsing or reshuffling.
+        Smaller values result in more even weights and slower optimization.
     do_extra
         if True, also return an extra dictionary with additional information about the optimization,
         which can be used for debugging or analysis.
@@ -90,6 +96,7 @@ def construct_qgq_stdnormal(
         targets_weights=targets_weights,
         fix=fix,
         symmetry=symmetry,
+        gtol=gtol,
         eps=eps,
         do_extra=do_extra,
     )
@@ -101,7 +108,8 @@ def construct_qgq_empirical(
     nmoment: int,
     targets_weights: ArrayLike | None = None,
     symmetry: Symmetry = Symmetry.NONE,
-    eps: float = 1e-4,
+    gtol: float = 1e-13,
+    eps: float = 1e-5,
     do_extra: bool = False,
 ) -> NDArray | tuple[NDArray, dict[str]]:
     """Construct a quasi-Gaussian quadrature grid for an empirical distribution.
@@ -122,8 +130,12 @@ def construct_qgq_empirical(
         The symmetry of the quadrature grid points (and weights) around zero.
         If symmetry is imposed, only the positive points are given in `points0`,
         and the negative ones are added implicitly by symmetry.
+    gtol
+        The gradient tolerance for the optimization convergence.
+        The default is very strict.
     eps
         A small regularization parameter to prevent points from collapsing or reshuffling.
+        Smaller values result in more even weights and slower optimization.
     do_extra
         if True, also return an extra dictionary with additional information about the optimization,
         which can be used for debugging or analysis.
@@ -183,6 +195,7 @@ def construct_qgq_empirical(
         targets_weights=targets_weights,
         fix=None,
         symmetry=symmetry,
+        gtol=gtol,
         eps=eps,
         do_extra=do_extra,
     )
@@ -206,7 +219,8 @@ def construct_qgq_low(
     targets_weights: ArrayLike | None = None,
     fix: ArrayLike | None = None,
     symmetry: Symmetry = Symmetry.NONE,
-    eps: float = 1e-4,
+    gtol: float = 1e-13,
+    eps: float = 1e-5,
     do_extra: bool = False,
 ) -> NDArray | tuple[NDArray, dict[str]]:
     """Construct a quasi-Gaussian quadrature grid, low-level interface.
@@ -216,6 +230,13 @@ def construct_qgq_low(
     points0
         Initial grid points. The optimization starts from this grid,
         possibly keeping some points fixed as requested by the user.
+
+        Note that the algorithm assumes that the mean of the distribution
+        is well-behaved, not large compared to 1,
+        and that the spread is of the order 1.
+        If this is not the case, it is recommended to precondition the
+        problem by centering and scaling the points.
+        See `construct_qgq_empirical` for an example of how to do this.
     basis_funcs
         The basis functions whose integrals are to be matched by the quadrature.
         These are functions of a single variable, and are evaluated at the grid points.
@@ -234,8 +255,12 @@ def construct_qgq_low(
         The symmetry of the quadrature grid points (and weights) around zero.
         If symmetry is imposed, only the positive points are given in `points0`,
         and the negative ones are added implicitly by symmetry.
+    gtol
+        The gradient tolerance for the optimization convergence.
+        The default is very strict.
     eps
         A small regularization parameter to prevent points from collapsing or reshuffling.
+        Smaller values result in more even weights and slower optimization.
     do_extra
         if True, also return an extra dictionary with additional information about the optimization,
         which can be used for debugging or analysis.
@@ -319,6 +344,12 @@ def construct_qgq_low(
         cost_wrapper,
         points0[mask] if len(fix) > 0 else points0,
         method="L-BFGS-B",
+        options={
+            "gtol": gtol,
+            "ftol": 0,
+            "maxiter": 100 * len(points0) ** 2,
+            "maxfun": 100 * len(points0) ** 2,
+        },
         jac=True,
     )
     if not res.success:
@@ -416,7 +447,7 @@ def point_cost(
     targets_basis: NDArray,
     targets_weights: NDArray,
     symmetry: Symmetry = Symmetry.NONE,
-    eps: float = 1e-4,
+    eps: float = 1e-5,
 ):
     """The cost function for optimizing the quadrature points.
 
@@ -459,6 +490,7 @@ def point_cost(
     grad = np.dot(errors, eqs_d) * targets_weights
 
     # Add a minor penalty to prevent points from collapsing or reshuffling.
+    # Here, we assume that the scale of the points is of the order 1.
     penalties = eps * np.exp(-np.diff(points))
     cost += penalties.sum()
     penalty_grad = np.zeros_like(points)

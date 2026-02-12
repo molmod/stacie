@@ -10,18 +10,29 @@
 # This QGQ method generates quadrature rules of the following form:
 #
 # $$
-#   \int f(x) p(x) dx \approx \mathcal{I}_\text{CGC} = \frac{1}{N} \sum_{n=1}^N f(x_n)
+#   \int f(x) p(x) dx \approx \mathcal{I}_\text{CGC} = \sum_{n=1}^N w_i f(x_n)
 # $$
 #
 # where $p(x)$ is a probability density function and the quadrature points
 # are optimized to make the approximation exact for polynomials of a given degree.
-# Unlike standard quadrature rules, the weights are all equal,
-# meaning that the variance of the integral is minimal when the integrand
+# The weights are assumed to be equal during the optimization of the quadrature points.
+# To improve the accuracy of the quadrature rule for the optimal points,
+# the weights are adjusted in a final step of the algorithm.
+# Practically, that means $w_n \approx 1/N$,
+# which is the main difference with standard quadrature rules.
+# As a result, the variance of the integral is minimal when the integrand
 # has independent and identically distributed noise:
 #
 # $$
-#   \var[\mathcal{I}_\text{CGC}] = \frac{1}{N} \var[f(x)]
+#   \var[\mathcal{I}_\text{CGC}] \approx \frac{1}{N} \var[f(x)]
 # $$
+#
+# The main limitation of the QGQ method is that it is only exact for polynomials
+# up to a relatively low degree (typically 5 or 6).
+# For higher degrees, the optimization has no solution,
+# unless a huge number of points is used (>100) which then converges slowly.
+# In practice, low degrees suffice: even with a tiny bit of noise on the integrand,
+# QGQ will easily outperform high-order quadrature rules.
 
 # %% [markdown]
 # ## Test Case With a Noisy Integrand
@@ -90,50 +101,64 @@ import numpy as np
 import matplotlib.pyplot as plt
 from stacie.qgq import construct_qgq_stdnormal, construct_qgq_empirical
 
+
 # %%
 # Quadrature grids and weights
-x_gh, w_gh = np.polynomial.hermite_e.hermegauss(30)
+
+npoint = 30
+x_gh, w_gh = np.polynomial.hermite_e.hermegauss(npoint)
 w_gh /= np.sqrt(2 * np.pi)
-x_qgq_exact, w_qgq_exact = construct_qgq_stdnormal(np.linspace(0.1, 1.0, 15), 6)
-rng = np.random.default_rng(seed=0)
+
+nmoment = 6
+# eps=1e-7 is used to get more even weights.
+x_qgq_exact, w_qgq_exact = construct_qgq_stdnormal(
+    np.linspace(0.1, 1.0, npoint // 2), nmoment, eps=1e-5
+)
+
+rng = np.random.default_rng(seed=42)
 std_points = rng.standard_normal(size=10000)
-x_qgq_approx, w_qgq_approx = construct_qgq_empirical(std_points, 30, 6)
-x_mc = rng.standard_normal(size=30)
+x_qgq_approx, w_qgq_approx = construct_qgq_empirical(
+    std_points, npoint, nmoment, eps=1e-5
+)
+
+x_mc = rng.standard_normal(size=npoint)
 x_mc.sort()
 
 
 # %%
 # Plot of the quadrature points and weights
+CASES = [
+    ("Gauss-Hermite", x_gh, w_gh),
+    ("QGQ Exact", x_qgq_exact, w_qgq_exact),
+    ("QGQ Approx", x_qgq_approx, w_qgq_approx),
+    ("Monte Carlo", x_mc, np.full_like(x_mc, 1 / len(x_mc))),
+]
+
+
 def plot_points_weights():
     plt.close("quad")
-    _, ax = plt.subplots(num="quad")
-    ax.plot(x_gh, w_gh, "+", label="Gauss-Hermite")
-    ax.plot(x_qgq_exact, w_qgq_exact, "+", label="QGQ Exact")
-    ax.plot(x_qgq_approx, w_qgq_approx, "+", label="QGQ Approx")
-    ax.plot(x_mc, np.full_like(x_mc, 1 / len(x_mc)), "+", label="Monte Carlo")
-    ax.set_xlabel("Quadrature points")
-    ax.set_ylabel("Quadrature weights")
-    ax.legend()
-    ax.set_title("Quadrature points and weights")
+    _, axs = plt.subplots(2, 2, num="quad")
+    for ax, (title, x, w) in zip(axs.flat, CASES, strict=True):
+        ax.set_title(title)
+        ax.set_xlabel("Quadrature points")
+        ax.set_ylabel("Quadrature weights")
+        ax.plot(x, w, "+")
 
 
 plot_points_weights()
 
 
 # %%
-# Plot of the quadrature points and weights
+# Plot of the quadrature points only
 def plot_points():
     plt.close("points")
-    _, ax = plt.subplots(num="points")
+    _, axs = plt.subplots(2, 2, num="points")
     idx = np.arange(len(x_gh))
-    ax.plot(x_gh, idx, "+", label="Gauss-Hermite")
-    ax.plot(x_qgq_exact, idx, "+", label="QGQ Exact")
-    ax.plot(x_qgq_approx, idx, "+", label="QGQ Approx")
-    ax.plot(x_mc, idx, "+", label="Monte Carlo")
-    ax.set_xlabel("Quadrature points")
-    ax.set_ylabel("Index")
-    ax.legend()
-    ax.set_title("Quadrature points and weights")
+    for ax, (title, x, _w) in zip(axs.flat, CASES, strict=True):
+        ax.plot(x, idx, "+")
+        ax.set_xlabel("Quadrature points")
+        ax.set_ylabel("Index")
+        ax.set_title(title)
 
 
 plot_points()
@@ -221,6 +246,15 @@ plot_sigma()
 
 # %% [markdown]
 #
+# The bands in the plot represent the uncertainty on the integral estimates
+# due to the noise on the integrand.
+#
 # The plot shows that even for errors on the integrand on the order of a percentage,
-# it is beneficial to use the QGQ method instead of standard quadrature rules or Monte Carlo,
+# it is beneficial to use the QGQ method instead of standard quadrature rules,
 # as it significantly reduces the uncertainty on the integral estimate.
+# (The advantage is a about a factor of 2 in this example,
+# simply because about 75% of the Gauss-Hermite points are in the tails of the distribution,
+# where it has tiny weights.)
+#
+# Compared to Monte Carlo, the QGQ method is less biased.
+# (Monte Carlo is mainly beneficial for high-dimensional integrals, which is not the case here.)

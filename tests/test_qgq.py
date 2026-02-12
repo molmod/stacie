@@ -31,29 +31,12 @@ from stacie.qgq import (
     assign_weights_l2,
     construct_qgq_empirical,
     construct_qgq_stdnormal,
-    kld_constr,
     plot_qgq,
     point_cost,
 )
 
 
-def test_kld_constr_jac():
-    rng = np.random.default_rng(0)
-    eqs = rng.normal(size=(3, 8))
-    rhs = rng.normal(size=3)
-    wref = rng.uniform(1, 2, size=8)
-
-    def constrfn(lbda):
-        errors, jac = kld_constr(lbda, eqs, rhs, wref)
-        return errors, jac
-
-    lbda = rng.normal(size=3)
-    _, jac = constrfn(lbda)
-    jac_num = nd.Jacobian(lambda lbda: kld_constr(lbda, eqs, rhs, wref)[0])(lbda)
-    assert jac == pytest.approx(jac_num, abs=1e-5)
-
-
-def test_assign_weights_l2(assign_weights):
+def test_assign_weights_l2():
     x = np.linspace(-1, 1, 8)
     eqs = np.array([x, x**2 - 1, x**3 - 3 * x])
     rhs = np.zeros(3)
@@ -95,7 +78,10 @@ def test_construct_qgq_stdnormal(zero, npoint, nmoment):
     points0 = np.linspace(0, 1.5, npoint)
     if not zero:
         points0 += 0.2
-    points, weights, extra = construct_qgq_stdnormal(points0, nmoment=nmoment, do_extra=True)
+    # gtol is relaxed to speed up the test. Avoid this in production.
+    points, weights, extra = construct_qgq_stdnormal(
+        points0, nmoment=nmoment, gtol=1e-4, do_extra=True
+    )
     assert len(points) == len(weights) == 2 * len(points0) - zero
     assert np.diff(points).min() > 0
     if (npoint, nmoment) not in HARD_CASES_STDNORMAL:
@@ -142,8 +128,9 @@ def test_construct_qgq_empirical(guess, npoint, nmoment):
         points0 = np.quantile(
             samples, (np.arange(-npoint // 2, npoint // 2) + 0.5) / (npoint + 2) + 0.5
         )
+    # gtol is relaxed to speed up the test. Avoid this in production.
     points, weights, extra = construct_qgq_empirical(
-        samples, points0=points0, nmoment=nmoment, do_extra=True
+        samples, points0=points0, nmoment=nmoment, gtol=1e-4, do_extra=True
     )
     assert len(points) == len(weights) == npoint
     assert np.diff(points).min() > 0
