@@ -9,7 +9,21 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 ## [Unreleased]
 
-(no changes yet)
+(no summary yet)
+
+### Added
+
+- `stacie.dq` module for constructing designed quadrature rules with equal (or user-specified) weights.
+  These grids are suitable for integrating over a low-dimensional parameter space,
+  where the integrand is noisy and expensive, typically the result of a stochastic simulation.
+  In the context of STACIE, the parameter space can consist of one or a few thermodynamic parameters
+  (e.g. temperature, pressure) that are varied across a set of simulations.
+  The integral of interest is typically an ensemble average of a transport coefficient.
+  One can provide the distribution of thermodynamic parameters a priori,
+  and the quadrature rule will be optimized to integrate over this distribution,
+  by taking a simple average of the function values at the quadrature points.
+  The advantage of equal weights is that the variance of the average,
+  due to (identically distributed and independent) noise in the function values, is minimal.
 
 (v1.2.1)=
 ## [1.2.1] - 2025-12-28

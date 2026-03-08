@@ -67,7 +67,7 @@ Some numerical aspects are demostrated separately in the following notebooks:
 
 ```{toctree}
 :maxdepth: 1
-qgq.py
+dq.py
 ```
 
 In addition to the worked examples in STACIE's documentation,
