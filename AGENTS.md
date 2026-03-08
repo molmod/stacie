@@ -51,9 +51,10 @@ but the core principles and algorithms should still be consistent with the publi
 ## 4. Coding Conventions
 
 - **Docstrings:**
-    - Follow the NumPy/SciPy docstring format.
+    - Follow the NumPy/SciPy docstring format (reST/Napoleon-style).
     - Mathematical formulas should be written in LaTeX.
-    - Docstrings are written in Markdown and will be rendered in Sphinx/MyST.
+    - Python docstrings use the NumPy/SciPy (reST) style and are rendered by Sphinx;
+      MyST/Markdown is used for documentation pages, not for docstrings in Python source.
 - **Type Hinting:**
     - All functions must have type hints.
     - Use `numpy.typing.NDArray` or `numpy.typing.ArrayLike` for array arguments
@@ -68,7 +69,7 @@ but the core principles and algorithms should still be consistent with the publi
 
 ## 5. Testing & Validation
 
-STACIE uses **Pytest:** for unit and integration testing:
+STACIE uses **pytest** for unit and integration testing:
 
 - All new features must include `pytest` suites.
 - Consider edge cases when writing unit tests.
@@ -102,7 +103,7 @@ When performing a Copilot Review or generating code:
 
 ## 7. Project Structure
 
-- `stacie/`: Core library logic.
+- `src/stacie/`: Core library logic.
 - `tests/`: Unit tests and integration tests.
 - `tools/`: Utility scripts for development and maintenance.
 - `docs/source/`: Documentation (Sphinx/MyST).
