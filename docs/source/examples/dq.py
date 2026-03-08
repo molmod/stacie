@@ -130,7 +130,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
-from stacie.dq import construct_dq_stdnormal, construct_dq_empirical, dq3, Symmetry
+from stacie.dq import construct_dq_empirical, construct_dq_stdnormal, dq3, Symmetry
 
 
 # %%
@@ -287,7 +287,7 @@ plot_sigma()
 # The plot shows that even for errors on the integrand on the order of a percentage,
 # it is beneficial to use the DQ method instead of standard quadrature rules,
 # as it significantly reduces the uncertainty on the integral estimate.
-# (The advantage is a about a factor of 2 in this example,
+# (The advantage is about a factor of 2 in this example,
 # simply because about 75% of the Gauss-Hermite points have almost zero weights.)
 #
 # Compared to Monte Carlo, the DQ method is less biased.
@@ -359,7 +359,7 @@ print(f"DQ Exact 6:       {integral_dq6:.15f}")
 #
 # ## 3-Point Grid
 #
-# The module `staice.dq` also includes a simple function {py:func}`stacie.dq.dq3`
+# The module `stacie.dq` also includes a simple function {py:func}`stacie.dq.dq3`
 # to construct a 3-point quadrature grid with equal weights.
 # The grid will integrate exactly any degree-3 polynomial times a distribution
 # with given mean, standard deviation and skewness.
@@ -381,11 +381,10 @@ print(f"skewness: {sp.stats.skew(x_dq3):.5f}")
 # a single quadrature point at the mean of the distribution.
 # Yet, it will give a much better estimate of the integral for a noisy integrand.
 #
-# This 3-point grid, and also the DQ grids above, are often useful for propagation
-# of a mean and standard deviation through some non-linear function.
-# For example, if one has an estimate of the mean, standard deviation and skewness of a distribution,
-# one can use the 3-point grid to estimate the mean of a function of a random variable with that distribution,
-# and the error on that mean due to the uncertainty on the distribution parameters.
+# This 3-point grid, and the DQ grids above, can be used to propagate
+# errors through nonlinear functions.
+# Given estimates of the mean, standard deviation and skewness of a stochastic quantity,
+# one can use the grid to estimate the statistics of a nonlinear function of that quantity.
 #
 # For example, let's estimate the sine of a random variable with mean 1.0, standard deviation 0.5 and skewness 0.0:
 
@@ -414,12 +413,12 @@ sine_std_norm = np.sqrt(sp.integrate.quad(integrand2, -np.inf, np.inf)[0])
 print(f"Normal sine: {sine_mean_norm:.5f} ± {sine_std_norm:.5f}")
 
 # %% [markdown]
-# This form of propagation is generally more accurate than the typical first-order approximation,
+# The 3-point error propagation is generally more accurate than the typical first-order approximation,
 # and has the added benefit that it does not require the function to be differentiable.
 # There is also no need to implement analytical or numerical derivatives.
 #
-# For example, if we had used the first-order approximation for the mean of
-# the sine function and its uncertainty, we would have used the following:
+# For example, let's compute the first-order approximation of the mean of
+# the sine function and its uncertainty:
 
 # %%
 sine_mean_1st = np.sin(1.0)
@@ -430,7 +429,7 @@ print(f"First-order sine: {sine_mean_1st:.5f} ± {sine_std_1st:.5f}")
 # Note that the uncertainty is fine but that the mean of the first-order approximation
 # is quite off, as the sine function is not linear around 1.0.
 #
-# This few-point approach to propagation of the mean and uncertainty is also known as the
+# This few-point approach to error propagation is also known as the
 # [Unscented Transform](https://en.wikipedia.org/wiki/Unscented_transform).
 
 # %%  [markdown]
@@ -441,9 +440,9 @@ print(f"First-order sine: {sine_mean_1st:.5f} ± {sine_std_1st:.5f}")
 
 # %%
 if abs(integral_dq_exact - 0.606168725991488) > 0.00001:
-    raise ValueError(f"wrong integral (DQ exact 30): {integral_dq_exact:.3e}")
+    raise ValueError(f"wrong integral (DQ 30 exact): {integral_dq_exact:.3e}")
 if abs(integral_dq6 - 0.606141193064441) > 0.00001:
-    raise ValueError(f"wrong integral (DQ design 6): {integral_dq6:.3e}")
+    raise ValueError(f"wrong integral (DQ 6): {integral_dq6:.3e}")
 if abs(sine_mean_dq3 - 0.73953) > 0.001:
     raise ValueError(f"wrong sine mean (DQ3): {sine_mean_dq3:.3e}")
 if abs(sine_std_dq3 - 0.26363) > 0.001:

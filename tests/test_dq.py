@@ -30,6 +30,7 @@ from stacie.dq import (
     Equations,
     Symmetry,
     construct_dq_empirical,
+    construct_dq_low,
     construct_dq_stdnormal,
     dq3,
     plot_dq,
@@ -71,7 +72,7 @@ def test_apply_sym(symmetry):
         assert points_sym[len(points)] == pytest.approx(0.0)
         assert points_sym[len(points) + 1 :] == pytest.approx(points)
         assert weights_sym[: len(points)][::-1] == pytest.approx(weights[1:])
-        assert weights_sym[len(points)] == pytest.approx(2 * weights[0])
+        assert weights_sym[len(points)] == pytest.approx(weights[0])
         assert weights_sym[len(points) + 1 :] == pytest.approx(weights[1:])
     elif symmetry == Symmetry.NONZERO:
         assert len(points_sym) == 2 * len(points)
@@ -112,6 +113,28 @@ def test_jacobian_eqs():
     eqs0, jac_an = eqs.compute_low(points0, eqs.weights0, deriv=1)
     assert len(eqs0) == len(eqs.funcs) + len(points0)
     assert jac_an.shape == (len(eqs.funcs) + len(points0), len(points0))
+    jac_num = nd.Jacobian(lambda x: eqs.compute_low(x, eqs.weights0, deriv=0)[0])(points0)
+    assert jac_an == pytest.approx(jac_num, abs=1e-5)
+
+
+def test_jacobian_eqs_no_penality():
+    funcs = [lambda x: x, lambda x: x**2 - 1, lambda x: x**3 - 3 * x]
+    funcs_d = [np.ones_like, lambda x: 2 * x, lambda x: 3 * x**2 - 3]
+    funcs_dd = [np.zeros_like, lambda x: np.full_like(x, 2), lambda x: 6 * x]
+    targets = np.array([0.0, 0.0, 0.0])
+    points0 = np.array([2.0, 2.5, 3.0])
+    weights0 = np.array([0.1, 0.2, 0.3])
+    eqs = Equations(
+        funcs=funcs,
+        funcs_d=funcs_d,
+        funcs_dd=funcs_dd,
+        targets=targets,
+        weights0=weights0,
+        symmetry=Symmetry.NONE,
+    )
+    eqs0, jac_an = eqs.compute_low(points0, eqs.weights0, deriv=1)
+    assert len(eqs0) == len(eqs.funcs)
+    assert jac_an.shape == (len(eqs.funcs), len(points0))
     jac_num = nd.Jacobian(lambda x: eqs.compute_low(x, eqs.weights0, deriv=0)[0])(points0)
     assert jac_an == pytest.approx(jac_num, abs=1e-5)
 
@@ -400,3 +423,26 @@ def test_dq3_quad():
     # The three-point quadrature should give the same result.
     quad2 = np.mean(poly(points))
     assert quad2 == pytest.approx(quad1, abs=1e-5)
+
+
+def test_dq3_numerical():
+    points0 = np.array([-1.0, 0.0, 1.0])
+    funcs = [
+        lambda x: x,
+        lambda x: (x - 0.5) ** 2,
+        lambda x: (x - 0.5) ** 3,
+    ]
+    funcs_d = [
+        np.ones_like,
+        lambda x: 2 * (x - 0.5),
+        lambda x: 3 * (x - 0.5) ** 2,
+    ]
+    funcs_dd = [
+        np.zeros_like,
+        lambda x: 2 * np.ones_like(x),
+        lambda x: 6 * (x - 0.5),
+    ]
+    targets = np.array([0.5, 4.0, 5.6])
+    points1, weights1 = construct_dq_low(points0, funcs, funcs_d, funcs_dd, targets)
+    assert points1 == pytest.approx(dq3(0.5, 2.0, 0.7))
+    assert weights1 == pytest.approx(np.ones(3) / 3)

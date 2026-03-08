@@ -62,15 +62,16 @@ def construct_dq_stdnormal(
     maxridge: int = 100,
     verbose: bool = False,
     do_extra: bool = False,
-) -> NDArray | tuple[NDArray, dict[str]]:
+) -> tuple[NDArray, NDArray] | tuple[NDArray, NDArray, dict[str]]:
     """Construct a DQ grid for the standard normal distribution.
 
     Parameters
     ----------
     points0
         The optimization starts from this grid.
-        Only provide positive points,
-        as the zero or negative ones will be automatically added by symmetry.
+        If symmetry is imposed, only the positive points should be given in `points0`.
+        If symmetry is ZERO, the zero point is implicitly added,
+        and should not be included in `points0`.
     nmoment
         The number of moments to match, must be strictly positive and even.
         Only even moments are considered, as the distribution is symmetric.
@@ -80,11 +81,8 @@ def construct_dq_stdnormal(
         One can choose whether to include the zero point in the grid or not.
     weights0
         The desired weights for the quadrature.
-        If not given, equal weights are used.
-        If symmetry is ZERO, the weight of the zero point must be included and
-        counts double in the quadrature, so it is set to 0.5 by default.
-        In this case, weights has one more element than points0,
-        and the first element corresponds to the zero point.
+        If not given, all weights are set equal.
+        If symmetry is ZERO, the weight of the zero point must be included.
     rmsdtol
         The convergence threshold for the RMSD of the equations being solved iteratively.
         The default is very strict.
@@ -103,8 +101,7 @@ def construct_dq_stdnormal(
     points1
         The optimized grid points, symmetric around zero.
     weights1
-        The optimized quadrature weights, typically matching the given weights,
-        up to a normalization factor.
+        The optimized quadrature weights, typically matching the given weights.
     extra
         If `do_extra` is True, a dictionary containing additional information.
     """
@@ -144,7 +141,7 @@ def construct_dq_empirical(
     maxridge: int = 100,
     verbose: bool = False,
     do_extra: bool = False,
-) -> NDArray | tuple[NDArray, dict[str]]:
+) -> tuple[NDArray, NDArray] | tuple[NDArray, NDArray, dict[str]]:
     """Construct a DQ grid for an empirical distribution.
 
     Parameters
@@ -153,6 +150,9 @@ def construct_dq_empirical(
         The samples from the empirical distribution, used to compute the target moments.
     points0
         The number of grid points to optimize or the initial grid points.
+        If symmetry is imposed, only the positive points should be given in `points0`.
+        If symmetry is ZERO, the zero point is implicitly added,
+        and should not be included in `points0`.
     nmoment
         The number of moments to match,
         must be strictly positive and strictly less than npoint.
@@ -161,12 +161,9 @@ def construct_dq_empirical(
         If symmetry is imposed, only the positive points are given in `points0`,
         and the negative ones are added implicitly by symmetry.
     weights0
-        The desired weights for the quadrature.
-        If not given, all values are set to 1.
-        If symmetry is ZERO, the weight of the zero point must be included and
-        counts double in the quadrature, so it is set to 0.5 by default.
-        In this case, weights has one more element than points0,
-        and the first element corresponds to the zero point.
+        The desired weights for the quadrature, which will be normalized to sum to 1.
+        If not given, all weights are set equal.
+        If symmetry is ZERO, the weight of the zero point must be included.
     rmsdtol
         The convergence threshold for the RMSD of the equations being solved iteratively.
         The default is very strict.
@@ -266,20 +263,19 @@ def construct_dq_low(
     maxridge: int = 100,
     verbose: bool = False,
     do_extra: bool = False,
-) -> NDArray | tuple[NDArray, dict[str]]:
+) -> tuple[NDArray, NDArray] | tuple[NDArray, NDArray, dict[str]]:
     """Construct a DQ grid, low-level interface.
 
     Parameters
     ----------
     points0
-        Initial grid points. The optimization starts from this grid,
-        possibly keeping some points fixed as requested by the user.
+        Initial grid points. The optimization starts from this grid.
+        If symmetry is imposed, only the positive points should be given in `points0`.
+        If symmetry is ZERO, the zero point is implicitly added,
+        and should not be included in `points0`.
 
-        Note that the algorithm assumes that the mean of the distribution
-        is well-behaved, not large compared to 1,
-        and that the spread is of the order 1.
-        If this is not the case, it is recommended to precondition the
-        problem by centering and scaling the points.
+        Note that the algorithm assumes that the optimal points are pre-conditioned
+        such that they have mean zero and standard deviation one.
         See `construct_dq_empirical` for an example of how to do this.
     funcs
         The basis functions whose integrals are to be matched by the quadrature.
@@ -298,6 +294,8 @@ def construct_dq_low(
         and the negative ones are added implicitly by symmetry.
     weights0
         The target weights for the quadrature points.
+        If not given, all weights are set equal.
+        If symmetry is ZERO, the weight of the zero point must be included.
     rmsdtol
         The convergence threshold for the RMSD of the equations being solved iteratively.
         The default is very strict.
@@ -318,7 +316,7 @@ def construct_dq_low(
         If symmetry is imposed, the full grid is returned, including the negative points.
     weights1
         The optimized quadrature weights corresponding to the optimized grid points.
-        These weights are typically nearly proportional to the given weights,
+        These weights are typically nearly proportional to the given weights.
     extra
         If `do_extra` is True, a dictionary containing intermediate results:
 
@@ -346,23 +344,28 @@ def construct_dq_low(
     if weights0 is None:
         if symmetry == Symmetry.ZERO:
             weights0 = np.full(len(points0) + 1, 1 / (2 * len(points0) + 1))
-            weights0[1:] *= 2
+        elif symmetry == Symmetry.NONZERO:
+            weights0 = np.full(len(points0), 1 / (2 * len(points0)))
         else:
             weights0 = np.full(len(points0), 1 / len(points0))
     else:
         weights0 = np.asarray(weights0, dtype=float)
         if weights0.min() <= 0:
             raise ValueError("weights must be strictly positive")
+        # Check length of weights
         if symmetry == Symmetry.ZERO:
             if len(weights0) != len(points0) + 1:
                 raise ValueError("weights0 must have length len(points0) + 1 when symmetry is ZERO")
-            weights0 /= weights0[0] + 2 * weights0[1:].sum()
         elif len(weights0) != len(points0):
             raise ValueError("weights0 must have the same length as points0 when symmetry != ZERO")
+        # Renormalize weights to sum to 1, taking into account the symmetry.
+        if symmetry == Symmetry.ZERO:
+            weights0_sum = weights0[0] + 2 * weights0[1:].sum()
         if symmetry == Symmetry.NONZERO:
-            weights0 /= 2 * weights0.sum()
+            weights0_sum = 2 * weights0.sum()
         elif symmetry == Symmetry.NONE:
-            weights0 /= weights0.sum()
+            weights0_sum = weights0.sum()
+        weights0 = weights0 / weights0_sum
 
     eqs = Equations(
         funcs=funcs,
@@ -443,7 +446,7 @@ class Equations:
         if self.symmetry == Symmetry.ZERO:
             return (
                 np.concatenate((-x[::-1], [0], x)),
-                np.concatenate((w[-1:0:-1], [2 * w[0]], w[1:])),
+                np.concatenate((w[-1:0:-1], w)),
             )
         return (np.concatenate((-x[::-1], x)), np.concatenate((w[::-1], w)))
 
@@ -458,7 +461,8 @@ class Equations:
         """Compute the equations and optionally their Jacobian for the given points and weights."""
         nf = len(self.funcs)
         nx = len(x)
-        eqs = np.zeros(nf if nf == nx else nf + nx)
+        neq = nf if nf == nx else nf + nx
+        eqs = np.zeros(neq)
         for i, func in enumerate(self.funcs):
             eqs[i] = np.dot(func(x), w) - self.targets[i]
         if nx > nf:
@@ -469,9 +473,11 @@ class Equations:
             grad = pen_results[1]
             gproj = apply_proj(grad)
             eqs[nf:] = gproj
+        else:
+            proj_results = self.proj(x, w, deriv=0)
         if deriv == 0:
             return (eqs,)
-        jac = np.zeros((nf + nx, nx))
+        jac = np.zeros((neq, nx))
         mat1 = proj_results[0]
         jac[:nf] = mat1
         if nx > nf:
@@ -494,7 +500,7 @@ class Equations:
             $P_{i,j}\, v_j$.
         apply_proj_d
             A function that applies the derivative of the projection matrix to a vector:
-            $\frac{\mathrm{d}\,P_{i,j}}{\matrm{d}\,x_k} v_j$.
+            $\frac{\mathrm{d}\,P_{i,j}}{\mathrm{d}\,x_k} v_j$.
         """
         mat1 = np.array([func(x) * w for func in self.funcs_d])
         u, s, vt = np.linalg.svd(mat1, full_matrices=False)
@@ -585,8 +591,7 @@ def solve_modified_lm(
     Parameters
     ----------
     x
-        The initial guess for the solution, which is modified in-place
-        and returned as the final solution.
+        The initial guess of the solution.
     equations
         The equations to solve, which must be an instance of the `Equations` class defined above.
     rmsdtol
@@ -601,7 +606,7 @@ def solve_modified_lm(
     Returns
     -------
     x
-        The optimized solution, which is the final value of the input `x` after the optimization.
+        The optimized solution.
     """
     if verbose:
         print("iter   RMSD error    Step size        Ridge    Cond.Num.")
@@ -643,7 +648,7 @@ def solve_modified_lm(
 def plot_dq(
     extra: dict[str], plot_dist: Callable | None = None, figsize: tuple[int, int] | None = None
 ):
-    """Plot the results of the QGQ optimization."""
+    """Plot the results of the DQ grid optimization."""
     if plot_dist is None:
         if figsize is None:
             figsize = (4, 5)
@@ -688,12 +693,15 @@ def dq3(mean: float, std: float, skew: float) -> NDArray:
         The skewness of the distribution.
         This value must be in the range $[-1/\sqrt{2}, 1/\sqrt{2}]$,
         otherwise the quadrature points become complex.
+        A ValueError is raised if the skewness is out of this range.
 
     Returns
     -------
     grid
         The 3-point quadrature grid.
     """
-    grid = np.roots([1, 0, -1.5, -skew])
+    if abs(skew) > 1 / np.sqrt(2):
+        raise ValueError("skew must be in the range [-1/sqrt(2), 1/sqrt(2)]")
+    grid = np.roots([1, 0, -1.5, -skew]).real
     grid.sort()
     return grid * std + mean
