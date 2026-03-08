@@ -359,12 +359,11 @@ def construct_dq_low(
         elif len(weights0) != len(points0):
             raise ValueError("weights0 must have the same length as points0 when symmetry != ZERO")
         # Renormalize weights to sum to 1, taking into account the symmetry.
+        weights0_sum = weights0.sum()
         if symmetry == Symmetry.ZERO:
-            weights0_sum = weights0[0] + 2 * weights0[1:].sum()
-        if symmetry == Symmetry.NONZERO:
-            weights0_sum = 2 * weights0.sum()
-        elif symmetry == Symmetry.NONE:
-            weights0_sum = weights0.sum()
+            weights0_sum += weights0[1:].sum()
+        elif symmetry == Symmetry.NONZERO:
+            weights0_sum *= 2
         weights0 = weights0 / weights0_sum
 
     eqs = Equations(

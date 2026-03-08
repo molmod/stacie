@@ -117,7 +117,7 @@ def test_jacobian_eqs():
     assert jac_an == pytest.approx(jac_num, abs=1e-5)
 
 
-def test_jacobian_eqs_no_penality():
+def test_jacobian_eqs_no_penalty():
     funcs = [lambda x: x, lambda x: x**2 - 1, lambda x: x**3 - 3 * x]
     funcs_d = [np.ones_like, lambda x: 2 * x, lambda x: 3 * x**2 - 3]
     funcs_dd = [np.zeros_like, lambda x: np.full_like(x, 2), lambda x: 6 * x]
