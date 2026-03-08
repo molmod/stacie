@@ -69,9 +69,9 @@ def construct_dq_stdnormal(
     ----------
     points0
         The optimization starts from this grid.
-        If symmetry is imposed, only the positive points should be given in `points0`.
+        If symmetry is imposed, only the positive points should be given in ``points0``.
         If symmetry is ZERO, the zero point is implicitly added,
-        and should not be included in `points0`.
+        and should not be included in ``points0``.
     nmoment
         The number of moments to match, must be strictly positive and even.
         Only even moments are considered, as the distribution is symmetric.
@@ -103,7 +103,7 @@ def construct_dq_stdnormal(
     weights1
         The optimized quadrature weights, typically matching the given weights.
     extra
-        If `do_extra` is True, a dictionary containing additional information.
+        If ``do_extra`` is True, a dictionary containing additional information.
     """
     if symmetry == Symmetry.NONE:
         raise ValueError("Symmetry must be imposed for the standard normal distribution")
@@ -150,15 +150,15 @@ def construct_dq_empirical(
         The samples from the empirical distribution, used to compute the target moments.
     points0
         The number of grid points to optimize or the initial grid points.
-        If symmetry is imposed, only the positive points should be given in `points0`.
+        If symmetry is imposed, only the positive points should be given in ``points0``.
         If symmetry is ZERO, the zero point is implicitly added,
-        and should not be included in `points0`.
+        and should not be included in ``points0``.
     nmoment
         The number of moments to match,
         must be strictly positive and strictly less than npoint.
     symmetry
         The symmetry of the quadrature grid points (and weights) around zero.
-        If symmetry is imposed, only the positive points are given in `points0`,
+        If symmetry is imposed, only the positive points are given in ``points0``,
         and the negative ones are added implicitly by symmetry.
     weights0
         The desired weights for the quadrature, which will be normalized to sum to 1.
@@ -184,7 +184,7 @@ def construct_dq_empirical(
     weights
         The optimized quadrature weights, typically nearly proportional to the Gaussian weights.
     extra
-        If `do_extra` is True, a dictionary containing additional information.
+        If ``do_extra`` is True, a dictionary containing additional information.
     """
     if isinstance(points0, int):
         npoint = points0
@@ -270,13 +270,13 @@ def construct_dq_low(
     ----------
     points0
         Initial grid points. The optimization starts from this grid.
-        If symmetry is imposed, only the positive points should be given in `points0`.
+        If symmetry is imposed, only the positive points should be given in ``points0``.
         If symmetry is ZERO, the zero point is implicitly added,
-        and should not be included in `points0`.
+        and should not be included in ``points0``.
 
         Note that the algorithm assumes that the optimal points are pre-conditioned
         such that they have mean zero and standard deviation one.
-        See `construct_dq_empirical` for an example of how to do this.
+        See ``construct_dq_empirical`` for an example of how to do this.
     funcs
         The basis functions whose integrals are to be matched by the quadrature.
         These are functions of a single variable, and are evaluated at the grid points.
@@ -290,7 +290,7 @@ def construct_dq_low(
         The target integrals of the basis functions, which the quadrature should match.
     symmetry
         The symmetry of the quadrature grid points (and weights) around zero.
-        If symmetry is imposed, only the positive points are given in `points0`,
+        If symmetry is imposed, only the positive points are given in ``points0``,
         and the negative ones are added implicitly by symmetry.
     weights0
         The target weights for the quadrature points.
@@ -318,18 +318,18 @@ def construct_dq_low(
         The optimized quadrature weights corresponding to the optimized grid points.
         These weights are typically nearly proportional to the given weights.
     extra
-        If `do_extra` is True, a dictionary containing intermediate results:
+        If ``do_extra`` is True, a dictionary containing intermediate results:
 
-        - `points0`: The initial grid points.
-        - `weights0`: The initial quadrature weights.
-        - `errors0`: The errors of the equations at the initial grid points and weights.
-        - `jacobian0`: The Jacobian of the equations at the initial grid points and weights.
-        - `funcs0`: The basis functions evaluated at the initial grid points.
-        - `points1`: The optimized grid points, same as the first return value.
-        - `weights1`: The optimized quadrature weights.
-        - `errors1`: The errors of the equations at the optimized grid points and weights.
-        - `jacobian1`: The Jacobian of the equations at the optimized grid points and weights.
-        - `funcs1`: The basis functions evaluated at the optimized grid points.
+        - ``points0``: The initial grid points.
+        - ``weights0``: The initial quadrature weights.
+        - ``errors0``: The errors of the equations at the initial grid points and weights.
+        - ``jacobian0``: The Jacobian of the equations at the initial grid points and weights.
+        - ``funcs0``: The basis functions evaluated at the initial grid points.
+        - ``points1``: The optimized grid points, same as the first return value.
+        - ``weights1``: The optimized quadrature weights.
+        - ``errors1``: The errors of the equations at the optimized grid points and weights.
+        - ``jacobian1``: The Jacobian of the equations at the optimized grid points and weights.
+        - ``funcs1``: The basis functions evaluated at the optimized grid points.
     """
     points0 = np.asarray(points0, dtype=float)
     targets = np.asarray(targets, dtype=float)
@@ -496,10 +496,10 @@ class Equations:
             Weighted derivative of basis functions w.r.t. x.
         apply_proj
             A function that applies the projection matrix to a vector:
-            $P_{i,j}\, v_j$.
+            :math:`P_{i,j}\, v_j`.
         apply_proj_d
             A function that applies the derivative of the projection matrix to a vector:
-            $\frac{\mathrm{d}\,P_{i,j}}{\mathrm{d}\,x_k} v_j$.
+            :math:`\frac{\partial\,P_{i,j}}{\partial\,x_k} v_j`.
         """
         mat1 = np.array([func(x) * w for func in self.funcs_d])
         u, s, vt = np.linalg.svd(mat1, full_matrices=False)
@@ -592,7 +592,7 @@ def solve_modified_lm(
     x
         The initial guess of the solution.
     equations
-        The equations to solve, which must be an instance of the `Equations` class defined above.
+        The equations to solve, which must be an instance of the :py:class:`Equations` class.
     rmsdtol
         The convergence threshold for the RMSD of the equations being solved iteratively.
     maxiter
@@ -690,7 +690,7 @@ def dq3(mean: float, std: float, skew: float) -> NDArray:
         The standard deviation of the distribution.
     skew
         The skewness of the distribution.
-        This value must be in the range $[-1/\sqrt{2}, 1/\sqrt{2}]$,
+        This value must be in the range :math:`[-1/\sqrt{2}, 1/\sqrt{2}]`,
         otherwise the quadrature points become complex.
         A ValueError is raised if the skewness is out of this range.
 
