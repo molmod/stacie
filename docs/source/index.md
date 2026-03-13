@@ -42,7 +42,7 @@ Please cite the following in publications that rely on STACIE:
 > [doi:10.1021/acs.jcim.5c01475](https://doi.org/10.1021/acs.jcim.5c01475),
 > [arXiv:2506.20438](https://arxiv.org/abs/2506.20438).
 
-When using the Lorentz model or performing shear performing viscosity calculations with STACIE,
+When using the Lorentz model or performing shear viscosity calculations with STACIE,
 please also cite the following paper:
 
 > Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen

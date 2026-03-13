@@ -50,7 +50,7 @@ If you use STACIE in your research, please cite the following paper:
 > }
 > ```
 
-When using the Lorentz model or performing shear performing viscosity calculations with STACIE,
+When using the Lorentz model or performing shear viscosity calculations with STACIE,
 please also cite the following paper:
 
 > Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen

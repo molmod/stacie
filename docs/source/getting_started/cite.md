@@ -38,7 +38,7 @@ and the citation records below will be updated when appropriate.
 
 ## Lorentz Model & Shear Viscosity
 
-When using the Lorentz model or performing shear performing viscosity calculations with STACIE,
+When using the Lorentz model or performing shear viscosity calculations with STACIE,
 please also cite the following paper:
 
 - BibTeX:
