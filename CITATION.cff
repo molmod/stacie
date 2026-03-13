@@ -51,8 +51,55 @@ authors:
       Zwijnaarde, Belgium
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.15543902
-    description: Example usage of STACIE (Jupyter notebooks and trajectory data)
+    value: 10.5281/zenodo.15744666
+    description: Concept DOI for STACIE software deposited on Zenodo
+references:
+  - authors:
+      - family-names: Toraman
+        given-names: Gözdenur
+      - family-names: Fauconnier
+        given-names: Dieter
+      - family-names: Verstraelen
+        given-names: Toon
+    title: >-
+      The AutoCorrelation Integral Drill (ACID)
+    doi: 10.5281/zenodo.15722902
+    type: data
+    identifiers:
+      - description: Concept DOI of the ACID dataset used to validate STACIE
+        type: doi
+        value: 10.5281/zenodo.15722902
+  - authors:
+      - family-names: Toraman
+        given-names: Gözdenur
+      - family-names: Verstraelen
+        given-names: Toon
+    title: >-
+      Example Trajectory Data and Jupyter Notebooks Showing How to Compute Various Properties with STACIE
+    doi: 10.5281/zenodo.15543902
+    type: data
+    identifiers:
+      - description: >-
+          Concept DOI of the dataset containing example usage of STACIE
+          (Jupyter notebooks and trajectory data)
+        type: doi
+        value: 10.5281/zenodo.15543902
+  - authors:
+      - family-names: Toraman
+        given-names: Gözdenur
+      - family-names: Fauconnier
+        given-names: Dieter
+      - family-names: Verstraelen
+        given-names: Toon
+    title: >-
+      Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics:
+      Case Study of 2,2,4-Trimethylhexane
+    doi: 10.48550/arXiv.2603.11247
+    type: article
+    identifiers:
+      - description: preprint describing the Lorentz model and shear viscosity calculations with STACIE
+        type: doi
+        value: 10.48550/arXiv.2603.11247
 preferred-citation:
   authors:
     - family-names: Toraman
