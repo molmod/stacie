@@ -50,6 +50,25 @@ If you use STACIE in your research, please cite the following paper:
 > }
 > ```
 
+When using the Lorentz model or performing shear performing viscosity calculations with STACIE,
+please also cite the following paper:
+
+> Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
+> "Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane"
+> preprint, 2026,
+> [arXiv:2603.11247](https://arxiv.org/abs/2603.11247).
+>
+> ```bibtex
+> @article{Toraman2026,
+>  author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
+>  title = {Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane},
+>  year = {2026},
+>  month = {mar},
+>  url = {https://arxiv.org/abs/2603.11247},
+>  doi = {10.48550/arXiv.2603.11247},
+> }
+> ```
+
 ## License
 
 STACIE is free software: you can redistribute it and/or modify it
