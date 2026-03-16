@@ -33,7 +33,7 @@
 # as this will minimize the variance of the numerical integral:
 #
 # $$
-#   \sigma_\mathcal{I_\text{DQ}} = \sqrt{\sum_{n=1}^N w_n^2 \sigma_n^2}
+#   \sigma_{\mathcal{I_\text{DQ}}} = \sqrt{\sum_{n=1}^N w_n^2 \sigma_n^2}
 # $$
 #
 # In either case, the weights of the quadrature rule are positive and fixed upfront,
@@ -119,7 +119,7 @@
 # The uncertainty propagation of $\epsilon$ can be performed analytically:
 #
 # $$
-#   \sigma_\mathcal{I} = \sigma \sqrt{\sum_{n=1}^N w_i^2}
+#   \sigma_{\mathcal{I}} = \sigma \sqrt{\sum_{n=1}^N w_i^2}
 # $$
 #
 # where $w_i$ are the quadrature weights.
