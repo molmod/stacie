@@ -1,6 +1,9 @@
 # %% [markdown]
 # # Designed Quadrature (DQ)
 #
+# (This feature will become available with STACIE 1.3.0,
+# which is not yet released at the time of writing.)
+#
 # This notebook illustrates how to use the module {py:mod}`stacie.dq` to compute
 # integrals over noisy integrands.
 # While solving this problem is not the main goal of STACIE,

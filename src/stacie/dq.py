@@ -578,13 +578,13 @@ class Equations:
 
 
 def solve_modified_lm(
-    x: NDArray[float],
+    x: NDArray,
     equations: Equations,
     rmsdtol: float = 1e-14,
     maxiter: int = 1000,
     maxridge: int = 100,
     verbose: bool = False,
-) -> NDArray[float]:
+) -> NDArray:
     """Solve the equations using a modified Levenberg-Marquardt algorithm.
 
     Parameters
