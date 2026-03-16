@@ -36,30 +36,25 @@ and the citation records below will be updated when appropriate.
     [reference_stacie.ris](./reference_stacie.ris)
     ```
 
-## Shear Viscosity Calculations
+## Lorentz Model & Shear Viscosity
 
-The following paper describes in detail the calculation of shear viscosity with STACIE.
+When using the Lorentz model or performing shear viscosity calculations with STACIE,
+please also cite the following paper:
 
 - BibTeX:
 
-    ```bibtex
-    @article{Toraman2025ShearViscosity,
-        title = {Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane.},
-        author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
-        year = {2025},
-        note = {in preparation}
-    }
+    ```{literalinclude} reference_lorentz.bib
+    ```
+
+    ```{only} html
+    [reference_lorentz.bib](./reference_lorentz.bib)
     ```
 
 - RIS (ProCite, Reference Manager)
 
-    ```text
-    TY  - JOUR
-    AU  - Toraman, Gözdenur
-    AU  - Fauconnier, Dieter
-    AU  - Verstraelen, Toon
-    PY  - 2025
-    TI  - Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane.
-    N1  - in preparation
-    ER  -
+    ```{literalinclude} reference_lorentz.ris
+    ```
+
+    ```{only} html
+    [reference_lorentz.ris](./reference_lorentz.ris)
     ```
