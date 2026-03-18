@@ -95,8 +95,8 @@ class Spectrum:
 def compute_spectrum(
     sequences: Iterable[NDArray[float]] | NDArray[float],
     *,
-    prefactors: Iterable[NDArray[float]] | NDArray[float] | None = 1.0,
-    timestep: float = 1,
+    prefactors: Iterable[NDArray[float]] | NDArray[float] | float | None = 1.0,
+    timestep: float = 1.0,
     include_zero_freq: bool = True,
 ) -> Spectrum:
     r"""Compute a spectrum and return it as a :class:`Spectrum` object.
