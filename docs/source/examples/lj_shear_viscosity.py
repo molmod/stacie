@@ -1,9 +1,9 @@
 # %% [markdown]
 # # Shear Viscosity of a Lennard-Jones Liquid Near the Triple Point (LAMMPS)
 #
-# This example shows how to calculate viscosity of argon
+# This example shows how to calculate the viscosity of argon
 # from pressure tensor data obtained from {term}`LAMMPS` {term}`MD` simulations.
-# The required theoretical background is explained the
+# The required theoretical background is explained in the
 # [](../properties/shear_viscosity.md) section.
 # The same simulations are also used for the [bulk viscosity](lj_bulk_viscosity.py)
 # and [thermal conductivity](lj_thermal_conductivity.py) examples in the following two notebooks.
@@ -28,8 +28,7 @@
 # To obtain sufficient data for all three properties, we performed 100 independent runs,
 # for which the [guesstimated relative error](../preparing_inputs/data_sufficiency.md)
 # is tabulated below.
-# The [Lorentz model](#section-lorentz-target) is used to fit the spectrum,
-# with degrees $S_\text{num}=\{0, 2\}$ and $S_\text{den}=\{2\}$, corresponding to $P=3$ parameters.
+# The [Lorentz model](#section-lorentz-target) is used to fit the spectrum, which by construction has a fixed number of parameters $P=3$.
 #
 # | Property             | $M$ | Guess rel. error |
 # | -------------------- | --: | ---------------: |
@@ -48,7 +47,7 @@
 # Note that these values are only coarse estimates.
 # As explained below, the production runs were extended twice to improve the statistics.
 #
-# Details of the MD simulations can be found the LAMMPS inputs
+# Details of the MD simulations can be found in the LAMMPS inputs
 # `docs/data/lammps_lj3d/template-init.lammps` and `docs/data/lammps_lj3d/template-ext.lammps`
 # in STACIE's Git repository.
 # These input files are actually [Jinja2](https://jinja.palletsprojects.com/) templates
@@ -169,7 +168,7 @@ plot_equilibration()
 # %% [markdown]
 # The plot shows that the equilibration runs were successful:
 # They reach the correct average temperature **and** also exhibit the expected fluctuations.
-# Note that we used a Langevin thermestat for equilibration.
+# Note that we used a Langevin thermostat for equilibration.
 # This is a robust local thermostat that quickly brings
 # all degrees of freedom to the desired temperature.
 # In comparison, a global Nosé-Hoover-chain (NHC) thermostat would still show large
@@ -315,7 +314,7 @@ eta_production_init = analyze_production(1).acint
 #
 # - The recommendations based on the exponential correlation time were met by the initial simulation settings.
 #
-#     - The recommended simulation time is 25.8 τ\*, which about 8600 steps.
+#     - The recommended simulation time is 25.8 τ\*, which is about 8600 steps.
 #       The initial production runs (12000 steps) were therefore sufficient.
 #
 #     - The recommended block time is 0.129 τ\*, which corresponds to about 40 steps.
@@ -343,7 +342,7 @@ eta_production_init = analyze_production(1).acint
 # the production runs were extended by an additional 24000 steps each,
 # to triple the simulation time.
 # This revealed that the effective number of points fitted to the spectrum
-# increase to 61, which is a sublinear increase, just enough to reach the target of 60.
+# increases to 61, which is a sublinear increase, just enough to reach the target of 60.
 # For the sake of demonstration, we decided to extend the production runs by another 64000 steps,
 # which resulted in a total simulation time of 300 τ\* per run.
 #
@@ -379,7 +378,7 @@ eta_production_ext = analyze_production(3).acint
 # Comprehensive literature surveys on computational estimates of the shear viscosity of a Lennard-Jones fluid
 # can be found in {cite:p}`meier_2004_transport_I` and {cite:p}`viscardi_2007_transport1`.
 # These papers also present new results, which are included in the table below.
-# Since the simulation settings ($r_\text{cut}^{*}=2.5$, $N=1372$, $T^*=0.722$ and $\rho^{*}=0.8442$)
+# Since the simulation settings ($r_\text{cut}^{*}=2.5$, $N=1372$, $\mathrm{T}^*=0.722$ and $\rho^{*}=0.8442$)
 # are identical to those used in this notebook, the reported values should be directly comparable.
 #
 # | Method                     | Simulation time [τ\*] | Shear viscosity [η\*] | Reference |
@@ -484,7 +483,7 @@ validate_temperature()
 #
 # - In the NVE ensemble, the temperature distribution is relatively narrow.
 #   Hence, using a single NVE run would not be representative of the temperature variance of the NVT ensemble.
-# - Some of the individual NVE runs have significantly lower ore higher temperatures than the average.
+# - Some of the individual NVE runs have significantly lower or higher temperatures than the average.
 #   If the transport property of interest has a nonlinear dependence on the temperature,
 #   this effect will lead to a shift in the estimated transport property,
 #   compared to using a single NVE run.
@@ -495,7 +494,7 @@ validate_temperature()
 # well below the thermodynamic limit.
 
 # %% [markdown]
-# ## Validation of the Independence of the Anistropic Contributions
+# ## Validation of the Independence of the Anisotropic Contributions
 #
 # Here we validate numerically that the
 # [five independent anisotropic contributions](../properties/shear_viscosity.md)
@@ -571,6 +570,6 @@ validate_consistency()
 
 # %%
 if abs(eta_production_init - 3.236) > 0.1:
-    raise ValueError(f"wrong viscosity (production): {eta_production_init:.3e}")
+    raise ValueError(f"Wrong viscosity (production): {eta_production_init:.3e}")
 if abs(eta_production_ext - 3.257) > 0.1:
-    raise ValueError(f"wrong viscosity (production): {eta_production_ext:.3e}")
+    raise ValueError(f"Wrong viscosity (production): {eta_production_ext:.3e}")
