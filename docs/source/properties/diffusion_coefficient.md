@@ -69,7 +69,7 @@ uc = UnitConfig(
     freq_unit_str="THz",
 )
 # Actual analysis with STACIE.
-result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), unit_config=uc, verbose=True)
+result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), uc=uc, verbose=True)
 print("Diffusion coefficient", result.acint)
 print("Uncertainty of the diffusion coefficient", result.acint_std)
 
@@ -139,6 +139,6 @@ uc = UnitConfig(
     freq_unit=TERAHERTZ,
     freq_unit_str="THz",
 )
-result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), verbose=True, unit_config=uc)
+result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), verbose=True, uc=uc)
 plot_results("diffusion_coefficient.pdf", result, uc)
 ```

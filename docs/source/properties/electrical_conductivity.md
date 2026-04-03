@@ -170,7 +170,7 @@ uc = UnitConfig(
     freq_unit_str="THz",
 )
 # Actual analysis with STACIE.
-result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), unit_config=uc, verbose=True)
+result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), uc=uc, verbose=True)
 print("Electrical conductivity", result.acint)
 print("Uncertainty of the electrical conductivity", result.acint_std)
 
@@ -242,7 +242,7 @@ uc = UnitConfig(
     freq_unit=TERAHERTZ,
     freq_unit_str="THz",
 )
-result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), verbose=True, unit_config=uc)
+result = estimate_acint(spectrum, ExpPolyModel([0, 1, 2]), verbose=True, uc=uc)
 plot_results("electrical_conductivity.pdf", result, uc)
 ```
 
