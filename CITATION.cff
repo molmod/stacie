@@ -94,12 +94,14 @@ references:
     title: >-
       Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics:
       Case Study of 2,2,4-Trimethylhexane
-    doi: 10.48550/arXiv.2603.11247
+    doi: 10.1021/acs.jctc.6c00506
     type: article
     identifiers:
-      - description: preprint describing the Lorentz model and shear viscosity calculations with STACIE
+      - description: >-
+          published journal article describing the Lorentz model
+          and shear viscosity calculations with STACIE
         type: doi
-        value: 10.48550/arXiv.2603.11247
+        value: 10.1021/acs.jctc.6c00506
 preferred-citation:
   authors:
     - family-names: Toraman
