@@ -33,23 +33,19 @@ authors:
   - family-names: Toraman
     given-names: Gözdenur
     orcid: https://orcid.org/0000-0001-6785-333X
-    affiliation: >-
-      Labo Soete,
-      Ghent University,
-      Technologiepark-Zwijnaarde 46,
-      B-9052,
-      Zwijnaarde,
-      Belgium
+    affiliation: Labo Soete, Ghent University
+    address: Technologiepark-Zwijnaarde 46
+    post-code: 9052
+    city: Zwijnaarde
+    country: BE
   - family-names: Verstraelen
     given-names: Toon
     orcid: https://orcid.org/0000-0001-9288-5608
-    affiliation: >-
-      Center for Molecular Modeling (CMM),
-      Ghent University,
-      Technologiepark-Zwijnaarde 46,
-      B-9052,
-      Zwijnaarde,
-      Belgium
+    affiliation: Center for Molecular Modeling (CMM), Ghent University
+    address: Technologiepark-Zwijnaarde 46
+    post-code: 9052
+    city: Zwijnaarde
+    country: BE
 identifiers:
   - type: doi
     value: 10.5281/zenodo.15744666
