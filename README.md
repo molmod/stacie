@@ -29,8 +29,8 @@ All information about STACIE can be found in the [documentation](https://molmod.
 If you use STACIE in your research, please cite the following paper:
 
 > Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
-> "STable AutoCorrelation Integral Estimator (STACIE):
-> Robust and accurate transport properties from molecular dynamics simulations"
+> "STable AutoCorrelation Integral Estimator:
+> Robust and Accurate Transport Properties from Molecular Dynamics Simulations"
 > *Journal of Chemical Information and Modeling* **2025**, 65 (19), 10445–10464,
 > <https://doi.org/10.1021/acs.jcim.5c01475>,
 > <https://arxiv.org/abs/2506.20438>.
@@ -38,7 +38,7 @@ If you use STACIE in your research, please cite the following paper:
 > ```bibtex
 > @article{Toraman2025,
 >  author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
->  title = {STable AutoCorrelation Integral Estimator (STACIE): Robust and accurate transport properties from molecular dynamics simulations},
+>  title = {STable AutoCorrelation Integral Estimator: Robust and Accurate Transport Properties from Molecular Dynamics Simulations},
 >  journal = {Journal of Chemical Information and Modeling},
 >  volume = {65},
 >  number = {19},
@@ -68,7 +68,7 @@ please also cite the following paper:
 >  number = {15},
 >  pages = {7496--7511},
 >  year = {2026},
->  month = {july},
+>  month = {jul},
 >  url = {https://doi.org/10.1021/acs.jctc.6c00506},
 >  doi = {10.1021/acs.jctc.6c00506},
 > }

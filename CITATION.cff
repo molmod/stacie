@@ -30,15 +30,15 @@ abstract: >-
   uncertainties of averages over time-correlated data,
   and analysis of characteristic timescales.
 authors:
-  - family-names: Gözdenur
-    given-names: Toraman
+  - family-names: Toraman
+    given-names: Gözdenur
     orcid: https://orcid.org/0000-0001-6785-333X
     affiliation: >-
       Labo Soete,
       Ghent University,
       Technologiepark-Zwijnaarde 46,
       B-9052,
-      Ghent,
+      Zwijnaarde,
       Belgium
   - family-names: Verstraelen
     given-names: Toon
@@ -48,7 +48,8 @@ authors:
       Ghent University,
       Technologiepark-Zwijnaarde 46,
       B-9052,
-      Zwijnaarde, Belgium
+      Zwijnaarde,
+      Belgium
 identifiers:
   - type: doi
     value: 10.5281/zenodo.15744666
@@ -111,8 +112,8 @@ preferred-citation:
     - family-names: Verstraelen
       given-names: Toon
   title: >-
-    STable AutoCorrelation Integral Estimator (STACIE):
-    Robust and accurate transport properties from molecular dynamics simulations
+    STable AutoCorrelation Integral Estimator:
+    Robust and Accurate Transport Properties from Molecular Dynamics Simulations
   doi: 10.1021/acs.jcim.5c01475
   type: article
   identifiers:
