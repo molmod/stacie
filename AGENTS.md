@@ -40,8 +40,8 @@ When generating or reviewing code, adhere to these principles:
 STACIE's algorithms have been published and can be consulted here:
 
 - Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
-  "STable AutoCorrelation Integral Estimator (STACIE):
-  Robust and accurate transport properties from molecular dynamics simulations"
+  "STable AutoCorrelation Integral Estimator:
+  Robust and Accurate Transport Properties from Molecular Dynamics Simulations"
   *Journal of Chemical Information and Modeling* 2025, 65 (19), 10445–10464,
   <https://doi.org/10.1021/acs.jcim.5c01475>,
 

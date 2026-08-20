@@ -30,25 +30,22 @@ abstract: >-
   uncertainties of averages over time-correlated data,
   and analysis of characteristic timescales.
 authors:
-  - family-names: Gözdenur
-    given-names: Toraman
+  - family-names: Toraman
+    given-names: Gözdenur
     orcid: https://orcid.org/0000-0001-6785-333X
-    affiliation: >-
-      Labo Soete,
-      Ghent University,
-      Technologiepark-Zwijnaarde 46,
-      B-9052,
-      Ghent,
-      Belgium
+    affiliation: Labo Soete, Ghent University
+    address: Technologiepark-Zwijnaarde 46
+    post-code: 9052
+    city: Zwijnaarde
+    country: BE
   - family-names: Verstraelen
     given-names: Toon
     orcid: https://orcid.org/0000-0001-9288-5608
-    affiliation: >-
-      Center for Molecular Modeling (CMM),
-      Ghent University,
-      Technologiepark-Zwijnaarde 46,
-      B-9052,
-      Zwijnaarde, Belgium
+    affiliation: Center for Molecular Modeling (CMM), Ghent University
+    address: Technologiepark-Zwijnaarde 46
+    post-code: 9052
+    city: Zwijnaarde
+    country: BE
 identifiers:
   - type: doi
     value: 10.5281/zenodo.15744666
@@ -94,12 +91,14 @@ references:
     title: >-
       Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics:
       Case Study of 2,2,4-Trimethylhexane
-    doi: 10.48550/arXiv.2603.11247
+    doi: 10.1021/acs.jctc.6c00506
     type: article
     identifiers:
-      - description: preprint describing the Lorentz model and shear viscosity calculations with STACIE
+      - description: >-
+          published journal article describing the Lorentz model
+          and shear viscosity calculations with STACIE
         type: doi
-        value: 10.48550/arXiv.2603.11247
+        value: 10.1021/acs.jctc.6c00506
 preferred-citation:
   authors:
     - family-names: Toraman
@@ -109,8 +108,8 @@ preferred-citation:
     - family-names: Verstraelen
       given-names: Toon
   title: >-
-    STable AutoCorrelation Integral Estimator (STACIE):
-    Robust and accurate transport properties from molecular dynamics simulations
+    STable AutoCorrelation Integral Estimator:
+    Robust and Accurate Transport Properties from Molecular Dynamics Simulations
   doi: 10.1021/acs.jcim.5c01475
   type: article
   identifiers:
