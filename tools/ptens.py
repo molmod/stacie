@@ -3,9 +3,9 @@
 
 import sympy as sp
 
-pxx, pxy, pzx, pyy, pyz, pzz = sp.symbols("pxx pxy pzx pyy pyz pzz")
+pxx, pxy, pxz, pyx, pyy, pyz, pzx, pzy, pzz = sp.symbols("pxx pxy pxz pyx pyy pyz pzx pzy pzz")
 
-ptens = sp.Matrix([[pxx, pxy, pzx], [pxy, pyy, pyz], [pzx, pyz, pzz]])
+ptens = sp.Matrix([[pxx, pxy, pxz], [pyx, pyy, pyz], [pzx, pzy, pzz]])
 rtens = sp.Matrix(
     [[1, 0, 0], [0, 1 / sp.sqrt(2), -1 / sp.sqrt(2)], [0, 1 / sp.sqrt(2), 1 / sp.sqrt(2)]]
 )
