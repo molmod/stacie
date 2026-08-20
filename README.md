@@ -31,7 +31,7 @@ If you use STACIE in your research, please cite the following paper:
 > Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
 > "STable AutoCorrelation Integral Estimator (STACIE):
 > Robust and accurate transport properties from molecular dynamics simulations"
-> *Journal of Chemical Information and Modeling* 2025, 65 (19), 10445–10464,
+> *Journal of Chemical Information and Modeling* **2025**, 65 (19), 10445–10464,
 > <https://doi.org/10.1021/acs.jcim.5c01475>,
 > <https://arxiv.org/abs/2506.20438>.
 >
@@ -55,7 +55,7 @@ please also cite the following paper:
 
 > Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
 > "Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane"
-> *Journal of Chemical Theory and Computation*, 2026, 10445--10464,
+> *Journal of Chemical Theory and Computation* **2026**, 22 (15), 7496–7511,
 > <https://doi.org/10.1021/acs.jctc.6c00506>,
 > <https://arxiv.org/abs/2603.11247>.
 >
@@ -63,6 +63,10 @@ please also cite the following paper:
 > @article{Toraman2026,
 >  author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
 >  title = {Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane},
+>  journal = {Journal of Chemical Theory and Computation},
+>  volume = {22},
+>  number = {15},
+>  pages = {7496--7511},
 >  year = {2026},
 >  month = {july},
 >  url = {https://doi.org/10.1021/acs.jctc.6c00506},
