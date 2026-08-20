@@ -3,9 +3,11 @@
 # How to Cite
 
 When using STACIE in your research, please cite the STACIE paper in any resulting publication.
-The reference is provided in several formats below:
+The reference is provided in several formats below.
 
 ## Main STACIE Paper
+
+This paper introduces STACIE and should be cited in any publication that relies on STACIE:
 
 > Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
 > "STable AutoCorrelation Integral Estimator:
@@ -13,10 +15,6 @@ The reference is provided in several formats below:
 > *Journal of Chemical Information and Modeling* **2025**, 65 (19), 10445–10464,
 > <https://doi.org/10.1021/acs.jcim.5c01475>,
 > <https://arxiv.org/abs/2506.20438>.
-
-This paper introduces STACIE and should be cited in any publication that relies on STACIE.
-The manuscript has been submitted to The Journal of Chemical Information and Modeling,
-and the citation records below will be updated when appropriate.
 
 - BibTeX:
 
