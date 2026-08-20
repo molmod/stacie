@@ -55,7 +55,7 @@ please also cite the following paper:
 
 > Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
 > "Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane"
-> *Journal of Chemical Theory and Computation*, 2026, ASAP Article,
+> *Journal of Chemical Theory and Computation*, 2026, 10445--10464,
 > <https://doi.org/10.1021/acs.jctc.6c00506>,
 > <https://arxiv.org/abs/2603.11247>.
 >
