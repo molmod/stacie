@@ -8,4 +8,4 @@ rsync -av --info=progress2 \
     --include=output/*.npz \
     --exclude=*.* \
     --prune-empty-dirs \
-    $1:projects/emd-viscosity/stacie/openmm_salt/
+    $1:data/toon/emd-viscosity/stacie/openmm_salt/

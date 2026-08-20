@@ -9,4 +9,4 @@ rsync -av --info=progress2 \
     --include=sims/replica_????_part_??/nv?_*.txt \
     --exclude=*.* \
     --prune-empty-dirs \
-    $1:projects/emd-viscosity/stacie/lammps_lj3d/
+    $1:data/toon/emd-viscosity/stacie/lammps_lj3d/

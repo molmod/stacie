@@ -26,6 +26,7 @@ ENV/
 .envrc
 .env
 .venv
+uv.lock
 
 # Build artifacts, distribution / packaging
 src/stacie/_version.py

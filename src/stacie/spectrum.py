@@ -20,11 +20,7 @@
 
 from collections.abc import Iterable
 from itertools import repeat
-
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
+from typing import Self
 
 import attrs
 import numpy as np

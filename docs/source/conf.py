@@ -202,6 +202,7 @@ nitpick_ignore = [
     ("py:class", "ArrayLike"),
     ("py:class", "matplotlib.axes._axes.Axes"),
     ("py:class", "numpy._typing._array_like._ScalarT"),
+    ("py:class", "numpy._typing._array_like.NDArray"),
     ("py:class", "numpy._typing.TypeAliasType"),
 ]
 napoleon_use_rtype = False

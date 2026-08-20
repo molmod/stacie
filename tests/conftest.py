@@ -35,24 +35,27 @@ mpl.rcParams["axes.spines.right"] = False
 def check_deriv(func, x0):
     """Check the derivative with STACIE's convention for returning gradients."""
     deriv = func(x0, deriv=1)[1]
-    num_deriv, info = nd.Derivative(lambda x: func(x)[0], full_output=True)(x0)
-    error = np.clip(info.error_estimate, 1e-15, np.inf)
+    result = nd.Derivative(lambda x: func(x)[0], full_output=True)(x0)
+    num_deriv, error = result.estimate, result.error_estimate
+    error = np.clip(error, 1e-15, np.inf)
     assert deriv / error == pytest.approx(num_deriv / error, abs=100)
 
 
 def check_curv(func, x0):
     """Check the curvature with STACIE's convention for returning gradients."""
     curv = func(x0, deriv=2)[2]
-    num_curv, info = nd.Derivative(lambda x: func(x, deriv=1)[1], full_output=True)(x0)
-    error = np.clip(info.error_estimate, 1e-15, np.inf)
+    result = nd.Derivative(lambda x: func(x, deriv=1)[1], full_output=True)(x0)
+    num_curv, error = result.estimate, result.error_estimate
+    error = np.clip(error, 1e-15, np.inf)
     assert curv / error == pytest.approx(num_curv / error, abs=100)
 
 
 def check_gradient(func, x0):
     """Check the gradient with STACIE's convention for returning gradients."""
     grad = func(x0, deriv=1)[1]
-    num_grad, info = nd.Gradient(lambda x: func(x)[0], full_output=True)(x0)
-    error = np.clip(info.error_estimate, 1e-15, np.inf)
+    result = nd.Gradient(lambda x: func(x)[0], full_output=True)(x0)
+    num_grad, error = result.estimate, result.error_estimate
+    error = np.clip(error, 1e-15, np.inf)
     if num_grad.ndim == 2:
         num_grad = num_grad.T
         error = error.T
@@ -62,6 +65,7 @@ def check_gradient(func, x0):
 def check_hessian(func, x0):
     """Check the Hessian with STACIE's convention for returning gradients."""
     hess = func(x0, deriv=2)[2]
-    num_hess, info = nd.Gradient(lambda x: func(x, deriv=1)[1], full_output=True)(x0)
-    error = np.clip(info.error_estimate, 1e-15, np.inf)
+    result = nd.Gradient(lambda x: func(x, deriv=1)[1], full_output=True)(x0)
+    num_hess, error = result.estimate, result.error_estimate
+    error = np.clip(error, 1e-15, np.inf)
     assert hess / error == pytest.approx(num_hess / error, abs=100)

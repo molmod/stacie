@@ -8,12 +8,10 @@ A local installation for testing and development can be installed as follows:
 ```bash
 git clone git@github.com:molmod/stacie.git
 cd stacie
-pre-commit install
-python -m venv venv
-echo 'source venv/bin/activate' > .envrc
+uv sync --extra=docs,tests,dev
+echo 'source .venv/bin/activate' > .envrc
 direnv allow
-pip install -U pip
-pip install -e .[docs,tests]
+pre-commit install
 pytest -vv
 cd docs
 ./compile_html.sh
