@@ -48,7 +48,6 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_codeautolink",
     "sphinx_copybutton",
-    "sphinx_tippy",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.inkscapeconverter",
 ]

@@ -80,7 +80,6 @@ docs = [
     "sphinx-autodoc-typehints",
     "sphinx-codeautolink",
     "sphinx-copybutton",
-    "sphinx-tippy",
     "sphinxcontrib-bibtex",
     "sphinxcontrib-svg2pdfconverter",
     "stepup>=3.1.2",
