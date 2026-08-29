@@ -69,6 +69,15 @@ Two consequences of `addopts` in `pyproject.toml` are worth knowing in advance:
   because the doubled worker processes overload the machine.
   Run invocations one after another instead.
 
+Every test is also bounded by `pytest-timeout`,
+with a budget of 120 seconds per test set in `pyproject.toml`.
+The slowest test took about 11 seconds on a development machine in August 2026,
+so the budget is generous enough to absorb a slow continuous integration runner
+while it still catches a non-converging solver
+that would otherwise occupy a worker process until the whole job is cancelled.
+Raise the budget for a single test with `@pytest.mark.timeout(...)`
+rather than raising it for the entire suite.
+
 ## Coding Conventions
 
 ### Semantic Line Breaks

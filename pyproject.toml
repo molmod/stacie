@@ -67,7 +67,8 @@ tests = [
     "numdifftools>=0.10.1",
     "pytest>=8.2.0",
     "pytest-regtest>=2.1.1",
-    "pytest-xdist>=3.5.0",
+    "pytest-timeout>=2.3.1",
+    "pytest-xdist>=3.6.1",
 ]
 dev = [
     "pre-commit",
@@ -80,6 +81,7 @@ Source = "https://github.com/molmod/stacie/"
 
 [tool.pytest.ini_options]
 addopts = "-n auto --dist worksteal -W error"
+timeout = 120
 
 [tool.setuptools_scm]
 version_scheme = "post-release"
