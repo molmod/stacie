@@ -106,6 +106,8 @@ They should never be used in any prose (code comments, docstrings, Markdown, ...
 neither in their UTF-8 glyph form nor in ASCII form (`--`, `---`).
 Subclauses should be made explicit (e.g. "which", "because", "that")
 or split into separate sentences.
+The one exception is an en dash that joins two proper names,
+as in "Green–Kubo" or "Wiener–Khinchin", where it is part of the name rather than punctuation.
 
 ### Prose That Ages Well
 

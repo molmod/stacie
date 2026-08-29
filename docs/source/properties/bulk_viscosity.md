@@ -1,7 +1,7 @@
 # Bulk Viscosity
 
 The bulk viscosity of a fluid is related to the autocorrelation
-of isotropic pressure fluctuations as follows:
+of isotropic pressure fluctuations through the following {term}`Green–Kubo relation`:
 
 $$
     \eta_b = \frac{V}{k_\text{B} T} \frac{1}{2}

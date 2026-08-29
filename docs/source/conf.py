@@ -50,6 +50,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.inkscapeconverter",
+    "sphinxext.opengraph",
 ]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
@@ -80,6 +81,9 @@ def load_footer_icons():
 
 
 html_theme = "furo"
+# Sphinx emits a canonical link only when this is set,
+# and the Open Graph configuration below derives the absolute page URLs from it.
+html_baseurl = "https://molmod.github.io/stacie/"
 html_static_path = ["static"]
 html_title = f"{project} {version}"
 html_css_files = ["custom.css"]
@@ -101,6 +105,30 @@ html_theme_options = {
         "admonition-font-size": "1rem",
     },
 }
+
+# -- Configuration of opengraph extension -------------------------------------
+# https://sphinxext-opengraph.readthedocs.io/en/latest/
+
+ogp_site_url = html_baseurl
+ogp_site_name = f"{project} documentation"
+# Setting an image also suppresses the per-page cards
+# that the extension would otherwise generate with matplotlib.
+ogp_image = html_baseurl + "_static/github_repo_card_light.png"
+ogp_image_alt = (
+    "Graphical summary of STACIE, "
+    "listing the properties it estimates: diffusivity, ionic electrical conductivity, "
+    "thermal conductivity, shear and bulk viscosity, "
+    "exponential and integrated correlation times, and the error on the mean."
+)
+# Without this tag, X and Bluesky fall back to a small square preview.
+ogp_custom_meta_tags = ['<meta name="twitter:card" content="summary_large_image">']
+# The description is derived from the first content of each page,
+# which on the theory and property pages is a LaTeX formula rather than prose.
+# Such a description is acceptable in a social media card,
+# where the title and the image carry the message,
+# but as a search engine snippet it is worse than no description at all,
+# because search engines tend to show this tag verbatim.
+ogp_enable_meta_description = False
 
 # -- Options for LaTeX output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/latex.html#module-latex

@@ -1,7 +1,7 @@
 # Ionic Electrical Conductivity
 
 The ionic electrical conductivity of a system is related to the autocorrelation
-of the charge current as follows:
+of the charge current through the following {term}`Green–Kubo relation`:
 
 $$
     \sigma = \frac{1}{V k_\text{B} T}

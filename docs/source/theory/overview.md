@@ -25,7 +25,7 @@ $$
 $$
 
 A prefactor $F$ is usually present, containing factors
-such as the temperature and/or the cell volume in Green--Kubo formalisms
+such as the temperature and/or the cell volume in Green–Kubo formalisms
 {cite:p}`green_1952_markoff, green_1954_markoff, kubo_1957_statistical`.
 The integrand is the ACF, $c(\Delta_t)$, of the time-dependent input $\hat{x}(t)$.
 It is common to integrate only from $0$ to $\infty$,
@@ -57,7 +57,7 @@ the inverse transform to derive the ACF from the PSD can be skipped.
 As we will see later, there are other advantages to using this zero-frequency limit to compute the integral.
 
 :::{note}
-Some derivations of Green--Kubo relations of transport properties,
+Some derivations of Green–Kubo relations of transport properties,
 conventionally formulated as integrals of autocorrelation functions,
 also express them as the zero-frequency limit of an appropriate spectrum
 {cite:p}`hansen_2013_theory`.
@@ -129,7 +129,8 @@ $$
 with $\omega = \exp(i 2\pi/N)$.
 Note that the factor $h$ is included in the definition of $C_k$
 to ensure that its units are consistent with the continuous case.
-According to (the discrete version of) the [Wiener--Khinchin theorem](statistics.md) {cite:p}`oppenheim_1999_power`,
+According to (the discrete version of) the {term}`Wiener–Khinchin theorem`
+{cite:p}`oppenheim_1999_power`, see [Parameter Estimation](statistics.md),
 this Fourier transform can be written in terms of the discrete PSD:
 
 $$

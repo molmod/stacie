@@ -1,6 +1,7 @@
 # Diffusion Coefficient
 
-The diffusion coefficient (or diffusivity) of a set of $N$ particles in $d$ dimensions is given by:
+The diffusion coefficient (or diffusivity) of a set of $N$ particles in $d$ dimensions
+is given by the following {term}`Green–Kubo relation`:
 
 $$
 D = \frac{1}{N\,d} \frac{1}{2}\int_{-\infty}^{+\infty}

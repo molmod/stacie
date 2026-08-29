@@ -1,7 +1,7 @@
 # Thermal Conductivity
 
 The thermal conductivity of a system is related to the autocorrelation
-of the heat flux as follows:
+of the heat flux through the following {term}`Green–Kubo relation`:
 
 $$
     \kappa = \frac{1}{V k_\text{B} T^2}

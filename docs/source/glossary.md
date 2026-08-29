@@ -5,6 +5,10 @@ ACF
     Autocorrelation function.
     A measure of the correlation of a signal with itself at different time lags.
 
+Green–Kubo relation
+    A mathematical expression that relates transport coefficients
+    to the time integral of the autocorrelation function of the corresponding flux or velocity.
+
 LAMMPS
     Large-scale atomic/molecular massively parallel simulator.
     A software package for simulating molecular dynamics.
@@ -29,13 +33,18 @@ NVT
     A statistical ensemble that represents a system in thermal equilibrium
     with a heat bath at constant temperature (T), volume (V), and number of particles (N).
 
-Uncertainty
-    An estimate of the standard deviation of a result
-    if the analysis would have been repeated many times with independent inputs.
-    This is also known as the standard error.
-
 PSD
     Power spectral density.
     A measure of the power of a signal as a function of frequency.
     The Fourier transform of the autocorrelation function.
+
+Uncertainty
+    In STACIE, uncertainties are expressed as standard deviations of the mean of a result,
+    except when noted otherwise.
+    This practically corresponds to the standard deviation of the result
+    over repeated (computational) experiments, also known as the standard error.
+
+Wiener–Khinchin theorem
+    A mathematical theorem that relates the autocorrelation function of a stationary random process
+    to its power spectral density (PSD) via the Fourier transform.
 ```

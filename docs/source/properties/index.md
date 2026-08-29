@@ -12,7 +12,7 @@ First, we discuss a few properties that may be relevant to multiple scientific d
 
 The following physicochemical transport properties can be computed
 as autocorrelation integrals of outputs from molecular dynamics simulations,
-using the so-called Green-Kubo relations
+using the so-called {term}`Green–Kubo relations <Green–Kubo relation>`
 {cite:p}`green_1952_markoff,green_1954_markoff,kubo_1957_statistical,helfand_1960_transport`.
 These properties have recently been referred to as diagonal transport coefficients {cite:p}`pegolo_2025_transport`.
 

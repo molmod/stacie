@@ -1,7 +1,8 @@
 # Shear Viscosity
 
 The shear viscosity of a fluid is related to the autocorrelation
-of microscopic off-diagonal pressure tensor fluctuations as follows:
+of microscopic off-diagonal pressure tensor fluctuations
+through the following {term}`Green–Kubo relation`:
 
 $$
     \eta = \frac{V}{k_\text{B} T} \frac{1}{2}

@@ -16,7 +16,7 @@ and the corresponding expectation value does not (`x`).
 Blurring the two in a docstring is a real error,
 because a reader then cannot tell whether a quantity carries sampling noise.
 
-### The Green-Kubo Context
+### The Green–Kubo Context
 
 Integrals of autocorrelation functions relate directly to physical properties
 such as viscosity and diffusivity.

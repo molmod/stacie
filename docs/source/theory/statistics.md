@@ -112,7 +112,7 @@ $$
     &= \frac{h}{N} \mean\Bigl[|\hat{X}_k|^2\Bigr]
 $$
 
-This is the discrete version of the Wiener--Khinchin theorem {cite:p}`oppenheim_1999_power`.
+This is the discrete version of the {term}`Wiener–Khinchin theorem` {cite:p}`oppenheim_1999_power`.
 Note that the factor $h$ is included in the definition of $C_k$
 to ensure that its units are consistent with the continuous case.
 
