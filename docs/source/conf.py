@@ -84,6 +84,7 @@ html_theme = "furo"
 html_static_path = ["static"]
 html_title = f"{project} {version}"
 html_css_files = ["custom.css"]
+html_extra_path = ["static/google7e7449498a5c0f0e.html"]
 html_favicon = "static/stacie-logo-black.svg"
 html_theme_options = {
     "dark_logo": "stacie-logo-white.svg",
