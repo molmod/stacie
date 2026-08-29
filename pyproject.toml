@@ -79,6 +79,7 @@ docs = [
     "sphinx-autodoc-typehints",
     "sphinx-codeautolink",
     "sphinx-copybutton",
+    "sphinx-sitemap",
     "sphinxcontrib-bibtex",
     "sphinxcontrib-svg2pdfconverter",
     "sphinxext-opengraph",

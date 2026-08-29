@@ -3,7 +3,11 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import importlib
+import importlib.util
+import inspect
 import os
+import pathlib
 
 import sphinx
 import sphinx.builders.latex.transforms
@@ -24,8 +28,28 @@ def _get_version_info():
     return major_minor, major_minor
 
 
+def _get_source_ref():
+    """Get the Git reference that the source links should point to."""
+    from setuptools_scm import get_version
+
+    scm_version = Version(get_version(root="../..", relative_to=__file__))
+    if scm_version.local is not None:
+        # A build from a working copy links to the exact commit,
+        # because a branch keeps moving after the documentation is deployed.
+        # The local segment of a setuptools-scm version is the commit hash,
+        # prefixed with ``g`` and optionally followed by a dirty-tree marker.
+        return scm_version.local.split(".")[0].removeprefix("g")
+    if scm_version.is_devrelease:
+        return "main"
+    return f"v{scm_version.public}"
+
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+REPO_URL = "https://github.com/molmod/stacie"
+REPO_BRANCH = "main"
+REPO_ROOT = pathlib.Path(__file__).parent.parent.parent
 
 project = "STACIE"
 copyright = "2024--2026, Gözdenur Toraman, Toon Verstraelen"  # noqa: A001
@@ -40,14 +64,15 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.linkcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    "sphinx.ext.viewcode",
     # Third-party extensions
     "myst_nb",
     "sphinx_autodoc_typehints",
     "sphinx_codeautolink",
     "sphinx_copybutton",
+    "sphinx_sitemap",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.inkscapeconverter",
     "sphinxext.opengraph",
@@ -84,6 +109,10 @@ html_theme = "furo"
 # Sphinx emits a canonical link only when this is set,
 # and the Open Graph configuration below derives the absolute page URLs from it.
 html_baseurl = "https://molmod.github.io/stacie/"
+# The documentation is deployed as a single unversioned and untranslated tree,
+# so the sitemap URLs must not carry the language and version prefixes
+# that sphinx-sitemap inserts by default.
+sitemap_url_scheme = "{link}"
 html_static_path = ["static"]
 html_title = f"{project} {version}"
 html_css_files = ["custom.css"]
@@ -92,9 +121,9 @@ html_favicon = "static/stacie-logo-black.svg"
 html_theme_options = {
     "dark_logo": "stacie-logo-white.svg",
     "light_logo": "stacie-logo-black.svg",
-    "source_repository": "https://github.com/molmod/stacie",
-    "source_branch": "main",
-    "source_directory": "docs/",
+    "source_repository": REPO_URL,
+    "source_branch": REPO_BRANCH,
+    "source_directory": "docs/source/",
     "footer_icons": load_footer_icons(),
     "dark_css_variables": {
         "admonition-title-font-size": "1rem",
@@ -251,6 +280,53 @@ suppress_warnings = ["sphinx_autodoc_typehints.forward_reference"]
 napoleon_use_rtype = False
 napoleon_use_param = True
 
+# -- Configuration of linkcode extension --------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/linkcode.html
+
+SOURCE_REF = _get_source_ref()
+
+
+def linkcode_resolve(domain, info):
+    """Get the URL of the source code of a documented Python object.
+
+    Parameters
+    ----------
+    domain
+        The language domain of the object, of which only ``"py"`` is resolved.
+    info
+        A dictionary with the keys ``"module"`` and ``"fullname"``,
+        identifying the object to link to.
+
+    Returns
+    -------
+    url
+        The URL of the object on GitHub, or ``None`` when it has no source of its own.
+    """
+    if domain != "py" or not info["module"]:
+        return None
+    try:
+        obj = importlib.import_module(info["module"])
+        for part in info["fullname"].split("."):
+            obj = getattr(obj, part)
+    except (ImportError, AttributeError):
+        return None
+    # A property hides its source behind the getter,
+    # and a decorated function behind its wrapper.
+    if isinstance(obj, property):
+        obj = obj.fget
+    obj = inspect.unwrap(obj) if callable(obj) else obj
+    try:
+        path = inspect.getsourcefile(obj)
+        lines, start = inspect.getsourcelines(obj)
+    except (TypeError, OSError):
+        # Attributes and other objects without a source location of their own.
+        return None
+    if path is None:
+        return None
+    relpath = pathlib.Path(path).resolve().relative_to(REPO_ROOT.resolve())
+    return f"{REPO_URL}/blob/{SOURCE_REF}/{relpath}#L{start}-L{start + len(lines) - 1}"
+
+
 # -- Configuration of mathjax extension ---------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/math.html#module-sphinx.ext.mathjax
 
@@ -275,6 +351,58 @@ bibtex_bibfiles = ["references.bib"]
 # -- Inform examples of data location -----------------------------------------
 # This path is relative to the examples directory.
 os.environ["DATA_ROOT"] = "../../data"
+
+# -- Source links of the generated API pages ----------------------------------
+
+
+def _get_api_module_path(pagename):
+    """Get the repository path of the module documented by a generated API page.
+
+    Parameters
+    ----------
+    pagename
+        The name of the page being rendered.
+
+    Returns
+    -------
+    relpath
+        The path of the module relative to the root of the repository,
+        or ``None`` when the page does not document a single module.
+    """
+    if not pagename.startswith("apidocs/"):
+        return None
+    try:
+        spec = importlib.util.find_spec(pagename.removeprefix("apidocs/"))
+    except (ImportError, ValueError):
+        return None
+    if spec is None or spec.origin is None:
+        return None
+    return pathlib.Path(spec.origin).resolve().relative_to(REPO_ROOT.resolve())
+
+
+def _set_api_source_links(app, pagename, templatename, context, doctree):
+    """Point the source buttons of the generated API pages at the documented module.
+
+    The reStructuredText of these pages is written by ``sphinx-apidoc`` during the build
+    and is not committed,
+    so the links that the theme derives from the page source would be dead.
+    The prose on such a page comes from the docstrings of one module,
+    which makes that module the source a reader wants to view or edit.
+    """
+    relpath = _get_api_module_path(pagename)
+    if relpath is None:
+        if pagename.startswith("apidocs/"):
+            # The theme renders neither button without a page source suffix.
+            context["page_source_suffix"] = ""
+        return
+    context["theme_source_edit_link"] = f"{REPO_URL}/edit/{REPO_BRANCH}/{relpath}"
+    context["theme_source_view_link"] = f"{REPO_URL}/blob/{REPO_BRANCH}/{relpath}?plain=true"
+
+
+def setup(app):
+    """Register the event handlers defined in this configuration file."""
+    app.connect("html-page-context", _set_api_source_links)
+
 
 # -- Pre-build step to regenerate API documentation ---------------------------
 
