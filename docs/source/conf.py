@@ -203,8 +203,23 @@ nitpick_ignore = [
     ("py:class", "matplotlib.axes._axes.Axes"),
     ("py:class", "numpy._typing._array_like._ScalarT"),
     ("py:class", "numpy._typing._array_like.NDArray"),
+    # A subscripted alias such as ``NDArray[float]`` nested inside another generic,
+    # for example ``dict[str, NDArray[float]]``, is a ``types.GenericAlias``
+    # whose ``__module__`` is the module defining the alias.
+    # As of NumPy 2.5 with sphinx-autodoc-typehints 3.12, this is cross-referenced
+    # under the name of its own type instead of the name of the alias.
+    ("py:class", "numpy._typing._array_like.GenericAlias"),
     ("py:class", "numpy._typing.TypeAliasType"),
 ]
+# Autodoc loads every module-level name, imported ones included,
+# before it decides which to document,
+# and sphinx-autodoc-typehints resolves the annotations of each name while doing so.
+# The imports from NumPy therefore drag in annotations
+# that reference names defined only under ``TYPE_CHECKING`` in NumPy,
+# which cannot be resolved at build time.
+# The downside of this setting is that it also hides genuinely broken forward references
+# in STACIE's own annotations.
+suppress_warnings = ["sphinx_autodoc_typehints.forward_reference"]
 napoleon_use_rtype = False
 napoleon_use_param = True
 
