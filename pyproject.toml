@@ -8,10 +8,33 @@ authors = [
     { name = "Gözdenur Toraman", email = "gozdenur.toraman@ugent.be" },
     { name = "Toon Verstraelen", email = "toon.verstraelen@ugent.be" },
 ]
-description = "STable AutoCorrelation Integral Estimator (STACIE)"
+description = "STACIE is the STable AutoCorrelation Integral Estimator for time-correlated data."
 readme = "README.md"
 license = { text = "LGPL-3.0-or-later OR CC-BY-SA-4.0 (for documentation)" }
 requires-python = ">=3.11"
+keywords = [
+    # snipwise.md BEGIN keywords
+    "ACF",
+    "autocorrelation function",
+    "autocorrelation integral",
+    "characteristic timescales",
+    "data analysis",
+    "exponential correlation time",
+    "integrated correlation time",
+    "LGPL",
+    "molecular dynamics",
+    "open source",
+    "post-processing",
+    "power spectral distribution",
+    "PSD",
+    "Python package",
+    "scientific computing",
+    "STACIE",
+    "time correlation",
+    "transport properties",
+    "uncertainty quantification",
+    # snipwise.md END keywords
+]
 classifiers = [
     "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
     "Development Status :: 5 - Production/Stable",
@@ -72,6 +95,7 @@ tests = [
 ]
 dev = [
     "pre-commit",
+    "snipwise<2.0.0a0",
 ]
 
 [project.urls]

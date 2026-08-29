@@ -16,11 +16,14 @@
     </picture>
 </p>
 
+<!-- snipwise.md BEGIN abstract -->
 STACIE is a Python package and algorithm that computes time integrals of autocorrelation functions.
 It is primarily designed for post-processing molecular dynamics simulations.
 However, it can also be used for more general analysis of time-correlated data.
-Typical applications include estimating transport properties and
-the uncertainty of averages over time-correlated data, as well as analyzing characteristic timescales.
+Typical applications include estimating transport properties
+and the uncertainty of averages over time-correlated data,
+as well as analyzing characteristic timescales.
+<!-- snipwise.md END abstract -->
 
 All information about STACIE can be found in the [documentation](https://molmod.github.io/stacie).
 
@@ -28,13 +31,16 @@ All information about STACIE can be found in the [documentation](https://molmod.
 
 If you use STACIE in your research, please cite the following paper:
 
+> <!-- snipwise.md BEGIN stacie-ref-markdown -->
 > Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
 > "STable AutoCorrelation Integral Estimator:
 > Robust and Accurate Transport Properties from Molecular Dynamics Simulations"
 > *Journal of Chemical Information and Modeling* **2025**, 65 (19), 10445–10464,
 > <https://doi.org/10.1021/acs.jcim.5c01475>,
 > <https://arxiv.org/abs/2506.20438>.
+> <!-- snipwise.md END stacie-ref-markdown -->
 >
+> <!-- snipwise.md BEGIN stacie-ref-bib -->
 > ```bibtex
 > @article{Toraman2025,
 >  author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
@@ -49,16 +55,20 @@ If you use STACIE in your research, please cite the following paper:
 >  doi = {10.1021/acs.jcim.5c01475},
 > }
 > ```
+> <!-- snipwise.md END stacie-ref-bib -->
 
 When using the Lorentz model or performing shear viscosity calculations with STACIE,
 please also cite the following paper:
 
+> <!-- snipwise.md BEGIN lorentz-ref-markdown -->
 > Gözdenur Toraman, Dieter Fauconnier, and Toon Verstraelen
 > "Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane"
 > *Journal of Chemical Theory and Computation* **2026**, 22 (15), 7496–7511,
 > <https://doi.org/10.1021/acs.jctc.6c00506>,
 > <https://arxiv.org/abs/2603.11247>.
+> <!-- snipwise.md END lorentz-ref-markdown -->
 >
+> <!-- snipwise.md BEGIN lorentz-ref-bib -->
 > ```bibtex
 > @article{Toraman2026,
 >  author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
@@ -73,6 +83,7 @@ please also cite the following paper:
 >  doi = {10.1021/acs.jctc.6c00506},
 > }
 > ```
+> <!-- snipwise.md END lorentz-ref-bib -->
 
 ## License
 

@@ -39,6 +39,11 @@ repos:
     - id: ruff-format
     - id: ruff-check
       args: ["--fix", "--show-fixes"]
+- repo: https://github.com/reproducible-reporting/snipwise
+  rev: v1.1.0
+  hooks:
+  - id: snipwise
+    args: [fix]
 - repo: https://github.com/srstevenson/nb-clean
   rev: "4.0.1"
   hooks:

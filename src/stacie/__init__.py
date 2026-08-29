@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # --
-"""The STACIE package."""
+"""STACIE is the STable AutoCorrelation Integral Estimator for time-correlated data."""
 
 from .cutoff import CV2LCriterion
 from .estimate import estimate_acint
