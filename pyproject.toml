@@ -29,10 +29,9 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    # Ensure changes to these dependencies are reflected in .github/requirements-old.txt
     "attrs>=23.1.0",
     "matplotlib>=3.9.0",
-    "numpy>=1.26.4",
+    "numpy>=2.0.0",
     "scipy>=1.13.0",
 ]
 dynamic = ["version"]
@@ -65,10 +64,10 @@ docs = [
     "stepup-reprep>=3.1.5",
 ]
 tests = [
-    "pytest",
-    "pytest-regtest",
-    "pytest-xdist",
     "numdifftools>=0.10.1",
+    "pytest>=8.2.0",
+    "pytest-regtest>=2.1.1",
+    "pytest-xdist>=3.5.0",
 ]
 dev = [
     "pre-commit",
