@@ -44,8 +44,8 @@ If you use STACIE in your research, please cite the following paper:
 > ```bibtex
 > @article{Toraman2025,
 >  author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
->  title = {STable AutoCorrelation Integral Estimator: Robust and Accurate Transport Properties
->   from Molecular Dynamics Simulations},
+>  title = {STable AutoCorrelation Integral Estimator:
+>   Robust and Accurate Transport Properties from Molecular Dynamics Simulations},
 >  journal = {Journal of Chemical Information and Modeling},
 >  volume = {65},
 >  number = {19},
