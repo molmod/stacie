@@ -135,3 +135,26 @@ ignore = [
     "RUF001",   # https://docs.astral.sh/ruff/rules/ambiguous-unicode-character-string/
     "TRY003",   # https://docs.astral.sh/ruff/rules/raise-vanilla-args/
 ]
+
+[tool.pymarkdown]
+# Report unknown or mistyped settings instead of silently ignoring them.
+mode.strict-config = true
+# Rule md007 (ul-indent) expects a list nested in an ordered list item
+# to be indented to the parent's content column, i.e. three spaces for a `1. ` item.
+# MyST only nests such a list when it is indented four spaces.
+plugins.md007.enabled = false
+plugins.md013.line_length = 100
+plugins.md013.heading_line_length = 100
+plugins.md013.code_block_line_length = 100
+# Rule md022 (blanks-around-headings) counts a MyST anchor, such as `(v1.2.1)=`,
+# as content that must be separated from the heading it labels,
+# while MyST only attaches the anchor to the heading on the line right below it.
+plugins.md022.enabled = false
+# The changelog repeats headings such as "Changed" under every release,
+# which is fine as long as they do not repeat under the same release.
+plugins.md024.siblings_only = true
+# The default list does not include the elements of the picture in the README.
+plugins.md033.allowed_elements = "!--,![CDATA[,!DOCTYPE,p,picture,source,img"
+# Rule md041 (first-line-heading) does not fit `docs/data/zenodo.md`,
+# which is the description of an archive rather than a page with a title.
+plugins.md041.enabled = false

@@ -1,4 +1,3 @@
-<!-- markdownlint-disable line-length -->
 # STACIE
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
@@ -41,10 +40,12 @@ If you use STACIE in your research, please cite the following paper:
 > <!-- snipwise.md END stacie-ref-markdown -->
 >
 > <!-- snipwise.md BEGIN stacie-ref-bib -->
+>
 > ```bibtex
 > @article{Toraman2025,
 >  author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
->  title = {STable AutoCorrelation Integral Estimator: Robust and Accurate Transport Properties from Molecular Dynamics Simulations},
+>  title = {STable AutoCorrelation Integral Estimator: Robust and Accurate Transport Properties
+>   from Molecular Dynamics Simulations},
 >  journal = {Journal of Chemical Information and Modeling},
 >  volume = {65},
 >  number = {19},
@@ -55,6 +56,7 @@ If you use STACIE in your research, please cite the following paper:
 >  doi = {10.1021/acs.jcim.5c01475},
 > }
 > ```
+>
 > <!-- snipwise.md END stacie-ref-bib -->
 
 When using the Lorentz model or performing shear viscosity calculations with STACIE,
@@ -69,10 +71,12 @@ please also cite the following paper:
 > <!-- snipwise.md END lorentz-ref-markdown -->
 >
 > <!-- snipwise.md BEGIN lorentz-ref-bib -->
+>
 > ```bibtex
 > @article{Toraman2026,
 >  author = {G\"{o}zdenur Toraman and Dieter Fauconnier and Toon Verstraelen},
->  title = {Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics: Case Study of 2,2,4-Trimethylhexane},
+>  title = {Reliable Viscosity Calculation from High-Pressure Equilibrium Molecular Dynamics:
+>   Case Study of 2,2,4-Trimethylhexane},
 >  journal = {Journal of Chemical Theory and Computation},
 >  volume = {22},
 >  number = {15},
@@ -83,6 +87,7 @@ please also cite the following paper:
 >  doi = {10.1021/acs.jctc.6c00506},
 > }
 > ```
+>
 > <!-- snipwise.md END lorentz-ref-bib -->
 
 ## License

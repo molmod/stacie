@@ -1,5 +1,3 @@
-<!-- markdownlint-disable line-length -->
-
 # How to Cite
 
 When using STACIE in your research, please cite the STACIE paper in any resulting publication.

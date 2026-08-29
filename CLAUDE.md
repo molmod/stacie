@@ -46,7 +46,7 @@ uv sync --extra=docs,tests,dev
 
 ### Linting
 
-Pre-commit hooks run `ruff format`, `ruff check` and `markdownlint-cli2` automatically on commit.
+Pre-commit hooks run `ruff format`, `ruff check` and `pymarkdown` automatically on commit.
 After making changes, run all pre-commit checks before considering the work done:
 
 ```bash

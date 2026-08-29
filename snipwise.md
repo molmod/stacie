@@ -18,7 +18,7 @@ snippets = ["lorentz-ref-bib"]
 [[targets]]
 patterns = ["README.md"]
 scanner = "markers"
-render = '{{ content | codeblock("bibtex") | prefix("> ") }}'
+render = '{{ ("\n" + (content | codeblock("bibtex")) + "\n\n") | prefix("> ") }}'
 snippets = ["stacie-ref-bib", "lorentz-ref-bib"]
 
 # The Markdown files have several snippets

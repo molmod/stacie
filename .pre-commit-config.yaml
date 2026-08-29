@@ -49,13 +49,17 @@ repos:
   hooks:
     - id: nb-clean
       args: ["--remove-empty-cells", "--preserve-cell-metadata", "tags", "--"]
-- repo: https://github.com/DavidAnson/markdownlint-cli2
-  rev: v0.22.1
+- repo: https://github.com/jackdewinter/pymarkdown
+  rev: v0.9.39
   hooks:
-    - id: markdownlint-cli2
-      exclude: '^test'
-      require_serial: true
-      args: ["--fix"]
+    # The fix command reports only which files it has rewritten,
+    # so the scan command is needed as well to report the violations that it cannot fix.
+    - id: pymarkdown
+      alias: pymarkdown-fix
+      name: PyMarkdown (fix)
+      args: [fix]
+    - id: pymarkdown
+      name: PyMarkdown (scan)
 - repo: https://github.com/citation-file-format/cffconvert
   rev: 054bda51dbe278b3e86f27c890e3f3ac877d616c
   hooks:
