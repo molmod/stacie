@@ -93,7 +93,6 @@ characteristic timescales
 data analysis
 exponential correlation time
 integrated correlation time
-LGPL
 molecular dynamics
 open source
 post-processing
