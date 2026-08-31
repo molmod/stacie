@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=65.0", "setuptools_scm[toml]>=7.1.0"]
+requires = ["setuptools>=77.0", "setuptools_scm>=8.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -94,6 +94,7 @@ tests = [
     "pytest-xdist>=3.6.1",
 ]
 dev = [
+    "stacie[docs,tests]",
     "pre-commit",
     "snipwise<2.0.0a0",
 ]

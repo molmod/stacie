@@ -8,7 +8,7 @@ A local installation for testing and development can be installed as follows:
 ```bash
 git clone git@github.com:molmod/stacie.git
 cd stacie
-uv sync --extra=docs,tests,dev
+uv sync --extra=dev
 echo 'source .venv/bin/activate' > .envrc
 direnv allow
 pre-commit install

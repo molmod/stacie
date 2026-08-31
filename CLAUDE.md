@@ -41,7 +41,7 @@ The release procedure is documented in `docs/source/development/release.md`.
 The development environment is managed with [uv](https://docs.astral.sh/uv/), not with `pip`:
 
 ```bash
-uv sync --extra=docs,tests,dev
+uv sync --extra=dev
 ```
 
 ### Linting
