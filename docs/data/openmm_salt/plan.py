@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-from stepup.core.api import mkdir, runpy, static
-from stepup.reprep.api import execute_papermill
+from stepup.core.api import run, shq, static
+from stepup.reprep.api import convert_jupyter
 
 
 def plan_initial(seed: int):
     """Run initial euqilibrium and production runs."""
-    execute_papermill(
+    convert_jupyter(
         "initial.ipynb",
         f"output/sim{seed:04d}_part00.ipynb",
         parameters={"seed": seed},
@@ -14,7 +14,7 @@ def plan_initial(seed: int):
 
 def plan_extension(seed: int, part: int, nstep: int):
     """Extend the production run."""
-    execute_papermill(
+    convert_jupyter(
         "extension.ipynb",
         f"output/sim{seed:04d}_part{part:02d}.ipynb",
         # Let StepUp know that this notebook depends on the previous checkpoint.
@@ -29,19 +29,19 @@ def plan_extension(seed: int, part: int, nstep: int):
 
 def plan_extract(seed: int, part: int, ensemble: str):
     """Extract essentials from OpenMM output (DCD and CSV) and store as NPZ."""
-    runpy(
-        "./${inp} ${out}",
-        inp=[
-            "extract.py",
-            f"output/sim{seed:04d}_part{part:02d}_{ensemble}_traj.csv",
-            f"output/sim{seed:04d}_part{part:02d}_{ensemble}_traj.dcd",
-            f"output/sim{seed:04d}_part{part:02d}_{ensemble}_last.pdb",
-        ],
-        out=f"output/sim{seed:04d}_part{part:02d}_{ensemble}_traj.npz",
+    inp = [
+        f"output/sim{seed:04d}_part{part:02d}_{ensemble}_traj.csv",
+        f"output/sim{seed:04d}_part{part:02d}_{ensemble}_traj.dcd",
+        f"output/sim{seed:04d}_part{part:02d}_{ensemble}_last.pdb",
+    ]
+    out = f"output/sim{seed:04d}_part{part:02d}_{ensemble}_traj.npz"
+    run(
+        f"./extract.py {shq(inp)} {shq(out)}",
+        inp=inp,
+        out=out,
     )
 
 
-mkdir("output")
 static("bhmtf.py", "initial.ipynb", "extension.ipynb", "utils.py", "extract.py")
 for seed in range(100):
     # Initial production runs

@@ -8,7 +8,7 @@ To rerun the MD simulations, you need files that are not included in the Zenodo 
 such as the LAMMPS and OpenMM input files, and the force fields.
 These are available in the STACIE Git repository: <https://github.com/molmod/stacie>
 
-Each directory under `docs/data` contains a `plan.py` script that can be executed with `stepup boot`
+Each directory under `docs/data` contains a `plan.py` script that can be executed with `sb`
 to run all simulations in parallel.
 See the `README.md` file in each directory for more details.
 

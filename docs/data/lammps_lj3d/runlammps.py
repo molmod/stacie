@@ -6,20 +6,30 @@ option.
 """
 
 import argparse
-import subprocess
+from collections.abc import Sequence
 
 from path import Path
-from stepup.core.api import amend, runpy
+from stepup.core.api import amend, run
+from stepup.core.extapi import run_subprocess
 
 __all__ = ("runlammps",)
 
 
-def runlammps(workdir: str, inp: list[str] = ()):
+# The prefix for the LAMMPS command is specific to the HPC system and the LAMMPS installation.
+# You may have to change it to match your system.
+PREFIX = (
+    "module load LAMMPS/29Aug2024-foss-2023b-kokkos && "
+    "PMIX_MCA_psec=native srun --mpi=pmix --overlap -n 1"
+)
+
+
+def runlammps(workdir: str, inp: Sequence[str] = (), out: Sequence[str] = ()):
     workdir = Path(workdir)
-    runpy(
+    run(
         f"./runlammps.py {workdir}",
-        inp=["runlammps.py", workdir / "in.lammps", *inp],
-        out=[workdir / "log.txt"],
+        inp=[workdir / "in.lammps", *inp],
+        out=[workdir / "log.txt", *out],
+        shell=True,
     )
 
 
@@ -29,11 +39,17 @@ def main(argv: list[str] | None = None):
     for file in args.rundir.files():
         if file.name != "in.lammps":
             file.remove()
-    subprocess.run(
-        ["lmp", "-i", "in.lammps", "-l", "log.txt", "-sc", "none"],
-        cwd=args.rundir,
-        check=True,
+
+    run_subprocess(
+        f"{PREFIX} lmp -i in.lammps -l log.txt -sc none",
+        workdir=args.rundir,
+        shell=True,
     )
+    # This goes against good practices: ideally amend should come before run_subprocess.
+    # However, LAMMPS output files are not known in advance in general.
+    # Which files it writes, depends non-trivially on the details of the input file.
+    # Here, we take the lazy approach of amending all files
+    # that are not the input file or the log file.
     extra_out = [path for path in args.rundir.files() if path.name not in ["in.lammps", "log.txt"]]
     amend(out=extra_out)
 

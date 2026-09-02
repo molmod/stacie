@@ -37,7 +37,7 @@ but only to read the outputs.
 All LAMMPS simulations can be executed efficiently as follows:
 
 ```bash
-stepup boot -n 1.0
+OMP_NUM_THREADS=1 sb
 ```
 
 This will create input files from the templates `template-init.lammps` and `template-ext.lammps`

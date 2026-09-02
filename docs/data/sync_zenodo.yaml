@@ -1,6 +1,5 @@
 path_record_id: .zenodo-record-id.txt
 endpoint: https://zenodo.org/api
-path_token: ~/.config/zenodo-org-token.txt
 metadata:
   title: Example Trajectory Data and Jupyter Notebooks Showing How to Compute Various Properties with STACIE
   version: '1.1.0'
@@ -12,6 +11,8 @@ metadata:
     - Jupyter notebook
     - transport properties
     - Cloud cover time correlations
+  languages:
+    - eng
   license:
     - cc-by-sa-4.0
     - lgpl-3.0-or-later
@@ -49,9 +50,9 @@ metadata:
       identifier: 10.1021/acs.jcim.5c01475
       resource_type: publication-article
       relation_type: cites
-    - scheme: arxiv
-      identifier: '2506.20438'
-      resource_type: publication-preprint
+    - scheme: doi
+      identifier: 10.1021/acs.jctc.6c00506
+      resource_type: publication-article
       relation_type: cites
     - scheme: url
       identifier: https://molmod.github.io/stacie
@@ -70,10 +71,4 @@ metadata:
           with Force Fields derived Ab Initio
         number: 'BOF/24J/2021/118'
         identifiers:
-          - url: https://research.ugent.be/web/result/project/b54e6ff5-5f33-11ec-8b09-c5a2063e752c/details/bof-24j-2021-118-molecular-dynamics-modelling-of-lubricants-at-ultra-high-pressures-with-force-fields-derived-ab-initio/en
-path_readme: zenodo.md
-paths:
-- README.pdf
-- examples.zip
-- ../../LICENSE-CC-BY-SA-4.0.txt
-- ../../LICENSE-LGPL-3.0-or-later.txt
+          - identifier: https://research.ugent.be/web/result/project/b54e6ff5-5f33-11ec-8b09-c5a2063e752c/details/bof-24j-2021-118-molecular-dynamics-modelling-of-lubricants-at-ultra-high-pressures-with-force-fields-derived-ab-initio/en

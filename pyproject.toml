@@ -83,8 +83,8 @@ docs = [
     "sphinxcontrib-bibtex",
     "sphinxcontrib-svg2pdfconverter",
     "sphinxext-opengraph",
-    "stepup>=3.1.2",
-    "stepup-reprep>=3.1.5",
+    "stepup>=4.0.0,<5.0.0a0",
+    "stepup-reprep>=4.0.0,<5.0.0a0",
 ]
 tests = [
     "numdifftools>=0.10.1",

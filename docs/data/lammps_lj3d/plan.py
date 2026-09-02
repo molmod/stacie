@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
+from path import Path
 from runlammps import runlammps
-from stepup.core.api import mkdir, render_jinja, static
+from stepup.core.api import render_jinja, static
 
 
 def plan_extension(ireplica: int, part: int, additional_steps: int):
@@ -16,31 +17,33 @@ def plan_extension(ireplica: int, part: int, additional_steps: int):
     additional_steps
         Number of additional steps to run in this extension.
     """
-    name = f"sims/replica_{ireplica:04d}_part_{part:02d}"
-    mkdir(f"{name}/")
+    old = f"replica_{ireplica:04d}_part_{part - 1:02d}"
+    olddir = Path(f"sims/{old}/")
+    new = f"replica_{ireplica:04d}_part_{part:02d}"
+    newdir = Path(f"sims/{new}/")
     render_jinja(
         "template-ext.lammps",
         {
-            "previous_dir": f"../replica_{ireplica:04d}_part_{part - 1:02d}",
+            "previous_dir": f"../{old}",
             "additional_steps": additional_steps,
         },
-        f"{name}/in.lammps",
+        newdir / "in.lammps",
     )
     runlammps(
-        f"{name}/", inp=[f"sims/replica_{ireplica:04d}_part_{part - 1:02d}/nve_final.restart"]
+        newdir,
+        inp=[olddir / "nve_final.restart"],
+        out=[newdir / "nve_final.restart"],
     )
-    return name
+    return newdir
 
 
 static("runlammps.py", "template-init.lammps", "template-ext.lammps")
-mkdir("sims/")
 nreplica = 100
 for ireplica in range(nreplica):
     # Initial production run
     name_i = f"sims/replica_{ireplica:04d}_part_00"
-    mkdir(f"{name_i}/")
     render_jinja("template-init.lammps", {"seed": ireplica + 1}, f"{name_i}/in.lammps")
-    runlammps(f"{name_i}/")
+    runlammps(f"{name_i}/", out=[f"{name_i}/nve_final.restart"])
 
     # Extensions of the production run
     plan_extension(ireplica=ireplica, part=1, additional_steps=24000)

@@ -51,7 +51,7 @@ to avoid unit confusion in the worked example.
 All OpenMM simulations can be executed efficiently on a single compute node with StepUp:
 
 ```bash
-OPENMM_CPU_THREADS=1 stepup boot -n 1.0
+OPENMM_CPU_THREADS=1 sb
 ```
 
 This will run in parallel the Jupyter notebooks `initial.ipynb` and `extension.ipynb`
