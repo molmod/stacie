@@ -11,6 +11,10 @@ These are available in the STACIE Git repository: <https://github.com/molmod/sta
 Each directory under `docs/data` contains a `plan.py` script that can be executed with `sb`
 to run all simulations in parallel.
 See the `README.md` file in each directory for more details.
+These workflow assume that you have set up a Python environment
+with all of STACIE's development dependencies installed.
+Furthermore, you may have to modify the workflows
+to work with your local installation of LAMMPS and OpenMM.
 
 In addition, the top-level directory contains a `plan.py` script to archive the examples,
 Jupyter notebooks, and data files into a single ZIP file for upload to Zenodo.
@@ -19,6 +23,6 @@ Jupyter notebooks, and data files into a single ZIP file for upload to Zenodo.
 ## Cloud cover data
 
 The cloud cover data used in the `cloud-cover.py` example is obtained from Open-Meteo:
-<https://open-meteo.com/en/docs/historical-weather-api>\
+<https://open-meteo.com/en/docs/historical-weather-api>
 
 A script to retrieve the data is provided in `docs/data/cloud-cover/download.sh`.
