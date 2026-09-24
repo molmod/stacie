@@ -59,7 +59,7 @@ If you decide to follow this route, always carefully validate the simulations:
 - First, check the conserved quantity (total energy) for drift or large fluctuations.
   Both should be small compared to the fluctuations of the kinetic energy.
   When divided by the number of atoms,
-  all errors of the conserved quantity should be a small fraction of $k_\mathrm{B}T$.
+  all errors of the conserved quantity should be a small fraction of $k_\text{B} T$.
 - For the NVE simulations as a whole, the temperature distribution should be
   consistent with the NVT or NpT ensemble.
 - Even if the NVE runs are performed correctly,
