@@ -9,6 +9,12 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 (no summary yet)
 
+(v1.2.2)=
+## [1.2.2] - 2026-09-24
+
+This is a preview of an upcoming version, featuring the designed quadrature module.
+It can benefit from some more testing and feedback, which this release will facilitate.
+
 ### Added
 
 - `stacie.dq` module for constructing designed quadrature rules with equal (or user-specified) weights.
@@ -22,6 +28,14 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
   by taking a simple average of the function values at the quadrature points.
   The advantage of equal weights is that the variance of the average,
   due to (identically distributed and independent) noise in the function values, is minimal.
+
+### Changed
+
+- Refactored several aspects of the development environment.
+
+### Fixed
+
+- Many documentation improvements and clarifications, including updated literature references.
 
 (v1.2.1)=
 ## [1.2.1] - 2025-12-28
@@ -133,3 +147,4 @@ in the documentation and README files.
 [1.1.3]: https://github.com/molmod/stacie/releases/tag/v1.1.3
 [1.2.0]: https://github.com/molmod/stacie/releases/tag/v1.2.0
 [1.2.1]: https://github.com/molmod/stacie/releases/tag/v1.2.1
+[1.2.2]: https://github.com/molmod/stacie/releases/tag/v1.2.2
