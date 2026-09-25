@@ -5,7 +5,7 @@ global-exclude *
 include CITATION.cff
 include CONTRIBUTING.md
 include CONTRIBUTORS.md
-include LICENSE-LGPL-3.0-or-later.txt
+include LICENSE
 include pyproject.toml
 include README.md
 
@@ -18,5 +18,5 @@ graft tests
 # Exclude test outputs
 prune tests/outputs
 
-# Exclude common build artifacts and cache files
-global-exclude *.py[cod] __pycache__ *.so
+# Exclude common build artifacts, cache files and agent instructions
+global-exclude *.py[cod] __pycache__ *.so CLAUDE.md
