@@ -23,7 +23,14 @@ import numpy as np
 import pytest
 from conftest import check_gradient, check_hessian
 
-from stacie.model import ExpPolyModel, PadeModel, convert_pade022_lorentz, guess
+from stacie.model import (
+    DebyeModel,
+    ExpPolyModel,
+    PadeModel,
+    convert_pade022_debye,
+    convert_pade022_lorentz,
+    guess,
+)
 
 NFREQ = 10
 FREQS = np.linspace(0, 0.5, NFREQ)
@@ -226,3 +233,209 @@ def test_convert_pade022_lorentz():
     num_jacobian = nd.Jacobian(transform)(pars_pade)
     covar_lorentz_fd = num_jacobian @ covar_pade @ num_jacobian.T
     assert covar_lorentz == pytest.approx(covar_lorentz_fd, rel=1e-6)
+
+
+# Debye parameters (C_dc, C_delta, tau_exp) with a minimum at zero frequency.
+PARS_REF_DEBYE = [
+    [1.0, 2.0, 0.3],
+    [0.5, 0.1, 1.7],
+    [3.0, 0.7, 0.05],
+]
+
+
+def debye_to_pade022(pars_debye):
+    """Construct Pade(0,2;2) parameters from Debye parameters.
+
+    Matching ``(p0 + p2 f^2) / (1 + q2 f^2)`` with
+    ``C_dc + C_delta x^2 / (1 + x^2)``, where ``x = 2 pi f tau``, gives
+    ``q2 = (2 pi tau)^2``, ``p0 = C_dc`` and ``p2 = (C_dc + C_delta) q2``.
+    """
+    c_dc, c_delta, tau = pars_debye
+    q2 = (2 * np.pi * tau) ** 2
+    return np.array([c_dc, (c_dc + c_delta) * q2, q2])
+
+
+def debye_spectrum(freqs, pars_debye):
+    """Evaluate the Debye spectrum in its textbook form."""
+    c_dc, c_delta, tau = pars_debye
+    x2 = (2 * np.pi * freqs * tau) ** 2
+    return c_dc + c_delta * x2 / (1 + x2)
+
+
+def test_debye_properties():
+    model = DebyeModel()
+    assert model.npar == 3
+    assert model.name == "debye()"
+    assert list(model.numer_degrees) == [0, 2]
+    assert list(model.denom_degrees) == [2]
+
+
+@pytest.mark.parametrize("pars_debye", PARS_REF_DEBYE)
+def test_debye_compute(pars_debye):
+    model = DebyeModel()
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    pars_pade = debye_to_pade022(pars_debye)
+    amplitudes = model.compute(FREQS, pars_pade, deriv=2)
+    # Agreement with the textbook form of the Debye spectrum.
+    assert amplitudes[0] == pytest.approx(debye_spectrum(FREQS, pars_debye), rel=1e-10)
+    # The model is a Pade model with fixed degrees.
+    amplitudes_pade = PadeModel([0, 2], [2]).compute(FREQS, pars_pade, deriv=2)
+    for amplitudes_debye_deriv, amplitudes_pade_deriv in zip(
+        amplitudes, amplitudes_pade, strict=True
+    ):
+        assert amplitudes_debye_deriv == pytest.approx(amplitudes_pade_deriv, rel=1e-10)
+
+
+@pytest.mark.parametrize("pars_debye", PARS_REF_DEBYE)
+def test_convert_pade022_debye_roundtrip(pars_debye):
+    pars_pade = debye_to_pade022(pars_debye)
+    pars_debye_conv, _ = convert_pade022_debye(pars_pade, np.eye(3))
+    assert pars_debye_conv == pytest.approx(pars_debye, rel=1e-10)
+
+
+@pytest.mark.parametrize("pars_debye", PARS_REF_DEBYE)
+def test_convert_pade022_debye_covar(pars_debye):
+    pars_pade = debye_to_pade022(pars_debye)
+    covar_pade = 1e-3 * np.array([[1.0, 0.1, 0.2], [0.1, 2.0, 0.3], [0.2, 0.3, 3.0]])
+    _, covar_conv = convert_pade022_debye(pars_pade, covar_pade)
+    assert covar_conv.shape == (3, 3)
+    assert covar_conv == pytest.approx(covar_conv.T, abs=1e-13)
+
+    # The DC level is p0, so its variance is untouched.
+    assert covar_conv[0, 0] == pytest.approx(covar_pade[0, 0], rel=1e-10)
+
+    # The relaxation time only depends on q2: tau = sqrt(q2) / (2 pi),
+    # so var(tau) = var(q2) / (16 pi^2 q2).
+    assert covar_conv[2, 2] == pytest.approx(
+        covar_pade[2, 2] / (16 * np.pi**2 * pars_pade[2]), rel=1e-10
+    )
+
+    # Numerical check of the full covariance via finite differences.
+    def transform(pars):
+        return convert_pade022_debye(pars, covar_pade)[0]
+
+    num_jacobian = nd.Jacobian(transform)(pars_pade)
+    covar_conv_fd = num_jacobian @ covar_pade @ num_jacobian.T
+    assert covar_conv == pytest.approx(covar_conv_fd, rel=1e-6)
+
+
+@pytest.mark.parametrize("pars_debye", PARS_REF_DEBYE)
+def test_debye_solve_linear_exact(pars_debye):
+    # A noiseless Debye spectrum is reproduced exactly by the linear Pade fit.
+    freqs = np.linspace(0, 1.0, NFREQ)
+    model = DebyeModel()
+    model.configure_scales(TIMESTEP, freqs, AMPLITUDES_REF)
+    amplitudes_ref = debye_spectrum(freqs, pars_debye)
+    ndofs = np.full(len(freqs), 20)
+    pars_pade, amplitudes = model.solve_linear(freqs, ndofs, amplitudes_ref, WEIGHTS, [])
+    assert amplitudes == pytest.approx(amplitudes_ref, rel=1e-10)
+    pars_debye_conv, _ = convert_pade022_debye(pars_pade, np.eye(3))
+    assert pars_debye_conv == pytest.approx(pars_debye, rel=1e-8)
+
+
+def test_guess_debye():
+    model = DebyeModel()
+    model.configure_scales(TIMESTEP, FREQS, AMPLITUDES_REF)
+    rng = np.random.default_rng(123)
+    amplitudes = rng.normal(size=len(FREQS)) ** 2
+    ndofs = np.full(len(FREQS), 2)
+    pars_init = guess(FREQS, ndofs, amplitudes, WEIGHTS, model, rng, 10)
+    assert len(pars_init) == 3
+    assert np.isfinite(pars_init).all()
+
+
+def make_debye_props(pars_pade, covar_diag=(1e-4, 1e-4, 1e-4), **kwargs):
+    return {"pars": np.array(pars_pade), "pars_covar": np.diag(covar_diag), **kwargs}
+
+
+@pytest.mark.parametrize("with_criterion", [False, True])
+def test_debye_derive_props(with_criterion):
+    pars_debye = np.array([1.0, 2.0, 0.3])
+    pars_pade = debye_to_pade022(pars_debye)
+    props = make_debye_props(pars_pade, **({"criterion": 5.0} if with_criterion else {}))
+    covar_pade = props["pars_covar"].copy()
+    model = DebyeModel()
+    model.derive_props(props)
+
+    # The autocorrelation integral is the DC level.
+    assert props["acint"] == pytest.approx(pars_debye[0], rel=1e-10)
+    assert props["acint_var"] == pytest.approx(covar_pade[0, 0], rel=1e-10)
+
+    # Debye parameters and the relaxation time.
+    assert props["pars_debye"] == pytest.approx(pars_debye, rel=1e-10)
+    assert props["pars_debye_covar"].shape == (3, 3)
+    assert props["corrtime_exp"] == pytest.approx(pars_debye[2], rel=1e-10)
+    tau_var = covar_pade[2, 2] / (16 * np.pi**2 * pars_pade[2])
+    assert props["corrtime_exp_var"] == pytest.approx(tau_var, rel=1e-10)
+
+    # Derived times are linear in tau, so their variances scale with the squared prefactor.
+    assert props["exp_block_time"] == pytest.approx(np.pi / 10 * pars_debye[2], rel=1e-10)
+    assert props["exp_block_time_var"] == pytest.approx((np.pi / 10) ** 2 * tau_var, rel=1e-10)
+    assert props["exp_simulation_time"] == pytest.approx(20 * np.pi * pars_debye[2], rel=1e-10)
+    assert props["exp_simulation_time_var"] == pytest.approx((20 * np.pi) ** 2 * tau_var, rel=1e-10)
+
+    if with_criterion:
+        # The penalty is ratio_weight times the ratio of relative errors.
+        relerr_tau = np.sqrt(tau_var) / pars_debye[2]
+        relerr_acint = np.sqrt(covar_pade[0, 0]) / pars_debye[0]
+        assert props["criterion"] == pytest.approx(
+            5.0 + model.ratio_weight * relerr_tau / relerr_acint, rel=1e-10
+        )
+        assert "msg" not in props
+    else:
+        assert "criterion" not in props
+
+
+@pytest.mark.parametrize(
+    ("pars_pade", "reason"),
+    [
+        ([1.0, 0.5, 0.2], None),  # Control: a valid Debye spectrum (p2 > p0 q2).
+        ([2.0, 0.5, 1.0], "maximum at zero"),  # Lorentz-like: p2 < p0 q2.
+        ([1.0, 1.0, 1.0], "flat"),  # No dip at all: p2 == p0 q2.
+        ([1.0, 0.5, -1.0], "q2 < 0"),
+        ([1.0, 0.5, 0.0], "q2 == 0"),
+        ([-1.0, 1.0, 1.0], "p0 < 0"),
+        ([0.0, 1.0, 1.0], "p0 == 0"),
+    ],
+)
+def test_debye_derive_props_validity(pars_pade, reason):
+    props = make_debye_props(pars_pade, criterion=1.0)
+    DebyeModel().derive_props(props)
+    # The autocorrelation integral is always derived.
+    assert props["acint"] == pars_pade[0]
+    if reason is None:
+        assert np.isfinite(props["criterion"])
+        assert "pars_debye" in props
+    else:
+        assert props["criterion"] == np.inf
+        assert props["msg"] == "No correlation time estimate available."
+        assert "pars_debye" not in props
+        assert "corrtime_exp" not in props
+
+
+@pytest.mark.parametrize(
+    ("ratio_threshold", "expect_discard"),
+    [(100.0, False), (1e-3, True)],
+)
+def test_debye_derive_props_threshold(ratio_threshold, expect_discard):
+    pars_pade = debye_to_pade022([1.0, 2.0, 0.3])
+    props = make_debye_props(pars_pade, criterion=1.0)
+    model = DebyeModel(ratio_threshold=ratio_threshold)
+    model.derive_props(props)
+    if expect_discard:
+        assert props["criterion"] == np.inf
+        assert props["msg"].startswith("rel.err. tau_exp >")
+    else:
+        assert np.isfinite(props["criterion"])
+        assert "msg" not in props
+
+
+@pytest.mark.parametrize("ratio_weight", [0.0, 1.0, 2.5])
+def test_debye_derive_props_ratio_weight(ratio_weight):
+    pars_pade = debye_to_pade022([1.0, 2.0, 0.3])
+    props = make_debye_props(pars_pade, criterion=1.0)
+    DebyeModel(ratio_weight=ratio_weight).derive_props(props)
+    props_ref = make_debye_props(pars_pade, criterion=1.0)
+    DebyeModel(ratio_weight=1.0).derive_props(props_ref)
+    ratio = props_ref["criterion"] - 1.0
+    assert props["criterion"] == pytest.approx(1.0 + ratio_weight * ratio, rel=1e-10)

@@ -9,6 +9,21 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 (no summary yet)
 
+### Added
+
+- The `DebyeModel` has been added to the list of built-in models.
+  It complements the `LorentzModel` and is suitable for spectra with a minimum at zero frequency.
+  Such spectra are typically the result of hopping-like diffusion
+  superimposed on a higher-frequency oscillatory motion.
+  The `DebyeModel` does not attempt to model these resonances in full,
+  and only accounts for the onset towards such a resonance peak,
+  to keep the number of parameters small.
+
+### Changed
+
+- The molten salt example has been refactored to use only the `DebyeModel`,
+  since it is expected to be the right model for this system *a priori*.
+
 (v1.2.2)=
 ## [1.2.2] - 2026-09-24
 

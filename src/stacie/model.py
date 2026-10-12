@@ -18,13 +18,15 @@
 # --
 """Models to fit the low-frequency part of the spectrum."""
 
+from collections.abc import Callable
+
 import attrs
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.optimize import brentq
 from scipy.special import polygamma
 
-__all__ = ("ExpPolyModel", "LorentzModel", "PadeModel", "SpectrumModel", "guess")
+__all__ = ("DebyeModel", "ExpPolyModel", "LorentzModel", "PadeModel", "SpectrumModel", "guess")
 
 
 @attrs.define
@@ -523,12 +525,22 @@ class PadeModel(SpectrumModel):
 
 @attrs.define
 class LorentzModel(PadeModel):
-    """A model for the spectrum with a Lorentzian peak at zero frequency plus some white noise.
+    r"""A model for the spectrum with a Lorentzian peak at zero frequency plus some white noise.
 
-    This is a special case of the PadeModel with
-    ``numer_degrees = [0, 2]`` and ``denom_degrees = [2]``.
+    This is a special case of the PadeModel with ``numer_degrees = [0, 2]``
+    and ``denom_degrees = [2]``:
+
+    .. math::
+
+        C(f) = \frac{p_0 + p_2 f^2}{1 + q_2 f^2}
+             = C_0 + \frac{2 C_1 \tau_\text{exp}}{1 + (2 \pi f \tau_\text{exp})^2}
+
+    with :math:`C_0 = p_2/q_2`, :math:`C_1 = \pi (p_0 - p_2/q_2) / \sqrt{q_2}` and
+    :math:`\tau_\text{exp} = \sqrt{q_2} / (2 \pi)`.
+    (These parameters are stored in ``pars_lorentz`` in the same order.)
     Furthermore, it will only accept parameters that correspond
-    to a well-defined exponential correlation time.
+    to a well-defined exponential correlation time and a positive autocorrelation integral,
+    i.e. :math:`q_2 > 0`, :math:`C_1 > 0` and :math:`p_0 > 0`.
 
     For too small cutoffs (covering only the peak of the Lorentzian and not its decay),
     the estimates of the Lorentzian width, and consequently the exponential correlation time,
@@ -577,49 +589,83 @@ class LorentzModel(PadeModel):
         to discard the current fit from the average over the cutoff frequencies.
         """
         super().derive_props(props)
-        # Try to deduce the exponential correlation time from the parameters.
-        pars = props["pars"]
-        if (
-            # real correlation time
-            pars[2] > 0
-            # positive lorentzian amplitude, maximum in the origin
-            and pars[0] * pars[2] > pars[1]
-        ):
-            # The following estimates of the exponential correlation time and its variance
-            # are only valid for small variances.
-            pars_lorentz, pars_lorentz_covar = convert_pade022_lorentz(pars, props["pars_covar"])
-            tau = pars_lorentz[2]
-            tau_var = pars_lorentz_covar[2, 2]
-            tau_props = {
-                "pars_lorentz": pars_lorentz,
-                "pars_lorentz_covar": pars_lorentz_covar,
-                "corrtime_exp": tau,
-                "corrtime_exp_var": tau_var,
-                "exp_block_time": tau * np.pi / 10,
-                "exp_block_time_var": tau_var * np.pi / 10,
-                "exp_simulation_time": 20 * tau * np.pi,
-                "exp_simulation_time_var": 20 * tau_var * np.pi,
-            }
-            props.update(tau_props)
-            if "criterion" in props:
-                # Empirical penalty to eliminate or down-weight cutoffs
-                # for which the maximum a posteriori approximation is expected to break down.
-                relerr_corrtime = tau_var**0.5 / tau
-                relerr_acint = props["acint_var"] ** 0.5 / props["acint"]
-                if relerr_corrtime > self.ratio_threshold * relerr_acint:
-                    props["criterion"] = np.inf
-                    props["msg"] = (
-                        f"rel.err. tau_exp > {self.ratio_threshold:.1e} x rel.err. ac integral"
-                    )
-                else:
-                    ratio = relerr_corrtime / relerr_acint
-                    props["criterion"] += self.ratio_weight * ratio
+        p0, p2, q2 = props["pars"]
+        _derive_corrtime_props(
+            props,
+            "lorentz",
+            convert_pade022_lorentz,
+            # Real correlation time, maximum in the origin and positive autocorrelation integral
+            q2 > 0 and p0 * q2 > p2 and p0 > 0,
+            self.ratio_weight,
+            self.ratio_threshold,
+        )
 
-        else:
-            # If we fail to find the exponential correlation time with a decent relative error,
-            # we discard the entire estimate at this cutoff frequency.
+
+def _derive_corrtime_props(
+    props: dict[str, NDArray[float]],
+    label: str,
+    convert: Callable[[NDArray[float], NDArray[float]], tuple[NDArray[float], NDArray[float]]],
+    valid: bool,
+    ratio_weight: float,
+    ratio_threshold: float,
+) -> None:
+    """Add the correlation time and related properties of a Pade(0,2;2) model.
+
+    Parameters
+    ----------
+    props
+        The properties of the fitted Pade(0,2;2) model, updated in place.
+        It must contain ``pars``, ``pars_covar``, ``acint`` and ``acint_var``.
+        If it also contains ``criterion``,
+        the latter is penalized with the ratio of relative errors.
+    label
+        The parameters and covariance returned by ``convert``
+        are stored as ``pars_{label}`` and ``pars_{label}_covar``.
+    convert
+        Function converting the Pade parameters and their covariance
+        to a parametrization whose third parameter is the correlation time.
+    valid
+        Whether the Pade parameters correspond to an acceptable model.
+        If not, the criterion is set to infinity and ``msg`` explains why.
+    ratio_weight
+        The penalty for the cutoff criterion is this weight times the ratio of relative errors.
+    ratio_threshold
+        A threshold for the ratio of relative errors used to set the cutoff criterion to Inf.
+    """
+    if not valid:
+        # If we fail to find the exponential correlation time with a decent relative error,
+        # we discard the entire estimate at this cutoff frequency.
+        props["criterion"] = np.inf
+        props["msg"] = "No correlation time estimate available."
+        return
+
+    # The following estimates of the exponential correlation time and its variance
+    # are only valid for small variances.
+    pars_conv, pars_conv_covar = convert(props["pars"], props["pars_covar"])
+    tau = pars_conv[2]
+    tau_var = pars_conv_covar[2, 2]
+    props.update(
+        {
+            f"pars_{label}": pars_conv,
+            f"pars_{label}_covar": pars_conv_covar,
+            "corrtime_exp": tau,
+            "corrtime_exp_var": tau_var,
+            "exp_block_time": tau * np.pi / 10,
+            "exp_block_time_var": tau_var * (np.pi / 10) ** 2,
+            "exp_simulation_time": 20 * tau * np.pi,
+            "exp_simulation_time_var": tau_var * (20 * np.pi) ** 2,
+        }
+    )
+    if "criterion" in props:
+        # Empirical penalty to eliminate or down-weight cutoffs
+        # for which the maximum a posteriori approximation is expected to break down.
+        relerr_corrtime = tau_var**0.5 / tau
+        relerr_acint = props["acint_var"] ** 0.5 / props["acint"]
+        if relerr_corrtime > ratio_threshold * relerr_acint:
             props["criterion"] = np.inf
-            props["msg"] = "No correlation time estimate available."
+            props["msg"] = f"rel.err. tau_exp > {ratio_threshold:.1e} x rel.err. ac integral"
+        else:
+            props["criterion"] += ratio_weight * relerr_corrtime / relerr_acint
 
 
 def convert_pade022_lorentz(
@@ -637,9 +683,11 @@ def convert_pade022_lorentz(
     Returns
     -------
     pars_lorentz
-        The parameters of the Lorentz model.
+        The white noise level ``C0 = p2/q2``,
+        the amplitude ``C1 = pi (p0 - p2/q2) / sqrt(q2)``
+        and the exponential correlation time ``sqrt(q2)/(2 pi)``.
     pars_lorentz_covar
-        The covariance matrix of the Lorentz model.
+        The covariance matrix of the Lorentz parameters (linear error propagation).
     """
     p0, p2, q2 = pars
     pars_lorentz = np.array(
@@ -661,6 +709,119 @@ def convert_pade022_lorentz(
         ]
     )
     return pars_lorentz, jac @ covar @ jac.T
+
+
+@attrs.define
+class DebyeModel(PadeModel):
+    r"""A Debye relaxation on top of white noise, with a minimum at zero frequency.
+
+    This is a special case of the PadeModel with ``numer_degrees = [0, 2]``
+    and ``denom_degrees = [2]``:
+
+    .. math::
+
+        C(f) = \frac{p_0 + p_2 f^2}{1 + q_2 f^2}
+             = C_\text{DC}
+             + C_\Delta \frac{(2 \pi f \tau_\text{exp})^2}{1 + (2 \pi f \tau_\text{exp})^2}
+
+    with :math:`C_\text{DC} = p_0`, :math:`C_\Delta = p_2/q_2 - p_0` and
+    :math:`\tau_\text{exp} = \sqrt{q_2} / (2 \pi)`.
+    (These parameters stored in ``pars_debye`` in the same order.)
+    The zero-frequency (DC) level :math:`C_\text{DC}` is the autocorrelation integral.
+    Only parameters with :math:`q_2 > 0`, :math:`C_\Delta > 0` and :math:`C_\text{DC} > 0`
+    are accepted.
+
+    For API compatibility with the Lorentz model,
+    the relaxation time is labeled as :math:`\tau_\text{exp}`,
+    although it is not the decay time of an exponential tail in the autocorrelation function.
+    It is still fair to think of it as the "slowest" timescale.
+    In STACIE 2, it will be renamed to something more general.
+
+    This model is completely analogous to the Lorentz model,
+    except that it features a minimum at frequency zero.
+    This type of spectrum is common in systems whose degrees of freedom
+    are temporarily confined by their environment:
+    on short timescales they oscillate in place,
+    while on longer timescales they escape and exhibit diffusive (random-walk) behavior.
+    To keep the number of fitting parameters minimal,
+    the model only captures the onset towards the resonance peak of the confined oscillation.
+
+    **Selection of cutoffs.**
+    The selection of cutoffs mirrors that of the LorentzModel
+    (which requires a maximum at zero frequency instead):
+    for too small cutoffs, covering only the bottom of the dip,
+    the relaxation time is poorly determined and the MAP approximation breaks down.
+    When the relative error of :math:`\tau_\text{exp}`,
+    divided by that of the autocorrelation integral, exceeds ``ratio_threshold``,
+    the cutoff criterion is set to infinity.
+    Otherwise, this ratio times ``ratio_weight`` is added to the cutoff criterion.
+    """
+
+    ratio_weight: float = attrs.field(default=1.0, kw_only=True)
+    """The penalty for the cutoff criterion is this weight times the ratio of relative errors."""
+
+    ratio_threshold: float = attrs.field(default=100.0, kw_only=True)
+    """A threshold for the ratio of relative errors used to set the cutoff criterion to Inf."""
+
+    # Hard-code the polynomial degrees of the Pade model.
+    numer_degrees: NDArray[int] = attrs.field(init=False, factory=lambda: np.array([0, 2]))
+    denom_degrees: NDArray[int] = attrs.field(init=False, factory=lambda: np.array([2]))
+
+    @property
+    def name(self):
+        return "debye()"
+
+    def derive_props(self, props: dict[str, NDArray[float]]):
+        """Add the autocorrelation integral and the Debye parameters (if well-defined).
+
+        The exponential correlation time is derived from the parameters,
+        if the fitted model has a minimum at zero frequency.
+        If not, the "criterion" is set to infinity and the "msg" is set accordingly,
+        to discard the current fit from the average over the cutoff frequencies.
+        """
+        super().derive_props(props)
+        p0, p2, q2 = props["pars"]
+        _derive_corrtime_props(
+            props,
+            "debye",
+            convert_pade022_debye,
+            # Real relaxation time, minimum in the origin and positive autocorrelation integral
+            q2 > 0 and p2 > p0 * q2 and p0 > 0,
+            self.ratio_weight,
+            self.ratio_threshold,
+        )
+
+
+def convert_pade022_debye(
+    pars: NDArray[float], covar: NDArray[float]
+) -> tuple[NDArray[float], NDArray[float]]:
+    """Convert parameters and covariance from Pade(0,2;2) to the Debye model.
+
+    Parameters
+    ----------
+    pars
+        The parameters of the Pade(0,2;2) model.
+    covar
+        The covariance matrix of the Pade(0,2;2) model.
+
+    Returns
+    -------
+    pars_debye
+        The DC level ``p0``, the step height ``C_delta = p2/q2 - p0``
+        and the relaxation time ``sqrt(q2)/(2 pi)``.
+    pars_debye_covar
+        The covariance matrix of the Debye parameters (linear error propagation).
+    """
+    p0, p2, q2 = pars
+    pars_debye = np.array([p0, p2 / q2 - p0, np.sqrt(q2) / (2 * np.pi)])
+    jac = np.array(
+        [
+            [1, 0, 0],
+            [-1, 1 / q2, -p2 / q2**2],
+            [0, 0, 1 / (4 * np.pi * np.sqrt(q2))],
+        ]
+    )
+    return pars_debye, jac @ covar @ jac.T
 
 
 def guess(

@@ -26,23 +26,31 @@
 #
 # Following the [](../preparing_inputs/molecular_dynamics.md),
 # an initial block size of 10 steps (50 fs) was used.
-# Because there is little prior knowledge on the structure of the spectrum,
-# the exponential polynomial model (ExpPoly) with degrees $S=\{0, 1\}$ was used initially,
-# i.e. with $P=2$ parameters.
-# As explained in the section on [block averages](../preparing_inputs/molecular_dynamics.md),
-# $400 P$ blocks were collected in the initial production runs,
-# amounting to 8000 steps (40 ps) of simulation time.
+# The initial production runs consist of 800 blocks, i.e. 8000 steps (40 ps) of simulation time.
+#
+# The spectrum of the charge current has a minimum at zero frequency,
+# where its value is the ionic conductivity.
+# At higher frequencies, the spectrum rises,
+# because the ions are temporarily confined by their neighbors and oscillate in place,
+# while on longer timescales they escape and diffuse.
+# The [Debye model](#section-debye-target) describes the onset of this rise
+# and is used throughout this notebook.
+# It has $P=3$ parameters.
+# Only the amount of data differs between the analyses below:
+# the same 100 trajectories are analyzed after one, two and three simulation stages.
 #
 # In total 100 NVE production runs were performed.
 # For each run, the system was first equilibrated in the NVT and later NPT ensemble.
 # According to the section [](../preparing_inputs/data_sufficiency.md),
 # 100 runs should be sufficient to obtain a relative error on the ionic conductivity of about 1%:
 #
-# $$ \epsilon_\text{rel} \approx \frac{1}{\sqrt{20 P M}} \approx 0.0091$$
+# $$ \epsilon_\text{rel} \approx \frac{1}{\sqrt{20 P M}} \approx 0.0075$$
 #
 # where $P$ is the number of parameters in the model
 # and $M = 100 \times 3$ is the number of independent input sequences.
 # (100 trajectories, 3 Cartesian components of the charge current per trajectory)
+# The guideline of $400 P$ blocks would call for 1200 blocks with this model,
+# somewhat more than the 800 blocks of the initial production runs.
 #
 # :::{note}
 # The results in this example were obtained using
@@ -63,8 +71,7 @@ from path import Path
 import scipy.constants as sc
 from scipy.stats import chi2
 from stacie import (
-    ExpPolyModel,
-    PadeModel,
+    DebyeModel,
     UnitConfig,
     compute_spectrum,
     estimate_acint,
@@ -195,8 +202,8 @@ plot_openmm_percentiles("npt", "volume", "nm$^3$", unit=1e-27, expected="last")
 # %% [markdown]
 # ## Reusable Code for the Analysis of the Production Runs
 #
-# The `analyze` function takes a few parameters to apply the same analysis with STACIE
-# to different inputs (initial and extended production runs).
+# The `analyze` function applies the same analysis with STACIE
+# to different amounts of data (initial and extended production runs).
 # After the analysis, it generates screen output and figures
 # as discussed in the [minimal example](minimal.py).
 
@@ -204,16 +211,18 @@ plot_openmm_percentiles("npt", "volume", "nm$^3$", unit=1e-27, expected="last")
 BOLTZMANN_CONSTANT = sc.value("Boltzmann constant")  # J/K
 
 
-def analyze(model, npart: int = 1, ntraj: int = 100) -> float:
+def analyze(npart: int = 1, ntraj: int = 100, neff_max: int | None = 1000) -> float:
     """Analyze MD trajectories to compute the ionic conductivity.
 
     Parameters
     ----------
-    model
-        The model fitted to the spectrum.
     npart
         The number of parts in the simulation to load.
         The default value of 1 corresponds to only loading the initial production runs.
+    ntraj
+        The number of trajectories to load.
+    neff_max
+        The maximum number of effective points in the fit, see :func:`stacie.estimate_acint`.
 
     Returns
     -------
@@ -266,11 +275,13 @@ def analyze(model, npart: int = 1, ntraj: int = 100) -> float:
         prefactors=None,
         include_zero_freq=False,
     )
-    result = estimate_acint(spectrum, model, verbose=True, uc=uc)
+    result = estimate_acint(
+        spectrum, DebyeModel(), neff_max=neff_max, verbose=True, uc=uc
+    )
 
     # Plot some basic analysis figures.
     prefix = "conductivity"
-    plt.close(f"{prefix}_spectrum")
+    plt.close(f"{prefix}_fitted")
     _, ax = plt.subplots(num=f"{prefix}_fitted")
     plot_fitted_spectrum(ax, uc, result)
     plt.close(f"{prefix}_extras")
@@ -288,20 +299,22 @@ def analyze(model, npart: int = 1, ntraj: int = 100) -> float:
 # from the initial production runs (8000 steps each).
 
 # %%
-conductivity_1_01 = analyze(ExpPolyModel([0, 1]))
+conductivity_1 = analyze()
 
 # %% [markdown]
-# The analysis of the initial production runs shows that the trajectories are not yet sufficient
-# for a reliable interpretation of the autocorrelation integrals:
+# The Debye model describes the spectrum well up to a cutoff frequency of about 2 THz.
+# The fit uses 83 effective points, which is sufficient for a three-parameter model.
+# The relative error on the conductivity is 1.4%,
+# which is of the same order of magnitude as the coarse estimate of 0.75%.
 #
-# - Only 15 effective points are used for the fitting.
-# - The relative error is 3.1%, while higher than the coarse estimate of 0.9%,
-#   it is of the right order of magnitude.
-#
-# The extra plots reveal another reason for extending the MD simulations.
-# The cutoff weight is significant at the lowest cutoff frequency,
-# suggesting that a finer grid with lower frequencies could reveal new details.
-# Hence, we extended the production runs by 8000 additional steps to refine the frequency grid,
+# The Debye model also provides a relaxation time of about 94 fs.
+# Its relative error (12%) is much larger than that of the conductivity (1.4%),
+# so the curvature of the dip is only moderately constrained by the initial runs.
+# The cutoff weight in the extra plots is concentrated around 2 THz
+# and drops to zero well before the lowest and highest cutoff frequencies are reached,
+# so the cutoff scan is not limited by the grid.
+# A finer frequency grid is still useful to constrain the model more tightly.
+# Hence, we extended the production runs by 8000 additional steps,
 # of which the results are discussed in the following subsection.
 
 # %% [markdown]
@@ -311,12 +324,17 @@ conductivity_1_01 = analyze(ExpPolyModel([0, 1]))
 # which loads the initial production runs and their first extension.
 
 # %%
-conductivity_2_01 = analyze(ExpPolyModel([0, 1]), npart=2)
+conductivity_2 = analyze(npart=2)
 
 # %% [markdown]
-# The extended analysis shows that the results are starting to converge.
-# However, the number of fitted points is still only 26, which is relatively low.
-# To get more robust results, we extended the simulations once more.
+# With twice as much data, the number of effective points in the fit also roughly doubles (157),
+# and the uncertainty on the conductivity decreases from 4.9 to 3.5 S/m.
+# The result is consistent with the one from the initial runs.
+# The cutoff criterion Z-score is slightly above the ideal limit of 2,
+# but this does not affect the conclusions,
+# because the conductivity hardly changes over the cutoff scan (extra plot at the top right).
+# To obtain more robust results,
+# we extended the simulations once more.
 # We added 184000 more steps, resulting in a simulation time of 1 ns for each of the 100 trajectories.
 
 # %% [markdown]
@@ -325,30 +343,33 @@ conductivity_2_01 = analyze(ExpPolyModel([0, 1]), npart=2)
 # We simply call the same `analyze()` function, but now with `npart=3`,
 # which loads the initial production runs and their first and second extensions.
 
-
 # %%
-conductivity_3_01 = analyze(ExpPolyModel([0, 1]), npart=3)
+conductivity_3 = analyze(npart=3, neff_max=4000)
 
 # %% [markdown]
-# The analysis of the full extended production runs leads to a modest improvement.
-# However, the utility of the first-order term of the model is questionable,
-# given that the slope is nearly zero and could go either way
-# according to the confidence intervals of the model (green dashed curves).
-# Hence, we first test a constant (white noise) model to the first part of the spectrum:
-
-# %%
-conductivity_3_0 = analyze(ExpPolyModel([0]), npart=3)
-
-# %% [markdown]
-# Another model to consider is the Pade model, not because we expect the ACF to decay exponentially,
-# but because it features well-behaved high-frequency limits, which can facilitate the regression.
-
-# %%
-conductivity_3_p = analyze(PadeModel([0, 2], [2]), npart=3)
-
-# %% [markdown]
-# This is indeed a successful regression, with 829 effective points for a three-parameter model.
-# The relative error estimate on the final result is 0.37%.
+# The full production runs give a very detailed spectrum.
+# With the default upper limit of 1000 effective points (`neff_max`),
+# the cutoff scan is stopped by this limit rather than by the data.
+# Hence, the call above raises `neff_max` to 4000,
+# which allows the model to be fitted to higher frequencies.
+# The scan now ends by itself, at about 2400 effective points,
+# because the cutoff criterion rises well beyond its minimum.
+# The average cutoff frequency is about 1.8 THz.
+# The relative error estimate on the conductivity is 0.29%
+# (with the default limit, it would be 0.33%).
+# The relaxation time of about 92 fs agrees with the values from the shorter runs,
+# and its relative error improves from 9% (default limit) to 3%.
+# This is the main benefit of the higher limit:
+# the conductivity is well determined because it is the value of the spectrum at zero frequency,
+# while the relaxation time depends on the curvature of the dip,
+# which is better constrained by the additional frequencies.
+#
+# The price is that the cutoff criterion Z-score rises to about 3,
+# slightly above the ideal limit of 2, as for the extended runs above.
+# This shows that the Debye model starts to deviate from the spectrum at the higher frequencies,
+# which is expected because it only describes the onset of the resonance peak.
+# The conductivity changes by less than one standard error when the limit is raised,
+# so this deviation does not affect the conclusions.
 
 # %% [markdown]
 # ## Density
@@ -393,21 +414,15 @@ density = estimate_density()
 # Furthermore, in {cite:p}`wang_2014_molecular` smaller simulation cells were used
 # (512 ions instead of 1728), which may also contribute to discrepancies.
 #
-# In the table below, we included some more results obtained with STACIE than those discussed above.
-# We also computed the conductivity with the Pade model for all cases,
-# which was a better choice in retrospect.
+# The table below lists the STACIE results discussed above and some results from the literature.
 #
 # | Ensemble | Simulated time [ns] | Density [g/cm<sup>3</sup>] | Conductivity [S/m] | Reference |
 # | -------- | ------------------: | -------------------------: | -----------------: | --------- |
-# | NpT+NVE  | 4                   | 1.454 ± 0.014              | 347 ± 10.9         | init expoly(0,1) |
-# | NpT+NVE  | 8                   | 1.454 ± 0.014              | 354 ± 8.0          | ext1 expoly(0,1) |
-# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 353 ± 3.7          | ext2 expoly(0,1) |
-# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 353 ± 3.8          | ext2 expoly(0) |
-# | NpT+NVE  | 4                   | 1.454 ± 0.014              | 343 ± 5.4          | init pade(0, 2; 2) |
-# | NpT+NVE  | 8                   | 1.454 ± 0.014              | 346 ± 3.7          | ext1 pade(0, 2; 2) |
-# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 349 ± 1.3          | ext2 pade(0, 2; 2) |
-# | NpT+NVT  | 6                   | 1.456                      | 348 ± 7    | {cite:p}`wang_2020_comparison` |
-# | NpT+NVT  | > 5                 | 1.444                      | ≈ 310      | {cite:p}`wang_2014_molecular` |
+# | NpT+NVE  | 4                   | 1.454 ± 0.014              | 342.4 ± 4.9        | init debye |
+# | NpT+NVE  | 8                   | 1.454 ± 0.014              | 345.8 ± 3.5        | ext1 debye |
+# | NpT+NVE  | 100                 | 1.454 ± 0.014              | 350.7 ± 1.0        | ext2 debye |
+# | NpT+NVT  | 6                   | 1.456                      | 348 ± 7            | {cite:p}`wang_2020_comparison` |
+# | NpT+NVT  | > 5                 | 1.444                      | ≈ 310              | {cite:p}`wang_2014_molecular` |
 # | Experiment | N.A.              | 1.542 ± 0.006              | 366 ± 3            | {cite:p}`janz_1968_molten` {cite:p}`bockris_1961_self` |
 #
 # The comparison shows that the results obtained with STACIE align reasonably well with the literature.
@@ -416,12 +431,14 @@ density = estimate_density()
 # The deviation from experiment is attributed to the approximations in the NaCl potential.
 # {cite:p}`wang_2020_comparison`
 #
-# Finally, this example also shows why transport properties can be difficult to compute.
-# As more data is collected, a more detailed spectrum is obtained.
-# Simple models can struggle to explain the increasing amount of information.
-# When extending the total simulation time from 8 ns to 100 ns,
-# the effective number of points in the fit does not grow accordingly.
-# As a result, the uncertainties decrease rather slowly with increasing simulation time.
+# Finally, this example shows how the quality of the result improves with the amount of data.
+# With a model that suits the spectrum,
+# the effective number of points in the fit grows with the simulation time.
+# As a result, the uncertainty on the conductivity decreases steadily:
+# from 4.9 S/m (4 ns) to 3.5 S/m (8 ns) and 1.0 S/m (100 ns).
+# The last step is smaller than the square root of the increase in simulation time,
+# because the Debye model only describes the onset of the resonance peak,
+# which limits the number of effective points that can be used in the fit.
 
 
 # %% [markdown]
@@ -547,15 +564,11 @@ plot_temperature_production()
 # The tests are only meant to pass for the notebook in its original form.
 
 # %%
-if abs(conductivity_1_01 - 347) > 10:
-    raise ValueError(f"wrong conductivity (production): {conductivity_1_01:.0f}")
-if abs(conductivity_2_01 - 354) > 8:
-    raise ValueError(f"wrong conductivity (production): {conductivity_2_01:.0f}")
-if abs(conductivity_3_01 - 353) > 7:
-    raise ValueError(f"wrong conductivity (production): {conductivity_3_01:.0f}")
-if abs(conductivity_3_0 - 353) > 5:
-    raise ValueError(f"wrong conductivity (production): {conductivity_3_0:.0f}")
-if abs(conductivity_3_p - 349) > 3:
-    raise ValueError(f"wrong conductivity (production): {conductivity_3_p:.0f}")
+if abs(conductivity_1 - 342) > 5:
+    raise ValueError(f"wrong conductivity (production): {conductivity_1:.0f}")
+if abs(conductivity_2 - 346) > 4:
+    raise ValueError(f"wrong conductivity (production): {conductivity_2:.0f}")
+if abs(conductivity_3 - 351) > 2:
+    raise ValueError(f"wrong conductivity (production): {conductivity_3:.0f}")
 if abs(density - 1.449) > 0.02:
     raise ValueError(f"wrong density (production): {density:.3f}")
