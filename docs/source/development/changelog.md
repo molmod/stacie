@@ -23,6 +23,15 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 - The molten salt example has been refactored to use only the `DebyeModel`,
   since it is expected to be the right model for this system *a priori*.
+- The `LorentzModel` now also rejects fits with a non-positive autocorrelation integral
+  (`p0 <= 0`) when deriving the exponential correlation time.
+  Such fits are discarded from the average over cutoff frequencies,
+  like fits with an ill-defined correlation time.
+
+### Fixed
+
+- The variances of `exp_block_time` and `exp_simulation_time` in the `LorentzModel`
+  were propagated with a linear instead of a squared prefactor, which is now fixed.
 
 (v1.2.2)=
 ## [1.2.2] - 2026-09-24

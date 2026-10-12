@@ -726,7 +726,7 @@ class DebyeModel(PadeModel):
 
     with :math:`C_\text{DC} = p_0`, :math:`C_\Delta = p_2/q_2 - p_0` and
     :math:`\tau_\text{exp} = \sqrt{q_2} / (2 \pi)`.
-    (These parameters stored in ``pars_debye`` in the same order.)
+    (These parameters are stored in ``pars_debye`` in the same order.)
     The zero-frequency (DC) level :math:`C_\text{DC}` is the autocorrelation integral.
     Only parameters with :math:`q_2 > 0`, :math:`C_\Delta > 0` and :math:`C_\text{DC} > 0`
     are accepted.
@@ -735,7 +735,6 @@ class DebyeModel(PadeModel):
     the relaxation time is labeled as :math:`\tau_\text{exp}`,
     although it is not the decay time of an exponential tail in the autocorrelation function.
     It is still fair to think of it as the "slowest" timescale.
-    In STACIE 2, it will be renamed to something more general.
 
     This model is completely analogous to the Lorentz model,
     except that it features a minimum at frequency zero.

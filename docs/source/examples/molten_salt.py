@@ -436,9 +436,8 @@ density = estimate_density()
 # the effective number of points in the fit grows with the simulation time.
 # As a result, the uncertainty on the conductivity decreases steadily:
 # from 4.9 S/m (4 ns) to 3.5 S/m (8 ns) and 1.0 S/m (100 ns).
-# The last step is smaller than the square root of the increase in simulation time,
-# because the Debye model only describes the onset of the resonance peak,
-# which limits the number of effective points that can be used in the fit.
+# This follows the inverse square root scaling with simulation time,
+# which is expected when the number of effective points grows in proportion to the simulation time.
 
 
 # %% [markdown]
