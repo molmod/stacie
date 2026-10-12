@@ -9,6 +9,11 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
 
 (no summary yet)
 
+(v1.3.0)=
+## [1.3.0] - 2026-10-12
+
+This release introduces the Debye spectral model.
+
 ### Added
 
 - The `DebyeModel` has been added to the list of built-in models.
@@ -27,6 +32,8 @@ and this project adheres to [Effort-based Versioning](https://jacobtomlinson.dev
   (`p0 <= 0`) when deriving the exponential correlation time.
   Such fits are discarded from the average over cutoff frequencies,
   like fits with an ill-defined correlation time.
+- The package metadata now declares only the `LGPL-3.0-or-later` license,
+  as an SPDX expression, because the dual-licensed documentation is not part of the package.
 
 ### Fixed
 
@@ -172,3 +179,4 @@ in the documentation and README files.
 [1.2.0]: https://github.com/molmod/stacie/releases/tag/v1.2.0
 [1.2.1]: https://github.com/molmod/stacie/releases/tag/v1.2.1
 [1.2.2]: https://github.com/molmod/stacie/releases/tag/v1.2.2
+[1.3.0]: https://github.com/molmod/stacie/releases/tag/v1.3.0
