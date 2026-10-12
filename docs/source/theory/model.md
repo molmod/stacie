@@ -1,6 +1,6 @@
 # Model Spectrum
 
-STACIE supports three models for fitting the low-frequency part of the power spectrum.
+STACIE supports four models for fitting the low-frequency part of the power spectrum.
 In all models, the value at zero frequency corresponds to the autocorrelation integral.
 
 1. The [ExpPolyModel](#stacie.model.ExpPolyModel) is the most general;
@@ -29,6 +29,10 @@ In all models, the value at zero frequency corresponds to the autocorrelation in
    This special case is not only implemented for convenience,
    since it is the most common way of using the Padé model,
    but also because it allows STACIE to derive the exponential correlation time.
+
+4. The [DebyeModel](#stacie.model.DebyeModel) is the counterpart of the Lorentz model
+   for spectra with a minimum at zero frequency instead of a maximum.
+   It is also a special case of the Padé model with the same degrees.
 
 (section-exppoly-target)=
 
@@ -228,3 +232,84 @@ model = LorentzModel()
 ```
 
 This model is identified as `lorentz()` in STACIE's screen output and plots.
+
+(section-debye-target)=
+
+## 4. Debye Model
+
+The [DebyeModel](#stacie.model.DebyeModel) is the mirror image of the Lorentz model.
+It describes a spectrum with a minimum at zero frequency,
+which is typical for degrees of freedom that oscillate in place on short timescales
+but escape their confinement and diffuse on longer timescales:
+
+$$
+    I^\text{debye}(f)
+    = C_\text{DC} + C_\Delta \frac{(2 \pi f \tau_\text{exp})^2}{1 + (2 \pi f \tau_\text{exp})^2}
+$$
+
+Here, $C_\text{DC}$ is the autocorrelation integral,
+and $C_\text{DC} + C_\Delta$ is the white noise level reached at high frequencies.
+Because $x^2/(1 + x^2) = 1 - 1/(1 + x^2)$,
+this spectrum is a white noise background from which a Lorentzian is subtracted.
+In the time domain, it corresponds to an exponential tail of the ACF with a negative amplitude.
+The model only captures the onset towards the resonance peak of the confined oscillation,
+which keeps the number of parameters small.
+
+The model is named after Debye because of the analogy with the conductivity dispersion
+that Debye and Falkenhagen predicted for strong electrolytes {cite:p}`debye_1928_dispersion`.
+There, the conductivity increases with frequency
+once the period of the field becomes comparable to the relaxation time $\Theta$
+of the ionic atmosphere,
+which they call the "Relaxationszeit".
+Their frequency dependence is not exactly the one above,
+and the physical origin of the relaxation is different,
+but the spectrum has the same qualitative shape:
+a parabolic minimum at zero frequency that rises towards a plateau.
+In STACIE, we reuse $\tau_\text{exp}$ from the [LorentzModel](#stacie.model.LorentzModel)
+because it has the same implications on simulation time and block sizes,
+and it is used in the same way for regularization.
+
+The model is fitted as a Padé model
+with numerator degrees $\{0, 2\}$ and denominator degrees $\{2\}$,
+and the parameters are converted afterwards:
+
+$$
+    \begin{aligned}
+        \hat{C}_\text{DC} &= \hat{p}_0
+        \\
+        \hat{C}_\Delta &= \frac{\hat{p}_2}{\hat{q}_2} - \hat{p}_0
+        \\
+        \hat{\tau}_\text{exp} &= \frac{\sqrt{\hat{q}_2}}{2 \pi}
+    \end{aligned}
+$$
+
+This is a valid Debye relaxation only if $q_2 > 0$, $p_2 > p_0\, q_2$ and $p_0 > 0$.
+The covariance of the Debye parameters follows from first-order error propagation,
+as for the Lorentz model, with the Jacobian
+
+$$
+    \mathbf{J} =
+    \begin{pmatrix}
+        1 & 0 & 0 \\
+        -1 & \frac{1}{q_2} & -\frac{p_2}{q_2^2} \\
+        0 & 0 & \frac{1}{4 \pi \sqrt{q_2}}
+    \end{pmatrix}
+$$
+
+The advantages over the equivalent Padé model are the same as for the Lorentz model:
+the exponential correlation time and its uncertainty are computed,
+fits that violate the conditions above are discarded from the average over all cutoffs,
+and the same penalty and threshold on the ratio of relative errors
+protect against poorly determined relaxation times.
+Note that $\tau_\text{exp}$ is only the "slowest" timescale of the spectrum,
+and not the decay time of an exponential tail in the ACF,
+as it is for the Lorentz model.
+
+To construct this model, you can create an instance of the `DebyeModel` class as follows:
+
+```python
+from stacie import DebyeModel
+model = DebyeModel()
+```
+
+This model is identified as `debye()` in STACIE's screen output and plots.

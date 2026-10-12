@@ -75,11 +75,14 @@ class Result:
     - ``switch_exponent``: exponent used to construct the cutoff
     - ``weights``: the weights used to combine the spectrum points in the fit
 
-    When using :class:`stacie.model.LorentzModel`, the following properties are added
+    When using :class:`stacie.model.LorentzModel` or :class:`stacie.model.DebyeModel`,
+    the following properties are added
     (derived from the marginalized parameters and their covariance):
 
-    - ``pars_lorentz``: Lorentz parameters (converted from the Padé parameters)
-    - ``pars_lorentz_covar``: covariance matrix of the Lorentz parameters
+    - ``pars_lorentz`` or ``pars_debye``: Lorentz or Debye parameters
+      (converted from the Padé parameters)
+    - ``pars_lorentz_covar`` or ``pars_debye_covar``:
+      covariance matrix of the Lorentz or Debye parameters
     - ``corrtime_exp``: exponential correlation time
     - ``corrtime_exp_var``: variance of the exponential correlation time
     - ``corrtime_exp_std``: standard error of the exponential correlation time
@@ -534,10 +537,13 @@ def fit_model_spectrum(
     - ``pars``: model parameters
     - ``pars_covar``: covariance matrix of the model parameters
 
-    When using :class:`stacie.model.LorentzModel`, the following estimates are added:
+    When using :class:`stacie.model.LorentzModel` or :class:`stacie.model.DebyeModel`,
+    the following estimates are added:
 
-    - ``pars_lorentz``: Lorentz parameters (converted from the Padé parameters)
-    - ``pars_lorentz_covar``: covariance matrix of the Lorentz parameters
+    - ``pars_lorentz`` or ``pars_debye``: Lorentz or Debye parameters
+      (converted from the Padé parameters)
+    - ``pars_lorentz_covar`` or ``pars_debye_covar``:
+      covariance matrix of the Lorentz or Debye parameters
     - ``corrtime_exp``: exponential correlation time, the slowest time scale in the sequences
     - ``corrtime_exp_var``: variance of the exponential correlation time
     - ``corrtime_exp_std``: standard error of the exponential correlation time
