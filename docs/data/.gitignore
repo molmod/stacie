@@ -1,4 +1,4 @@
-*inventory.txt
+*inventory.jsonl
 *.zip
 .stepup
 matplotlibrc

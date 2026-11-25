@@ -45,11 +45,10 @@ paths = [
     *openmm_paths_npz,
     *cloudcover_paths,
 ]
-make_inventory(*paths, "inventory.txt")
+make_inventory(*paths, "examples_inventory.jsonl")
+zip_inventory("examples_inventory.jsonl", "examples.zip")
 
 # Sync with Zenodo
 static("sync_zenodo.yaml", "zenodo_description.md")
-zip_inventory("inventory.txt", "examples.zip")
-sync_zenodo(
-    "sync_zenodo.yaml", ["README.pdf", "examples.zip"], path_description="zenodo_description.md"
-)
+make_inventory("README.pdf", "examples.zip", "zenodo_inventory.jsonl")
+sync_zenodo("sync_zenodo.yaml", "zenodo_description.md", "zenodo_inventory.jsonl")
