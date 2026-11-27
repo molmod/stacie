@@ -133,3 +133,31 @@ def test_variance():
     assert s1.variance == pytest.approx((sequences**2).mean())
     assert s2.variance == pytest.approx(np.var(sequences, ddof=1))
     assert s3.variance == pytest.approx(np.var(sequences, ddof=1))
+
+
+@pytest.mark.parametrize("nstep", [4, 5, 6, 7, 8, 9])
+def test_ndofs_nyquist_parity(nstep: int):
+    """Check ``ndofs`` and Plancherel's theorem for all ``nstep % 4`` residues.
+
+    By the real DFT symmetry ``|X_{N-k}| = |X_k|``, the Nyquist bin at ``k = N/2``
+    is purely real and exists if and only if ``nstep`` is even,
+    so ``ndofs[-1]`` equals ``nindep`` for even ``nstep`` and ``2 * nindep`` for odd ``nstep``.
+    """
+    rng = np.random.default_rng(42)
+    nindep = 3
+    prefactor = 0.4
+    timestep = 1.5
+    sequences = rng.standard_normal((nindep, nstep))
+    spectrum = compute_spectrum(sequences, prefactors=prefactor, timestep=timestep)
+
+    expected_ndofs = np.full(spectrum.nfreq, 2 * nindep, dtype=float)
+    expected_ndofs[0] = nindep
+    if nstep % 2 == 0:
+        expected_ndofs[-1] = nindep
+    assert_equal(spectrum.ndofs, expected_ndofs)
+
+    # Plancherel's theorem for the real DFT:
+    # sum_k ndofs[k] * amplitudes[k] = 0.5 * prefactor * timestep * sum_{m,n} x_{m,n}^2.
+    assert (spectrum.amplitudes * spectrum.ndofs).sum() == pytest.approx(
+        0.5 * prefactor * timestep * (sequences**2).sum()
+    )
