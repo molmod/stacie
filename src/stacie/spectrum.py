@@ -205,7 +205,7 @@ def compute_spectrum(
     # Number of "degrees of freedom" (contributions) to each amplitude
     ndofs = np.full(freqs.shape, 2 * nindep, dtype=float)
     ndofs[0] = nindep
-    if len(freqs) % 2 == 0:
+    if nstep % 2 == 0:
         ndofs[-1] = nindep
 
     # Remove DC component, useful for inputs that oscillate about a non-zero average.
